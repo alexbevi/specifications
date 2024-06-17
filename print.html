@@ -2791,8 +2791,8 @@ comma (","). The key is everything up to the first colon sign (":") and the valu
 <p>For example:</p>
 <pre><code>?readPreferenceTags=dc:ny,rack:1
 </code></pre>
-<p>Drivers MUST handle unencoded colon signs (":") within the value. For example, given the connection string:</p>
-<pre><code>?authMechanismProperties=TOKEN_RESOURCE:mongodb://foo
+<p>Drivers MUST handle unencoded colon signs (":") within the value. For example, given the connection string option:</p>
+<pre><code>authMechanismProperties=TOKEN_RESOURCE:mongodb://foo
 </code></pre>
 <p>the driver MUST interpret the key as <code>TOKEN_RESOURCE</code> and the value as <code>mongodb://foo</code>.</p>
 <p>For any option key-value pair that may contain a comma (such as <code>TOKEN_RESOURCE</code>), drivers MUST document that: a value
