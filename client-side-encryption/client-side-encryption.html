@@ -421,7 +421,7 @@ in an idiomatic way (e.g. keyword arguments, builder classes, etc.).</p>
 <p>Drivers MAY use a native UUID type in place of a parameter or return type specified as a BSON binary with subtype 0x04
 as described in <a href="../uuid.rst">Handling of Native UUID Types</a>.</p>
 <h3 id="mongoclient-changes"><a class="header" href="#mongoclient-changes">MongoClient Changes</a></h3>
-<span id="MongoClient" />
+<p><span id="MongoClient"></span></p>
 <pre><code class="language-typescript">class MongoClient {
    MongoClient(... autoEncryptionOpts: AutoEncryptionOpts);
 
@@ -437,7 +437,7 @@ as described in <a href="../uuid.rst">Handling of Native UUID Types</a>.</p>
    private azureAccessTokenExpireTime?: PointInTime;
 }
 </code></pre>
-<span id="AutoEncryptionOpts" />
+<p><span id="AutoEncryptionOpts"></span></p>
 <pre><code class="language-typescript">class AutoEncryptionOpts {
    keyVaultClient: Optional&lt;MongoClient&gt;;
    keyVaultNamespace: String;
@@ -527,12 +527,8 @@ configuration (monitoring callbacks, stable API, etc.).</p>
 </blockquote>
 <p>See
 <a href="#whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client">What's the deal with metadataClient, keyVaultClient, and the internal client?</a></p>
-<span id="GCPKMSOptions" />
-<span id="AWSKMSOptions" />
-<span id="KMSProvider" />
-<span id="KMSProviders" />
-<span id="AzureAccessToken" />
-<span id="kmsproviders" />
+<p><span id="GCPKMSOptions"></span> <span id="AWSKMSOptions"></span> <span id="KMSProvider"></span>
+<span id="KMSProviders"></span> <span id="AzureAccessToken"></span> <span id="kmsproviders"></span></p>
 <h4 id="kmsproviders"><a class="header" href="#kmsproviders">kmsProviders</a></h4>
 <p>The <code>kmsProviders</code> property may be specified on <a href="#ClientEncryptionOpts">ClientEncryptionOpts</a> or
 <a href="#AutoEncryptionOpts">AutoEncryptionOpts</a>. Multiple KMS providers may be specified, each using a specific property on
@@ -674,7 +670,7 @@ $t_0 + d_{exp}$.</li>
 </li>
 <li>Return $P$ as the additional KMS providers to <a href="#libmongocrypt">libmongocrypt</a>.</li>
 </ol>
-<span id="obtaining-gcp-credentials" />
+<p><span id="obtaining-gcp-credentials"></span></p>
 <h5 id="obtaining-gcp-credentials"><a class="header" href="#obtaining-gcp-credentials">Obtaining GCP Credentials</a></h5>
 <p>Set <code>HOST</code> to <code>metadata.google.internal</code>.</p>
 <p>Send an HTTP request to the URL <code>http://&lt;HOST&gt;/computeMetadata/v1/instance/service-accounts/default/token</code> with the
@@ -835,7 +831,7 @@ Automatic encryption may be disabled with the bypassAutoEncryption option. See
 <p>Drivers MUST implement extraOptions in a way that allows deprecating/removing options in the future without an API
 break, such as with a BSON document or map type instead of a struct type with fixed fields. See
 <a href="#why-are-extraoptions-and-kmsproviders-maps">Why are extraOptions and kmsProviders maps?</a>.</p>
-<span id="extraoptions.cryptsharedlibpath" />
+<p><span id="extraoptions.cryptsharedlibpath"></span></p>
 <h5 id="extraoptionscryptsharedlibpath"><a class="header" href="#extraoptionscryptsharedlibpath"><code>extraOptions.cryptSharedLibPath</code></a></h5>
 <ul>
 <li>Type: <code>undefined | string</code></li>
@@ -847,7 +843,7 @@ break, such as with a BSON document or map type instead of a struct type with fi
 <li><a href="#path-resolution-behavior">Path Resolution Behavior</a></li>
 <li><a href="#enabling-crypt_shared">Enabling crypt_shared</a></li>
 </ul>
-<span id="extraoptions.cryptsharedlibrequired" />
+<p><span id="extraoptions.cryptsharedlibrequired"></span></p>
 <h5 id="extraoptionscryptsharedlibrequired"><a class="header" href="#extraoptionscryptsharedlibrequired"><code>extraOptions.cryptSharedLibRequired</code></a></h5>
 <ul>
 <li>Type: <code>boolean</code></li>
@@ -857,8 +853,7 @@ break, such as with a BSON document or map type instead of a struct type with fi
 <p>If, after initializing a <code>libmongocrypt_handle</code>, <a href="#crypt_shared">crypt_shared</a> is detected to be unavailable AND
 <a href="#extraoptions.cryptsharedlibrequired">extraOptions.cryptSharedLibRequired</a> is <code>true</code>, the driver MUST consider the
 <code>libmongocrypt_handle</code> to be invalid and return an error to the user. Refer:</p>
-<span id="managing-mongocryptd" />
-<span id="detecting-crypt_shared-availability" />
+<p><span id="managing-mongocryptd"></span> <span id="detecting-crypt_shared-availability"></span></p>
 <h4 id="encryptedfieldsmap"><a class="header" href="#encryptedfieldsmap">encryptedFieldsMap</a></h4>
 <p><code>encryptedFieldsMap</code> maps a collection namespace to an <code>encryptedFields</code>.</p>
 <p><code>encryptedFieldsMap</code> only applies to Queryable Encryption.</p>
@@ -878,7 +873,7 @@ server. It protects against a malicious server advertising a false <code>encrypt
 <p>See <a href="#why-is-bypassqueryanalysis-needed">Why is bypassQueryAnalysis needed?</a>.</p>
 <h3 id="queryable-encryption-create-and-drop-collection-helpers"><a class="header" href="#queryable-encryption-create-and-drop-collection-helpers">Queryable Encryption Create and Drop Collection Helpers</a></h3>
 <p>A collection supporting Queryable Encryption requires an index and three additional collections.</p>
-<span id="GetEncryptedFields" />
+<p><span id="GetEncryptedFields"></span></p>
 <h4 id="collection-encryptedfields-lookup-getencryptedfields"><a class="header" href="#collection-encryptedfields-lookup-getencryptedfields">Collection <code>encryptedFields</code> Lookup (GetEncryptedFields)</a></h4>
 <p>The convenience methods support the following lookup process for finding the <code>encryptedFields</code> associated with a
 collection.</p>
@@ -1072,8 +1067,8 @@ use the collection name <code>enxcol_.&lt;collectionName&gt;.ecoc</code>.</li>
    private MongoClient keyvault_client;
 }
 </code></pre>
-<span id="ClientEncryptionOpts" />
-<span id="KMSProvidersTLSOptions" />
+<p><span id="ClientEncryptionOpts"></span></p>
+<p><span id="KMSProvidersTLSOptions"></span></p>
 <pre><code class="language-typescript">interface ClientEncryptionOpts {
    keyVaultClient: MongoClient;
    keyVaultNamespace: String;
@@ -1357,7 +1352,7 @@ from libmongocrypt.</p>
 <p>Drivers MUST propagate errors from libmongocrypt in whatever way is idiomatic to the driver (exception, error object,
 etc.). These errors MUST be distinguished in some way (e.g. exception type) to make it easier for users to distinguish
 when a command fails due to client side encryption.</p>
-<span id="enabling-crypt_shared" />
+<p><span id="enabling-crypt_shared"></span></p>
 <h2 id="enabling-command-marking-with-the-crypt_shared-library"><a class="header" href="#enabling-command-marking-with-the-crypt_shared-library">Enabling Command Marking with the <code>crypt_shared</code> Library</a></h2>
 <p>The MongoDB Enterprise distribution includes a dynamic library named <code>mongo_crypt_v1</code> (with the appropriate file
 extension or filename suffix for the host platform). This library will be loaded by <a href="#libmongocrypt">libmongocrypt</a> when
@@ -1374,8 +1369,7 @@ facilitate driver testing with <a href="#crypt_shared">crypt_shared</a> (Refer:
 The driver MUST NOT manipulate or do any validation on the <a href="#crypt_shared">crypt_shared</a> path options provided in
 <a href="#extraoptions">extraOptions</a>. They should be passed through to <a href="#libmongocrypt">libmongocrypt</a> unchanged.</p>
 </blockquote>
-<span id="search-path" />
-<span id="search-paths" />
+<p><span id="search-path"></span> <span id="search-paths"></span></p>
 <h3 id="setting-search-paths"><a class="header" href="#setting-search-paths">Setting Search Paths</a></h3>
 <p>For the user-facing API the driver MUST append the literal string - <code>"$SYSTEM"</code> to the search paths for the
 <code>libmongocrypt_handle</code> if <code>bypassAutoEncryption</code> is not set to <code>true</code>, and MUST NOT append to the search path if it is
@@ -1388,7 +1382,7 @@ driver may change the paths that it appends for <a href="#crypt_shared">crypt_sh
 execution from the ambient state of the host system.</p>
 <p>Refer to: <a href="#path-resolution-behavior">Path Resolution Behavior</a> and
 <a href="#search-paths-for-testing">Search Paths for Testing</a></p>
-<span id="override-path" />
+<p><span id="override-path"></span></p>
 <h3 id="overriding-the-crypt_shared-library-path"><a class="header" href="#overriding-the-crypt_shared-library-path">Overriding the <code>crypt_shared</code> Library Path</a></h3>
 <p>If <a href="#extraoptions.cryptsharedlibpath">extraOptions.cryptSharedLibPath</a> was specified by the user, the driver MUST set
 the <a href="#crypt_shared">crypt_shared</a> path override on the <code>libmongocrypt_handle</code>.</p>
@@ -1466,7 +1460,7 @@ not to load <a href="#crypt_shared">crypt_shared</a>.</p>
 successfully loaded by asking <a href="#libmongocrypt">libmongocrypt</a> for the <a href="#crypt_shared">crypt_shared</a> version string. If
 the result is an empty string, <a href="#libmongocrypt">libmongocrypt</a> did not load <a href="#crypt_shared">crypt_shared</a> and the driver
 must rely on <a href="#mongocryptd">mongocryptd</a> to mark command documents for encryption.</p>
-<span id="disabling-crypt_shared" />
+<p><span id="disabling-crypt_shared"></span></p>
 <h3 id="disabling-crypt_shared"><a class="header" href="#disabling-crypt_shared">"Disabling" <code>crypt_shared</code></a></h3>
 <p>For purposes of testing, a driver can "disable" <a href="#crypt_shared">crypt_shared</a> searching to ensure that
 <a href="#mongocryptd">mongocryptd</a> is used instead, even if a <a href="#crypt_shared">crypt_shared</a> library would be available.</p>

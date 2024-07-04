@@ -603,7 +603,7 @@ most human readable and is useful for debugging and documentation.</li>
 <h3 id="of-parsers-and-generators"><a class="header" href="#of-parsers-and-generators">Of Parsers and Generators</a></h3>
 <p>Parsers need to accept any valid Extended JSON string that a generator can produce. Parsers and generators are permitted
 to accept and output strings in other formats as well for backwards compatibility.</p>
-<div id="levels of nesting">
+<p><span id="levels of nesting"></span></p>
 <p>Acceptable nesting depth has implications for resource usage so unlimited nesting is not permitted.</p>
 <p>Generators support at least 100 levels of nesting in a BSON document being transformed to Extended JSON. This aligns
 with MongoDB's own limitation of 100 levels of nesting.</p>

@@ -1807,7 +1807,7 @@ most human readable and is useful for debugging and documentation.</li>
 <h3 id="of-parsers-and-generators"><a class="header" href="#of-parsers-and-generators">Of Parsers and Generators</a></h3>
 <p>Parsers need to accept any valid Extended JSON string that a generator can produce. Parsers and generators are permitted
 to accept and output strings in other formats as well for backwards compatibility.</p>
-<div id="levels of nesting">
+<p><span id="levels of nesting"></span></p>
 <p>Acceptable nesting depth has implications for resource usage so unlimited nesting is not permitted.</p>
 <p>Generators support at least 100 levels of nesting in a BSON document being transformed to Extended JSON. This aligns
 with MongoDB's own limitation of 100 levels of nesting.</p>
@@ -3084,7 +3084,7 @@ provides the option under a different name, the driver MAY implement the old and
 values MUST be encoded in UTF-8. All integer options are 32-bit unless specified otherwise. Note that all requirements
 and recommendations described in the <a href="uri-options/../connection-string/connection-string-spec.html">Connection String spec</a> pertaining
 to URI options apply here.</p>
-<div id="uri.options">
+<p><span id="uri.options"></span></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Accepted Values</th><th>Default Value</th><th>Optional to implement?</th><th>Description</th></tr></thead><tbody>
 <tr><td>appname</td><td>any string that meets the criteria listed in the <a href="uri-options/../mongodb-handshake/handshake.rst#client-application-name">handshake spec</a></td><td>no appname specified</td><td>no</td><td>Passed into the server in the client metadata as part of the connection handshake</td></tr>
 <tr><td>authMechanism</td><td>any string; valid values are defined in the <a href="uri-options/../auth/auth.html#supported-authentication-methods">auth spec</a></td><td>None; default values for authentication exist for constructing authentication credentials per the <a href="uri-options/../auth/auth.html#supported-authentication-methods">auth spec</a>, but there is no default for the URI option itself.</td><td>no</td><td>The authentication mechanism method to use for connection to the server</td></tr>
@@ -8193,7 +8193,7 @@ defined in the URI Validation section.</p>
 <p>When a MongoClient is configured with an SRV URI and <code>loadBalanced=true</code>, the driver MUST NOT poll for changes in the
 SRV record as is done for non-load balanced sharded clusters.</p>
 <h3 id="server-discovery-logging-and-monitoring"><a class="header" href="#server-discovery-logging-and-monitoring">Server Discovery Logging and Monitoring</a></h3>
-<div id="monitoring">
+<p><span id="monitoring"></span></p>
 <h4 id="monitoring-1"><a class="header" href="#monitoring-1">Monitoring</a></h4>
 <p>When <code>loadBalanced=true</code> is specified in the URI the topology MUST start in type <code>LoadBalanced</code> and MUST remain as
 <code>LoadBalanced</code> indefinitely. The topology MUST contain 1 <code>ServerDescription</code> with a <code>ServerType</code> of -
@@ -9468,7 +9468,7 @@ An OP_QUERY operation targeting the '$cmd' collection namespace.</p>
 <p><strong>Direct connection</strong><br />
 A driver connection mode that sends all database operations to a single server without regard for
 type.</p>
-<span id="eligible"/>
+<p><span id="eligible"></span></p>
 <p><strong>Eligible</strong><br />
 Describes candidate servers that also meet the criteria specified by the <code>tag_sets</code> and
 <code>maxStalenessSeconds</code> read preference parameters.</p>
@@ -11246,7 +11246,7 @@ the defined name but MAY deviate to comply with their existing conventions.</p>
 <h4 id="supported-server-versions"><a class="header" href="#supported-server-versions">Supported Server Versions</a></h4>
 <p>Drivers MUST verify server eligibility by ensuring that <code>maxWireVersion</code> is at least 6 because retryable reads require a
 MongoDB 3.6 standalone, replica set or shard cluster, MongoDB 3.6 server wire version is 6 as defined in the
-<a href="retryable-reads/../wireversion-featurelist.rst">Server Wire version and Feature List specification</a>.</p>
+<a href="retryable-reads/../wireversion-featurelist.html">Server Wire version and Feature List specification</a>.</p>
 <p>The minimum server version is 3.6 because</p>
 <ol>
 <li>It gives us version parity with retryable writes.</li>
@@ -12947,7 +12947,7 @@ timeout for each database operation. This would mimic using <code>timeoutMode=IT
 <li>2022-10-05: Remove spec front matter.</li>
 <li>2022-01-19: Initial version.</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="driver-sessions-specification"><a class="header" href="#driver-sessions-specification">Driver Sessions Specification</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="sessions-specification"><a class="header" href="#sessions-specification">Sessions Specification</a></h1>
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.6</li>
@@ -14198,7 +14198,7 @@ Existing programs that don't use snapshot reads continue to compile and run corr
 <li>2021-08-09: Updated client-side error spec tests to use correct syntax for <code>test.expectEvents</code></li>
 <li>2022-10-05: Remove spec front matter</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="driver-transactions-specification"><a class="header" href="#driver-transactions-specification">Driver Transactions Specification</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="transactions-specification"><a class="header" href="#transactions-specification">Transactions Specification</a></h1>
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 4.0</li>
@@ -17267,7 +17267,7 @@ order to support partial indexes. Fixed
 "provides" typo.</p>
 </li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="driver-crud-api"><a class="header" href="#driver-crud-api">Driver CRUD API</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="crud-api"><a class="header" href="#crud-api">CRUD API</a></h1>
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 2.6</li>
@@ -25992,7 +25992,7 @@ in an idiomatic way (e.g. keyword arguments, builder classes, etc.).</p>
 <p>Drivers MAY use a native UUID type in place of a parameter or return type specified as a BSON binary with subtype 0x04
 as described in <a href="client-side-encryption/../uuid.rst">Handling of Native UUID Types</a>.</p>
 <h3 id="mongoclient-changes-3"><a class="header" href="#mongoclient-changes-3">MongoClient Changes</a></h3>
-<span id="MongoClient" />
+<p><span id="MongoClient"></span></p>
 <pre><code class="language-typescript">class MongoClient {
    MongoClient(... autoEncryptionOpts: AutoEncryptionOpts);
 
@@ -26008,7 +26008,7 @@ as described in <a href="client-side-encryption/../uuid.rst">Handling of Native 
    private azureAccessTokenExpireTime?: PointInTime;
 }
 </code></pre>
-<span id="AutoEncryptionOpts" />
+<p><span id="AutoEncryptionOpts"></span></p>
 <pre><code class="language-typescript">class AutoEncryptionOpts {
    keyVaultClient: Optional&lt;MongoClient&gt;;
    keyVaultNamespace: String;
@@ -26098,12 +26098,8 @@ configuration (monitoring callbacks, stable API, etc.).</p>
 </blockquote>
 <p>See
 <a href="client-side-encryption/client-side-encryption.html#whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client">What's the deal with metadataClient, keyVaultClient, and the internal client?</a></p>
-<span id="GCPKMSOptions" />
-<span id="AWSKMSOptions" />
-<span id="KMSProvider" />
-<span id="KMSProviders" />
-<span id="AzureAccessToken" />
-<span id="kmsproviders" />
+<p><span id="GCPKMSOptions"></span> <span id="AWSKMSOptions"></span> <span id="KMSProvider"></span>
+<span id="KMSProviders"></span> <span id="AzureAccessToken"></span> <span id="kmsproviders"></span></p>
 <h4 id="kmsproviders"><a class="header" href="#kmsproviders">kmsProviders</a></h4>
 <p>The <code>kmsProviders</code> property may be specified on <a href="client-side-encryption/client-side-encryption.html#ClientEncryptionOpts">ClientEncryptionOpts</a> or
 <a href="client-side-encryption/client-side-encryption.html#AutoEncryptionOpts">AutoEncryptionOpts</a>. Multiple KMS providers may be specified, each using a specific property on
@@ -26245,7 +26241,7 @@ $t_0 + d_{exp}$.</li>
 </li>
 <li>Return $P$ as the additional KMS providers to <a href="client-side-encryption/client-side-encryption.html#libmongocrypt">libmongocrypt</a>.</li>
 </ol>
-<span id="obtaining-gcp-credentials" />
+<p><span id="obtaining-gcp-credentials"></span></p>
 <h5 id="obtaining-gcp-credentials"><a class="header" href="#obtaining-gcp-credentials">Obtaining GCP Credentials</a></h5>
 <p>Set <code>HOST</code> to <code>metadata.google.internal</code>.</p>
 <p>Send an HTTP request to the URL <code>http://&lt;HOST&gt;/computeMetadata/v1/instance/service-accounts/default/token</code> with the
@@ -26406,7 +26402,7 @@ Automatic encryption may be disabled with the bypassAutoEncryption option. See
 <p>Drivers MUST implement extraOptions in a way that allows deprecating/removing options in the future without an API
 break, such as with a BSON document or map type instead of a struct type with fixed fields. See
 <a href="client-side-encryption/client-side-encryption.html#why-are-extraoptions-and-kmsproviders-maps">Why are extraOptions and kmsProviders maps?</a>.</p>
-<span id="extraoptions.cryptsharedlibpath" />
+<p><span id="extraoptions.cryptsharedlibpath"></span></p>
 <h5 id="extraoptionscryptsharedlibpath"><a class="header" href="#extraoptionscryptsharedlibpath"><code>extraOptions.cryptSharedLibPath</code></a></h5>
 <ul>
 <li>Type: <code>undefined | string</code></li>
@@ -26418,7 +26414,7 @@ break, such as with a BSON document or map type instead of a struct type with fi
 <li><a href="client-side-encryption/client-side-encryption.html#path-resolution-behavior">Path Resolution Behavior</a></li>
 <li><a href="client-side-encryption/client-side-encryption.html#enabling-crypt_shared">Enabling crypt_shared</a></li>
 </ul>
-<span id="extraoptions.cryptsharedlibrequired" />
+<p><span id="extraoptions.cryptsharedlibrequired"></span></p>
 <h5 id="extraoptionscryptsharedlibrequired"><a class="header" href="#extraoptionscryptsharedlibrequired"><code>extraOptions.cryptSharedLibRequired</code></a></h5>
 <ul>
 <li>Type: <code>boolean</code></li>
@@ -26428,8 +26424,7 @@ break, such as with a BSON document or map type instead of a struct type with fi
 <p>If, after initializing a <code>libmongocrypt_handle</code>, <a href="client-side-encryption/client-side-encryption.html#crypt_shared">crypt_shared</a> is detected to be unavailable AND
 <a href="client-side-encryption/client-side-encryption.html#extraoptions.cryptsharedlibrequired">extraOptions.cryptSharedLibRequired</a> is <code>true</code>, the driver MUST consider the
 <code>libmongocrypt_handle</code> to be invalid and return an error to the user. Refer:</p>
-<span id="managing-mongocryptd" />
-<span id="detecting-crypt_shared-availability" />
+<p><span id="managing-mongocryptd"></span> <span id="detecting-crypt_shared-availability"></span></p>
 <h4 id="encryptedfieldsmap"><a class="header" href="#encryptedfieldsmap">encryptedFieldsMap</a></h4>
 <p><code>encryptedFieldsMap</code> maps a collection namespace to an <code>encryptedFields</code>.</p>
 <p><code>encryptedFieldsMap</code> only applies to Queryable Encryption.</p>
@@ -26449,7 +26444,7 @@ server. It protects against a malicious server advertising a false <code>encrypt
 <p>See <a href="client-side-encryption/client-side-encryption.html#why-is-bypassqueryanalysis-needed">Why is bypassQueryAnalysis needed?</a>.</p>
 <h3 id="queryable-encryption-create-and-drop-collection-helpers"><a class="header" href="#queryable-encryption-create-and-drop-collection-helpers">Queryable Encryption Create and Drop Collection Helpers</a></h3>
 <p>A collection supporting Queryable Encryption requires an index and three additional collections.</p>
-<span id="GetEncryptedFields" />
+<p><span id="GetEncryptedFields"></span></p>
 <h4 id="collection-encryptedfields-lookup-getencryptedfields"><a class="header" href="#collection-encryptedfields-lookup-getencryptedfields">Collection <code>encryptedFields</code> Lookup (GetEncryptedFields)</a></h4>
 <p>The convenience methods support the following lookup process for finding the <code>encryptedFields</code> associated with a
 collection.</p>
@@ -26643,8 +26638,8 @@ use the collection name <code>enxcol_.&lt;collectionName&gt;.ecoc</code>.</li>
    private MongoClient keyvault_client;
 }
 </code></pre>
-<span id="ClientEncryptionOpts" />
-<span id="KMSProvidersTLSOptions" />
+<p><span id="ClientEncryptionOpts"></span></p>
+<p><span id="KMSProvidersTLSOptions"></span></p>
 <pre><code class="language-typescript">interface ClientEncryptionOpts {
    keyVaultClient: MongoClient;
    keyVaultNamespace: String;
@@ -26928,7 +26923,7 @@ from libmongocrypt.</p>
 <p>Drivers MUST propagate errors from libmongocrypt in whatever way is idiomatic to the driver (exception, error object,
 etc.). These errors MUST be distinguished in some way (e.g. exception type) to make it easier for users to distinguish
 when a command fails due to client side encryption.</p>
-<span id="enabling-crypt_shared" />
+<p><span id="enabling-crypt_shared"></span></p>
 <h2 id="enabling-command-marking-with-the-crypt_shared-library"><a class="header" href="#enabling-command-marking-with-the-crypt_shared-library">Enabling Command Marking with the <code>crypt_shared</code> Library</a></h2>
 <p>The MongoDB Enterprise distribution includes a dynamic library named <code>mongo_crypt_v1</code> (with the appropriate file
 extension or filename suffix for the host platform). This library will be loaded by <a href="client-side-encryption/client-side-encryption.html#libmongocrypt">libmongocrypt</a> when
@@ -26945,8 +26940,7 @@ facilitate driver testing with <a href="client-side-encryption/client-side-encry
 The driver MUST NOT manipulate or do any validation on the <a href="client-side-encryption/client-side-encryption.html#crypt_shared">crypt_shared</a> path options provided in
 <a href="client-side-encryption/client-side-encryption.html#extraoptions">extraOptions</a>. They should be passed through to <a href="client-side-encryption/client-side-encryption.html#libmongocrypt">libmongocrypt</a> unchanged.</p>
 </blockquote>
-<span id="search-path" />
-<span id="search-paths" />
+<p><span id="search-path"></span> <span id="search-paths"></span></p>
 <h3 id="setting-search-paths"><a class="header" href="#setting-search-paths">Setting Search Paths</a></h3>
 <p>For the user-facing API the driver MUST append the literal string - <code>"$SYSTEM"</code> to the search paths for the
 <code>libmongocrypt_handle</code> if <code>bypassAutoEncryption</code> is not set to <code>true</code>, and MUST NOT append to the search path if it is
@@ -26959,7 +26953,7 @@ driver may change the paths that it appends for <a href="client-side-encryption/
 execution from the ambient state of the host system.</p>
 <p>Refer to: <a href="client-side-encryption/client-side-encryption.html#path-resolution-behavior">Path Resolution Behavior</a> and
 <a href="client-side-encryption/client-side-encryption.html#search-paths-for-testing">Search Paths for Testing</a></p>
-<span id="override-path" />
+<p><span id="override-path"></span></p>
 <h3 id="overriding-the-crypt_shared-library-path"><a class="header" href="#overriding-the-crypt_shared-library-path">Overriding the <code>crypt_shared</code> Library Path</a></h3>
 <p>If <a href="client-side-encryption/client-side-encryption.html#extraoptions.cryptsharedlibpath">extraOptions.cryptSharedLibPath</a> was specified by the user, the driver MUST set
 the <a href="client-side-encryption/client-side-encryption.html#crypt_shared">crypt_shared</a> path override on the <code>libmongocrypt_handle</code>.</p>
@@ -27037,7 +27031,7 @@ not to load <a href="client-side-encryption/client-side-encryption.html#crypt_sh
 successfully loaded by asking <a href="client-side-encryption/client-side-encryption.html#libmongocrypt">libmongocrypt</a> for the <a href="client-side-encryption/client-side-encryption.html#crypt_shared">crypt_shared</a> version string. If
 the result is an empty string, <a href="client-side-encryption/client-side-encryption.html#libmongocrypt">libmongocrypt</a> did not load <a href="client-side-encryption/client-side-encryption.html#crypt_shared">crypt_shared</a> and the driver
 must rely on <a href="client-side-encryption/client-side-encryption.html#mongocryptd">mongocryptd</a> to mark command documents for encryption.</p>
-<span id="disabling-crypt_shared" />
+<p><span id="disabling-crypt_shared"></span></p>
 <h3 id="disabling-crypt_shared"><a class="header" href="#disabling-crypt_shared">"Disabling" <code>crypt_shared</code></a></h3>
 <p>For purposes of testing, a driver can "disable" <a href="client-side-encryption/client-side-encryption.html#crypt_shared">crypt_shared</a> searching to ensure that
 <a href="client-side-encryption/client-side-encryption.html#mongocryptd">mongocryptd</a> is used instead, even if a <a href="client-side-encryption/client-side-encryption.html#crypt_shared">crypt_shared</a> library would be available.</p>
@@ -27961,7 +27955,7 @@ data into one BSON value that can be treated as an opaque blob in most contexts.
 <h3 id="why-not-use-separate-bson-binary-subtypes-instead-of-a-nested-subtype"><a class="header" href="#why-not-use-separate-bson-binary-subtypes-instead-of-a-nested-subtype">Why not use separate BSON binary subtypes instead of a nested subtype?</a></h3>
 <p>If we used separate subtypes, we'd need to reserve three (and possibly more in the future) of our 124 remaining
 subtypes.</p>
-<span id="intent-to-encrypt"/>
+<p><span id="intent-to-encrypt"></span></p>
 <h3 id="why-are-intent-to-encrypt-markings-needed"><a class="header" href="#why-are-intent-to-encrypt-markings-needed">Why are intent-to-encrypt markings needed?</a></h3>
 <p>Intent-to-encrypt markings provide a simple way for mongocryptd to communicate what values need to be encrypted to
 libmongocrypt. Alternatively, mongocryptd could respond with a list of field paths. But field paths are difficult to
@@ -28907,59 +28901,15 @@ interface TopologyDescription {
 <p>The following table describes the rules for determining if a topology type has readable or writable servers. If no read
 preference is passed to <code>hasReadableServer</code>, the driver MUST default the value to the default read preference,
 <code>primary</code>, or treat the call as if <code>primary</code> was provided.</p>
-<table style="width:99%;">
-<colgroup>
-<col style="width: 22%" />
-<col style="width: 38%" />
-<col style="width: 38%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Topology Type</th>
-<th><code>hasReadableServer</code></th>
-<th><code>hasWritableServer</code></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Unknown</td>
-<td><code>false</code></td>
-<td><code>false</code></td>
-</tr>
-<tr class="even">
-<td>Single</td>
-<td><code>true</code> if the server is available</td>
-<td><code>true</code> if the server is available</td>
-</tr>
-<tr class="odd">
-<td>ReplicaSetNoPrimary</td>
-<td><div class="line-block">Called with <code>primary</code>:
-<code>false</code><br />
-Called with any other option: uses the read preference to determine if
-any server in the cluster is suitable for reading.<br />
-Called with no option: <code>false</code></div></td>
-<td><code>false</code></td>
-</tr>
-<tr class="even">
-<td>ReplicaSetWithPrimary</td>
-<td><div class="line-block">Called with any valid option: uses the read
-preference to determine if any server in the cluster is suitable for
-reading.<br />
-Called with no option: <code>true</code></div></td>
-<td><code>true</code></td>
-</tr>
-<tr class="odd">
-<td>Sharded</td>
-<td><code>true</code> if 1+ servers are available</td>
-<td><code>true</code> if 1+ servers are available</td>
-</tr>
-<tr class="even">
-<td>LoadBalanced</td>
-<td><code>true</code></td>
-<td><code>true</code></td>
-</tr>
-</tbody>
-</table>
+<div class="table-wrapper"><table><thead><tr><th>Topology Type</th><th><code>hasReadableServer</code></th><th><code>hasWritableServer</code></th></tr></thead><tbody>
+<tr><td>Unknown</td><td><code>false</code></td><td><code>false</code></td></tr>
+<tr><td>Single</td><td><code>true</code> if the server is available</td><td><code>true</code> if the server is available</td></tr>
+<tr><td>ReplicaSetNoPrimary</td><td>Called with <code>primary</code>: <code>false</code>  <br>Called with any other option: uses the read preference to determine if any server in the cluster is suitable for reading.  <br>Called with no option: <code>false</code></td><td><code>false</code></td></tr>
+<tr><td>ReplicaSetWithPrimary</td><td>Called with any valid option: uses the read preference to determine if any server in the cluster is suitable for reading.  <br>Called with no option: <code>true</code></td><td><code>true</code></td></tr>
+<tr><td>Sharded</td><td><code>true</code> if 1+ servers are available</td><td><code>true</code> if 1+ servers are available</td></tr>
+<tr><td>LoadBalanced</td><td><code>true</code></td><td><code>true</code></td></tr>
+</tbody></table>
+</div>
 <h3 id="log-messages-2"><a class="header" href="#log-messages-2">Log Messages</a></h3>
 <p>Please refer to the <a href="server-discovery-and-monitoring/../logging/logging.html">logging specification</a> for details on logging implementations in general,
 including log levels, log components, and structured versus unstructured logging.</p>
@@ -29126,29 +29076,11 @@ added requirements for SDAM log messages.</p>
 <li>
 <p>2021-05-06: Updated to use modern terminology.</p>
 </li>
-</ul>
-<h1 id="head-2024-03-29-updated-to-clarify-expected-initial-value-of-topologydescriptionchangedevents-previousdescription-field-2024-01-17-updated-to-require-that-topologydescriptionchangedevent-should-be-emitted-before-just-topologyclosedevent-is-emitted-2024-01-04-updated-to-clarify-when-serverheartbeatstartedevent-should-be-emitted-2023-03-31-renamed-to-include-logging-in-the-title-reorganized-contents-and-made-consistent-with-clam-spec-and-added-requirements-for-sdam-log-messages-2022-10-05-remove-spec-front-matter-and-reformat-changelog-2021-05-06-updated-to-use-modern-terminology-2020-04-20-add-rules-for-streaming-heartbeat-protocol-and-add-awaited-field-to-heartbeat-events-201812-12-clarified-table-of-rules-for-readablewritable-servers-2016-08-31-added-table-of-rules-for-determining-if-topology-has-readablewritable-servers-2016-10-11-topologydescription-objects-may-have-additional-methods-and-properties--parent-of-469393fd-drivers-2789-convert-sdam-spec-to-markdown-2024-03-29-updated-to-clarify-expected-initial-value-of-topologydescriptionchangedevents-previousdescription-field-2024-01-04-updated-to-clarify-when-serverheartbeatstartedevent-should-be-emitted-2023-03-31-renamed-to-include-logging-in-the-title-reorganized-contents-and-made-consistent-with-clam-spec-and-added-requirements-for-sdam-log-messages-2022-10-05-remove-spec-front-matter-and-reformat-changelog-2021-05-06-updated-to-use-modern-terminology-2020-04-20-add-rules-for-streaming-heartbeat-protocol-and-add-awaited-field-to-heartbeat-events-201812-12-clarified-table-of-rules-for-readablewritable-servers-2016-08-31-added-table-of-rules-for-determining-if-topology-has-readablewritable-servers-2016-10-11-topologydescription-objects-may-have-additional-methods-and-properties"><a class="header" href="#head-2024-03-29-updated-to-clarify-expected-initial-value-of-topologydescriptionchangedevents-previousdescription-field-2024-01-17-updated-to-require-that-topologydescriptionchangedevent-should-be-emitted-before-just-topologyclosedevent-is-emitted-2024-01-04-updated-to-clarify-when-serverheartbeatstartedevent-should-be-emitted-2023-03-31-renamed-to-include-logging-in-the-title-reorganized-contents-and-made-consistent-with-clam-spec-and-added-requirements-for-sdam-log-messages-2022-10-05-remove-spec-front-matter-and-reformat-changelog-2021-05-06-updated-to-use-modern-terminology-2020-04-20-add-rules-for-streaming-heartbeat-protocol-and-add-awaited-field-to-heartbeat-events-201812-12-clarified-table-of-rules-for-readablewritable-servers-2016-08-31-added-table-of-rules-for-determining-if-topology-has-readablewritable-servers-2016-10-11-topologydescription-objects-may-have-additional-methods-and-properties--parent-of-469393fd-drivers-2789-convert-sdam-spec-to-markdown-2024-03-29-updated-to-clarify-expected-initial-value-of-topologydescriptionchangedevents-previousdescription-field-2024-01-04-updated-to-clarify-when-serverheartbeatstartedevent-should-be-emitted-2023-03-31-renamed-to-include-logging-in-the-title-reorganized-contents-and-made-consistent-with-clam-spec-and-added-requirements-for-sdam-log-messages-2022-10-05-remove-spec-front-matter-and-reformat-changelog-2021-05-06-updated-to-use-modern-terminology-2020-04-20-add-rules-for-streaming-heartbeat-protocol-and-add-awaited-field-to-heartbeat-events-201812-12-clarified-table-of-rules-for-readablewritable-servers-2016-08-31-added-table-of-rules-for-determining-if-topology-has-readablewritable-servers-2016-10-11-topologydescription-objects-may-have-additional-methods-and-properties">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD :2024-03-29: Updated to clarify expected initial value of TopologyDescriptionChangedEvent's previousDescription field :2024-01-17: Updated to require that <code>TopologyDescriptionChangedEvent</code> should be emitted before just <code>TopologyClosedEvent</code> is emitted :2024-01-04: Updated to clarify when ServerHeartbeatStartedEvent should be emitted :2023-03-31: Renamed to include "logging" in the title. Reorganized contents and made consistent with CLAM spec, and added requirements for SDAM log messages. :2022-10-05: Remove spec front matter and reformat changelog. :2021-05-06: Updated to use modern terminology. :2020-04-20: Add rules for streaming heartbeat protocol and add "awaited" field to heartbeat events. :2018:12-12: Clarified table of rules for readable/writable servers :2016-08-31: Added table of rules for determining if topology has readable/writable servers. :2016-10-11: TopologyDescription objects MAY have additional methods and properties. ||||||| parent of 469393fd (DRIVERS-2789 Convert SDAM Spec to Markdown) :2024-03-29: Updated to clarify expected initial value of TopologyDescriptionChangedEvent's previousDescription field :2024-01-04: Updated to clarify when ServerHeartbeatStartedEvent should be emitted :2023-03-31: Renamed to include "logging" in the title. Reorganized contents and made consistent with CLAM spec, and added requirements for SDAM log messages. :2022-10-05: Remove spec front matter and reformat changelog. :2021-05-06: Updated to use modern terminology. :2020-04-20: Add rules for streaming heartbeat protocol and add "awaited" field to heartbeat events. :2018:12-12: Clarified table of rules for readable/writable servers :2016-08-31: Added table of rules for determining if topology has readable/writable servers. :2016-10-11: TopologyDescription objects MAY have additional methods and properties.</a></h1>
-<ul>
-<li>2020-04-20: Add rules for streaming heartbeat protocol and add "awaited" field to heartbeat events.</li>
-</ul>
-<blockquote>
-<blockquote>
-<blockquote>
-<blockquote>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>469393fd (DRIVERS-2789 Convert SDAM Spec to Markdown)</p>
-</blockquote>
-</blockquote>
-</blockquote>
-</blockquote>
-</blockquote>
-</blockquote>
-</blockquote>
-<ul>
 <li>
-<p>2018:12-12: Clarified table of rules for readable/writable servers</p>
+<p>2020-04-20: Add rules for streaming heartbeat protocol and add "awaited" field to heartbeat events.</p>
+</li>
+<li>
+<p>2018-12-12: Clarified table of rules for readable/writable servers</p>
 </li>
 <li>
 <p>2016-08-31: Added table of rules for determining if topology has readable/writable servers.</p>
@@ -30920,7 +30852,7 @@ createEntities:
 <li>ClientSession. See <a href="unified-test-format/unified-test-format.html#entity_session">entity_session</a> and <a href="unified-test-format/unified-test-format.html#session-operations">Session Operations</a>.</li>
 <li>GridFS Bucket. See <a href="unified-test-format/unified-test-format.html#entity_bucket">entity_bucket</a> and <a href="unified-test-format/unified-test-format.html#bucket-operations">Bucket Operations</a>.</li>
 </ul>
-<span id="entity_changestream" />
+<p><span id="entity_changestream"></span></p>
 <ul>
 <li>
 <p>ChangeStream. Change stream entities are special in that they are not defined in <a href="unified-test-format/unified-test-format.html#createentities">createEntities</a> but
@@ -30956,14 +30888,14 @@ following BSON types are known: 0x01-0x13, 0x7F, 0xFF.</p>
 could yield runtime errors (e.g. while loading a test file with an Extended JSON parser).</p>
 </li>
 </ul>
-<span id="entity_thread" />
+<p><span id="entity_thread"></span></p>
 <ul>
 <li>Test runner thread. An entity representing a "thread" that can be used to concurrently execute operations. Thread
 entities MUST be able to run concurrently with the main test runner thread and other thread entities, but they do not
 have to be implemented as actual OS threads (e.g. they can be goroutines or async tasks). See
 <a href="unified-test-format/unified-test-format.html#entity_thread_object">entity_thread_object</a> for more information on how they are created.</li>
 </ul>
-<span id="entity_topologydescription" />
+<p><span id="entity_topologydescription"></span></p>
 <ul>
 <li>TopologyDescription. An entity representing a client's
 <a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#topologydescription">TopologyDescription</a> at a
@@ -30990,7 +30922,7 @@ may be converted to JSON using a tool such as <a href="https://github.com/nodeca
 <p>This SHOULD describe the common purpose of tests in this file and MAY refer to the filename (e.g. "updateOne-hint").</p>
 </li>
 </ul>
-<span id="schemaVersion" />
+<p><span id="schemaVersion"></span></p>
 <ul>
 <li>
 <p><code>schemaVersion</code>: Required string. Version of this specification with which the test file complies.</p>
@@ -31002,13 +30934,13 @@ specific patch versions since patch-level changes SHOULD NOT alter the structure
 noted in <a href="unified-test-format/unified-test-format.html#schema-version">Schema Version</a>).</p>
 </li>
 </ul>
-<span id="runOnRequirements" />
+<p><span id="runOnRequirements"></span></p>
 <ul>
 <li><code>runOnRequirements</code>: Optional array of one or more <a href="unified-test-format/unified-test-format.html#runonrequirement">runOnRequirement</a> objects. List of server
 version and/or topology requirements for which the tests in this file can be run. If no requirements are met, the test
 runner MUST skip this test file.</li>
 </ul>
-<span id="createEntities" />
+<p><span id="createEntities"></span></p>
 <ul>
 <li>
 <p><code>createEntities</code>: Optional array of one or more <a href="unified-test-format/unified-test-format.html#entity">entity</a> objects. List of entities (e.g. client, collection,
@@ -31017,12 +30949,12 @@ session objects) that SHALL be created before each test case is executed.</p>
 before any of their dependent entities (e.g. database, session).</p>
 </li>
 </ul>
-<span id="initialData" />
+<p><span id="initialData"></span></p>
 <ul>
 <li><code>initialData</code>: Optional array of one or more <a href="unified-test-format/unified-test-format.html#collectiondata">collectionData</a> objects. Data that will exist in
 collections before each test case is executed.</li>
 </ul>
-<span id="tests" />
+<p><span id="tests"></span></p>
 <ul>
 <li><code>tests</code>: Required array of one or more <a href="unified-test-format/unified-test-format.html#test">test</a> objects. List of test cases to be executed independently of each
 other.</li>
@@ -31081,7 +31013,7 @@ parameter, test runners MUST treat the comparison as not equal and skip the test
 fetching a single parameter using <code>getParameter</code>.</p>
 </li>
 </ul>
-<span id="runOnRequirement_auth" />
+<p><span id="runOnRequirement_auth"></span></p>
 <ul>
 <li>
 <p><code>auth</code>: Optional boolean. If true, the tests MUST only run if authentication is enabled. If false, tests MUST NOT run
@@ -31118,7 +31050,7 @@ on the entity's <code>id</code> key. This anchor will allow the unique name to b
 <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a> later in the file (e.g. from another entity or
 <a href="unified-test-format/unified-test-format.html#operation">operation</a> object) and also leverage YAML's parser for reference validation.</p>
 <p>The structure of this object is as follows:</p>
-<span id="entity_client" />
+<p><span id="entity_client"></span></p>
 <ul>
 <li>
 <p><code>client</code>: Optional object. Defines a MongoClient object. In addition to the configuration defined below, test runners
@@ -31151,7 +31083,7 @@ the placeholder document with values loaded from the test environment. For examp
 </code></pre>
 </li>
 </ul>
-<span id="entity_client_useMultipleMongoses" />
+<p><span id="entity_client_useMultipleMongoses"></span></p>
 <ul>
 <li>
 <p><code>useMultipleMongoses</code>: Optional boolean. If true and the topology is a sharded cluster, the test runner MUST assert
@@ -31174,7 +31106,7 @@ Serverless proxy).</p>
 <p>This option has no effect for topologies that are not sharded or load balanced.</p>
 </li>
 </ul>
-<span id="entity_client_observeEvents" />
+<p><span id="entity_client_observeEvents"></span></p>
 <ul>
 <li>
 <p><code>observeEvents</code>: Optional array of one or more strings. Types of events that can be observed for this client.
@@ -31205,7 +31137,7 @@ follows:</p>
 </ul>
 </li>
 </ul>
-<span id="entity_client_ignoreCommandMonitoringEvents" />
+<p><span id="entity_client_ignoreCommandMonitoringEvents"></span></p>
 <ul>
 <li>
 <p><code>ignoreCommandMonitoringEvents</code>: Optional array of one or more strings. Command names for which the test runner MUST
@@ -31217,7 +31149,7 @@ and any commands containing sensitive information (per the
 <a href="unified-test-format/unified-test-format.html#entity_client_observeEvents">observeEvents</a>.</p>
 </li>
 </ul>
-<span id="entity_client_observeSensitiveCommands" />
+<p><span id="entity_client_observeSensitiveCommands"></span></p>
 <ul>
 <li><code>observeSensitiveCommands</code>: Optional boolean. If true, events associated with sensitive commands (per the
 <a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.rst#security">Command Logging and Monitoring</a>
@@ -31226,7 +31158,7 @@ redacted by the driver. If false or not specified, events for commands containin
 ignored. Authentication SHOULD be disabled when this property is true, i.e. <a href="unified-test-format/unified-test-format.html#runOnRequirement_auth">auth</a> should be
 false for each <code>runOnRequirement</code>. See <a href="unified-test-format/unified-test-format.html#rationale_observeSensitiveCommands">rationale_observeSensitiveCommands</a>.</li>
 </ul>
-<span id="entity_client_storeEventsAsEntities" />
+<p><span id="entity_client_storeEventsAsEntities"></span></p>
 <ul>
 <li>
 <p><code>storeEventsAsEntities</code>: Optional array of one or more <a href="unified-test-format/unified-test-format.html#storeeventsasentity">storeEventsAsEntity</a> objects. Each
@@ -31241,7 +31173,7 @@ object denotes an entity name and one or more events to be collected and stored 
 </code></pre>
 </li>
 </ul>
-<span id="entity_client_observeLogMessages" />
+<p><span id="entity_client_observeLogMessages"></span></p>
 <ul>
 <li><code>observeLogMessages</code>: Optional object where the key names are log <a href="unified-test-format/../logging/logging.html#components">components</a> and
 the values are minimum <a href="unified-test-format/../logging/logging.html#log-severity-levels">log severity levels</a> indicating which components
@@ -31252,7 +31184,7 @@ collector(s) and SHOULD NOT be included in <a href="unified-test-format/unified-
 </ul>
 </li>
 </ul>
-<span id="entity_clientEncryption" />
+<p><span id="entity_clientEncryption"></span></p>
 <ul>
 <li>
 <p><code>clientEncryption</code>: Optional object. Defines a ClientEncryption object.</p>
@@ -31305,7 +31237,7 @@ instructions to obtain test credentials.</p>
 </ul>
 </li>
 </ul>
-<span id="entity_database" />
+<p><span id="entity_database"></span></p>
 <ul>
 <li>
 <p><code>database</code>: Optional object. Defines a Database object.</p>
@@ -31323,7 +31255,7 @@ instructions to obtain test credentials.</p>
 </ul>
 </li>
 </ul>
-<span id="entity_collection" />
+<p><span id="entity_collection"></span></p>
 <ul>
 <li>
 <p><code>collection</code>: Optional object. Defines a Collection object.</p>
@@ -31341,7 +31273,7 @@ instructions to obtain test credentials.</p>
 </ul>
 </li>
 </ul>
-<span id="entity_session" />
+<p><span id="entity_session"></span></p>
 <ul>
 <li>
 <p><code>session</code>: Optional object. Defines an explicit ClientSession object.</p>
@@ -31372,7 +31304,7 @@ are defined in the following specifications:</p>
 </ul>
 </li>
 </ul>
-<span id="entity_bucket" />
+<p><span id="entity_bucket"></span></p>
 <ul>
 <li>
 <p><code>bucket</code>: Optional object. Defines a Bucket object, as defined in the <a href="unified-test-format/../gridfs/gridfs-spec.html">GridFS</a> spec.</p>
@@ -31389,7 +31321,7 @@ defined in the <a href="unified-test-format/../gridfs/gridfs-spec.html#configura
 </ul>
 </li>
 </ul>
-<span id="entity_thread_object" />
+<p><span id="entity_thread_object"></span></p>
 <ul>
 <li>
 <p><code>thread</code>: Optional object. Defines a test runner "thread". Once the "thread" has been created, it should be idle and
@@ -31486,7 +31418,7 @@ may be empty.</li>
 <p>This SHOULD describe the purpose of this test (e.g. "insertOne is retried").</p>
 </li>
 </ul>
-<span id="test_runOnRequirements" />
+<p><span id="test_runOnRequirements"></span></p>
 <ul>
 <li>
 <p><code>runOnRequirements</code>: Optional array of one or more <a href="unified-test-format/unified-test-format.html#runonrequirement">runOnRequirement</a> objects. List of server
@@ -31499,17 +31431,17 @@ of requirements MUST be satisfied in order for a test to be executed and more pe
 test-level could be taken out of context on their own.</p>
 </li>
 </ul>
-<span id="test_skipReason" />
+<p><span id="test_skipReason"></span></p>
 <ul>
 <li><code>skipReason</code>: Optional string. If set, the test will be skipped. The string SHOULD explain the reason for skipping the
 test (e.g. JIRA ticket).</li>
 </ul>
-<span id="test_operations" />
+<p><span id="test_operations"></span></p>
 <ul>
 <li><code>operations</code>: Required array of one or more <a href="unified-test-format/unified-test-format.html#operation">operation</a> objects. List of operations to be executed for the
 test case.</li>
 </ul>
-<span id="test_expectEvents" />
+<p><span id="test_expectEvents"></span></p>
 <ul>
 <li>
 <p><code>expectEvents</code>: Optional array of one or more <a href="unified-test-format/unified-test-format.html#expectedeventsforclient">expectedEventsForClient</a> objects. For one or
@@ -31522,7 +31454,7 @@ entity with the same <code>eventType</code> field. For example, a test containin
 be redundant (if the <code>events</code> arrays were identical) or likely to fail (if the <code>events</code> arrays differed).</p>
 </li>
 </ul>
-<span id="test_expectLogMessages" />
+<p><span id="test_expectLogMessages"></span></p>
 <ul>
 <li>
 <p><code>expectLogMessages</code>: Optional array of one or more <a href="unified-test-format/unified-test-format.html#expectedlogmessagesforclient">expectedLogMessagesForClient</a>
@@ -31535,7 +31467,7 @@ enable filtering messages by client.</p>
 client entity.</p>
 </li>
 </ul>
-<span id="test_outcome" />
+<p><span id="test_outcome"></span></p>
 <ul>
 <li>
 <p><code>outcome</code>: Optional array of one or more <a href="unified-test-format/unified-test-format.html#collectiondata">collectionData</a> objects. Data that is expected to exist in
@@ -31547,18 +31479,18 @@ The procedure for asserting collection contents is discussed in <a href="unified
 <h4 id="operation"><a class="header" href="#operation">operation</a></h4>
 <p>An operation to be executed as part of the test.</p>
 <p>The structure of this object is as follows:</p>
-<span id="operation_name" />
+<p><span id="operation_name"></span></p>
 <ul>
 <li><code>name</code>: Required string. Name of the operation (e.g. method) to perform on the object.</li>
 </ul>
-<span id="operation_object" />
+<p><span id="operation_object"></span></p>
 <ul>
 <li><code>object</code>: Required string. Name of the object on which to perform the operation. This SHOULD correspond to either an
 <a href="unified-test-format/unified-test-format.html#entity">entity</a> name (for <a href="unified-test-format/unified-test-format.html#entity-test-operations">Entity Test Operations</a>) or "testRunner" (for
 <a href="unified-test-format/unified-test-format.html#special-test-operations">Special Test Operations</a>). If the object is an entity, The YAML file SHOULD use an
 <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a> for its <code>id</code> field (e.g. <code>object: *collection0</code>).</li>
 </ul>
-<span id="operation_arguments" />
+<p><span id="operation_arguments"></span></p>
 <ul>
 <li>
 <p><code>arguments</code>: Optional object. Map of parameter names and values for the operation. The structure of this object will
@@ -31567,7 +31499,7 @@ vary based on the operation. See <a href="unified-test-format/unified-test-forma
 <p>The <code>session</code> parameter is handled specially (see <a href="unified-test-format/unified-test-format.html#commonOptions_session">commonOptions_session</a>).</p>
 </li>
 </ul>
-<span id="operation_ignoreResultAndError" />
+<p><span id="operation_ignoreResultAndError"></span></p>
 <ul>
 <li>
 <p><code>ignoreResultAndError</code>: Optional boolean. If true, both the error and result for the operation MUST be ignored.</p>
@@ -31576,7 +31508,7 @@ and <a href="unified-test-format/unified-test-format.html#operation_saveResultAs
 <p>This field SHOULD NOT be used for <a href="unified-test-format/unified-test-format.html#special-test-operations">Special Test Operations</a> (i.e. <code>object: testRunner</code>).</p>
 </li>
 </ul>
-<span id="operation_expectError" />
+<p><span id="operation_expectError"></span></p>
 <ul>
 <li>
 <p><code>expectError</code>: Optional <a href="unified-test-format/unified-test-format.html#expectederror">expectedError</a> object. One or more assertions for an error expected to be
@@ -31586,7 +31518,7 @@ raised by the operation.</p>
 <p>This field SHOULD NOT be used for <a href="unified-test-format/unified-test-format.html#special-test-operations">Special Test Operations</a> (i.e. <code>object: testRunner</code>).</p>
 </li>
 </ul>
-<span id="operation_expectResult" />
+<p><span id="operation_expectResult"></span></p>
 <ul>
 <li>
 <p><code>expectResult</code>: Optional mixed type. A value corresponding to the expected result of the operation. This field may be
@@ -31596,7 +31528,7 @@ a scalar value, a single document, or an array of values. Test runners MUST foll
 <p>This field SHOULD NOT be used for <a href="unified-test-format/unified-test-format.html#special-test-operations">Special Test Operations</a> (i.e. <code>object: testRunner</code>).</p>
 </li>
 </ul>
-<span id="operation_saveResultAsEntity" />
+<p><span id="operation_saveResultAsEntity"></span></p>
 <ul>
 <li>
 <p><code>saveResultAsEntity</code>: Optional string. If specified, the actual result returned by the operation (if any) will be
@@ -31679,7 +31611,7 @@ not contain any additional <code>writeConcernErrors</code>s. This field is only 
 <a href="unified-test-format/unified-test-format.html#clientbulkwrite">clientBulkWrite</a> operation.</p>
 </li>
 </ul>
-<span id="expectedError_errorResponse" />
+<p><span id="expectedError_errorResponse"></span></p>
 <ul>
 <li>
 <p><code>errorResponse</code>: Optional document. A value corresponding to the expected server response. The test runner MUST assert
@@ -31691,7 +31623,7 @@ may not provide direct access to a single response. Tests SHOULD avoid using <co
 possible; otherwise, affected drivers SHOULD skip such tests if necessary.</p>
 </li>
 </ul>
-<span id="expectedError_expectResult" />
+<p><span id="expectedError_expectResult"></span></p>
 <ul>
 <li><code>expectResult</code>: Optional mixed type. This field follows the same rules as
 <a href="unified-test-format/unified-test-format.html#operation_expectResult">operation.expectResult</a> and is only used in cases where the error includes a result (e.g.
@@ -31734,7 +31666,7 @@ monitoring events as an example, <code>requestId</code> and <code>operationId</c
 </ul>
 <h5 id="expectedcommandevent"><a class="header" href="#expectedcommandevent">expectedCommandEvent</a></h5>
 <p>The structure of this object is as follows:</p>
-<span id="expectedEvent_commandStartedEvent" />
+<p><span id="expectedEvent_commandStartedEvent"></span></p>
 <ul>
 <li>
 <p><code>commandStartedEvent</code>: Optional object. Assertions for one or more
@@ -31752,7 +31684,7 @@ SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node
 </ul>
 </li>
 </ul>
-<span id="expectedEvent_commandSucceededEvent" />
+<p><span id="expectedEvent_commandSucceededEvent"></span></p>
 <ul>
 <li>
 <p><code>commandSucceededEvent</code>: Optional object. Assertions for one or more
@@ -31770,7 +31702,7 @@ SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node
 </ul>
 </li>
 </ul>
-<span id="expectedEvent_commandFailedEvent" />
+<p><span id="expectedEvent_commandFailedEvent"></span></p>
 <ul>
 <li>
 <p><code>commandFailedEvent</code>: Optional object. Assertions for one or more
@@ -31787,17 +31719,17 @@ SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node
 </li>
 </ul>
 <h5 id="expectedcmapevent"><a class="header" href="#expectedcmapevent">expectedCmapEvent</a></h5>
-<span id="expectedEvent_poolCreatedEvent" />
+<p><span id="expectedEvent_poolCreatedEvent"></span></p>
 <ul>
 <li><code>poolCreatedEvent</code>: Optional object. If present, this object MUST be an empty document as all fields in this event are
 non-deterministic.</li>
 </ul>
-<span id="expectedEvent_poolReadyEvent" />
+<p><span id="expectedEvent_poolReadyEvent"></span></p>
 <ul>
 <li><code>poolReadyEvent</code>: Optional object. If present, this object MUST be an empty document as all fields in this event are
 non-deterministic.</li>
 </ul>
-<span id="expectedEvent_poolClearedEvent" />
+<p><span id="expectedEvent_poolClearedEvent"></span></p>
 <ul>
 <li>
 <p><code>poolClearedEvent</code>: Optional object. Assertions for one or more
@@ -31810,22 +31742,22 @@ matches this value.</li>
 </ul>
 </li>
 </ul>
-<span id="expectedEvent_poolClosedEvent" />
+<p><span id="expectedEvent_poolClosedEvent"></span></p>
 <ul>
 <li><code>poolClosedEvent</code>: Optional object. If present, this object MUST be an empty document as all fields in this event are
 non-deterministic.</li>
 </ul>
-<span id="expectedEvent_connectionCreatedEvent" />
+<p><span id="expectedEvent_connectionCreatedEvent"></span></p>
 <ul>
 <li><code>connectionCreatedEvent</code>: Optional object. If present, this object MUST be an empty document as all fields in this
 event are non-deterministic.</li>
 </ul>
-<span id="expectedEvent_connectionReadyEvent" />
+<p><span id="expectedEvent_connectionReadyEvent"></span></p>
 <ul>
 <li><code>connectionReadyEvent</code>: Optional object. If present, this object MUST be an empty document as all fields in this event
 are non-deterministic.</li>
 </ul>
-<span id="expectedEvent_connectionClosedEvent" />
+<p><span id="expectedEvent_connectionClosedEvent"></span></p>
 <ul>
 <li>
 <p><code>connectionClosedEvent</code>: Optional object. Assertions for one or more
@@ -31837,12 +31769,12 @@ values for this field are defined in the CMAP spec.</li>
 </ul>
 </li>
 </ul>
-<span id="expectedEvent_connectionCheckOutStartedEvent" />
+<p><span id="expectedEvent_connectionCheckOutStartedEvent"></span></p>
 <ul>
 <li><code>connectionCheckOutStartedEvent</code>: Optional object. If present, this object MUST be an empty document as all fields in
 this event are non-deterministic.</li>
 </ul>
-<span id="expectedEvent_connectionCheckOutFailedEvent" />
+<p><span id="expectedEvent_connectionCheckOutFailedEvent"></span></p>
 <ul>
 <li>
 <p><code>connectionCheckOutFailedEvent</code>: Optional object. Assertions for one or more
@@ -31855,19 +31787,19 @@ values for this field are defined in the CMAP spec.</li>
 </ul>
 </li>
 </ul>
-<span id="expectedEvent_connectionCheckedOutEvent" />
+<p><span id="expectedEvent_connectionCheckedOutEvent"></span></p>
 <ul>
 <li><code>connectionCheckedOutEvent</code>: Optional object. If present, this object MUST be an empty document as all fields in this
 event are non-deterministic.</li>
 </ul>
-<span id="expectedEvent_connectionCheckedInEvent" />
+<p><span id="expectedEvent_connectionCheckedInEvent"></span></p>
 <ul>
 <li><code>connectionCheckedInEvent</code>: Optional object. If present, this object MUST be an empty document as all fields in this
 event are non-deterministic.</li>
 </ul>
 <h5 id="expectedsdamevent"><a class="header" href="#expectedsdamevent">expectedSdamEvent</a></h5>
 <p>The structure of this object is as follows:</p>
-<span id="expectedEvent_serverDescriptionChangedEvent" />
+<p><span id="expectedEvent_serverDescriptionChangedEvent"></span></p>
 <ul>
 <li>
 <p><code>serverDescriptionChangedEvent</code>: Optional object. Assertions for one or more
@@ -31890,7 +31822,7 @@ valid values.</li>
 </ul>
 </li>
 </ul>
-<span id="expectedEvent_serverHeartbeatStartedEvent" />
+<p><span id="expectedEvent_serverHeartbeatStartedEvent"></span></p>
 <ul>
 <li>
 <p><code>serverHeartbeatStartedEvent</code>: Optional object. Assertions for one or more
@@ -31902,7 +31834,7 @@ fields.</p>
 </ul>
 </li>
 </ul>
-<span id="expectedEvent_serverHeartbeatSucceededEvent" />
+<p><span id="expectedEvent_serverHeartbeatSucceededEvent"></span></p>
 <ul>
 <li>
 <p><code>serverHeartbeatSucceededEvent</code>: Optional object. Assertions for one or more
@@ -31914,7 +31846,7 @@ fields.</p>
 </ul>
 </li>
 </ul>
-<span id="expectedEvent_serverHeartbeatFailedEvent" />
+<p><span id="expectedEvent_serverHeartbeatFailedEvent"></span></p>
 <ul>
 <li>
 <p><code>serverHeartbeatFailedEvent</code>: Optional object. Assertions for one or more
@@ -31926,7 +31858,7 @@ fields.</p>
 </ul>
 </li>
 </ul>
-<span id="expectedEvent_topologyDescriptionChangedEvent" />
+<p><span id="expectedEvent_topologyDescriptionChangedEvent"></span></p>
 <ul>
 <li>
 <p><code>topologyDescriptionChangedEvent</code>: Optional object. Assertions for one
@@ -32045,19 +31977,19 @@ Comprehensive documentation for some of these types and their parameters may be 
 <li><a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#topologydescription">Server Discovery and Monitoring: TopologyDescription</a>.</li>
 </ul>
 <p>The structure of these common options is as follows:</p>
-<span id="commonOptions_collectionName" />
+<p><span id="commonOptions_collectionName"></span></p>
 <ul>
 <li><code>collectionName</code>: String. Collection name. The YAML file SHOULD use an
 <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a> for a collection entity's <code>collectionName</code> field (e.g.
 <code>collectionName: *collection0Name</code>).</li>
 </ul>
-<span id="commonOptions_databaseName" />
+<p><span id="commonOptions_databaseName"></span></p>
 <ul>
 <li><code>databaseName</code>: String. Database name. The YAML file SHOULD use an
 <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a> for a database entity's <code>databaseName</code> field (e.g.
 <code>databaseName: *database0Name</code>).</li>
 </ul>
-<span id="commonOptions_readConcern" />
+<p><span id="commonOptions_readConcern"></span></p>
 <ul>
 <li>
 <p><code>readConcern</code>: Object. Map of parameters to construct a read concern.</p>
@@ -32067,7 +31999,7 @@ Comprehensive documentation for some of these types and their parameters may be 
 </ul>
 </li>
 </ul>
-<span id="commonOptions_readPreference" />
+<p><span id="commonOptions_readPreference"></span></p>
 <ul>
 <li>
 <p><code>readPreference</code>: Object. Map of parameters to construct a read preference.</p>
@@ -32080,19 +32012,19 @@ Comprehensive documentation for some of these types and their parameters may be 
 </ul>
 </li>
 </ul>
-<span id="commonOptions_client" />
+<p><span id="commonOptions_client"></span></p>
 <ul>
 <li><code>client</code>: String. Client entity name, which the test runner MUST resolve to a MongoClient object. The YAML file SHOULD
 use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a> for a client entity's <code>id</code> field (e.g.
 <code>client: *client0</code>).</li>
 </ul>
-<span id="commonOptions_session" />
+<p><span id="commonOptions_session"></span></p>
 <ul>
 <li><code>session</code>: String. Session entity name, which the test runner MUST resolve to a ClientSession object. The YAML file
 SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a> for a session entity's <code>id</code> field (e.g.
 <code>session: *session0</code>).</li>
 </ul>
-<span id="commonOptions_writeConcern" />
+<p><span id="commonOptions_writeConcern"></span></p>
 <ul>
 <li>
 <p><code>writeConcern</code>: Object. Map of parameters to construct a write concern.</p>
@@ -32169,7 +32101,7 @@ Because drivers do not consistently propagate errors encountered while closing a
 <a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a> or <a href="unified-test-format/unified-test-format.html#operation_expectError">expectError</a> for this operation. Test files SHOULD
 NOT specify any operations for a client entity or any entity descended from it following a <code>close</code> operation on it, as
 driver behavior when an operation is attempted on a closed client or one of its descendant objects is not consistent.</p>
-<span id="client_createChangeStream" />
+<p><span id="client_createChangeStream"></span></p>
 <h4 id="createchangestream"><a class="header" href="#createchangestream">createChangeStream</a></h4>
 <p>Creates a cluster-level change stream and ensures that the server-side cursor has been created.</p>
 <p>This operation proxies the client's <code>watch</code> method and supports the same arguments and options. Test files SHOULD NOT
@@ -32254,7 +32186,7 @@ below.</p>
 <h4 id="aggregate"><a class="header" href="#aggregate">aggregate</a></h4>
 <p>When executing an <code>aggregate</code> operation, the test runner MUST fully iterate the result. This will ensure consistent
 behavior between drivers that eagerly create a server-side cursor and those that do so lazily when iteration begins.</p>
-<span id="database_createChangeStream" />
+<p><span id="database_createChangeStream"></span></p>
 <h4 id="createchangestream-1"><a class="header" href="#createchangestream-1">createChangeStream</a></h4>
 <p>Creates a database-level change stream and ensures that the server-side cursor has been created.</p>
 <p>This operation proxies the database's <code>watch</code> method and supports the same arguments and options. Test files SHOULD NOT
@@ -32325,7 +32257,7 @@ MUST be used as the result for the first iteration operation on the cursor.</p>
 </ul>
 <p>Collection operations that require special handling or are not documented by an existing specification are described
 below.</p>
-<span id="collection_aggregate" />
+<p><span id="collection_aggregate"></span></p>
 <h4 id="aggregate-1"><a class="header" href="#aggregate-1">aggregate</a></h4>
 <p>When executing an <code>aggregate</code> operation, the test runner MUST fully iterate the result. This will ensure consistent
 behavior between drivers that eagerly create a server-side cursor and those that do so lazily when iteration begins.</p>
@@ -32373,7 +32305,7 @@ BulkWriteException MAY translate the expected code name to a number (see:
 <a href="https://github.com/mongodb/mongo/blob/master/src/mongo/base/error_codes.yml">error_codes.yml</a>) and compare with <code>code</code>
 instead, but MUST raise an error if the comparison cannot be attempted (e.g. <code>code</code> is also not available, translation
 fails).</p>
-<span id="collection_createChangeStream" />
+<p><span id="collection_createChangeStream"></span></p>
 <h4 id="createchangestream-2"><a class="header" href="#createchangestream-2">createChangeStream</a></h4>
 <p>Creates a collection-level change stream and ensures that the server-side cursor has been created.</p>
 <p>This operation proxies the collection's <code>watch</code> method and supports the same arguments and options. Test files SHOULD
@@ -32382,7 +32314,7 @@ runners MUST ensure that the server-side cursor is created (i.e. <code>aggregate
 before the resulting change stream might be saved with <a href="unified-test-format/unified-test-format.html#operation_saveResultAsEntity">operation.saveResultAsEntity</a>.</p>
 <p>Test runners MUST NOT iterate the change stream when executing this operation and test files SHOULD NOT specify
 <a href="unified-test-format/unified-test-format.html#operation_expectResult">operation.expectResult</a> for this operation.</p>
-<span id="collection_createFindCursor" />
+<p><span id="collection_createFindCursor"></span></p>
 <h4 id="createfindcursor"><a class="header" href="#createfindcursor">createFindCursor</a></h4>
 <p>This operation proxies the collection's <code>find</code> method and supports the same arguments and options. Test runners MUST
 ensure that the server-side cursor is created (i.e. a <code>find</code> command is executed) as part of this operation and before
@@ -32454,8 +32386,7 @@ callback operation raises an error, it should be possible to assert that error a
 <li><a href="unified-test-format/../gridfs/gridfs-spec.html">GridFS</a></li>
 </ul>
 <p>Bucket operations that require special handling or are not documented by an existing specification are described below.</p>
-<span id="download" />
-<span id="downloadByName" />
+<p><span id="download"></span> <span id="downloadByName"></span></p>
 <h4 id="download-and-downloadbyname"><a class="header" href="#download-and-downloadbyname">download and downloadByName</a></h4>
 <p>These operations proxy the bucket's <code>openDownloadStream</code> and <code>openDownloadStreamByName</code> methods and support the same
 parameters and options, but return a string containing the stream's contents instead of the stream itself. Test runners
@@ -32467,11 +32398,11 @@ raised (e.g. missing chunks). Test files SHOULD use <a href="unified-test-format
 <a href="unified-test-format/unified-test-format.html#io-operations-for-gridfs-streams">IO operations for GridFS streams</a> in <a href="unified-test-format/unified-test-format.html#future-work">Future Work</a>.</p>
 <h4 id="opendownloadstream-and-opendownloadstreambyname"><a class="header" href="#opendownloadstream-and-opendownloadstreambyname">openDownloadStream and openDownloadStreamByName</a></h4>
 <p>These operations SHOULD NOT be used in test files. See <a href="unified-test-format/unified-test-format.html#download-and-downloadbyname">download and downloadByName</a>.</p>
-<span id="openUploadStream" />
+<p><span id="openUploadStream"></span></p>
 <h4 id="openuploadstream-and-openuploadstreamwithid"><a class="header" href="#openuploadstream-and-openuploadstreamwithid">openUploadStream and openUploadStreamWithId</a></h4>
 <p>These operations SHOULD NOT be used in test files. See
 <a href="unified-test-format/unified-test-format.html#io-operations-for-gridfs-streams">IO operations for GridFS streams</a> in <a href="unified-test-format/unified-test-format.html#future-work">Future Work</a>.</p>
-<span id="upload-and-uploadWithId" />
+<p><span id="upload-and-uploadWithId"></span></p>
 <h4 id="upload-and-uploadwithid"><a class="header" href="#upload-and-uploadwithid">upload and uploadWithId</a></h4>
 <p>These operations proxy the bucket's <code>uploadFromStream</code> and <code>uploadFromStreamWithId</code> methods and support the same
 parameters and options with one exception: the <code>source</code> parameter is an object specifying hex bytes from which test
@@ -32774,7 +32705,7 @@ exist on the collection. The test runner MUST use an internal MongoClient for th
 </code></pre>
 <p>Use a <code>listIndexes</code> command to check whether the index exists. Note that it is currently not possible to run
 <code>listIndexes</code> from within a transaction.</p>
-<span id="operation_createEntities" />
+<p><span id="operation_createEntities"></span></p>
 <h4 id="createentities"><a class="header" href="#createentities">createEntities</a></h4>
 <p>The <code>createEntities</code> operation instructs the test runner to create the provided entities and store them in the current
 test's <a href="unified-test-format/unified-test-format.html#entity-map">Entity Map</a>.</p>
@@ -33670,7 +33601,7 @@ adding comments, using YAML anchors) and cannot be enforced with a JSON schema. 
 ignored in order to test the test runner implementation (e.g. defining entities out of order to trigger runtime errors).
 The specification does prefer "MUST" in other contexts, such as discussing parts of the test file format that <em>are</em>
 enforceable by the JSON schema or the test runner implementation.</p>
-<span id="rationale_observeSensitiveCommands" />
+<p><span id="rationale_observeSensitiveCommands"></span></p>
 <h3 id="why-cant-observesensitivecommands-be-true-when-authentication-is-enabled"><a class="header" href="#why-cant-observesensitivecommands-be-true-when-authentication-is-enabled">Why can't <code>observeSensitiveCommands</code> be true when authentication is enabled?</a></h3>
 <p>When running against authentication-enabled clusters, the events observed by a client will always begin with
 auth-related commands (e.g. <code>authenticate</code>, <code>saslStart</code>, <code>saslContinue</code>) because the MongoClient will need to
@@ -34021,7 +33952,7 @@ configuration and execute a ping command. Repeat this test using SCRAM-SHA-256.<
 each test.</p>
 </li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="mongodb-driver-performance-benchmarking"><a class="header" href="#mongodb-driver-performance-benchmarking">MongoDB Driver Performance Benchmarking</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="performance-benchmarking"><a class="header" href="#performance-benchmarking">Performance Benchmarking</a></h1>
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>

@@ -252,7 +252,7 @@ data into one BSON value that can be treated as an opaque blob in most contexts.
 <h3 id="why-not-use-separate-bson-binary-subtypes-instead-of-a-nested-subtype"><a class="header" href="#why-not-use-separate-bson-binary-subtypes-instead-of-a-nested-subtype">Why not use separate BSON binary subtypes instead of a nested subtype?</a></h3>
 <p>If we used separate subtypes, we'd need to reserve three (and possibly more in the future) of our 124 remaining
 subtypes.</p>
-<span id="intent-to-encrypt"/>
+<p><span id="intent-to-encrypt"></span></p>
 <h3 id="why-are-intent-to-encrypt-markings-needed"><a class="header" href="#why-are-intent-to-encrypt-markings-needed">Why are intent-to-encrypt markings needed?</a></h3>
 <p>Intent-to-encrypt markings provide a simple way for mongocryptd to communicate what values need to be encrypted to
 libmongocrypt. Alternatively, mongocryptd could respond with a list of field paths. But field paths are difficult to

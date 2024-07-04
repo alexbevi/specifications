@@ -228,7 +228,7 @@ provides the option under a different name, the driver MAY implement the old and
 values MUST be encoded in UTF-8. All integer options are 32-bit unless specified otherwise. Note that all requirements
 and recommendations described in the <a href="../connection-string/connection-string-spec.html">Connection String spec</a> pertaining
 to URI options apply here.</p>
-<div id="uri.options">
+<p><span id="uri.options"></span></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Accepted Values</th><th>Default Value</th><th>Optional to implement?</th><th>Description</th></tr></thead><tbody>
 <tr><td>appname</td><td>any string that meets the criteria listed in the <a href="../mongodb-handshake/handshake.rst#client-application-name">handshake spec</a></td><td>no appname specified</td><td>no</td><td>Passed into the server in the client metadata as part of the connection handshake</td></tr>
 <tr><td>authMechanism</td><td>any string; valid values are defined in the <a href="../auth/auth.html#supported-authentication-methods">auth spec</a></td><td>None; default values for authentication exist for constructing authentication credentials per the <a href="../auth/auth.html#supported-authentication-methods">auth spec</a>, but there is no default for the URI option itself.</td><td>no</td><td>The authentication mechanism method to use for connection to the server</td></tr>
