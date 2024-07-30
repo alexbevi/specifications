@@ -2,6 +2,7 @@
 
 [Introduction](README.md)
 [Mantras](driver-mantras.md)
+[Wire Versions](wireversion-featurelist.md)
 
 # Specifications
 
@@ -59,8 +60,8 @@
 
 - [Programmability]()
   - [Resource Management]()
-    - [Databases](enumerate-databases.rst)
-    - [Collections](enumerate-collections.rst)
+    - [Databases](enumerate-databases.md)
+    - [Collections](enumerate-collections.md)
     - [Indexes](index-management/index-management.md)
   - [Data Management]()
     - [CRUD](crud/crud.md)
