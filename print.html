@@ -11321,9 +11321,9 @@ concerns) SHOULD implement retryability for the read-only command runner.</li>
 <ul>
 <li><a href="retryable-reads/../change-streams/change-streams.html">Change Streams</a></li>
 <li><a href="retryable-reads/../crud/crud.html">CRUD</a></li>
-<li><a href="retryable-reads/../enumerate-collections.rst">Enumerating Collections</a></li>
+<li><a href="retryable-reads/../enumerate-collections.html">Enumerating Collections</a></li>
 <li><a href="retryable-reads/../index-management/index-management.html#enumerate-indexes">Enumerating Indexes</a></li>
-<li><a href="retryable-reads/../enumerate-databases.rst">Enumerating Databases</a></li>
+<li><a href="retryable-reads/../enumerate-databases.html">Enumerating Databases</a></li>
 <li><a href="retryable-reads/../gridfs/gridfs-spec.html">GridFS Spec</a></li>
 </ul>
 <h4 id="unsupported-read-operations"><a class="header" href="#unsupported-read-operations">Unsupported Read Operations</a></h4>
@@ -12495,8 +12495,8 @@ progresses.</p>
 <li><a href="client-side-operations-timeout/../crud/crud.html">CRUD</a></li>
 <li><a href="client-side-operations-timeout/../change-streams/change-streams.html">Change Streams</a></li>
 <li><a href="client-side-operations-timeout/../client-side-encryption/client-side-encryption.html">Client Side Encryption</a></li>
-<li><a href="client-side-operations-timeout/../enumerate-collections.rst">Enumerating Collections</a></li>
-<li><a href="client-side-operations-timeout/../enumerate-databases.rst">Enumerating Databases</a></li>
+<li><a href="client-side-operations-timeout/../enumerate-collections.html">Enumerating Collections</a></li>
+<li><a href="client-side-operations-timeout/../enumerate-databases.html">Enumerating Databases</a></li>
 <li><a href="client-side-operations-timeout/../gridfs/gridfs-spec.html">GridFS</a></li>
 <li><a href="client-side-operations-timeout/../index-management/index-management.html">Index Management</a></li>
 <li><a href="client-side-operations-timeout/../transactions/transactions.html">Transactions</a></li>
@@ -15584,704 +15584,27 @@ Changes
 :2019-04-24: withTransaction does not retry when commit fails with MaxTimeMSExpired.
 :2018-02-13: withTransaction should retry commits after a wtimeout
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1>=====================
-Enumerating Databases</h1>
-<p>:Status: Accepted
-:Minimum Server Version: 3.6</p>
-<p>.. contents::</p>
-<hr />
-<h1 id="abstract-29"><a class="header" href="#abstract-29">Abstract</a></h1>
-<p>A driver can provide functionality to enumerate all databases on a server. This
-specification defines several methods for enumerating databases.</p>
-<h1 id="meta-29"><a class="header" href="#meta-29">META</a></h1>
-<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”,
-“SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be
-interpreted as described in <code>RFC 2119 &lt;https://www.ietf.org/rfc/rfc2119.txt&gt;</code>_.</p>
-<h1 id="specification-27"><a class="header" href="#specification-27">Specification</a></h1>
-<h2 id="terms-19"><a class="header" href="#terms-19">Terms</a></h2>
-<p>MongoClient
-Driver object representing a connection to MongoDB. This is the root object
-of a driver’s API and MAY be named differently in some drivers.</p>
-<p>MongoDatabase
-Driver object representing a database and the operations that can be
-performed on it. MAY be named differently in some drivers.</p>
-<p>Iterable
-An object or data structure that is a sequence of elements that can be
-iterated over. This spec is flexible on what that means as different drivers
-will have different requirements, types, and idioms.</p>
-<p>Document
-An object or data structure used by the driver to represent a BSON document.
-This spec is flexible on what that means as different drivers will have
-different requirements, types, and idioms.</p>
-<h2 id="naming-deviations-4"><a class="header" href="#naming-deviations-4">Naming Deviations</a></h2>
-<p>This specification defines names for methods. To the extent possible, drivers
-SHOULD use the defined names. However, where a driver or language’s naming
-conventions would conflict, drivers SHOULD honor their existing conventions. For
-example, a driver may use <code>list_databases</code> instead of <code>listDatabases</code>.</p>
-<h2 id="filters"><a class="header" href="#filters">Filters</a></h2>
-<p>Drivers SHOULD support the <code>filter</code> option when implementing the <code>listDatabases</code>_
-database command. The <code>filter</code> option is a query predicate that determines which
-databases are listed in the command result. You can specify a condition on any of the
-database fields returned in the command output:</p>
-<p>.. _listDatabases: https://www.mongodb.com/docs/manual/reference/command/listDatabases/</p>
-<ul>
-<li><code>name</code></li>
-<li><code>sizeOnDisk</code></li>
-<li><code>empty</code></li>
-<li><code>shards</code></li>
-</ul>
-<p>For example, to list only databases whose names begin with "foo":</p>
-<p>::</p>
-<blockquote>
-<p>db.adminCommand({listDatabases: 1, filter: {name: /^foo/}});</p>
-</blockquote>
-<h2 id="authorizeddatabases"><a class="header" href="#authorizeddatabases">AuthorizedDatabases</a></h2>
-<p>MongoDB 4.0.5 added an <code>authorizedDatabases</code> boolean option to the <code>listDatabases</code>_
-database command, which can be used to limit the command result to only include databases
-the user is authorized to use. Drivers SHOULD support the new <code>authorizedDatabases</code>
-option when implementing the <code>listDatabases</code>_ database command.</p>
-<p>The possible values for <code>authorizedDatabases</code> are:</p>
-<ul>
-<li>unspecified (missing entirely from the command document sent to the server)</li>
-<li><code>false</code></li>
-<li><code>true</code></li>
-</ul>
-<p>See the server's <code>listDatabases</code>_ documentation for an explanation of what each value means.</p>
-<h2 id="comment"><a class="header" href="#comment">Comment</a></h2>
-<p>MongoDB 4.4 introduced a <code>comment</code>  option to the <code>listDatabases</code>
-command. This option enables users to specify a comment as an arbitrary
-BSON type to help trace the operation through the database profiler, currentOp and logs.
-The default is to not send a value.  If a comment is provided on pre-4.4 servers, the comment
-should still be attached and the driver should rely on the server to provide an error to the user.</p>
-<p>::</p>
-<blockquote>
-<p>db.getSiblingDB("admin").runCommand({listDatabases: 1, comment: "hi there"})</p>
-</blockquote>
-<h2 id="driver-methods"><a class="header" href="#driver-methods">Driver Methods</a></h2>
-<p>If a driver already has a method to perform one of the listed tasks, there is no
-need to change it. Do not break backwards compatibility when adding new methods.</p>
-<p>All methods SHOULD be implemented on the MongoClient object.</p>
-<p>All methods MUST apply timeouts per the <code>Client Side Operations Timeout &lt;./client-side-operations-timeout/client-side-operations-timeout.md&gt;</code>__
-specification.</p>
-<p>Enumerating Full Database Information</p>
-<pre><code>
-The `listDatabases`_ database command returns an array of documents, each of
-which contains information about a database on the MongoDB server. Additionally,
-the command reports the aggregate sum of all database sizes (in bytes). Consider
-the following example:
-
-.. _listDatabases: https://www.mongodb.com/docs/manual/reference/command/listDatabases/
-
-::
-
-  &gt; db.getSiblingDB("admin").runCommand({listDatabases:1})
-  {
-      "databases" : [
-          {
-              "name" : "admin",
-              "sizeOnDisk" : 83886080,
-              "empty" : false
-          },
-          {
-              "name" : "local",
-              "sizeOnDisk" : 83886080,
-              "empty" : false
-          }
-      ],
-      "totalSize" : 167772160,
-      "ok" : 1
-  }
-
-Drivers SHOULD implement a MongoClient method that returns an Iterable of
-database specifications (e.g. model object, document type), each of which
-correspond to an element in the databases array of the ``listDatabases`` command
-result. This method SHOULD be named ``listDatabases``.
-
-Drivers MAY report ``totalSize`` (e.g. through an additional output variable on
-the ``listDatabases`` method), but this is not necessary.
-
-Drivers SHOULD support the ``filter``, ``authorizedDatabases`` and ``comment``
-options when implementing this method.
-
-Enumerating Database Names
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-MongoDB 3.6 introduced a ``nameOnly`` boolean option to the ``listDatabases``
-database command, which limits the command result to only include database
-names. Consider the following example:
-
-::
-
-  &gt; db.getSiblingDB("admin").runCommand({listDatabases:1,nameOnly:true})
-  {
-      "databases" : [
-          { "name" : "admin" },
-          { "name" : "local" }
-      ],
-      "ok" : 1
-  }
-
-Drivers MAY implement a MongoClient method that returns an Iterable of strings,
-each of which corresponds to a name in the databases array of the
-``listDatabases`` command result. This method SHOULD be named
-``listDatabaseNames``.
-
-Older versions of the server that do not support the ``nameOnly`` option for the
-``listDatabases`` command will ignore it without raising an error. Therefore,
-drivers SHOULD always specify the ``nameOnly`` option when they only intend to
-access database names from the ``listDatabases`` command result.
-
-Drivers SHOULD support the ``filter``, ``authorizedDatabases`` and ``comment``
-options when implementing this method.
-
-Enumerating MongoDatabase Objects
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Drivers MAY implement a MongoClient method that returns an Iterable of
-MongoDatabase types, each of which corresponds to a name in the databases array
-of the ``listDatabases`` command result. This method MAY be named
-``listMongoDatabases``.
-
-Any MongoDatabase objects returned by this method SHOULD inherit the same
-MongoClient options that would otherwise be inherited by selecting an individual
-MongoDatabase through MongoClient (e.g. read preference, write concern).
-
-Drivers SHOULD specify the ``nameOnly`` option when executing the
-``listDatabases`` command for this method.
-
-Drivers SHOULD support the ``filter``, ``authorizedDatabases`` and ``comment``
-options when implementing this method.
-
-Replica Sets
-------------
-
-The ``listDatabases`` command may be run on a secondary node. Drivers MUST run
-the ``listDatabases`` command only on the primary node in replica set topology,
-unless directly connected to a secondary node in Single topology.
-
-Test Plan
-=========
-
-Test Environments
------------------
-
-The test plan should be executed against the following servers:
-
-* Standalone
-* Replica set primary
-* Replica set secondary
-* Sharding router (i.e. mongos)
-
-Test Cases
-----------
-
-The following scenarios should be run for each test environment:
-
-* Execute the method to enumerate full database information (e.g.
-  ``listDatabases()``)
-  - Verify that the method returns an Iterable of Document types
-  - Verify that all databases on the server are present in the result set
-  - Verify that the result set does not contain duplicates
-* Execute the method to enumerate database names (e.g. ``listDatabaseNames()``)
-  - Verify that the method returns an Iterable of strings
-  - Verify that all databases on the server are present in the result set
-  - Verify that the result set does not contain duplicates
-* Execute the method to enumerate MongoDatabase objects (e.g.
-  ``listMongoDatabases()``)
-  - Verify that the method returns an Iterable of MongoDatabase objects
-  - Verify that all databases on the server are present in the result set
-  - Verify that the result set does not contain duplicates
-
-Motivation for Change
-=====================
-
-Although most drivers provide a ``listDatabases`` command helper in their API,
-there was previously no spec for a database enumeration. MongoDB 3.6 introduced
-a ``nameOnly`` option to the ``listDatabases`` database command. The driver API
-should to be expanded to support this option.
-
-Design Rationale
-================
-
-The design of this specification is inspired by the `Collection Enumeration`_
-and `Index Enumeration`_ specifications. Since most drivers already implement a
-``listDatabases`` command helper in some fashion, this spec is flexible when it
-comes to existing APIs.
-
-.. _Collection Enumeration: ./enumerate-collections.rst
-.. _Index Enumeration: ./enumerate-indexes.rst
-
-Backwards Compatibility
-=======================
-
-There should be no backwards compatibility concerns. This specification merely
-deals with how to enumerate databases in future versions of MongoDB and allows
-flexibility for existing driver APIs.
-
-Reference Implementation
-========================
-
-TBD
-
-Q &amp; A
-=====
-
-Why is reporting the total size of all databases optional?
-----------------------------------------------------------
-
-Although the ``listDatabases`` command provides two results, a ``databases``
-array and ``totalSize`` integer, the array of database information documents is
-the primary result. Returning a tuple or composite result type from a
-``listDatabases`` driver method would complicate the general use case, as
-opposed to an optional output argument (if supported by the language).
-Furthermore, the ``totalSize`` value can be calculated client-side by summing
-all ``sizeOnDisk`` fields in the array of database information documents.
-
-Changelog
-=========
-
-:2022-10-05: Remove spec front matter and reformat changelog. Also reverts the
-             minimum server version to 3.6, which is where ``nameOnly`` and
-             ``filter`` options were first introduced for ``listDatabases``.
-:2022-08-17: Clarify the behavior of comment on pre-4.4 servers.
-:2022-02-01: Support comment option in listDatabases command
-:2022-01-19: Require that timeouts be applied per the client-side operations timeout spec.
-:2019-11-20: Support authorizedDatabases option in listDatabases command
-:2017-10-30: Support filter option in listDatabases command
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><p>.. role:: javascript(code)
-:language: javascript</p>
-<h1>=======================
-Enumerating Collections</h1>
-<p>:Status: Accepted
-:Minimum Server Version: 1.8</p>
-<p>.. contents::</p>
-<hr />
-<h1 id="abstract-30"><a class="header" href="#abstract-30">Abstract</a></h1>
-<p>A driver can contain a feature to enumerate all collections belonging to a
-database. This specification defines how collections should be enumerated.</p>
-<h1 id="meta-30"><a class="header" href="#meta-30">META</a></h1>
-<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”,
-“SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be
-interpreted as described in <code>RFC 2119 &lt;https://www.ietf.org/rfc/rfc2119.txt&gt;</code>_.</p>
-<h1 id="specification-28"><a class="header" href="#specification-28">Specification</a></h1>
-<h2 id="terms-20"><a class="header" href="#terms-20">Terms</a></h2>
-<p>MongoClient
-Driver object representing a connection to MongoDB. This is the root object
-of a driver’s API and MAY be named differently in some drivers.</p>
-<p>Iterable
-An object or data structure that is a sequence of elements that can be
-iterated over. This spec is flexible on what that means as different drivers
-will have different requirements, types, and idioms.</p>
-<p>The driver needs to implement different methods of enumeration depending on
-MongoDB server version. From MongoDB 2.7.6, the server implements a
-<code>listCollections</code> command that MUST be used if available. For the non-MMAP
-storage engines that come with 2.8, this will be the only way how their
-collections can be enumerated. For earlier MongoDB server versions, the driver
-SHOULD simply query against the <code>systems.namespaces</code> collection.</p>
-<h2 id="pre-mongodb-276-versions"><a class="header" href="#pre-mongodb-276-versions">Pre MongoDB 2.7.6 versions</a></h2>
-<p>On MongoDB versions prior to 2.7.6, the only way to enumerate collections for
-a database is by querying the <code>system.namespaces</code> collection::</p>
-<pre><code>db.system.namespaces.find()
-</code></pre>
-<p>This query returns a list of documents through a normal query cursor, which
-always include a <code>name</code> field and optionally a <code>options</code> field.</p>
-<p>Each document describes a namespace. Among collections, these namespaces
-also include special collections (containing <code>.system.</code> or <code>.oplog.</code> in the
-name). The returned documents also include indexes (containing a <code>$</code> in the
-name). Index names MUST NOT be returned while enumerating collections through
-<code>db.system.namespaces.find()</code>.</p>
-<p>When returning information, drivers MUST strip the database name from the
-returned namespace, and only leave the collection name.</p>
-<h2 id="mongodb-versions-276-to-280-rc2"><a class="header" href="#mongodb-versions-276-to-280-rc2">MongoDB versions 2.7.6 to 2.8.0-rc2</a></h2>
-<p>MAY be supported, but this is not necessary. These versions allow the
-<code>listCollections</code> command, but return results as a single document, but not
-as a cursor. This spec does not cover these versions.</p>
-<h2 id="post-mongodb-280-rc3-versions"><a class="header" href="#post-mongodb-280-rc3-versions">Post MongoDB 2.8.0-rc3 versions</a></h2>
-<p>In versions 2.8.0-rc3 and later, the <code>listCollections</code> command returns a
-cursor::</p>
-<pre><code>$ use test
-$ db.runCommand( { listCollections: 1 } );
-</code></pre>
-<p>The command also accepts options.</p>
-<p>The <code>filter</code> option, which acts like a query against the returned collection
-documents. You can i.e. use the following to only list the collections
-beginning with <code>test</code>::</p>
-<pre><code>$ db.runCommand( { listCollections: 1, filter: { name: /^test/ } } );
-</code></pre>
-<p>Or to find all capped collections::</p>
-<pre><code>$ db.runCommand( { listCollections: 1, filter: { 'options.capped': true } } );
-</code></pre>
-<p>The <code>cursor.batchSize</code> option, which allows you to set how many initial
-collections should be returned as part of the cursor specification document
-that comes back from the server. This first batch is part of the returned
-structure in the <code>firstBatch</code> key (see more about return types further on).</p>
-<p>The command returns a cursor definition structure::</p>
-<pre><code>{
-    cursor: {
-        id: &lt;long&gt;,
-        ns: &lt;string&gt;,
-        firstBatch: [&lt;object&gt;, &lt;object&gt;, ...]
-    },
-    ok: 1
-}
-</code></pre>
-<p>With the <code>cursor.id</code> and <code>cursor.ns</code> fields you can retrieve further
-collection information structures.</p>
-<p>The command also returns the field <code>ok</code> to
-signal whether the command was executed successfully.</p>
-<p>This will return the first 25 collection descriptions as part of the returned
-document::</p>
-<pre><code>$ db.runCommand( { listCollections: 1, cursor : { batchSize: 25 } } );
-</code></pre>
-<p>MongoDB 4.4 introduced a <code>comment</code>  option to the <code>listCollections</code>
-database command. This option enables users to specify a comment as an arbitrary
-BSON type to help trace the operation through the database profiler, currentOp
-and logs. The default is to not send a value.  If a comment is provided on pre-4.4
-servers, the comment should still be attached and the driver should rely on the server
-to provide an error to the user.</p>
-<p>Example of usage of the comment option::</p>
-<pre><code>$ db.runCommand({"listCollections": 1, "comment": "hi there"})
-</code></pre>
-<p>Any comment set on a <code>listCollections</code> command is inherited by any subsequent
-<code>getMore</code> commands run on the same <code>cursor.id</code> returned from the
-<code>listCollections</code> command. Therefore, drivers MUST NOT attach the comment
-to subsequent getMore commands on a cursor.</p>
-<h2 id="filters-1"><a class="header" href="#filters-1">Filters</a></h2>
-<p>Pre MongoDB 2.7.6 servers, which require querying <code>system.namespaces</code>,
-return the name of a collection prefixed with the database name.</p>
-<p>Post MongoDB 2.7.6 servers, which have <code>listCollections</code> implemented,
-return the name of a collection <strong>without</strong> the database name prefixed to it.</p>
-<p>Because of this, drivers MUST prefix filters against the <code>name</code> field with
-the database name for pre MongoDB 2.7.6 servers. Because prefixing causes
-issues with regular expressions, a driver MUST NOT allow a regular expression
-as the match value for the <code>name</code> field in the filter for pre MongoDB
-2.7.6 drivers.</p>
-<p>For example, to list all collections with a "listCollections" method, you
-would do the following with the <code>filter</code> argument::</p>
-<p>if filter.name is set:
-if server version &lt; 2.7.6
-if typeof filter.name != string</p>
-<pre><code>    throw "value type not accepted" (as it needs to be a static string)
-
-  else
-    filter.name = "dbname." + filter.name
-</code></pre>
-<p>Filtering against the <code>options</code> field of a collection has no
-restrictions.</p>
-<p>Return types</p>
-<pre><code>
-For servers that support the ``listCollections`` command, the return types
-differ depending on server version. Versions 2.7.6 to 2.8.0-rc2 return a single
-document containing all the results, but versions 2.8.0-rc3 and later return a
-cursor description. The format that is returned is the same as for any other command cursor::
-
-    {
-        cursor: {
-            id: &lt;long&gt;,
-            ns: &lt;string&gt;,
-            firstBatch: [&lt;object&gt;, &lt;object&gt;, ...]
-        },
-        ok: 1
-    }
-
-The number of objects in the ``firstBatch`` field depends on the
-``cursor.batchSize`` option.
-
-
-Drivers MAY expose methods to return collection names as an array. If your
-driver already has such a method, its return type MUST NOT be changed in order
-to prevent breaking backwards compatibility.
-
-Drivers SHOULD expose (a) method(s) to return collection information through a
-cursor, where the information for each collection is represented by a single
-document.
-
-
-Enumeration: getting collection names
--------------------------------------
-
-With both the pre and post 2.7.6 versions having a different way to enumerate
-all collections, drivers SHOULD implement their enumeration according to the
-following algorithm (just like the
-`shell does &lt;https://github.com/mongodb/mongo/blob/f32ba54f971c045fb589fe4c3a37da77dc486cee/src/mongo/shell/db.js#L550&gt;`_)::
-
-  run the listCollections command, with the filter if given
-    if res.code == 59 || res.code == 13390:
-      fall back to querying system.namespaces.
-
-    if !res.ok:
-      if res.errmsg &amp;&amp; res.errmsg.startsWith( "no such cmd" ):
-        fall back to querying system.namespaces.
-
-      else:
-        throw listCollections command failed exception
-
-    loop through res.cursor.firstBatch
-
-    use getmore with res.cursor.id and res.cursor.ns information to loop over
-    remaining results
-
-If you need to fall back to querying ``system.namespaces``, then you need to
-filter out all return documents that contain a ``$`` in the ``name`` field.
-
-When falling back to querying ``system.namespaces`` you will also need to filter
-out all the documents that contain ``".oplog.$"`` as this collection is used for
-legacy replication within the local database.
-
-Alternatively, and if a driver already implements checking MongoDB versions, a
-driver MAY alternatively implement it as::
-
-  if server version &gt;= 2.7.6
-    run the listCollections command, with the filter if given
-      if res.code == 59 || res.code == 13390:
-        throw listCollections command failed exception
-
-      if res.errmsg &amp;&amp; res.errmsg.startsWith( "no such cmd" ):
-        throw listCollections command failed exception
-
-    loop through res.cursor.firstBatch
-
-    use getmore with res.cursor.id and res.cursor.ns information to loop over
-    remaining results
-
-  else
-    fall back to querying system.namespaces.
-
-Driver methods
---------------
-
-Drivers SHOULD use the method name ``listCollections`` for a method that
-returns all collections with a cursor return type. Drivers MAY use an idiomatic
-variant that fits the language the driver is for.
-
-If a driver already has a method to perform one of the listed tasks,
-there is no need to change it. Do not break backwards compatibility when
-adding new methods.
-
-All methods:
-
-- SHOULD be on the database object.
-- MUST allow a filter to be passed to include only requested collections.
-- MAY allow the ``cursor.batchSize`` option to be passed.
-- SHOULD allow the ``comment`` option to be passed.
-- MUST use the *same* return type (ie, array or cursor) whether either a
-  pre-2.7.6 server, a post-2.7.6 or a post-2.8.0-rc3 server is being used.
-- MUST apply timeouts per the `Client Side Operations Timeout
-  &lt;./client-side-operations-timeout/client-side-operations-timeout.md&gt;`__
-  specification.
-
-All methods that return cursors MUST support the timeout options documented
-in `Client Side Operations Timeout: Cursors
-&lt;./client-side-operations-timeout/client-side-operations-timeout.md#cursors&gt;`__.
-
-Getting Collection Names
-</code></pre>
-<p>Drivers MAY implement a MongoClient method that returns an Iterable of strings,
-where each string corresponds to a collection name. This method SHOULD be named
-<code>listCollectionNames</code>.</p>
-<p>MongoDB 4.0 introduced a <code>nameOnly</code> boolean option to the <code>listCollections</code>
-database command, which limits the command result to only include collection
-names. NOTE: <code>nameOnly</code> is applied before any filter is applied.</p>
-<p>Example return::</p>
-<pre><code>[
-    "me",
-    "oplog.rs",
-    "replset.minvalid",
-    "startup_log",
-    "system.indexes",
-    "system.replset"
-]
-</code></pre>
-<p>Server version between 2.7.6 (inclusive) and 4.0 (exclusive) do not support
-the <code>nameOnly</code> option for the <code>listCollections</code> command and will ignore it
-without raising an error. Therefore, drivers MUST always specify the <code>nameOnly</code>
-option when they only intend to access collection names from the <code>listCollections</code>
-command result, except drivers MUST NOT set <code>nameOnly</code> if a filter
-specifies any keys other than <code>name</code>.</p>
-<p>MongoDB 4.0 also added an <code>authorizedCollections</code> boolean option to the <code>listCollections</code>
-command, which can be used to limit the command result to only include collections
-the user is authorized to use. Drivers MAY allow users to set the <code>authorizedCollections</code>
-option on the <code>listCollectionNames</code> method.</p>
-<p>Getting Full Collection Information</p>
-<pre><code>
-Drivers MAY implement a method to return the full ``name/options`` pairs that
-are returned from both ``listCollections`` (in the ``res.cursor.firstBatch``
-field, and subsequent retrieved documents through getmore on the cursor
-constructed from ``res.cursor.ns`` and ``res.cursor.id``), and the query
-result for ``system.namespaces``.
-
-The returned result for each variant MUST be equivalent, and each collection
-that is returned MUST use the field names ``name`` and ``options``.
-
-In MongoDB 4.4, the ``ns`` field was removed from the index specifications, so
-the index specification included in the ``idIndex`` field of the collection
-information will no longer contain an ``ns`` field.
-
-- For drivers that report those index specifications in the form of documents or
-  dictionaries, no special handling is necessary, but any documentation of the
-  contents of the documents/dictionaries MUST indicate that the ``ns`` field
-  will no longer be present in MongoDB 4.4+. If the contents of the
-  documents/dictionaries are undocumented, then no special mention of the ``ns``
-  field is necessary.
-- For drivers that report those index specifications in the form of statically
-  defined models, the driver MUST manually populate the ``ns`` field of the
-  models with the appropriate namespace if the server does not report it in the
-  ``listCollections`` command response. The ``ns`` field is not required to be a
-  part of the models, however.
-
-Example return (a cursor which returns documents, not a simple array)::
-
-    {
-        "name" : "me", "options" : { "flags" : 1 }
-    },
-    {
-        "name" : "oplog.rs", "options" : { "capped" : true, "size" : 10485760, "autoIndexId" : false }
-    },
-    {
-        "name" : "replset.minvalid", "options" : { "flags" : 1 }
-    },
-    {
-        "name" : "startup_log", "options" : { "capped" : true, "size" : 10485760 }
-    },
-    {
-        "name" : "system.indexes", "options" : { }
-    },
-    {
-        "name" : "system.replset", "options" : { "flags" : 1 }
-    }
-
-When returning this information as a cursor, a driver SHOULD use the
-method name ``listCollections`` or an idiomatic variant.
-
-Drivers MAY allow the ``nameOnly`` and ``authorizedCollections`` options
-to be passed when executing the ``listCollections`` command for this method.
-
-Returning a List of Collection Objects
-</code></pre>
-<p>Drivers MAY implement a method that returns a collection object for each
-returned collection, if the driver has such a concept. This method MAY be named
-<code>listMongoCollections</code>.</p>
-<p>Example return (in PHP, but abbreviated)::</p>
-<pre><code>array(6) {
-  [0] =&gt; class MongoCollection#6 { }
-  [1] =&gt; class MongoCollection#7 { }
-  [2] =&gt; class MongoCollection#8 { }
-  [3] =&gt; class MongoCollection#9 { }
-  [4] =&gt; class MongoCollection#10 { }
-  [5] =&gt; class MongoCollection#11 { }
-}
-</code></pre>
-<p>Drivers MUST specify true for the <code>nameOnly</code> option when executing the
-<code>listCollections</code> command for this method, except drivers MUST NOT set
-<code>nameOnly</code> if a filter specifies any keys other than <code>name</code>.</p>
-<p>Drivers MAY allow the <code>authorizedCollections</code> option to be passed when
-executing the <code>listCollections</code> command for this method</p>
-<p>Replica Sets</p>
-<pre><code>
-- ``listCollections`` can be run on a secondary node.
-- Querying ``system.indexes`` on a secondary node requires secondaryOk to be set.
-- Drivers MUST run ``listCollections`` on the primary node when in a replica set
-  topology, unless directly connected to a secondary node in Single topology.
-
-
-Test Plan
-=========
-
-Configurations
---------------
-
-- standalone node
-- replica set primary node
-- replica set secondary node
-- mongos node
-
-Preparation
------------
-
-For each of the configurations:
-
-- Create a (new) database
-- Create a collection and a capped collection
-- Create an index on each of the two collections
-- Insert at least one document in each of the two collections
-
-Tests
------
-
-- Run the driver's method that returns a list of collection names (e.g.
-  ``listCollectionNames()``):
-
-  - verify that *all* collection names are represented in the result
-  - verify that there are no duplicate collection names
-  - there are no returned collections that do not exist
-  - there are no returned collections containing an '$'
-
-- Run the driver's method that returns a list of collection names (e.g.
-  ``listCollectionNames()``), pass a filter of ``{ 'options.capped': true }``,
-  and:
-
-  - verify that *only* names of capped collections are represented in the result
-  - verify that there are no duplicate collection names
-  - there are no returned collections that do not exist
-  - there are no returned collections containing an '$'
-
-
-Backwards Compatibility
-=======================
-
-There should be no backwards compatibility concerns. This SPEC merely deals
-with how to enumerate collections in future versions of MongoDB.
-
-
-Reference Implementation
-========================
-
-The shell implements the first algorithm for falling back if the
-``listCollections`` command does not exist
-(`&lt;https://github.com/mongodb/mongo/blob/f32ba54f971c045fb589fe4c3a37da77dc486cee/src/mongo/shell/db.js#L550&gt;`_).
-
-
-Changelog
-=========
-
-:2022-10-05: Remove spec front matter and reformat changelog.
-:2022-09-15: Clarify the behavior of ``comment`` on pre-4.4 servers.
-:2022-02-01: Add ``comment`` option to ``listCollections`` command.
-:2022-01-20: Require that timeouts be applied per the client-side operations
-             timeout spec.
-:2021-12-17: Support ``authorizedCollections`` option in ``listCollections``
-             command.
-:2021-04-22: Update to use secondaryOk.
-:2020-03-18: MongoDB 4.4 no longer includes ``ns`` field in ``idIndex`` field
-             for ``listCollections`` responses.
-:2019-03-21: The method that returns a list of collection names should be named
-             ``listCollectionNames``. The method that returns a list of
-             collection objects may be named ``listMongoCollections``.
-:2018-07-03: Clarify that ``nameOnly`` must not be used with filters other than
-             ``name``.
-:2018-05-18: Support ``nameOnly`` option in ``listCollections`` command.
-:2017-09-27: Clarify reason for filtering collection names containing '$'.
-:2015-01-14: Clarify trimming of database name. Put preferred method name for
-             listing collections with a cursor as return value.
-:2014-12-18: Update with the server change to return a cursor for
-             ``listCollections``.
-</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><p>.. note::
+This specification has been converted to Markdown and renamed to
+<code>enumerate-databases.md &lt;enumerate-databases.md&gt;</code>_.</p>
+<div style="break-before: page; page-break-before: always;"></div><p>.. note::
+This specification has been converted to Markdown and renamed to
+<code>enumerate-collections.md &lt;enumerate-collections.md&gt;</code>_.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="index-management"><a class="header" href="#index-management">Index Management</a></h1>
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="specification-29"><a class="header" href="#specification-29">Specification</a></h2>
+<h2 id="specification-27"><a class="header" href="#specification-27">Specification</a></h2>
 <p>The index management spec defines a set of behaviour in the drivers for creating, removing and viewing indexes in a
 collection. It defines implementation details when required but also provides flexibility in the driver in that one or
 both of 2 unique APIs can be chosen to be implemented.</p>
 <h3 id="definitions-5"><a class="header" href="#definitions-5">Definitions</a></h3>
-<h4 id="meta-31"><a class="header" href="#meta-31">META</a></h4>
+<h4 id="meta-29"><a class="header" href="#meta-29">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-21"><a class="header" href="#terms-21">Terms</a></h4>
+<h4 id="terms-19"><a class="header" href="#terms-19">Terms</a></h4>
 <p><strong>Collection</strong><br />
 The term <code>Collection</code> references the object in the driver that represents a collection on the server.</p>
 <p><strong>Cursor</strong><br />
@@ -16321,7 +15644,7 @@ consolidate them into one with a clear name. For instance, it would be permissib
 <h4 id="naming-1"><a class="header" href="#naming-1">Naming</a></h4>
 <p>All drivers MUST name operations and parameters as defined in the following sections. Exceptions to this rule are noted
 in the appropriate section. Class and interface names may vary according to the driver and language best practices.</p>
-<h4 id="naming-deviations-5"><a class="header" href="#naming-deviations-5">Naming Deviations</a></h4>
+<h4 id="naming-deviations-4"><a class="header" href="#naming-deviations-4">Naming Deviations</a></h4>
 <p>When deviating from a defined name, an author should consider if the altered name is recognizable and discoverable to
 the user of another driver.</p>
 <p>A non-exhaustive list of acceptable naming deviations are as follows:</p>
@@ -17273,18 +16596,18 @@ order to support partial indexes. Fixed
 <li>Minimum Server Version: 2.6</li>
 </ul>
 <hr />
-<h2 id="abstract-31"><a class="header" href="#abstract-31">Abstract</a></h2>
+<h2 id="abstract-29"><a class="header" href="#abstract-29">Abstract</a></h2>
 <p>The CRUD API defines a set of related methods and structures defining a driver's API. As not all languages/frameworks
 have the same abilities, parts of the spec may or may not apply. These sections have been called out.</p>
-<h2 id="specification-30"><a class="header" href="#specification-30">Specification</a></h2>
+<h2 id="specification-28"><a class="header" href="#specification-28">Specification</a></h2>
 <p>This specification is about <a href="crud/crud.html#guidance">Guidance</a> in 3 areas related to the CRUD API as well as a specification for the
 API itself. It does not define implementation details and provides room and flexibility for the idioms and differences
 in languages and frameworks.</p>
 <h3 id="definitions-6"><a class="header" href="#definitions-6">Definitions</a></h3>
-<h4 id="meta-32"><a class="header" href="#meta-32">META</a></h4>
+<h4 id="meta-30"><a class="header" href="#meta-30">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-22"><a class="header" href="#terms-22">Terms</a></h4>
+<h4 id="terms-20"><a class="header" href="#terms-20">Terms</a></h4>
 <p><strong>Collection:</strong><br />
 The term <code>interface Collection</code> will be seen in most of the sections. Each driver will likely have a
 class or interface defined for the concept of a collection. Operations appearing inside the <code>interface Collection</code> are
@@ -19725,7 +19048,7 @@ from the individual write models.</p>
 <li>Minimum Server Version: 1.8</li>
 </ul>
 <hr />
-<h2 id="abstract-32"><a class="header" href="#abstract-32">Abstract</a></h2>
+<h2 id="abstract-30"><a class="header" href="#abstract-30">Abstract</a></h2>
 <p>As of MongoDB server version 3.4 (maxWireVersion 5), a collation option is supported by the query system for matching
 and sorting on language strings in a locale-aware fashion.</p>
 <p>A driver MUST support a Collation option for each of the relevant operations in server versions &gt;= 3.4 (maxWireVersion
@@ -19733,7 +19056,7 @@ and sorting on language strings in a locale-aware fashion.</p>
 maxWireVersion &lt; 5 or if the user is using opcode-based unacknowledged writes.</p>
 <p>The CRUD and Index Management specs include the collation option in descriptions of API elements where it is supported.
 This document provides more details on the specific driver behavior required to handle the collation option.</p>
-<h2 id="meta-33"><a class="header" href="#meta-33">META</a></h2>
+<h2 id="meta-31"><a class="header" href="#meta-31">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="design-rationale-20"><a class="header" href="#design-rationale-20">Design Rationale</a></h2>
@@ -19753,7 +19076,7 @@ gains.</p>
 Because a Collation defines how documents are matched and sorted for both read and write operations, behavior
 differences between server versions are significant. Drivers therefore MUST throw an error if a user specifies a
 Collation and the selected server has a maxWireVersion &lt; 5 or if using opcode-based unacknowledged writes.</p>
-<h2 id="specification-31"><a class="header" href="#specification-31">Specification</a></h2>
+<h2 id="specification-29"><a class="header" href="#specification-29">Specification</a></h2>
 <h3 id="collation-document-model"><a class="header" href="#collation-document-model">Collation Document Model</a></h3>
 <p>For naming and deviation guidance, see the <a href="collation/../crud/crud.html#naming">CRUD specification</a>. Defined below are the
 constructs for drivers. Note that the only required field is <code>locale</code>, but the driver should let the server validate the
@@ -21796,13 +21119,13 @@ of matched documents not the number of modified documents.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 8.0</li>
 </ul>
-<h2 id="abstract-33"><a class="header" href="#abstract-33">Abstract</a></h2>
+<h2 id="abstract-31"><a class="header" href="#abstract-31">Abstract</a></h2>
 <p>This specification defines the driver API for the <code>bulkWrite</code> server command introduced in MongoDB 8.0. The API defined
 in this specification allows users to perform insert, update, and delete operations against mixed namespaces in a
 minimized number of round trips, and to receive detailed results for each operation performed. This API is distinct from
 the <a href="crud/../crud/crud.html#insert-update-replace-delete-and-bulk-writes">collection-level bulkWrite method</a> defined in the
 CRUD specification and the <a href="crud/../driver-bulk-update.rst">deprecated bulk write specification</a>.</p>
-<h2 id="specification-32"><a class="header" href="#specification-32">Specification</a></h2>
+<h2 id="specification-30"><a class="header" href="#specification-30">Specification</a></h2>
 <blockquote>
 <p>[!NOTE]
 The <code>BulkWriteOptions</code>, <code>BulkWriteResult</code>, and <code>BulkWriteException</code> types defined in this specification are similar to
@@ -22539,11 +21862,11 @@ Read and Write Concern</h1>
 :Minimum Server Version: 2.4</p>
 <p>.. contents::</p>
 <hr />
-<h1 id="abstract-34"><a class="header" href="#abstract-34">Abstract</a></h1>
+<h1 id="abstract-32"><a class="header" href="#abstract-32">Abstract</a></h1>
 <p>A driver must support configuring and sending read concern and write concerns
 to a server. This specification defines the API drivers must implement as well
 as how that API is translated into messages for communication with the server.</p>
-<h1 id="meta-34"><a class="header" href="#meta-34">META</a></h1>
+<h1 id="meta-32"><a class="header" href="#meta-32">META</a></h1>
 <p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”,
 “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be
 interpreted as described in <code>RFC 2119 &lt;https://www.ietf.org/rfc/rfc2119.txt&gt;</code>_.</p>
@@ -22553,7 +21876,7 @@ The <code>maxWireVersion</code> value reported by the <code>hello</code> command
 Server Selection
 The process of selecting a server to read or write from. See
 <code>the server selection specification     &lt;https://github.com/mongodb/specifications/tree/master/source/server-selection&gt;</code>_.</p>
-<h1 id="specification-33"><a class="header" href="#specification-33">Specification</a></h1>
+<h1 id="specification-31"><a class="header" href="#specification-31">Specification</a></h1>
 <p>This specification includes guidance for implementing <code>Read Concern</code>_ and
 <code>Write Concern</code>_ in a driver. It does not define how read and write concern
 behave or are implemented on the server.</p>
@@ -23188,17 +22511,17 @@ Changelog
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-35"><a class="header" href="#abstract-35">Abstract</a></h2>
+<h2 id="abstract-33"><a class="header" href="#abstract-33">Abstract</a></h2>
 <p>As of version 3.6 of the MongoDB server a new <code>$changeStream</code> pipeline stage is supported in the aggregation framework.
 Specifying this stage first in an aggregation pipeline allows users to request that notifications are sent for all
 changes to a particular collection. This specification defines the means for creating change streams in drivers, as well
 as behavior during failure scenarios.</p>
-<h2 id="specification-34"><a class="header" href="#specification-34">Specification</a></h2>
+<h2 id="specification-32"><a class="header" href="#specification-32">Specification</a></h2>
 <h3 id="definitions-7"><a class="header" href="#definitions-7">Definitions</a></h3>
-<h4 id="meta-35"><a class="header" href="#meta-35">META</a></h4>
+<h4 id="meta-33"><a class="header" href="#meta-33">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-23"><a class="header" href="#terms-23">Terms</a></h4>
+<h4 id="terms-21"><a class="header" href="#terms-21">Terms</a></h4>
 <h5 id="resumable-error"><a class="header" href="#resumable-error">Resumable Error</a></h5>
 <p>An error is considered resumable if it meets any of the criteria listed below. For any criteria with wire version
 constraints, the driver MUST use the wire version of the connection used to do the initial <code>aggregate</code> or the <code>getMore</code>
@@ -24244,16 +23567,16 @@ Find, getMore and killCursors commands.</h1>
 <p>:Status: Accepted
 :Minimum Server Version: 3.2</p>
 <p>.. contents::</p>
-<h1 id="abstract-36"><a class="header" href="#abstract-36">Abstract</a></h1>
+<h1 id="abstract-34"><a class="header" href="#abstract-34">Abstract</a></h1>
 <p>The Find, GetMore and KillCursors commands in MongoDB 3.2 or later replace
 the use of the legacy OP_QUERY, OP_GET_MORE and OP_KILL_CURSORS wire protocol
 messages. This specification lays out how drivers should interact with the new
 commands when compared to the legacy wire protocol level messages.</p>
 <h1 id="definitions-8"><a class="header" href="#definitions-8">Definitions</a></h1>
-<h2 id="meta-36"><a class="header" href="#meta-36">Meta</a></h2>
+<h2 id="meta-34"><a class="header" href="#meta-34">Meta</a></h2>
 <p>The keywords "MUST", “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in <code>RFC 2119</code>_.</p>
 <p>.. _RFC 2119: https://www.ietf.org/rfc/rfc2119.txt</p>
-<h2 id="terms-24"><a class="header" href="#terms-24">Terms</a></h2>
+<h2 id="terms-22"><a class="header" href="#terms-22">Terms</a></h2>
 <p>Document
 ^^^^^^^^</p>
 <p>::</p>
@@ -24664,7 +23987,7 @@ OP_GET_MORE and OP_KILL_CURSORS.</p>
 <li>Minimum Server Version: 2.2</li>
 </ul>
 <hr />
-<h2 id="abstract-37"><a class="header" href="#abstract-37">Abstract</a></h2>
+<h2 id="abstract-35"><a class="header" href="#abstract-35">Abstract</a></h2>
 <p>GridFS is a convention drivers use to store and retrieve BSON binary data (type "x05") that exceeds MongoDB"s
 BSON-document size limit of 16 MiB. When this data, called a <strong>user file</strong>, is written to the system, GridFS divides the
 file into <strong>chunks</strong> that are stored as distinct documents in a <strong>chunks collection</strong>. To retrieve a stored file, GridFS
@@ -24676,10 +23999,10 @@ support in their implementations. Additionally, this document attempts to clarif
 in the GridFS data model, disambiguate GridFS terminology, and document configuration options that were previously
 unspecified.</p>
 <h2 id="definitions-9"><a class="header" href="#definitions-9">Definitions</a></h2>
-<h3 id="meta-37"><a class="header" href="#meta-37">META</a></h3>
+<h3 id="meta-35"><a class="header" href="#meta-35">META</a></h3>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h3 id="terms-25"><a class="header" href="#terms-25">Terms</a></h3>
+<h3 id="terms-23"><a class="header" href="#terms-23">Terms</a></h3>
 <p><strong>Bucket name</strong><br />
 A prefix under which a GridFS system"s collections are stored. Collection names for the files and
 chunks collections are prefixed with the bucket name. The bucket name MUST be configurable by the user. Multiple buckets
@@ -24771,7 +24094,7 @@ driver's programming language to represent a file id. This would be something li
 <p><strong>User File</strong><br />
 A data added by a user to GridFS. This data may map to an actual file on disk, a stream of input, a large
 data object, or any other large amount of consecutive data.</p>
-<h2 id="specification-35"><a class="header" href="#specification-35">Specification</a></h2>
+<h2 id="specification-33"><a class="header" href="#specification-33">Specification</a></h2>
 <h3 id="guidance-4"><a class="header" href="#guidance-4">Guidance</a></h3>
 <h4 id="documentation-5"><a class="header" href="#documentation-5">Documentation</a></h4>
 <p>The documentation provided in code below is merely for driver authors and SHOULD NOT be taken as required documentation
@@ -25499,19 +24822,19 @@ Stable API For Drivers</h1>
 :Minimum Server Version: N/A</p>
 <p>.. contents::</p>
 <hr />
-<h1 id="abstract-38"><a class="header" href="#abstract-38">Abstract</a></h1>
+<h1 id="abstract-36"><a class="header" href="#abstract-36">Abstract</a></h1>
 <p>As MongoDB moves toward more frequent releases (a.k.a. continuous delivery), we
 want to enable users to take advantage of our rapidly released features, without
 exposing applications to incompatible server changes due to automatic server
 upgrades. A stable API will help accomplish that goal.</p>
-<h1 id="meta-38"><a class="header" href="#meta-38">META</a></h1>
+<h1 id="meta-36"><a class="header" href="#meta-36">META</a></h1>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
 interpreted as described in <code>RFC 2119 &lt;https://www.ietf.org/rfc/rfc2119.txt&gt;</code>__.</p>
 <p>This document tends to use "SHOULD" more frequently than other specifications,
 but mainly in the context of providing guidance on writing test files. This is
 discussed in more detail in <code>Design Rationale</code>_.</p>
-<h1 id="specification-36"><a class="header" href="#specification-36">Specification</a></h1>
+<h1 id="specification-34"><a class="header" href="#specification-34">Specification</a></h1>
 <h2 id="background"><a class="header" href="#background">Background</a></h2>
 <p>When applications interact with MongoDB, both the driver and the server
 participate in executing operations. Therefore, when determining application
@@ -25751,7 +25074,7 @@ Changelog
 <li>Version: 1.14.0</li>
 </ul>
 <hr />
-<h2 id="abstract-39"><a class="header" href="#abstract-39">Abstract</a></h2>
+<h2 id="abstract-37"><a class="header" href="#abstract-37">Abstract</a></h2>
 <p>MongoDB 4.2 introduced support for client side encryption, guaranteeing that sensitive data can only be encrypted and
 decrypted with access to both MongoDB and a separate key management provider (supporting AWS, Azure, GCP, a local
 provider, and KMIP). Once enabled, data can be seamlessly encrypted and decrypted with minimal application code changes.
@@ -25759,10 +25082,10 @@ provider, and KMIP). Once enabled, data can be seamlessly encrypted and decrypte
 expressive encrypted search operations. This spec covers both capabilities - 1st generation, "Client Side Field Level
 Encryption" and generation 2, "Queryable Encryption" - as the associated core cryptographic library and supporting
 drivers share a common codebase.</p>
-<h2 id="meta-39"><a class="header" href="#meta-39">META</a></h2>
+<h2 id="meta-37"><a class="header" href="#meta-37">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="terms-26"><a class="header" href="#terms-26">Terms</a></h2>
+<h2 id="terms-24"><a class="header" href="#terms-24">Terms</a></h2>
 <p><strong>encrypted MongoClient</strong><br />
 A MongoClient with client side encryption enabled.</p>
 <p><strong>data key</strong><br />
@@ -27888,15 +27211,15 @@ queryable encrypted fields in a new collection.</p>
 <li>Minimum Server Version: 4.2</li>
 </ul>
 <hr />
-<h2 id="abstract-40"><a class="header" href="#abstract-40">Abstract</a></h2>
+<h2 id="abstract-38"><a class="header" href="#abstract-38">Abstract</a></h2>
 <p>Client side encryption requires a new binary subtype to store (1) encrypted ciphertext with metadata, and (2) binary
 markings indicating what values must be encrypted in a document. (1) is stored in the server, but (2) is only used in
 the communication protocol between libmongocrypt and mongocryptd described in
 <a href="https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/client-side-encryption.rst">Driver Spec: Client Side Encryption Encryption</a>.</p>
-<h2 id="meta-40"><a class="header" href="#meta-40">META</a></h2>
+<h2 id="meta-38"><a class="header" href="#meta-38">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-37"><a class="header" href="#specification-37">Specification</a></h2>
+<h2 id="specification-35"><a class="header" href="#specification-35">Specification</a></h2>
 <p>This spec introduces a new BSON binary subtype with value 6. The binary has multiple formats determined by the first
 byte, but are all related to client side encryption. The first byte indicates the type and layout of the remaining data.</p>
 <p>All values are represented in little endian. The payload is generally optimized for storage size. The exception is the
@@ -27996,7 +27319,7 @@ Command Logging and Monitoring</h1>
 :Minimum Server Version: 2.4</p>
 <p>.. contents::</p>
 <hr />
-<h1 id="specification-38"><a class="header" href="#specification-38">Specification</a></h1>
+<h1 id="specification-36"><a class="header" href="#specification-36">Specification</a></h1>
 <p>The command logging and monitoring specification defines a set of behaviour in the drivers for providing runtime information about commands in log messages as well as in events which users
 can consume programmatically, either directly or by integrating with third-party APM libraries.</p>
 <h2 id="definitions-10"><a class="header" href="#definitions-10">Definitions</a></h2>
@@ -28592,15 +27915,15 @@ Updated suggested unstructured forms of log messages reflecting the changes.
 <li>Minimum Server Version: 2.4</li>
 </ul>
 <hr />
-<h2 id="abstract-41"><a class="header" href="#abstract-41">Abstract</a></h2>
+<h2 id="abstract-39"><a class="header" href="#abstract-39">Abstract</a></h2>
 <p>The SDAM logging and monitoring specification defines a set of behaviors in the driver for providing runtime information
 about server discovery and monitoring (SDAM) in log messages, as well as in events that users can consume
 programmatically, either directly or by integrating with third-party APM libraries.</p>
 <h3 id="definitions-11"><a class="header" href="#definitions-11">Definitions</a></h3>
-<h4 id="meta-41"><a class="header" href="#meta-41">META</a></h4>
+<h4 id="meta-39"><a class="header" href="#meta-39">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-27"><a class="header" href="#terms-27">Terms</a></h4>
+<h4 id="terms-25"><a class="header" href="#terms-25">Terms</a></h4>
 <p><code>ServerAddress</code></p>
 <blockquote>
 <p>The term <code>ServerAddress</code> refers to the implementation in the driver's language of a server host/port pair. This may be
@@ -28616,7 +27939,7 @@ etc.). This may be a string or object. The name of the object is NOT REQUIRED.</
 <p>The term <code>Server</code> refers to the implementation in the driver's language of an abstraction of a mongod or mongos
 process, or a load balancer, as defined by the <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#server">SDAM specification</a>.</p>
 </blockquote>
-<h3 id="specification-39"><a class="header" href="#specification-39">Specification</a></h3>
+<h3 id="specification-37"><a class="header" href="#specification-37">Specification</a></h3>
 <h3 id="guidance-6"><a class="header" href="#guidance-6">Guidance</a></h3>
 <h4 id="documentation-6"><a class="header" href="#documentation-6">Documentation</a></h4>
 <p>The documentation provided in the code below is merely for driver authors and SHOULD NOT be taken as required
@@ -29103,13 +28426,13 @@ added requirements for SDAM log messages.</p>
 <li>Minimum Server Version: N/A</li>
 </ul>
 <hr />
-<h2 id="abstract-42"><a class="header" href="#abstract-42">Abstract</a></h2>
+<h2 id="abstract-40"><a class="header" href="#abstract-40">Abstract</a></h2>
 <p>This specification defines requirements for drivers' logging configuration and behavior.</p>
-<h2 id="meta-42"><a class="header" href="#meta-42">META</a></h2>
+<h2 id="meta-40"><a class="header" href="#meta-40">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-40"><a class="header" href="#specification-40">Specification</a></h2>
-<h3 id="terms-28"><a class="header" href="#terms-28">Terms</a></h3>
+<h2 id="specification-38"><a class="header" href="#specification-38">Specification</a></h2>
+<h3 id="terms-26"><a class="header" href="#terms-26">Terms</a></h3>
 <p><strong>Structured logging</strong><br />
 Structured logging refers to producing log messages in a structured format, i.e. a series of
 key-value pairs, which can be converted to external formats such as JSON.</p>
@@ -29461,13 +28784,13 @@ environment variables.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-43"><a class="header" href="#abstract-43">Abstract</a></h2>
+<h2 id="abstract-41"><a class="header" href="#abstract-41">Abstract</a></h2>
 <p>Drivers currently support a variety of options that allow users to configure connection pooling behavior. Users are
 confused by drivers supporting different subsets of these options. Additionally, drivers implement their connection
 pools differently, making it difficult to design cross-driver pool functionality. By unifying and codifying pooling
 options and behavior across all drivers, we will increase user comprehension and code base maintainability.</p>
 <p>This specification does not apply to drivers that do not support multitasking.</p>
-<h2 id="meta-43"><a class="header" href="#meta-43">META</a></h2>
+<h2 id="meta-41"><a class="header" href="#meta-41">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="definitions-12"><a class="header" href="#definitions-12">Definitions</a></h2>
@@ -30712,12 +30035,12 @@ timeout specification.</p>
 <li>Current Schema Version: 1.19.0</li>
 </ul>
 <hr />
-<h2 id="abstract-44"><a class="header" href="#abstract-44">Abstract</a></h2>
+<h2 id="abstract-42"><a class="header" href="#abstract-42">Abstract</a></h2>
 <p>This project defines a unified schema for YAML and JSON specification tests, which run operations against a MongoDB
 deployment. By conforming various spec tests to a single schema, drivers can implement a single test runner to execute
 acceptance tests for multiple specifications, thereby reducing maintenance of existing specs and implementation time for
 new specifications.</p>
-<h2 id="meta-44"><a class="header" href="#meta-44">META</a></h2>
+<h2 id="meta-42"><a class="header" href="#meta-42">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <p>This document tends to use "SHOULD" more frequently than other specifications, but mainly in the context of providing
@@ -30738,8 +30061,8 @@ guidance on writing test files. This is discussed in more detail in <a href="uni
 </ul>
 <p>This is not an exhaustive list. Specifications that are known to not be supported by this format may be discussed under
 <a href="unified-test-format/unified-test-format.html#future-work">Future Work</a>.</p>
-<h2 id="specification-41"><a class="header" href="#specification-41">Specification</a></h2>
-<h3 id="terms-29"><a class="header" href="#terms-29">Terms</a></h3>
+<h2 id="specification-39"><a class="header" href="#specification-39">Specification</a></h2>
+<h3 id="terms-27"><a class="header" href="#terms-27">Terms</a></h3>
 <p><strong>Entity</strong> Any object or value that is indexed by a unique name and stored in the <a href="unified-test-format/unified-test-format.html#entity-map">Entity Map</a>. This will
 typically be a driver object (e.g. client, session) defined in <a href="unified-test-format/unified-test-format.html#createentities">createEntities</a> but may also be a
 <a href="unified-test-format/unified-test-format.html#operation_saveResultAsEntity">saved operation result</a>. A exhaustive list of supported types is presented in
@@ -32096,7 +31419,7 @@ evaluated consistently.</p>
 <p>These operations and their arguments may be documented in the following specifications:</p>
 <ul>
 <li><a href="unified-test-format/../change-streams/change-streams.html">Change Streams</a></li>
-<li><a href="unified-test-format/../enumerate-databases.rst">Enumerating Databases</a></li>
+<li><a href="unified-test-format/../enumerate-databases.html">Enumerating Databases</a></li>
 </ul>
 <p>Client operations that require special handling or are not documented by an existing specification are described below.</p>
 <h4 id="close"><a class="header" href="#close">close</a></h4>
@@ -32185,7 +31508,7 @@ test currently attempts to create a data key with an existing keyAltName or add 
 <ul>
 <li><a href="unified-test-format/../change-streams/change-streams.html">Change Streams</a></li>
 <li><a href="unified-test-format/../crud/crud.html">CRUD</a></li>
-<li><a href="unified-test-format/../enumerate-collections.rst">Enumerating Collections</a></li>
+<li><a href="unified-test-format/../enumerate-collections.html">Enumerating Collections</a></li>
 </ul>
 <p>Database operations that require special handling or are not documented by an existing specification are described
 below.</p>
@@ -33963,7 +33286,7 @@ each test.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-45"><a class="header" href="#abstract-45">Abstract</a></h2>
+<h2 id="abstract-43"><a class="header" href="#abstract-43">Abstract</a></h2>
 <p>This document describes a standard benchmarking suite for MongoDB drivers.</p>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <h3 id="name-and-purpose"><a class="header" href="#name-and-purpose">Name and purpose</a></h3>
@@ -34484,11 +33807,11 @@ iterations in a reasonable time (e.g. file sizes and number of documents in cert
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-46"><a class="header" href="#abstract-46">Abstract</a></h2>
+<h2 id="abstract-44"><a class="header" href="#abstract-44">Abstract</a></h2>
 <p>The official BSON specification does not include test data, so this pseudo-specification describes tests for BSON
 encoding and decoding. It also includes tests for MongoDB's "Extended JSON" specification (hereafter abbreviated as
 <code>extjson</code>).</p>
-<h2 id="meta-45"><a class="header" href="#meta-45">Meta</a></h2>
+<h2 id="meta-43"><a class="header" href="#meta-43">Meta</a></h2>
 <p>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="motivation-for-change-15"><a class="header" href="#motivation-for-change-15">Motivation for Change</a></h2>
@@ -34512,7 +33835,7 @@ pseudo-specification provides such tests.</p>
 <li>Replace or extend the official BSON spec at <a href="http://bsonspec.org">http://bsonspec.org</a>.</li>
 <li>Provide a formal specification for <code>extjson</code>.</li>
 </ul>
-<h2 id="specification-42"><a class="header" href="#specification-42">Specification</a></h2>
+<h2 id="specification-40"><a class="header" href="#specification-40">Specification</a></h2>
 <p>The specification for BSON lives at <a href="http://bsonspec.org">http://bsonspec.org</a>. The <code>extjson</code> format specification is
 <a href="bson-corpus/../extended-json.html">here</a>.</p>
 <h2 id="test-plan-29"><a class="header" href="#test-plan-29">Test Plan</a></h2>
@@ -34976,14 +34299,14 @@ server communication.
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-47"><a class="header" href="#abstract-47">Abstract</a></h2>
+<h2 id="abstract-45"><a class="header" href="#abstract-45">Abstract</a></h2>
 <p>This specification is about the ability for drivers to automate tests for "Functions as a Service" from continuous
 integration.</p>
-<h2 id="meta-46"><a class="header" href="#meta-46">META</a></h2>
+<h2 id="meta-44"><a class="header" href="#meta-44">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-43"><a class="header" href="#specification-43">Specification</a></h2>
-<h3 id="terms-30"><a class="header" href="#terms-30">Terms</a></h3>
+<h2 id="specification-41"><a class="header" href="#specification-41">Specification</a></h2>
+<h3 id="terms-28"><a class="header" href="#terms-28">Terms</a></h3>
 <h4 id="faas-1"><a class="header" href="#faas-1">FaaS</a></h4>
 <p>"Function as a Service", such as AWS Lambda.</p>
 <h3 id="implementing-automated-faas-tests"><a class="header" href="#implementing-automated-faas-tests">Implementing Automated FaaS Tests</a></h3>
