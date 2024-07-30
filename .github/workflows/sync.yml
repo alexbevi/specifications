@@ -25,7 +25,7 @@ jobs:
         # sync action checks out your 'target_sync_branch' anyway
         ref:  mkbook
         # REQUIRED if your upstream repo is private (see wiki)
-        # persist-credentials: false
+        persist-credentials: false
 
     # REQUIRED step
     # Step 2: run the sync action
