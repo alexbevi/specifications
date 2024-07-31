@@ -426,6 +426,7 @@ The primary and all secondaries are candidates, but only eligible candidates are
 <a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
 spec defines several other server types that could appear in a replica set. Such types are never candidates, eligible or
 suitable.</p>
+<p><span id="algorithm-for-filtering-by-staleness"></span></p>
 <h5 id="maxstalenessseconds"><a class="header" href="#maxstalenessseconds">maxStalenessSeconds</a></h5>
 <p>The maximum replication lag, in wall clock time, that a secondary can suffer and still be eligible.</p>
 <p>The default is no maximum staleness.</p>
@@ -469,6 +470,7 @@ ServerDescription of the secondary with the greatest lastWriteDate, "SMax":</p>
 </li>
 </ul>
 <p>See the Max Staleness Spec for overall description and justification of this feature.</p>
+<p><span id="algorithm-for-filtering-by-tag_sets"></span></p>
 <h5 id="tag_sets"><a class="header" href="#tag_sets">tag_sets</a></h5>
 <p>The read preference <code>tag_sets</code> parameter is an ordered list of tag sets used to restrict the eligibility of servers,
 such as for data center awareness.</p>
@@ -719,7 +721,7 @@ the latency window, just select that server and goto Step #8.</li>
 <a href="#server-selection-succeeded-message">"Server selection succeeded" message</a>. Do not go onto later steps.</li>
 <li>Request an immediate topology check, then block the server selection thread until the topology changes or until the
 server selection timeout has elapsed</li>
-<li>If server selection has timed out, raise a [server selection error](#server selection error) and log a
+<li>If server selection has timed out, raise a <a href="#server-selection-errors">server selection error</a> and log a
 <a href="#server-selection-failed-message">"Server selection failed" message</a>.</li>
 <li>Goto Step #2</li>
 </ol>
@@ -740,7 +742,7 @@ the selection timeout is exceeded.</p>
 <ul>
 <li>record the target scan time as last scan time plus <code>minHeartBeatFrequencyMS</code></li>
 <li>if <a href="#serverselectiontryonce">serverSelectionTryOnce</a> is false and the target scan time would exceed the maximum
-time, raise a [server selection error](#server selection error) and log a
+time, raise a <a href="#server-selection-errors">server selection error</a> and log a
 <a href="#server-selection-failed-message">"Server selection failed" message</a>.</li>
 <li>if the current time is less than the target scan time, sleep until the target scan time</li>
 <li>do a blocking immediate topology check (which must also update the last scan time and mark the topology as no
@@ -759,11 +761,11 @@ and return one at random from the filtered servers, and log a
 <a href="#server-selection-succeeded-message">"Server selection succeeded" message</a>.; otherwise, mark the topology stale and
 continue to step #9.</li>
 <li>If <a href="#serverselectiontryonce">serverSelectionTryOnce</a> is true and the last scan time is newer than the selection
-start time, raise a [server selection error](#server selection error) and log a
+start time, raise a <a href="#server-selection-errors">server selection error</a> and log a
 <a href="#server-selection-failed-message">"Server selection failed" message</a>; otherwise, log a
 <a href="#waiting-for-suitable-server-to-become-available-message">"Waiting for suitable server to become available" message</a>
 if one has not already been logged for this operation, and goto Step #4</li>
-<li>If the current time exceeds the maximum time, raise a [server selection error](#server selection error) and log a
+<li>If the current time exceeds the maximum time, raise a <a href="#server-selection-errors">server selection error</a> and log a
 <a href="#server-selection-failed-message">"Server selection failed" message</a>.</li>
 <li>Goto Step #4</li>
 </ol>
@@ -818,8 +820,8 @@ ReplicaSetNoPrimary.</p>
 <li>From these, select one server within the latency window.</li>
 </ol>
 </blockquote>
-<p>(See [algorithm for filtering by staleness](#algorithm for filtering by staleness), [algorithm for filtering by
-tag_sets](#algorithm for filtering by tag_sets), and
+<p>(See <a href="#algorithm-for-filtering-by-staleness">algorithm for filtering by staleness</a>,
+<a href="#algorithm-for-filtering-by-tag_sets">algorithm for filtering by tag_sets</a>, and
 <a href="#filtering-suitable-servers-based-on-the-latency-window">filtering suitable servers based on the latency window</a> for
 details on each step, and
 <a href="#why-is-maxstalenessseconds-applied-before-tag_sets">why is maxStalenessSeconds applied before tag_sets?</a>.)</p>

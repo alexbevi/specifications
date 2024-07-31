@@ -320,8 +320,8 @@ with dependencies.</p>
 sam local invoke --parameter-overrides "MongoDbUri=${MONGODB_URI}"
 </code></pre>
 <p><em>NOTE</em> "127.0.0.1" in the MONGODB_URI MUST be replaced with "host.docker.internal" to test a local MongoDB deployment.
-If "host.docker.internal" does not work (can occur on M1 machines), drivers MAY choose to use a [bridged docker
-container](<a href="https://docs.docker.com/network/bridge/">https://docs.docker.com/network/bridge/</a>) to test locally.</p>
+If "host.docker.internal" does not work (can occur on M1 machines), drivers MAY choose to use a
+<a href="https://docs.docker.com/network/bridge/">bridged docker container</a> to test locally.</p>
 <h6 id="implementing-the-function"><a class="header" href="#implementing-the-function">Implementing the Function</a></h6>
 <p>Drivers MUST setup the function as would be done in their appropriate language. In the function implementation the
 driver MUST:</p>

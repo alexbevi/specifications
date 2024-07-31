@@ -403,7 +403,7 @@ hyphens between hex character groups (e.g. <code>c8edabc3f7384ca3b68dab92a91478a
 <p>A generator MUST allow users to produce strings in either the Canonical Extended JSON format or the Relaxed Extended
 JSON format. If generators provide a default format, the default SHOULD be the Relaxed Extended JSON format.</p>
 <p>A generator MAY be capable of exporting strings that adhere to other formats, such as Legacy Extended JSON formats.</p>
-<p>A generator SHOULD support at least 100 [levels of nesting](#levels of nesting) in a BSON document.</p>
+<p>A generator SHOULD support at least 100 levels of nesting in a BSON document.</p>
 <h4 id="transforming-bson"><a class="header" href="#transforming-bson">Transforming BSON</a></h4>
 <p>Given a BSON document (e.g. a buffer of bytes meeting the requirements of the BSON specification), a generator MUST use
 the corresponding JSON values or Extended JSON type wrapper objects for the BSON type given in the Extended JSON

@@ -194,13 +194,11 @@ mistakes when they take advantage of a design that has been well-considered, rev
 <a href="#configuration">configured</a>. Second, it begins <a href="#monitoring">monitoring</a> by calling
 <a href="../mongodb-handshake/handshake.rst#terms">hello or legacy hello</a> on all servers. (Multi-threaded and asynchronous
 monitoring is described first, then single-threaded monitoring.) Third, as hello or legacy hello responses are received
-the client <a href="#parsing-a-hello-or-legacy-hello-response">parses them</a>, and fourth, it [updates its view of the
-topology](#updates its view of the topology).</p>
-<p>Finally, this spec describes how [drivers update their topology view in response to errors](#drivers update their
-topology view in response to errors), and includes generous implementation notes for driver authors.</p>
+the client <a href="#parsing-a-hello-or-legacy-hello-response">parses them</a>, and fourth, it updates its view of the topology.</p>
+<p>Finally, this spec describes how drivers update their topology view in response to errors, and includes generous
+implementation notes for driver authors.</p>
 <p>This spec does not describe how a client chooses a server for an operation; that is the domain of the Server Selection
-Spec. But there is a section describing the [interaction between monitoring and server selection](#interaction between
-monitoring and server selection).</p>
+Spec. But there is a section describing the interaction between monitoring and server selection.</p>
 <p>There is no discussion of driver architecture and data structures, nor is there any specification of a user-facing API.
 This spec is only concerned with the algorithm for monitoring the server topology.</p>
 <h2 id="meta"><a class="header" href="#meta">Meta</a></h2>
@@ -313,7 +311,7 @@ ServerType; it is synonymous with Unknown.</p>
 increase, as electionId takes precedence in ordering Default null. Part of the (<code>electionId</code>, <code>setVersion</code>) tuple.</li>
 <li>servers: a set of ServerDescription instances. Default contains one server: "localhost:27017", ServerType Unknown.</li>
 <li>stale: a boolean for single-threaded clients, whether the topology must be re-scanned. (Not related to
-maxStalenessSeconds, nor to [stale primaries](#stale primaries).)</li>
+maxStalenessSeconds, nor to stale primaries.)</li>
 <li>compatible: a boolean. False if any server's wire protocol version range is incompatible with the client's. Default
 true.</li>
 <li>compatibilityError: a string. The error message if "compatible" is false, otherwise null.</li>
@@ -338,13 +336,13 @@ Default null. (Only mongos and shard servers record this field when monitoring c
 least until
 <a href="../max-staleness/max-staleness.html#future-feature-to-support-readconcern-afteroptime">drivers allow applications to use readConcern "afterOptime".</a>)</li>
 <li>(=) type: a <a href="#servertype">ServerType</a> enum value. Default Unknown.</li>
-<li>(=) minWireVersion, maxWireVersion: the wire protocol version range supported by the server. Both default to 0. [Use
-min and maxWireVersion only to determine compatibility](#use min and maxWireVersion only to determine compatibility).</li>
+<li>(=) minWireVersion, maxWireVersion: the wire protocol version range supported by the server. Both default to 0.
+<a href="#checking-wire-protocol-compatibility">Use min and maxWireVersion only to determine compatibility</a>.</li>
 <li>(=) me: The hostname or IP, and the port number, that this server was configured with in the replica set. Default
 null.</li>
 <li>(=) hosts, passives, arbiters: Sets of addresses. This server's opinion of the replica set's members, if any. These
-<a href="#hostnames-are-normalized-to-lower-case">hostnames are normalized to lower-case</a>. Default empty. The client
-[monitors all three types of servers](#monitors all three types of servers) in a replica set.</li>
+<a href="#hostnames-are-normalized-to-lower-case">hostnames are normalized to lower-case</a>. Default empty. The client monitors
+all three types of servers in a replica set.</li>
 <li>(=) tags: map from string to string. Default empty.</li>
 <li>(=) setName: string or null. Default null.</li>
 <li>(=) electionId: an ObjectId, if this is a MongoDB 2.6+ replica set member that believes it is primary. See
@@ -591,6 +589,7 @@ ServerDescription in TopologyDescription.servers.</p>
 <p>Whenever the client checks a server (successfully or not), and regardless of whether the new server description is equal
 to the previous server description as defined in <a href="#server-description-equality">Server Description Equality</a>, the
 ServerDescription in TopologyDescription.servers MUST be replaced with the new ServerDescription.</p>
+<p><span id="checking-wire-protocol-compatibility"></span></p>
 <h5 id="checking-wire-protocol-compatibility"><a class="header" href="#checking-wire-protocol-compatibility">Checking wire protocol compatibility</a></h5>
 <p>A ServerDescription which is not Unknown is incompatible if:</p>
 <ul>
@@ -911,9 +910,9 @@ for more information.</p>
 <h4 id="network-error-during-server-check"><a class="header" href="#network-error-during-server-check">Network error during server check</a></h4>
 <p>See error handling in the <a href="server-monitoring.rst">Server Monitoring spec</a>.</p>
 <h4 id="application-errors"><a class="header" href="#application-errors">Application errors</a></h4>
-<p>When processing a network or command error, clients MUST first check the error's [generation number](#generation
-number). If the error's generation number is equal to the pool's generation number then error handling MUST continue
-according to <a href="#network-error-when-reading-or-writing">Network error when reading or writing</a> or
+<p>When processing a network or command error, clients MUST first check the error's generation number. If the error's
+generation number is equal to the pool's generation number then error handling MUST continue according to
+<a href="#network-error-when-reading-or-writing">Network error when reading or writing</a> or
 <a href="#not-writable-primary-and-node-is-recovering">"not writable primary" and "node is recovering"</a>. Otherwise, the error is
 considered stale and the client MUST NOT update any topology state. (See
 <a href="#why-ignore-errors-based-on-cmaps-generation-number">Why ignore errors based on CMAP's generation number?</a>)</p>
@@ -1177,9 +1176,9 @@ ServerDescription when...</li>
 <p>Better to call hello or legacy hello for each new socket, as required by the <a href="../auth/auth.html">Auth Spec</a>, and use the
 hello or legacy hello response associated with that socket for maxWireVersion, maxBsonObjectSize, etc.: all the fields
 required to correctly communicate with the server.</p>
-<p>The hello or legacy hello responses received by monitors determine if the topology as a whole [is compatible](#is
-compatible) with the driver, and which servers are suitable for selection. The monitors' responses should not be used to
-determine how to format wire protocol messages to the servers.</p>
+<p>The hello or legacy hello responses received by monitors determine if the topology as a whole is compatible with the
+driver, and which servers are suitable for selection. The monitors' responses should not be used to determine how to
+format wire protocol messages to the servers.</p>
 <h5 id="immutable-data"><a class="header" href="#immutable-data">Immutable data</a></h5>
 <p>Multi-threaded drivers should treat ServerDescriptions and TopologyDescriptions as immutable: the client replaces them,
 rather than modifying them, in response to new information about the topology. Thus readers of these data structures can
@@ -1491,8 +1490,8 @@ following errors may be returned from a mongos when it cannot route to a shard:<
 <p>When these are returned, the mongos should <em>not</em> be marked as "Unknown", since it is more likely an issue with the
 shard.</p>
 <h3 id="why-ignore-errors-based-on-cmaps-generation-number"><a class="header" href="#why-ignore-errors-based-on-cmaps-generation-number">Why ignore errors based on CMAP's generation number?</a></h3>
-<p>Using CMAP's [generation number](#generation number) solves the following race condition among application threads and
-the monitor during error handling:</p>
+<p>Using CMAP's generation number solves the following race condition among application threads and the monitor during
+error handling:</p>
 <ol>
 <li>Two concurrent writes begin on application threads A and B.</li>
 <li>The server restarts.</li>
@@ -1532,7 +1531,7 @@ future operations will be routed to the server and fail until the next heartbeat
 after its check would happen after the pool was cleared and thus avoid putting it an inconsistent state.</p>
 <h3 id="what-is-the-purpose-of-topologyversion"><a class="header" href="#what-is-the-purpose-of-topologyversion">What is the purpose of topologyVersion?</a></h3>
 <p><a href="#topologyversion">topologyVersion</a> solves the following race condition among application threads and the monitor when
-handling [State Change Errors](#State Change Errors):</p>
+handling State Change Errors:</p>
 <ol>
 <li>Two concurrent writes begin on application threads A and B.</li>
 <li>The primary steps down.</li>
