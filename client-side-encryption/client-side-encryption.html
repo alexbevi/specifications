@@ -1055,7 +1055,6 @@ use the collection name <code>enxcol_.&lt;collectionName&gt;.ecoc</code>.</li>
    //   {$and: [{$gt: [&lt;fieldpath&gt;, &lt;value1&gt;]}, {$lt: [&lt;fieldpath&gt;, &lt;value2&gt;]}]
    // $gt may also be $gte. $lt may also be $lte.
    // Only supported when queryType is "range" and algorithm is "Range".
-   // NOTE: The "range" queryType and "Range" algorithm are currently unstable API and subject to backwards breaking changes.
    encryptExpression(expr: Document, opts: EncryptOpts): Document;
 
    // Decrypts an encrypted value (BSON binary of subtype 6).
@@ -1192,7 +1191,6 @@ write operation is unacknowledged as permitted by the <a href="../crud/crud.html
    rangeOpts: Optional&lt;RangeOpts&gt;
 }
 
-// NOTE: RangeOpts is currently unstable API and subject to backwards breaking changes.
 // RangeOpts specifies index options for a Queryable Encryption field supporting "range" queries.
 // min, max, trimFactor, sparsity, and precision must match the values set in the encryptedFields of the destination collection.
 // For double and decimal128, min/max/precision must all be set, or all be unset.
@@ -1222,7 +1220,7 @@ is required.</p>
 <li>"AEAD_AES_256_CBC_HMAC_SHA_512-Random"</li>
 <li>"Indexed"</li>
 <li>"Unindexed"</li>
-<li>"Range" (unstable)</li>
+<li>"Range"</li>
 </ul>
 <p>The result of explicit encryption with the "Indexed" or "Range" algorithm must be processed by the server to insert or
 query. Drivers MUST document the following behavior:</p>
@@ -1230,10 +1228,6 @@ query. Drivers MUST document the following behavior:</p>
 <p>To insert or query with an "Indexed" or "Range" encrypted payload, use a <code>MongoClient</code> configured with
 <code>AutoEncryptionOpts</code>. <code>AutoEncryptionOpts.bypassQueryAnalysis</code> may be true. <code>AutoEncryptionOpts.bypassAutoEncryption</code>
 must be false.</p>
-</blockquote>
-<blockquote>
-<p>[!NOTE]
-The "Range" algorithm is currently unstable API and subject to backwards breaking changes.</p>
 </blockquote>
 <h4 id="contentionfactor"><a class="header" href="#contentionfactor">contentionFactor</a></h4>
 <p>contentionFactor may be used to tune performance. Only applies when algorithm is "Indexed" or "Range". libmongocrypt
@@ -1246,17 +1240,9 @@ returns an error if contentionFactor is set for a non-applicable algorithm.</p>
 </ul>
 <p>queryType only applies when algorithm is "Indexed" or "Range". libmongocrypt returns an error if queryType is set for a
 non-applicable queryType.</p>
-<blockquote>
-<p>[!NOTE]
-The "range" queryType is currently unstable API and subject to backwards breaking changes.</p>
-</blockquote>
 <h4 id="rangeopts"><a class="header" href="#rangeopts">rangeOpts</a></h4>
 <p>rangeOpts only applies when algorithm is "range". libmongocrypt returns an error if rangeOpts is set for a
 non-applicable algorithm.</p>
-<blockquote>
-<p>[!NOTE]
-rangeOpts is currently unstable API and subject to backwards breaking changes.</p>
-</blockquote>
 <h2 id="user-facing-api-when-auto-encryption-fails"><a class="header" href="#user-facing-api-when-auto-encryption-fails">User facing API: When Auto Encryption Fails</a></h2>
 <p>Auto encryption requires parsing the MongoDB query language client side (with the <a href="#mongocryptd">mongocryptd</a> process or
 <a href="#crypt_shared">crypt_shared</a> library). For unsupported operations, an exception will propagate to prevent the
@@ -2159,6 +2145,9 @@ on. To support concurrent access of the key vault collection, the key management
 explicit session parameter as described in the <a href="../sessions/driver-sessions.html">Drivers Sessions Specification</a>.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-07-29: Document range as stable.</p>
+</li>
 <li>
 <p>2024-07-22: Make <code>trimFactor</code> and <code>sparsity</code> optional.</p>
 </li>
