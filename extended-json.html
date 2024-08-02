@@ -361,10 +361,9 @@ number on a 32-bit platform), it MUST interpret it as a BSON Double even if this
 parser MUST NOT interpret it as a BSON String containing a decimal representation of the number.</li>
 </ul>
 <h4 id="special-rules-for-parsing-uuid-fields"><a class="header" href="#special-rules-for-parsing-uuid-fields">Special rules for parsing <code>$uuid</code> fields</a></h4>
-<p>As per the <a href="https://github.com/mongodb/specifications/blob/master/source/uuid.rst">UUID specification</a>, Binary subtype 3
-or 4 are used to represent UUIDs in BSON. Consequently, UUIDs are handled as per the convention described for the
-<code>Binary</code> type in the <a href="#conversion-table">Conversion table</a>, e.g. the following document written with the MongoDB Python
-Driver:</p>
+<p>As per the <a href="uuid.html">UUID specification</a>, Binary subtype 3 or 4 are used to represent UUIDs in BSON. Consequently, UUIDs
+are handled as per the convention described for the <code>Binary</code> type in the <a href="#conversion-table">Conversion table</a>, e.g. the
+following document written with the MongoDB Python Driver:</p>
 <pre><code class="language-javascript">{"Binary": uuid.UUID("c8edabc3-f738-4ca3-b68d-ab92a91478a3")}
 </code></pre>
 <p>is transformed into the following (newlines and spaces added for readability):</p>
@@ -378,8 +377,7 @@ Driver:</p>
 <blockquote>
 <p>[!NOTE]
 The above described type conversion assumes that UUID representation is set to <code>STANDARD</code>. See the
-<a href="https://github.com/mongodb/specifications/blob/master/source/uuid.rst">UUID specification</a> for more information about
-UUID representations.</p>
+<a href="uuid.html">UUID specification</a> for more information about UUID representations.</p>
 </blockquote>
 <p>While this transformation preserves BSON subtype information (since UUIDs can be represented as BSON subtype 3 <em>or</em> 4),
 base64-encoding is not the standard way of representing UUIDs and using it makes comparing these values against textual
