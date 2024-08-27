@@ -1781,7 +1781,7 @@ populating an error struct, or another idiom that is consistent with other serve
 <li>Set <code>message</code> to <code>writeConcernError.errmsg</code> if available.</li>
 <li>Set <code>details</code> to <code>writeConcernError.errInfo</code> if available. Drivers MUST NOT parse inside <code>errInfo</code>.</li>
 </ul>
-<p>See <a href="../read-write-concern/read-write-concern.rst#writeconcernerror-examples">writeConcernError Examples</a> in the
+<p>See <a href="../read-write-concern/read-write-concern.html#writeconcernerror-examples">writeConcernError Examples</a> in the
 Read/Write Concern spec for examples of how a server represents write concern errors in replies.</p>
 <h6 id="writeerror"><a class="header" href="#writeerror">WriteError</a></h6>
 <p>Write errors for <code>insert</code>, <code>update</code>, and <code>delete</code> commands are reported as objects within a <code>writeErrors</code> array field in
@@ -2332,7 +2332,7 @@ Write concern is about indicating how writes are acknowledged. Since all operati
 in this specification are performed on a collection, it's uncommon that two different write operations on the same
 collection would use a different write concern, potentially causing mismatched and out-of-sync data. As such, the most
 natural place to indicate write concern is on the client, the database, or the collection itself and not the operations
-within it. See the <a href="../read-write-concern/read-write-concern.rst">Read/Write Concern specification</a> for the API of
+within it. See the <a href="../read-write-concern/read-write-concern.html">Read/Write Concern specification</a> for the API of
 constructing a read/write concern and associated API.</p>
 <p>However, it might be that a driver needs to expose write concern to a user per operation for various reasons. As noted
 before, it is permitted to specify this, along with other driver-specific options, in some alternative way.</p>

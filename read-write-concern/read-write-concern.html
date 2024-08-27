@@ -173,7 +173,519 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="rw-concern"><a class="header" href="#rw-concern">R/W Concern</a></h1>
+                        <h1 id="read-and-write-concern"><a class="header" href="#read-and-write-concern">Read and Write Concern</a></h1>
+<ul>
+<li>Status: Accepted</li>
+<li>Minimum Server Version: 2.4</li>
+</ul>
+<hr />
+<h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
+<p>A driver must support configuring and sending read concern and write concerns to a server. This specification defines
+the API drivers must implement as well as how that API is translated into messages for communication with the server.</p>
+<h2 id="meta"><a class="header" href="#meta">META</a></h2>
+<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<h2 id="terminology"><a class="header" href="#terminology">Terminology</a></h2>
+<p>MaxWireVersion The <code>maxWireVersion</code> value reported by the <code>hello</code> command.</p>
+<p>Server Selection The process of selecting a server to read or write from. See
+<a href="https://github.com/mongodb/specifications/tree/master/source/server-selection">the server selection specification</a>.</p>
+<h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
+<p>This specification includes guidance for implementing <a href="#read-concern">Read Concern</a> and <a href="#write-concern">Write Concern</a>
+in a driver. It does not define how read and write concern behave or are implemented on the server.</p>
+<h3 id="read-concern"><a class="header" href="#read-concern">Read Concern</a></h3>
+<p>For naming and deviation guidance, see the <a href="../crud/crud.html#naming">CRUD specification</a>. Defined below are the
+constructs for drivers.</p>
+<pre><code class="language-typescript">enum ReadConcernLevel {
+    /**
+     * This is rendered as "local" (lower-case) on the wire.
+     */
+    local,
+
+    /**
+     * This is rendered as "majority" (lower-case) on the wire.
+     */
+    majority,
+
+    /**
+     * This is rendered as "linearizable" (lower-case) on the wire.
+     */
+    linearizable,
+
+    /**
+     * This is rendered as "available" (lower-case) on the wire.
+     */
+    available,
+
+    /**
+     * This is rendered as "snapshot" (lower-case) on the wire.
+     */
+    snapshot
+}
+
+class ReadConcern {
+  /**
+   * The level of the read concern.
+   */
+  level: Optional&lt;ReadConcernLevel | String&gt;
+}
+</code></pre>
+<p>The read concern option is available for the following operations:</p>
+<ul>
+<li><code>aggregate</code> command</li>
+<li><code>count</code> command</li>
+<li><code>distinct</code> command</li>
+<li><code>find</code> command</li>
+<li><code>mapReduce</code> command where the <code>out</code> option is <code>{ inline: 1 }</code></li>
+<li><code>parallelCollectionScan</code> command</li>
+<li><code>geoNear</code> command</li>
+<li><code>geoSearch</code> command</li>
+</ul>
+<p>Starting in MongoDB 4.2, an <code>aggregate</code> command with a write stage (e.g. <code>$out</code>, <code>$merge</code>) supports a <code>readConcern</code>;
+however, it does not support the "linearizable" level (attempting to do so will result in a server error).</p>
+<p>Server versions before 4.2 do not support a <code>readConcern</code> at all for <code>aggregate</code> commands with a write stage.</p>
+<p>The <code>mapReduce</code> command where the <code>out</code> option is anything other than <code>{ inline: 1 }</code> does not support a <code>readConcern</code>.</p>
+<h4 id="unknown-levels-and-additional-options-for-string-based-readconcerns"><a class="header" href="#unknown-levels-and-additional-options-for-string-based-readconcerns">Unknown Levels and Additional Options for String Based ReadConcerns</a></h4>
+<p>For forward compatibility, a driver MUST NOT raise an error when a user provides an unknown <code>level</code> or additional
+options. The driver relies on the server to validate levels and other contents of the read concern.</p>
+<h4 id="servers-default-read-concern"><a class="header" href="#servers-default-read-concern">Server's Default Read Concern</a></h4>
+<p>When a <code>ReadConcern</code> is created but no values are specified, it should be considered the server's default <code>ReadConcern</code>.
+<code>readconcern&gt;: { }</code> is not the same as <code>readconcern&gt;: { level="local"}</code>. The former is the server's default
+<code>ReadConcern</code> while the latter is the user explicitly specifying a <code>ReadConcern</code> with a <code>level</code> of "local".</p>
+<h4 id="snapshot-read-concern"><a class="header" href="#snapshot-read-concern">Snapshot Read Concern</a></h4>
+<p>When a <code>ReadConcern</code> <code>level</code> <code>snapshot</code> is used, <code>atClusterTime</code> may be specified to indicate the desired point in time
+for reading. <code>find</code>, <code>aggregate</code> and <code>distinct</code> operations executed with <code>ReadConcern</code> <code>snapshot</code> but without
+<code>atClusterTime</code> will return <code>atClusterTime</code> timestamp in the server response. The obtained <code>atClusterTime</code> timestamp can
+be used for subsequent read operations. <code>ReadConcern</code> <code>level</code> <code>snapshot</code> with <code>clusterTime</code> is supported in <code>find</code>,
+<code>aggregate</code> and <code>distinct</code> operations.</p>
+<h4 id="on-the-wire"><a class="header" href="#on-the-wire">On the Wire</a></h4>
+<h5 id="read-commands"><a class="header" href="#read-commands">Read Commands</a></h5>
+<p>Read commands that support <code>ReadConcern</code> take a named parameter spelled (case-sensitively) <code>readConcern</code>. See command
+documentation for further examples.</p>
+<p>If the <code>Client</code>, <code>Database</code>, or <code>Collection</code> being operated on either has no <code>ReadConcern</code> set, or has the server
+default <code>ReadConcern</code> - <code>readconcern&gt;: { }</code>:</p>
+<ul>
+<li>If the <code>ReadConcern</code> specified for the command is the server default <code>readConcern: { }</code>, the driver MUST omit it when
+sending the command.</li>
+<li>If the <code>ReadConcern</code> specified for the command is any <code>ReadConcern</code> besides the server default, including an
+explicitly specified <code>ReadConcern</code> of <code>readConcern: { level: "local" }</code>, the driver MUST include the <code>ReadConcern</code>
+when sending the command.</li>
+</ul>
+<p>If the <code>Client</code>, <code>Database</code>, or <code>Collection</code> being operated on has a non-default <code>ReadConcern</code> specified, then the
+driver MUST include the command's <code>ReadConcern</code> when sending the command. This includes if the command specifies the
+server default <code>ReadConcern</code>, so that the command can override the <code>Client</code>, <code>Database</code>, or <code>Collection</code>'s <code>ReadConcern</code>
+to use the server default instead.</p>
+<h5 id="generic-command-method"><a class="header" href="#generic-command-method">Generic Command Method</a></h5>
+<p>If your driver offers a generic <code>RunCommand</code> method on your <code>database</code> object, <code>ReadConcern</code> MUST NOT be applied
+automatically to any command. A user wishing to use a <code>ReadConcern</code> in a generic command must supply it manually.</p>
+<h5 id="errors"><a class="header" href="#errors">Errors</a></h5>
+<p><code>ReadConcern</code> errors from a server MUST NOT be handled by a driver. There is nothing a driver can do about them and any
+such errors will get propagated to the user via normal error handling.</p>
+<h4 id="location-specification"><a class="header" href="#location-specification">Location Specification</a></h4>
+<h5 id="via-code"><a class="header" href="#via-code">Via Code</a></h5>
+<p><code>ReadConcern</code> SHOULD be specifiable at the <code>Client</code>, <code>Database</code>, and <code>Collection</code> levels. Unless specified, the value
+MUST be inherited from its parent and SHOULD NOT be modifiable on an existing <code>Client</code>, <code>Database</code> or <code>Collection</code>. In
+addition, a driver MAY allow it to be specified on a per-operation basis in accordance with the CRUD specification.</p>
+<p>For example:</p>
+<pre><code class="language-typescript">var client = new MongoClient({ readConcern: { level: "local" } });
+
+// db1's readConcern level is "local".
+var db1 = client.getDatabase("db1");
+
+// col1's readConcern level is "local"
+var col1 = db1.getCollection("col_name");
+
+// db2's readConcern level is "majority".
+var db2 = client.getDatabase("db_name", { readConcern: { level: "majority" } });
+
+// col2's readConcern level is "majority"
+var col2 = db2.getCollection("col_name");
+
+// col3's readConcern level is the server's default read concern
+var col3 = db2.getCollection("col_name", { readConcern: { } });
+</code></pre>
+<h5 id="via-connection-string"><a class="header" href="#via-connection-string">Via Connection String</a></h5>
+<p>Options</p>
+<ul>
+<li><code>readConcernLevel</code> - defines the level for the read concern.</li>
+</ul>
+<p>For example:</p>
+<pre><code>mongodb://server:27017/db?readConcernLevel=majority
+</code></pre>
+<h4 id="errors-1"><a class="header" href="#errors-1">Errors</a></h4>
+<ul>
+<li>MaxWireVersion &lt; 4 Only the server's default <code>ReadConcern</code> is support by MaxWireVersion &lt; 4. When using other
+<code>readConcernLevels</code> with clients reporting <code>MaxWireVersion</code> &lt; 4, the driver MUST raise an error. This check MUST
+happen after server selection has occurred in the case of mixed version clusters. It is up to users to appropriately
+define a <code>ReadPreference</code> such that intermittent errors do not occur.</li>
+</ul>
+<blockquote>
+<p>[!NOTE]
+<code>ReadConcern</code> is only supported for commands.</p>
+</blockquote>
+<h3 id="write-concern"><a class="header" href="#write-concern">Write Concern</a></h3>
+<p>When a driver sends a write concern document to the server, the structure of the write concern document MUST be as
+follows:</p>
+<pre><code class="language-typescript">class WriteConcern {
+  /**
+   * If true, wait for the the write operation to get committed to the
+   * journal. When unspecified, a driver MUST NOT send "j".
+   *
+   * @see https://www.mongodb.com/docs/manual/core/write-concern/#journaled
+   */
+  j: Optional&lt;Boolean&gt;,
+
+  /**
+   * When an integer, specifies the number of nodes that should acknowledge
+   * the write and MUST be greater than or equal to 0.
+   * When a string, indicates tags. "majority" is defined, but users
+   * could specify other custom error modes.
+   * When not specified, a driver MUST NOT send "w".
+   */
+  w: Optional&lt;Int32 | String&gt;,
+
+  /**
+   * If provided, and the write concern is not satisfied within the
+   * specified timeout (in milliseconds), the server will return an error
+   * for the operation. When unspecified, a driver SHOULD NOT send "wtimeout".
+   *
+   * The value, if provided, MUST be greater than or equal to 0.
+   *
+   * @see https://www.mongodb.com/docs/manual/core/write-concern/#timeouts
+   */
+  wtimeout: Optional&lt;Int64&gt;
+}
+</code></pre>
+<p>When a driver provides a way for the application to specify the write concern, the following data structure SHOULD be
+used. For acceptable naming and deviation guidance, see the <a href="../crud/crud.html#naming">CRUD specification</a>.</p>
+<pre><code class="language-typescript">class WriteConcern {
+  /**
+   * Corresponds to the "j" field in the WriteConcern document sent to
+   * the server.
+   */
+  journal: Optional&lt;Boolean&gt;,
+
+  /**
+   * Corresponds to the "w" field in the WriteConcern document sent to
+   * the server.
+   */
+  w: Optional&lt;Int32 | String&gt;,
+
+  /**
+   * Corresponds to the "wtimeout" field in the WriteConcern document sent to
+   * the server.
+   *
+   * NOTE: This option is deprecated in favor of timeoutMS.
+   */
+  wtimeoutMS: Optional&lt;Int64&gt;
+}
+</code></pre>
+<h4 id="fsync"><a class="header" href="#fsync">FSync</a></h4>
+<p>FSync SHOULD be considered deprecated. Those drivers supporting the deprecated <code>fsync</code> option SHOULD treat <code>fsync</code>
+identically to <code>journal</code> in terms of consistency with <code>w</code> and whether a <code>WriteConcern</code> that specifies <code>fsync</code> is
+acknowledged or unacknowledged.</p>
+<h4 id="wtimeoutms"><a class="header" href="#wtimeoutms">wtimeoutMS</a></h4>
+<p><code>wtimeoutMS</code> MUST be considered deprecated in favor of
+<a href="../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a>.</p>
+<h4 id="servers-default-writeconcern"><a class="header" href="#servers-default-writeconcern">Server's Default WriteConcern</a></h4>
+<p>When a <code>WriteConcern</code> is created but no values are specified, it should be considered the server's default
+<code>WriteConcern</code>.</p>
+<p>The server has a settings field called <code>getLastErrorDefaults</code> which allows a user to customize the default behavior of a
+<code>WriteConcern</code>. Because of this, <code>writeConcern: { }</code> is not the same as - <code>writeconcern: {w: 1}</code>. Sending <code>{w:1}</code>
+overrides that default. As another example, <code>writeConcern: { }</code> is not the same as <code>writeConcern: {journal: false}</code>.</p>
+<h4 id="inconsistent-writeconcern"><a class="header" href="#inconsistent-writeconcern">Inconsistent WriteConcern</a></h4>
+<p>Drivers MUST raise an error when an inconsistent <code>WriteConcern</code> is specified. The following is an exhaustive list of
+inconsistent <code>WriteConcerns</code>:</p>
+<pre><code class="language-typescript">writeConcern = { w: 0, journal: true };
+</code></pre>
+<h4 id="unacknowledged-writeconcern"><a class="header" href="#unacknowledged-writeconcern">Unacknowledged WriteConcern</a></h4>
+<p>An <code>Unacknowledged WriteConcern</code> is when (<code>w</code> equals 0) AND (<code>journal</code> is not set or is <code>false</code>).</p>
+<p>These criteria indicates that the user does not care about errors from the server.</p>
+<p>Examples:</p>
+<pre><code class="language-typescript">writeConcern = { w: 0 }; // Unacknowledged
+writeConcern = { w: 0, journal: false }; // Unacknowledged
+writeConcern = { w: 0, wtimeoutMS: 100 }; // Unacknowledged
+</code></pre>
+<h4 id="on-the-wire-1"><a class="header" href="#on-the-wire-1">On the Wire</a></h4>
+<h5 id="op_insert-op_delete-op_update"><a class="header" href="#op_insert-op_delete-op_update">OP_INSERT, OP_DELETE, OP_UPDATE</a></h5>
+<p><code>WriteConcern</code> is implemented by sending the <code>getLastError</code> (GLE) command directly after the operation. Drivers SHOULD
+piggy-back the GLE onto the same buffer as the operation. Regardless, GLE MUST be sent on the same connection as the
+initial write operation.</p>
+<p>When a user has not specified a <code>WriteConcern</code> or has specified the server's default <code>WriteConcern</code>, drivers MUST send
+the GLE command without arguments. For example: <code>{ getLastError: 1 }</code></p>
+<p>Drivers MUST NOT send a GLE for an <code>Unacknowledged WriteConcern</code>. In this instance, the server will not send a reply.</p>
+<p>See the <code>getLastError</code> command documentation for other formatting.</p>
+<h5 id="write-commands"><a class="header" href="#write-commands">Write Commands</a></h5>
+<p>The <code>insert</code>, <code>delete</code>, and <code>update</code> commands take a named parameter, <code>writeConcern</code>. See the command documentation for
+further examples.</p>
+<p>When a user has not specified a <code>WriteConcern</code> or has specified the server's default <code>WriteConcern</code>, drivers MUST omit
+the <code>writeConcern</code> parameter from the command.</p>
+<p>All other <code>WriteConcerns</code>, including the <code>Unacknowledged WriteConcern</code>, MUST be sent with the <code>writeConcern</code> parameter.</p>
+<blockquote>
+<p>[!NOTE]
+Drivers MAY use <code>OP_INSERT</code>, <code>OP_UPDATE</code>, and <code>OP_DELETE</code> when an <code>Unacknowledged WriteConcern</code> is used.</p>
+</blockquote>
+<h5 id="generic-command-method-1"><a class="header" href="#generic-command-method-1">Generic Command Method</a></h5>
+<p>If your driver offers a generic <code>RunCommand</code> method on your <code>database</code> object, <code>WriteConcern</code> MUST NOT be applied
+automatically to any command. A user wishing to use a <code>WriteConcern</code> in a generic command must manually include it in
+the command document passed to the method.</p>
+<p>The generic command method MUST NOT check the user's command document for a <code>WriteConcern</code> nor check whether the server
+is new enough to support a write concern for the command. The method simply sends the user's command to the server
+as-is.</p>
+<h5 id="find-and-modify"><a class="header" href="#find-and-modify">Find And Modify</a></h5>
+<p>The <code>findAndModify</code> command takes a named parameter, <code>writeConcern</code>. See command documentation for further examples.</p>
+<p>If writeConcern is specified for the Collection, <code>writeConcern</code> MUST be omitted when sending <code>findAndModify</code> with
+MaxWireVersion &lt; 4.</p>
+<p>If the findAndModify helper accepts writeConcern as a parameter, the driver MUST raise an error with MaxWireVersion &lt;
+4.</p>
+<blockquote>
+<p>[!NOTE]
+Driver documentation SHOULD include a warning in their server 3.2 compatible releases that an elevated <code>WriteConcern</code>
+may cause performance degradation when using <code>findAndModify</code>. This is because <code>findAndModify</code> will now be honoring a
+potentially high latency setting where it did not before.</p>
+</blockquote>
+<h5 id="other-commands-that-write"><a class="header" href="#other-commands-that-write">Other commands that write</a></h5>
+<p>Command helper methods for commands that write, other than those discussed above, MAY accept a write concern or write
+concern options in their parameter list. If the helper accepts a write concern, the driver MUST error if the selected
+server's MaxWireVersion &lt; 5 and a write concern has explicitly been specified.</p>
+<p>Helper methods that apply the write concern inherited from the Collection or Database, SHOULD check whether the selected
+server's MaxWireVersion &gt;= 5 and if so, include the inherited write concern in the command on the wire. If the selected
+server's MaxWireVersion &lt; 5, these methods SHOULD silently omit the write concern from the command on the wire.</p>
+<p>These commands that write are:</p>
+<blockquote>
+<ul>
+<li><code>aggregate</code> with write stage (e.g. <code>$out</code>, <code>$merge</code>)</li>
+<li><code>copydb</code></li>
+<li><code>create</code></li>
+<li><code>createIndexes</code></li>
+<li><code>drop</code></li>
+<li><code>dropDatabase</code></li>
+<li><code>dropIndexes</code></li>
+<li><code>mapReduce</code> where the <code>out</code> option is not <code>{ inline: 1 }</code></li>
+<li><code>clone</code></li>
+<li><code>cloneCollection</code></li>
+<li><code>cloneCollectionAsCapped</code></li>
+<li><code>collMod</code></li>
+<li><code>convertToCapped</code></li>
+<li><code>renameCollection</code></li>
+<li><code>createUser</code></li>
+<li><code>updateUser</code></li>
+<li><code>dropUser</code></li>
+</ul>
+</blockquote>
+<h5 id="errors-2"><a class="header" href="#errors-2">Errors</a></h5>
+<p>In general, server errors associated with <code>WriteConcern</code> return successful (<code>"ok": 1</code>) responses with a
+<code>writeConcernError</code> field indicating the issue. For example,</p>
+<pre><code class="language-typescript">rs0:PRIMARY&gt; db.runCommand({insert: "foo", documents: [{x:1}], writeConcern: { w: "blah"}})
+{
+  n: 1,
+  opTime: {
+    ts: Timestamp(1583026145, 1),
+    t: NumberLong(5)
+  },
+  electionId: ObjectId("7fffffff0000000000000005"),
+  ok: 1,
+  writeConcernError: {
+    code: 79,
+    codeName: "UnknownReplWriteConcern",
+    errmsg: "No write concern mode named 'blah' found in replica set configuration",
+    errInfo: {
+      writeConcern: {
+        w: "blah",
+        wtimeout: 0,
+        provenance: "clientSupplied"
+      }
+    }
+  },
+  $clusterTime: {
+    clusterTime: Timestamp(1583026145, 1),
+    signature: {
+      hash: BinData(0, "AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+      keyId: NumberLong(0)
+    }
+  },
+  operationTime: Timestamp(1583026145, 1)
+}
+</code></pre>
+<p>Drivers SHOULD parse server replies for a "writeConcernError" field and report the error only in the command-specific
+helper methods for commands that write, from the list above. For example, helper methods for "findAndModify" or
+"aggregate" SHOULD parse the server reply for "writeConcernError".</p>
+<p>Drivers SHOULD report writeConcernErrors however they report other server errors: by raising an exception, returning
+"false", or another idiom that is consistent with other server errors. Drivers SHOULD report writeConcernErrors with a
+<code>WriteConcernError</code> defined in the <a href="../crud/crud.html#error-handling">CRUD specification</a>.</p>
+<p>Drivers SHOULD NOT parse server replies for "writeConcernError" in generic command methods.</p>
+<p>(Reporting of writeConcernErrors is more complex for bulk operations, see the Bulk API Spec.)</p>
+<h6 id="writeconcernerror-examples"><a class="header" href="#writeconcernerror-examples">writeConcernError Examples</a></h6>
+<p>The set of possible writeConcernErrors is quite large because they can include errors caused by shutdown, stepdown,
+interruption, maxTimeMS, and wtimeout. This section attempts to list all known error codes that may appear within a
+writeConcernError but may not be exhaustive. Note that some errors have been abbreviated:</p>
+<ul>
+<li><code>{ok:1, writeConcernError: {code: 91, codeName: "ShutdownInProgress"}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 189, codeName: "PrimarySteppedDown"}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 11600, codeName: "InterruptedAtShutdown"}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 11601, codeName: "Interrupted"}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 11602, codeName: "InterruptedDueToReplStateChange"}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 64, codeName: "WriteConcernFailed", errmsg: "waiting for replication timed out", errInfo: {wtimeout: True}}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 64, codeName: "WriteConcernFailed", errmsg: "multiple errors reported : {...} at shardName1 :: and :: {...} at shardName2"}}</code><sup class="footnote-reference"><a href="#1">1</a></sup></li>
+<li><code>{ok:1, writeConcernError: {code: 50, codeName: "MaxTimeMSExpired"}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 100, codeName: "UnsatisfiableWriteConcern", errmsg: "Not enough data-bearing nodes"}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 79, codeName: "UnknownReplWriteConcern"}}</code></li>
+</ul>
+<p>Note also that it is possible for a writeConcernError to be attached to a command failure. For example:</p>
+<ul>
+<li><code>{ok:0, code: 251, codeName: "NoSuchTransaction", writeConcernError: {code: 91, codeName: "ShutdownInProgress"}}</code><sup class="footnote-reference"><a href="#2">2</a></sup></li>
+</ul>
+<h4 id="location-specification-1"><a class="header" href="#location-specification-1">Location Specification</a></h4>
+<h5 id="via-code-1"><a class="header" href="#via-code-1">Via Code</a></h5>
+<p><code>WriteConcern</code> SHOULD be specifiable at the <code>Client</code>, <code>Database</code>, and <code>Collection</code> levels. Unless specified, the value
+MUST be inherited from its parent and SHOULD NOT be modifiable on an existing <code>Client</code>, <code>Database</code> or <code>Collection</code>. In
+addition, a driver MAY allow it to be specified on a per-operation basis in accordance with the CRUD specification.</p>
+<p>For example:</p>
+<pre><code class="language-typescript">var client = new MongoClient({ writeConcern: { w: 2 } });
+
+// db1's writeConcern is {w: 2}.
+var db1 = client.getDatabase("db1");
+
+// col1's writeConcern is {w: 2}.
+var col1 = db1.getCollection("col_name");
+
+// db2's writeConcern is {journal: true}.
+var db2 = client.getDatabase("db_name", { writeConcern: { journal: true } });
+
+// col2's writeConcern {journal: true}.
+var col2 = db2.getCollection("col_name");
+
+// col3's writeConcern is the server's default write concern.
+var col3 = db2.getCollection("col_name", { writeConcern: { } });
+
+// Override col3's writeConcern.
+col3.drop({ writeConcern: { w: 3 } });
+</code></pre>
+<h5 id="via-connection-string-1"><a class="header" href="#via-connection-string-1">Via Connection String</a></h5>
+<p>Options</p>
+<ul>
+<li><code>w</code> - corresponds to <code>w</code> in the class definition.</li>
+<li><code>journal</code> - corresponds to <code>journal</code> in the class definition.</li>
+<li><code>wtimeoutMS</code> - corresponds to <code>wtimeoutMS</code> in the class definition.</li>
+</ul>
+<p>For example:</p>
+<pre><code>mongodb://server:27017/db?w=3
+
+mongodb://server:27017/db?journal=true
+
+mongodb://server:27017/db?wtimeoutMS=1000
+
+mongodb://server:27017/db?w=majority&amp;wtimeoutMS=1000
+</code></pre>
+<h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
+<p>There should be no backwards compatibility concerns. This specification merely deals with how to specify read and write
+concerns.</p>
+<h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
+<p>Yaml tests are located here: <a href="https://github.com/mongodb/specifications/tree/master/source/read-write-concern/tests">https://github.com/mongodb/specifications/tree/master/source/read-write-concern/tests</a></p>
+<p>Below are English descriptions of other items that should be tested:</p>
+<h3 id="readconcern"><a class="header" href="#readconcern">ReadConcern</a></h3>
+<ol>
+<li>Commands supporting a read concern MUST raise an error when MaxWireVersion is less than 4 and a non-default,
+non-local read concern is specified.</li>
+<li>Commands supporting a read concern MUST NOT send the default read concern to the server.</li>
+<li>Commands supporting a read concern MUST send any non-default read concern to the server.</li>
+</ol>
+<h3 id="writeconcern"><a class="header" href="#writeconcern">WriteConcern</a></h3>
+<ol>
+<li>Commands supporting a write concern MUST NOT send the default write concern to the server.</li>
+<li>Commands supporting a write concern MUST send any non-default acknowledged write concern to the server, either in the
+command or as a getLastError.</li>
+<li>On ServerVersion less than 2.6, drivers MUST NOT send a getLastError command for an Unacknowledged write concern.</li>
+<li>FindAndModify helper methods MUST NOT send a write concern when the MaxWireVersion is less than 4.</li>
+<li>Helper methods for other commands that write MUST NOT send a write concern when the MaxWireVersion is less than 5.</li>
+</ol>
+<h2 id="reference-implementation"><a class="header" href="#reference-implementation">Reference Implementation</a></h2>
+<p>These are currently under construction.</p>
+<h2 id="q--a"><a class="header" href="#q--a">Q &amp; A</a></h2>
+<p>Q: Why is specifying a non-default <code>ReadConcern</code> for servers &lt; 3.2 an error while a non-default write concern gets
+ignored in <code>findAndModify</code>? <code>findAndModify</code> is an existing command and since <code>WriteConcern</code> may be defined globally,
+anyone using <code>findAndModify</code> in their applications with a non-default <code>WriteConcern</code> defined globally would have all
+their <code>findAndModify</code> operations fail.</p>
+<p>Q: Why does a driver send <code>{ readConcern: { level: "local" } }</code> to the server when that is the server's default? First,
+to mirror how <code>WriteConcern</code> already works, <code>ReadConcern() does not equal ReadConcern(level=local)</code> in the same way that
+<code>WriteConcern() does not equal WriteConcern(w=1)</code>. This is true for <code>WriteConcern</code> because the server's default could be
+set differently. While this setting does not currently exist for <code>ReadConcern</code>, it is a possible eventuality and it
+costs a driver nothing to be prepared for it. Second, it makes sense that if a user doesn't specify a <code>ReadConcern</code>, we
+don't send one and if a user does specify a <code>ReadConcern</code>, we do send one. If the user specifies level="local", for
+instance, we send it.</p>
+<h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
+<ul>
+<li>
+<p>2024-08-23: Migrated from reStructuredText to Markdown.</p>
+</li>
+<li>
+<p>2015-10-16: ReadConcern of local is no longer allowed to be used when talking with MaxWireVersion &lt; 4.</p>
+</li>
+<li>
+<p>2016-05-20: Added note about helpers for commands that write accepting a writeConcern parameter.</p>
+</li>
+<li>
+<p>2016-06-17: Added "linearizable" to ReadConcern levels.</p>
+</li>
+<li>
+<p>2016-07-15: Command-specific helper methods for commands that write SHOULD check the server's MaxWireVersion and
+decide whether to send writeConcern. Advise drivers to parse server replies for writeConcernError and raise an
+exception if found, only in command-specific helper methods that take a writeConcern parameter, not in generic command
+methods. Don't mention obscure commands with no helpers.</p>
+</li>
+<li>
+<p>2016-08-06: Further clarify that command-specific helper methods for commands that write take write concern options in
+their parameter lists, and relax from SHOULD to MAY.</p>
+</li>
+<li>
+<p>2017-03-13: reIndex silently ignores writeConcern in MongoDB 3.4 and returns an error if writeConcern is included with
+MongoDB 3.5+. See <a href="https://jira.mongodb.org/browse/SERVER-27891">SERVER-27891</a>.</p>
+</li>
+<li>
+<p>2017-11-17: Added list of commands that support readConcern</p>
+</li>
+<li>
+<p>2017-12-18: Added "available" to Readconcern level.</p>
+</li>
+<li>
+<p>2017-05-29: Added user management commands to list of commands that write</p>
+</li>
+<li>
+<p>2019-01-29: Added section listing all known examples of writeConcernError.</p>
+</li>
+<li>
+<p>2019-06-07: Clarify language for aggregate and mapReduce commands that write.</p>
+</li>
+<li>
+<p>2019-10-31: Explicitly define write concern option mappings.</p>
+</li>
+<li>
+<p>2020-02-13: Inconsistent write concern must be considered an error.</p>
+</li>
+<li>
+<p>2021-04-07: Updated to use hello command.</p>
+</li>
+<li>
+<p>2021-06-15: Added "snapshot" to Readconcern level</p>
+</li>
+<li>
+<p>2021-07-12: Add missing commas after ReadConcernLevel enum values</p>
+</li>
+<li>
+<p>2022-01-19: Deprecate wTimeoutMS in favor of timeoutMS.</p>
+</li>
+<li>
+<p>2022-10-05: Remove spec front matter and reformat changelog.</p>
+</li>
+</ul>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>This is only possible in a sharded cluster. When a write is routed to multiple shards and more than one shard
+returns a writeConcernError, then mongos will construct a new writeConcernError with the "WriteConcernFailed" error
+code and an errmsg field contains the stringified writeConcernError from each shard. Note that each shard may return
+a different writeConcernError.</p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>See <a href="https://jira.mongodb.org/browse/SERVER-38850">https://jira.mongodb.org/browse/SERVER-38850</a></p>
+</div>
 
                     </main>
 

@@ -344,8 +344,7 @@ standalone node are causally consistent automatically because there is only one 
 }
 </code></pre>
 <p>For the lists of commands that support causally consistent reads, see
-<a href="https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#read-concern/">ReadConcern</a>
-spec.</p>
+<a href="../read-write-concern/read-write-concern.html#read-concern/">ReadConcern</a> spec.</p>
 <p>The driver MUST merge the <code>ReadConcern</code> specified for the operation with the <code>operationTime</code> from the <code>ClientSession</code>
 (which goes in the <code>afterClusterTime</code> field) to generate the combined <code>readConcern</code> to send to the server. If the level
 property of the read concern for the operation is null then the driver MUST NOT include a <code>level</code> field alongside the

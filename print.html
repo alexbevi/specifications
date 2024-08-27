@@ -2826,7 +2826,7 @@ to URI options apply here.</p>
 <tr><td>proxyPort</td><td>non-negative integer</td><td>defined in the <a href="uri-options/../socks5-support/socks5.rst#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The port of the SOCKS5 proxy server specified in <code>proxyHost</code>.</td></tr>
 <tr><td>proxyUsername</td><td>any string</td><td>defined in the <a href="uri-options/../socks5-support/socks5.rst#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The username for username/password authentication to the SOCKS5 proxy server specified in <code>proxyHost</code>.</td></tr>
 <tr><td>proxyPassword</td><td>any string</td><td>defined in the <a href="uri-options/../socks5-support/socks5.rst#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The password for username/password authentication to the SOCKS5 proxy server specified in <code>proxyHost</code>.</td></tr>
-<tr><td>readConcernLevel</td><td>any string (<a href="uri-options/../read-write-concern/read-write-concern.rst#unknown-levels-and-additional-options-for-string-based-readconcerns">to allow for forwards compatibility with the server</a>)</td><td>no read concern specified</td><td>no</td><td>Default read concern for the client</td></tr>
+<tr><td>readConcernLevel</td><td>any string (<a href="uri-options/../read-write-concern/read-write-concern.html#unknown-levels-and-additional-options-for-string-based-readconcerns">to allow for forwards compatibility with the server</a>)</td><td>no read concern specified</td><td>no</td><td>Default read concern for the client</td></tr>
 <tr><td>readPreference</td><td>any string; currently supported values are defined in the <a href="uri-options/../server-selection/server-selection.html#mode">server selection spec</a>, but must be lowercase camelCase, e.g. "primaryPreferred"</td><td>defined in <a href="uri-options/../server-selection/server-selection.html#mode">server selection spec</a></td><td>no</td><td>Default read preference for the client (excluding tags)</td></tr>
 <tr><td>readPreferenceTags</td><td>comma-separated key:value pairs (e.g. "dc:ny,rack:1" and "dc:ny)<br><br>can be specified multiple times; each instance of this key is a separate tag set</td><td>no tags specified</td><td>no</td><td>Default read preference tags for the client; only valid if the read preference mode is not primary<br><br>The order of the tag sets in the read preference is the same as the order they are specified in the URI</td></tr>
 <tr><td>replicaSet</td><td>any string</td><td>no replica set name provided</td><td>no</td><td>The name of the replica set to connect to</td></tr>
@@ -13055,8 +13055,7 @@ standalone node are causally consistent automatically because there is only one 
 }
 </code></pre>
 <p>For the lists of commands that support causally consistent reads, see
-<a href="https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#read-concern/">ReadConcern</a>
-spec.</p>
+<a href="causal-consistency/../read-write-concern/read-write-concern.html#read-concern/">ReadConcern</a> spec.</p>
 <p>The driver MUST merge the <code>ReadConcern</code> specified for the operation with the <code>operationTime</code> from the <code>ClientSession</code>
 (which goes in the <code>afterClusterTime</code> field) to generate the combined <code>readConcern</code> to send to the server. If the level
 property of the read concern for the operation is null then the driver MUST NOT include a <code>level</code> field alongside the
@@ -13341,7 +13340,7 @@ true. Snapshot reads are supported on both primaries and secondaries.</p>
 <p>Transactions are not allowed with snapshot sessions. Calling <code>session.startTransaction(options)</code> on a snapshot session
 MUST raise an error.</p>
 <h2 id="readconcern-changes"><a class="header" href="#readconcern-changes">ReadConcern changes</a></h2>
-<p><code>snapshot</code> added to <a href="sessions/../read-write-concern/read-write-concern.rst#read-concern">ReadConcernLevel enumeration</a>.</p>
+<p><code>snapshot</code> added to <a href="sessions/../read-write-concern/read-write-concern.html#read-concern">ReadConcernLevel enumeration</a>.</p>
 <h2 id="server-commands-2"><a class="header" href="#server-commands-2">Server Commands</a></h2>
 <p>There are no new server commands related to snapshot reads. Instead, snapshot reads are implemented by:</p>
 <ol>
@@ -17431,7 +17430,7 @@ populating an error struct, or another idiom that is consistent with other serve
 <li>Set <code>message</code> to <code>writeConcernError.errmsg</code> if available.</li>
 <li>Set <code>details</code> to <code>writeConcernError.errInfo</code> if available. Drivers MUST NOT parse inside <code>errInfo</code>.</li>
 </ul>
-<p>See <a href="crud/../read-write-concern/read-write-concern.rst#writeconcernerror-examples">writeConcernError Examples</a> in the
+<p>See <a href="crud/../read-write-concern/read-write-concern.html#writeconcernerror-examples">writeConcernError Examples</a> in the
 Read/Write Concern spec for examples of how a server represents write concern errors in replies.</p>
 <h6 id="writeerror"><a class="header" href="#writeerror">WriteError</a></h6>
 <p>Write errors for <code>insert</code>, <code>update</code>, and <code>delete</code> commands are reported as objects within a <code>writeErrors</code> array field in
@@ -17982,7 +17981,7 @@ Write concern is about indicating how writes are acknowledged. Since all operati
 in this specification are performed on a collection, it's uncommon that two different write operations on the same
 collection would use a different write concern, potentially causing mismatched and out-of-sync data. As such, the most
 natural place to indicate write concern is on the client, the database, or the collection itself and not the operations
-within it. See the <a href="crud/../read-write-concern/read-write-concern.rst">Read/Write Concern specification</a> for the API of
+within it. See the <a href="crud/../read-write-concern/read-write-concern.html">Read/Write Concern specification</a> for the API of
 constructing a read/write concern and associated API.</p>
 <p>However, it might be that a driver needs to expose write concern to a user per operation for various reasons. As noted
 before, it is permitted to specify this, along with other driver-specific options, in some alternative way.</p>
@@ -19594,21 +19593,533 @@ batch-splitting to standardize implementations across drivers and simplify batch
 <p>2024-05-08: Bulk write specification created.</p>
 </li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="rw-concern"><a class="header" href="#rw-concern">R/W Concern</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="read-and-write-concern"><a class="header" href="#read-and-write-concern">Read and Write Concern</a></h1>
+<ul>
+<li>Status: Accepted</li>
+<li>Minimum Server Version: 2.4</li>
+</ul>
+<hr />
+<h2 id="abstract-31"><a class="header" href="#abstract-31">Abstract</a></h2>
+<p>A driver must support configuring and sending read concern and write concerns to a server. This specification defines
+the API drivers must implement as well as how that API is translated into messages for communication with the server.</p>
+<h2 id="meta-31"><a class="header" href="#meta-31">META</a></h2>
+<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<h2 id="terminology-1"><a class="header" href="#terminology-1">Terminology</a></h2>
+<p>MaxWireVersion The <code>maxWireVersion</code> value reported by the <code>hello</code> command.</p>
+<p>Server Selection The process of selecting a server to read or write from. See
+<a href="https://github.com/mongodb/specifications/tree/master/source/server-selection">the server selection specification</a>.</p>
+<h2 id="specification-30"><a class="header" href="#specification-30">Specification</a></h2>
+<p>This specification includes guidance for implementing <a href="read-write-concern/read-write-concern.html#read-concern">Read Concern</a> and <a href="read-write-concern/read-write-concern.html#write-concern">Write Concern</a>
+in a driver. It does not define how read and write concern behave or are implemented on the server.</p>
+<h3 id="read-concern"><a class="header" href="#read-concern">Read Concern</a></h3>
+<p>For naming and deviation guidance, see the <a href="read-write-concern/../crud/crud.html#naming">CRUD specification</a>. Defined below are the
+constructs for drivers.</p>
+<pre><code class="language-typescript">enum ReadConcernLevel {
+    /**
+     * This is rendered as "local" (lower-case) on the wire.
+     */
+    local,
+
+    /**
+     * This is rendered as "majority" (lower-case) on the wire.
+     */
+    majority,
+
+    /**
+     * This is rendered as "linearizable" (lower-case) on the wire.
+     */
+    linearizable,
+
+    /**
+     * This is rendered as "available" (lower-case) on the wire.
+     */
+    available,
+
+    /**
+     * This is rendered as "snapshot" (lower-case) on the wire.
+     */
+    snapshot
+}
+
+class ReadConcern {
+  /**
+   * The level of the read concern.
+   */
+  level: Optional&lt;ReadConcernLevel | String&gt;
+}
+</code></pre>
+<p>The read concern option is available for the following operations:</p>
+<ul>
+<li><code>aggregate</code> command</li>
+<li><code>count</code> command</li>
+<li><code>distinct</code> command</li>
+<li><code>find</code> command</li>
+<li><code>mapReduce</code> command where the <code>out</code> option is <code>{ inline: 1 }</code></li>
+<li><code>parallelCollectionScan</code> command</li>
+<li><code>geoNear</code> command</li>
+<li><code>geoSearch</code> command</li>
+</ul>
+<p>Starting in MongoDB 4.2, an <code>aggregate</code> command with a write stage (e.g. <code>$out</code>, <code>$merge</code>) supports a <code>readConcern</code>;
+however, it does not support the "linearizable" level (attempting to do so will result in a server error).</p>
+<p>Server versions before 4.2 do not support a <code>readConcern</code> at all for <code>aggregate</code> commands with a write stage.</p>
+<p>The <code>mapReduce</code> command where the <code>out</code> option is anything other than <code>{ inline: 1 }</code> does not support a <code>readConcern</code>.</p>
+<h4 id="unknown-levels-and-additional-options-for-string-based-readconcerns"><a class="header" href="#unknown-levels-and-additional-options-for-string-based-readconcerns">Unknown Levels and Additional Options for String Based ReadConcerns</a></h4>
+<p>For forward compatibility, a driver MUST NOT raise an error when a user provides an unknown <code>level</code> or additional
+options. The driver relies on the server to validate levels and other contents of the read concern.</p>
+<h4 id="servers-default-read-concern"><a class="header" href="#servers-default-read-concern">Server's Default Read Concern</a></h4>
+<p>When a <code>ReadConcern</code> is created but no values are specified, it should be considered the server's default <code>ReadConcern</code>.
+<code>readconcern&gt;: { }</code> is not the same as <code>readconcern&gt;: { level="local"}</code>. The former is the server's default
+<code>ReadConcern</code> while the latter is the user explicitly specifying a <code>ReadConcern</code> with a <code>level</code> of "local".</p>
+<h4 id="snapshot-read-concern"><a class="header" href="#snapshot-read-concern">Snapshot Read Concern</a></h4>
+<p>When a <code>ReadConcern</code> <code>level</code> <code>snapshot</code> is used, <code>atClusterTime</code> may be specified to indicate the desired point in time
+for reading. <code>find</code>, <code>aggregate</code> and <code>distinct</code> operations executed with <code>ReadConcern</code> <code>snapshot</code> but without
+<code>atClusterTime</code> will return <code>atClusterTime</code> timestamp in the server response. The obtained <code>atClusterTime</code> timestamp can
+be used for subsequent read operations. <code>ReadConcern</code> <code>level</code> <code>snapshot</code> with <code>clusterTime</code> is supported in <code>find</code>,
+<code>aggregate</code> and <code>distinct</code> operations.</p>
+<h4 id="on-the-wire"><a class="header" href="#on-the-wire">On the Wire</a></h4>
+<h5 id="read-commands"><a class="header" href="#read-commands">Read Commands</a></h5>
+<p>Read commands that support <code>ReadConcern</code> take a named parameter spelled (case-sensitively) <code>readConcern</code>. See command
+documentation for further examples.</p>
+<p>If the <code>Client</code>, <code>Database</code>, or <code>Collection</code> being operated on either has no <code>ReadConcern</code> set, or has the server
+default <code>ReadConcern</code> - <code>readconcern&gt;: { }</code>:</p>
+<ul>
+<li>If the <code>ReadConcern</code> specified for the command is the server default <code>readConcern: { }</code>, the driver MUST omit it when
+sending the command.</li>
+<li>If the <code>ReadConcern</code> specified for the command is any <code>ReadConcern</code> besides the server default, including an
+explicitly specified <code>ReadConcern</code> of <code>readConcern: { level: "local" }</code>, the driver MUST include the <code>ReadConcern</code>
+when sending the command.</li>
+</ul>
+<p>If the <code>Client</code>, <code>Database</code>, or <code>Collection</code> being operated on has a non-default <code>ReadConcern</code> specified, then the
+driver MUST include the command's <code>ReadConcern</code> when sending the command. This includes if the command specifies the
+server default <code>ReadConcern</code>, so that the command can override the <code>Client</code>, <code>Database</code>, or <code>Collection</code>'s <code>ReadConcern</code>
+to use the server default instead.</p>
+<h5 id="generic-command-method-1"><a class="header" href="#generic-command-method-1">Generic Command Method</a></h5>
+<p>If your driver offers a generic <code>RunCommand</code> method on your <code>database</code> object, <code>ReadConcern</code> MUST NOT be applied
+automatically to any command. A user wishing to use a <code>ReadConcern</code> in a generic command must supply it manually.</p>
+<h5 id="errors-1"><a class="header" href="#errors-1">Errors</a></h5>
+<p><code>ReadConcern</code> errors from a server MUST NOT be handled by a driver. There is nothing a driver can do about them and any
+such errors will get propagated to the user via normal error handling.</p>
+<h4 id="location-specification"><a class="header" href="#location-specification">Location Specification</a></h4>
+<h5 id="via-code"><a class="header" href="#via-code">Via Code</a></h5>
+<p><code>ReadConcern</code> SHOULD be specifiable at the <code>Client</code>, <code>Database</code>, and <code>Collection</code> levels. Unless specified, the value
+MUST be inherited from its parent and SHOULD NOT be modifiable on an existing <code>Client</code>, <code>Database</code> or <code>Collection</code>. In
+addition, a driver MAY allow it to be specified on a per-operation basis in accordance with the CRUD specification.</p>
+<p>For example:</p>
+<pre><code class="language-typescript">var client = new MongoClient({ readConcern: { level: "local" } });
+
+// db1's readConcern level is "local".
+var db1 = client.getDatabase("db1");
+
+// col1's readConcern level is "local"
+var col1 = db1.getCollection("col_name");
+
+// db2's readConcern level is "majority".
+var db2 = client.getDatabase("db_name", { readConcern: { level: "majority" } });
+
+// col2's readConcern level is "majority"
+var col2 = db2.getCollection("col_name");
+
+// col3's readConcern level is the server's default read concern
+var col3 = db2.getCollection("col_name", { readConcern: { } });
+</code></pre>
+<h5 id="via-connection-string"><a class="header" href="#via-connection-string">Via Connection String</a></h5>
+<p>Options</p>
+<ul>
+<li><code>readConcernLevel</code> - defines the level for the read concern.</li>
+</ul>
+<p>For example:</p>
+<pre><code>mongodb://server:27017/db?readConcernLevel=majority
+</code></pre>
+<h4 id="errors-2"><a class="header" href="#errors-2">Errors</a></h4>
+<ul>
+<li>MaxWireVersion &lt; 4 Only the server's default <code>ReadConcern</code> is support by MaxWireVersion &lt; 4. When using other
+<code>readConcernLevels</code> with clients reporting <code>MaxWireVersion</code> &lt; 4, the driver MUST raise an error. This check MUST
+happen after server selection has occurred in the case of mixed version clusters. It is up to users to appropriately
+define a <code>ReadPreference</code> such that intermittent errors do not occur.</li>
+</ul>
+<blockquote>
+<p>[!NOTE]
+<code>ReadConcern</code> is only supported for commands.</p>
+</blockquote>
+<h3 id="write-concern"><a class="header" href="#write-concern">Write Concern</a></h3>
+<p>When a driver sends a write concern document to the server, the structure of the write concern document MUST be as
+follows:</p>
+<pre><code class="language-typescript">class WriteConcern {
+  /**
+   * If true, wait for the the write operation to get committed to the
+   * journal. When unspecified, a driver MUST NOT send "j".
+   *
+   * @see https://www.mongodb.com/docs/manual/core/write-concern/#journaled
+   */
+  j: Optional&lt;Boolean&gt;,
+
+  /**
+   * When an integer, specifies the number of nodes that should acknowledge
+   * the write and MUST be greater than or equal to 0.
+   * When a string, indicates tags. "majority" is defined, but users
+   * could specify other custom error modes.
+   * When not specified, a driver MUST NOT send "w".
+   */
+  w: Optional&lt;Int32 | String&gt;,
+
+  /**
+   * If provided, and the write concern is not satisfied within the
+   * specified timeout (in milliseconds), the server will return an error
+   * for the operation. When unspecified, a driver SHOULD NOT send "wtimeout".
+   *
+   * The value, if provided, MUST be greater than or equal to 0.
+   *
+   * @see https://www.mongodb.com/docs/manual/core/write-concern/#timeouts
+   */
+  wtimeout: Optional&lt;Int64&gt;
+}
+</code></pre>
+<p>When a driver provides a way for the application to specify the write concern, the following data structure SHOULD be
+used. For acceptable naming and deviation guidance, see the <a href="read-write-concern/../crud/crud.html#naming">CRUD specification</a>.</p>
+<pre><code class="language-typescript">class WriteConcern {
+  /**
+   * Corresponds to the "j" field in the WriteConcern document sent to
+   * the server.
+   */
+  journal: Optional&lt;Boolean&gt;,
+
+  /**
+   * Corresponds to the "w" field in the WriteConcern document sent to
+   * the server.
+   */
+  w: Optional&lt;Int32 | String&gt;,
+
+  /**
+   * Corresponds to the "wtimeout" field in the WriteConcern document sent to
+   * the server.
+   *
+   * NOTE: This option is deprecated in favor of timeoutMS.
+   */
+  wtimeoutMS: Optional&lt;Int64&gt;
+}
+</code></pre>
+<h4 id="fsync"><a class="header" href="#fsync">FSync</a></h4>
+<p>FSync SHOULD be considered deprecated. Those drivers supporting the deprecated <code>fsync</code> option SHOULD treat <code>fsync</code>
+identically to <code>journal</code> in terms of consistency with <code>w</code> and whether a <code>WriteConcern</code> that specifies <code>fsync</code> is
+acknowledged or unacknowledged.</p>
+<h4 id="wtimeoutms"><a class="header" href="#wtimeoutms">wtimeoutMS</a></h4>
+<p><code>wtimeoutMS</code> MUST be considered deprecated in favor of
+<a href="read-write-concern/../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a>.</p>
+<h4 id="servers-default-writeconcern"><a class="header" href="#servers-default-writeconcern">Server's Default WriteConcern</a></h4>
+<p>When a <code>WriteConcern</code> is created but no values are specified, it should be considered the server's default
+<code>WriteConcern</code>.</p>
+<p>The server has a settings field called <code>getLastErrorDefaults</code> which allows a user to customize the default behavior of a
+<code>WriteConcern</code>. Because of this, <code>writeConcern: { }</code> is not the same as - <code>writeconcern: {w: 1}</code>. Sending <code>{w:1}</code>
+overrides that default. As another example, <code>writeConcern: { }</code> is not the same as <code>writeConcern: {journal: false}</code>.</p>
+<h4 id="inconsistent-writeconcern"><a class="header" href="#inconsistent-writeconcern">Inconsistent WriteConcern</a></h4>
+<p>Drivers MUST raise an error when an inconsistent <code>WriteConcern</code> is specified. The following is an exhaustive list of
+inconsistent <code>WriteConcerns</code>:</p>
+<pre><code class="language-typescript">writeConcern = { w: 0, journal: true };
+</code></pre>
+<h4 id="unacknowledged-writeconcern"><a class="header" href="#unacknowledged-writeconcern">Unacknowledged WriteConcern</a></h4>
+<p>An <code>Unacknowledged WriteConcern</code> is when (<code>w</code> equals 0) AND (<code>journal</code> is not set or is <code>false</code>).</p>
+<p>These criteria indicates that the user does not care about errors from the server.</p>
+<p>Examples:</p>
+<pre><code class="language-typescript">writeConcern = { w: 0 }; // Unacknowledged
+writeConcern = { w: 0, journal: false }; // Unacknowledged
+writeConcern = { w: 0, wtimeoutMS: 100 }; // Unacknowledged
+</code></pre>
+<h4 id="on-the-wire-1"><a class="header" href="#on-the-wire-1">On the Wire</a></h4>
+<h5 id="op_insert-op_delete-op_update"><a class="header" href="#op_insert-op_delete-op_update">OP_INSERT, OP_DELETE, OP_UPDATE</a></h5>
+<p><code>WriteConcern</code> is implemented by sending the <code>getLastError</code> (GLE) command directly after the operation. Drivers SHOULD
+piggy-back the GLE onto the same buffer as the operation. Regardless, GLE MUST be sent on the same connection as the
+initial write operation.</p>
+<p>When a user has not specified a <code>WriteConcern</code> or has specified the server's default <code>WriteConcern</code>, drivers MUST send
+the GLE command without arguments. For example: <code>{ getLastError: 1 }</code></p>
+<p>Drivers MUST NOT send a GLE for an <code>Unacknowledged WriteConcern</code>. In this instance, the server will not send a reply.</p>
+<p>See the <code>getLastError</code> command documentation for other formatting.</p>
+<h5 id="write-commands"><a class="header" href="#write-commands">Write Commands</a></h5>
+<p>The <code>insert</code>, <code>delete</code>, and <code>update</code> commands take a named parameter, <code>writeConcern</code>. See the command documentation for
+further examples.</p>
+<p>When a user has not specified a <code>WriteConcern</code> or has specified the server's default <code>WriteConcern</code>, drivers MUST omit
+the <code>writeConcern</code> parameter from the command.</p>
+<p>All other <code>WriteConcerns</code>, including the <code>Unacknowledged WriteConcern</code>, MUST be sent with the <code>writeConcern</code> parameter.</p>
+<blockquote>
+<p>[!NOTE]
+Drivers MAY use <code>OP_INSERT</code>, <code>OP_UPDATE</code>, and <code>OP_DELETE</code> when an <code>Unacknowledged WriteConcern</code> is used.</p>
+</blockquote>
+<h5 id="generic-command-method-2"><a class="header" href="#generic-command-method-2">Generic Command Method</a></h5>
+<p>If your driver offers a generic <code>RunCommand</code> method on your <code>database</code> object, <code>WriteConcern</code> MUST NOT be applied
+automatically to any command. A user wishing to use a <code>WriteConcern</code> in a generic command must manually include it in
+the command document passed to the method.</p>
+<p>The generic command method MUST NOT check the user's command document for a <code>WriteConcern</code> nor check whether the server
+is new enough to support a write concern for the command. The method simply sends the user's command to the server
+as-is.</p>
+<h5 id="find-and-modify-1"><a class="header" href="#find-and-modify-1">Find And Modify</a></h5>
+<p>The <code>findAndModify</code> command takes a named parameter, <code>writeConcern</code>. See command documentation for further examples.</p>
+<p>If writeConcern is specified for the Collection, <code>writeConcern</code> MUST be omitted when sending <code>findAndModify</code> with
+MaxWireVersion &lt; 4.</p>
+<p>If the findAndModify helper accepts writeConcern as a parameter, the driver MUST raise an error with MaxWireVersion &lt;
+4.</p>
+<blockquote>
+<p>[!NOTE]
+Driver documentation SHOULD include a warning in their server 3.2 compatible releases that an elevated <code>WriteConcern</code>
+may cause performance degradation when using <code>findAndModify</code>. This is because <code>findAndModify</code> will now be honoring a
+potentially high latency setting where it did not before.</p>
+</blockquote>
+<h5 id="other-commands-that-write"><a class="header" href="#other-commands-that-write">Other commands that write</a></h5>
+<p>Command helper methods for commands that write, other than those discussed above, MAY accept a write concern or write
+concern options in their parameter list. If the helper accepts a write concern, the driver MUST error if the selected
+server's MaxWireVersion &lt; 5 and a write concern has explicitly been specified.</p>
+<p>Helper methods that apply the write concern inherited from the Collection or Database, SHOULD check whether the selected
+server's MaxWireVersion &gt;= 5 and if so, include the inherited write concern in the command on the wire. If the selected
+server's MaxWireVersion &lt; 5, these methods SHOULD silently omit the write concern from the command on the wire.</p>
+<p>These commands that write are:</p>
+<blockquote>
+<ul>
+<li><code>aggregate</code> with write stage (e.g. <code>$out</code>, <code>$merge</code>)</li>
+<li><code>copydb</code></li>
+<li><code>create</code></li>
+<li><code>createIndexes</code></li>
+<li><code>drop</code></li>
+<li><code>dropDatabase</code></li>
+<li><code>dropIndexes</code></li>
+<li><code>mapReduce</code> where the <code>out</code> option is not <code>{ inline: 1 }</code></li>
+<li><code>clone</code></li>
+<li><code>cloneCollection</code></li>
+<li><code>cloneCollectionAsCapped</code></li>
+<li><code>collMod</code></li>
+<li><code>convertToCapped</code></li>
+<li><code>renameCollection</code></li>
+<li><code>createUser</code></li>
+<li><code>updateUser</code></li>
+<li><code>dropUser</code></li>
+</ul>
+</blockquote>
+<h5 id="errors-3"><a class="header" href="#errors-3">Errors</a></h5>
+<p>In general, server errors associated with <code>WriteConcern</code> return successful (<code>"ok": 1</code>) responses with a
+<code>writeConcernError</code> field indicating the issue. For example,</p>
+<pre><code class="language-typescript">rs0:PRIMARY&gt; db.runCommand({insert: "foo", documents: [{x:1}], writeConcern: { w: "blah"}})
+{
+  n: 1,
+  opTime: {
+    ts: Timestamp(1583026145, 1),
+    t: NumberLong(5)
+  },
+  electionId: ObjectId("7fffffff0000000000000005"),
+  ok: 1,
+  writeConcernError: {
+    code: 79,
+    codeName: "UnknownReplWriteConcern",
+    errmsg: "No write concern mode named 'blah' found in replica set configuration",
+    errInfo: {
+      writeConcern: {
+        w: "blah",
+        wtimeout: 0,
+        provenance: "clientSupplied"
+      }
+    }
+  },
+  $clusterTime: {
+    clusterTime: Timestamp(1583026145, 1),
+    signature: {
+      hash: BinData(0, "AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+      keyId: NumberLong(0)
+    }
+  },
+  operationTime: Timestamp(1583026145, 1)
+}
+</code></pre>
+<p>Drivers SHOULD parse server replies for a "writeConcernError" field and report the error only in the command-specific
+helper methods for commands that write, from the list above. For example, helper methods for "findAndModify" or
+"aggregate" SHOULD parse the server reply for "writeConcernError".</p>
+<p>Drivers SHOULD report writeConcernErrors however they report other server errors: by raising an exception, returning
+"false", or another idiom that is consistent with other server errors. Drivers SHOULD report writeConcernErrors with a
+<code>WriteConcernError</code> defined in the <a href="read-write-concern/../crud/crud.html#error-handling">CRUD specification</a>.</p>
+<p>Drivers SHOULD NOT parse server replies for "writeConcernError" in generic command methods.</p>
+<p>(Reporting of writeConcernErrors is more complex for bulk operations, see the Bulk API Spec.)</p>
+<h6 id="writeconcernerror-examples"><a class="header" href="#writeconcernerror-examples">writeConcernError Examples</a></h6>
+<p>The set of possible writeConcernErrors is quite large because they can include errors caused by shutdown, stepdown,
+interruption, maxTimeMS, and wtimeout. This section attempts to list all known error codes that may appear within a
+writeConcernError but may not be exhaustive. Note that some errors have been abbreviated:</p>
+<ul>
+<li><code>{ok:1, writeConcernError: {code: 91, codeName: "ShutdownInProgress"}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 189, codeName: "PrimarySteppedDown"}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 11600, codeName: "InterruptedAtShutdown"}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 11601, codeName: "Interrupted"}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 11602, codeName: "InterruptedDueToReplStateChange"}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 64, codeName: "WriteConcernFailed", errmsg: "waiting for replication timed out", errInfo: {wtimeout: True}}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 64, codeName: "WriteConcernFailed", errmsg: "multiple errors reported : {...} at shardName1 :: and :: {...} at shardName2"}}</code><sup class="footnote-reference"><a href="#1">1</a></sup></li>
+<li><code>{ok:1, writeConcernError: {code: 50, codeName: "MaxTimeMSExpired"}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 100, codeName: "UnsatisfiableWriteConcern", errmsg: "Not enough data-bearing nodes"}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 79, codeName: "UnknownReplWriteConcern"}}</code></li>
+</ul>
+<p>Note also that it is possible for a writeConcernError to be attached to a command failure. For example:</p>
+<ul>
+<li><code>{ok:0, code: 251, codeName: "NoSuchTransaction", writeConcernError: {code: 91, codeName: "ShutdownInProgress"}}</code><sup class="footnote-reference"><a href="#2">2</a></sup></li>
+</ul>
+<h4 id="location-specification-1"><a class="header" href="#location-specification-1">Location Specification</a></h4>
+<h5 id="via-code-1"><a class="header" href="#via-code-1">Via Code</a></h5>
+<p><code>WriteConcern</code> SHOULD be specifiable at the <code>Client</code>, <code>Database</code>, and <code>Collection</code> levels. Unless specified, the value
+MUST be inherited from its parent and SHOULD NOT be modifiable on an existing <code>Client</code>, <code>Database</code> or <code>Collection</code>. In
+addition, a driver MAY allow it to be specified on a per-operation basis in accordance with the CRUD specification.</p>
+<p>For example:</p>
+<pre><code class="language-typescript">var client = new MongoClient({ writeConcern: { w: 2 } });
+
+// db1's writeConcern is {w: 2}.
+var db1 = client.getDatabase("db1");
+
+// col1's writeConcern is {w: 2}.
+var col1 = db1.getCollection("col_name");
+
+// db2's writeConcern is {journal: true}.
+var db2 = client.getDatabase("db_name", { writeConcern: { journal: true } });
+
+// col2's writeConcern {journal: true}.
+var col2 = db2.getCollection("col_name");
+
+// col3's writeConcern is the server's default write concern.
+var col3 = db2.getCollection("col_name", { writeConcern: { } });
+
+// Override col3's writeConcern.
+col3.drop({ writeConcern: { w: 3 } });
+</code></pre>
+<h5 id="via-connection-string-1"><a class="header" href="#via-connection-string-1">Via Connection String</a></h5>
+<p>Options</p>
+<ul>
+<li><code>w</code> - corresponds to <code>w</code> in the class definition.</li>
+<li><code>journal</code> - corresponds to <code>journal</code> in the class definition.</li>
+<li><code>wtimeoutMS</code> - corresponds to <code>wtimeoutMS</code> in the class definition.</li>
+</ul>
+<p>For example:</p>
+<pre><code>mongodb://server:27017/db?w=3
+
+mongodb://server:27017/db?journal=true
+
+mongodb://server:27017/db?wtimeoutMS=1000
+
+mongodb://server:27017/db?w=majority&amp;wtimeoutMS=1000
+</code></pre>
+<h2 id="backwards-compatibility-22"><a class="header" href="#backwards-compatibility-22">Backwards Compatibility</a></h2>
+<p>There should be no backwards compatibility concerns. This specification merely deals with how to specify read and write
+concerns.</p>
+<h2 id="test-plan-26"><a class="header" href="#test-plan-26">Test Plan</a></h2>
+<p>Yaml tests are located here: <a href="https://github.com/mongodb/specifications/tree/master/source/read-write-concern/tests">https://github.com/mongodb/specifications/tree/master/source/read-write-concern/tests</a></p>
+<p>Below are English descriptions of other items that should be tested:</p>
+<h3 id="readconcern-1"><a class="header" href="#readconcern-1">ReadConcern</a></h3>
+<ol>
+<li>Commands supporting a read concern MUST raise an error when MaxWireVersion is less than 4 and a non-default,
+non-local read concern is specified.</li>
+<li>Commands supporting a read concern MUST NOT send the default read concern to the server.</li>
+<li>Commands supporting a read concern MUST send any non-default read concern to the server.</li>
+</ol>
+<h3 id="writeconcern-1"><a class="header" href="#writeconcern-1">WriteConcern</a></h3>
+<ol>
+<li>Commands supporting a write concern MUST NOT send the default write concern to the server.</li>
+<li>Commands supporting a write concern MUST send any non-default acknowledged write concern to the server, either in the
+command or as a getLastError.</li>
+<li>On ServerVersion less than 2.6, drivers MUST NOT send a getLastError command for an Unacknowledged write concern.</li>
+<li>FindAndModify helper methods MUST NOT send a write concern when the MaxWireVersion is less than 4.</li>
+<li>Helper methods for other commands that write MUST NOT send a write concern when the MaxWireVersion is less than 5.</li>
+</ol>
+<h2 id="reference-implementation-19"><a class="header" href="#reference-implementation-19">Reference Implementation</a></h2>
+<p>These are currently under construction.</p>
+<h2 id="q--a-8"><a class="header" href="#q--a-8">Q &amp; A</a></h2>
+<p>Q: Why is specifying a non-default <code>ReadConcern</code> for servers &lt; 3.2 an error while a non-default write concern gets
+ignored in <code>findAndModify</code>? <code>findAndModify</code> is an existing command and since <code>WriteConcern</code> may be defined globally,
+anyone using <code>findAndModify</code> in their applications with a non-default <code>WriteConcern</code> defined globally would have all
+their <code>findAndModify</code> operations fail.</p>
+<p>Q: Why does a driver send <code>{ readConcern: { level: "local" } }</code> to the server when that is the server's default? First,
+to mirror how <code>WriteConcern</code> already works, <code>ReadConcern() does not equal ReadConcern(level=local)</code> in the same way that
+<code>WriteConcern() does not equal WriteConcern(w=1)</code>. This is true for <code>WriteConcern</code> because the server's default could be
+set differently. While this setting does not currently exist for <code>ReadConcern</code>, it is a possible eventuality and it
+costs a driver nothing to be prepared for it. Second, it makes sense that if a user doesn't specify a <code>ReadConcern</code>, we
+don't send one and if a user does specify a <code>ReadConcern</code>, we do send one. If the user specifies level="local", for
+instance, we send it.</p>
+<h2 id="changelog-33"><a class="header" href="#changelog-33">Changelog</a></h2>
+<ul>
+<li>
+<p>2024-08-23: Migrated from reStructuredText to Markdown.</p>
+</li>
+<li>
+<p>2015-10-16: ReadConcern of local is no longer allowed to be used when talking with MaxWireVersion &lt; 4.</p>
+</li>
+<li>
+<p>2016-05-20: Added note about helpers for commands that write accepting a writeConcern parameter.</p>
+</li>
+<li>
+<p>2016-06-17: Added "linearizable" to ReadConcern levels.</p>
+</li>
+<li>
+<p>2016-07-15: Command-specific helper methods for commands that write SHOULD check the server's MaxWireVersion and
+decide whether to send writeConcern. Advise drivers to parse server replies for writeConcernError and raise an
+exception if found, only in command-specific helper methods that take a writeConcern parameter, not in generic command
+methods. Don't mention obscure commands with no helpers.</p>
+</li>
+<li>
+<p>2016-08-06: Further clarify that command-specific helper methods for commands that write take write concern options in
+their parameter lists, and relax from SHOULD to MAY.</p>
+</li>
+<li>
+<p>2017-03-13: reIndex silently ignores writeConcern in MongoDB 3.4 and returns an error if writeConcern is included with
+MongoDB 3.5+. See <a href="https://jira.mongodb.org/browse/SERVER-27891">SERVER-27891</a>.</p>
+</li>
+<li>
+<p>2017-11-17: Added list of commands that support readConcern</p>
+</li>
+<li>
+<p>2017-12-18: Added "available" to Readconcern level.</p>
+</li>
+<li>
+<p>2017-05-29: Added user management commands to list of commands that write</p>
+</li>
+<li>
+<p>2019-01-29: Added section listing all known examples of writeConcernError.</p>
+</li>
+<li>
+<p>2019-06-07: Clarify language for aggregate and mapReduce commands that write.</p>
+</li>
+<li>
+<p>2019-10-31: Explicitly define write concern option mappings.</p>
+</li>
+<li>
+<p>2020-02-13: Inconsistent write concern must be considered an error.</p>
+</li>
+<li>
+<p>2021-04-07: Updated to use hello command.</p>
+</li>
+<li>
+<p>2021-06-15: Added "snapshot" to Readconcern level</p>
+</li>
+<li>
+<p>2021-07-12: Add missing commas after ReadConcernLevel enum values</p>
+</li>
+<li>
+<p>2022-01-19: Deprecate wTimeoutMS in favor of timeoutMS.</p>
+</li>
+<li>
+<p>2022-10-05: Remove spec front matter and reformat changelog.</p>
+</li>
+</ul>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>This is only possible in a sharded cluster. When a write is routed to multiple shards and more than one shard
+returns a writeConcernError, then mongos will construct a new writeConcernError with the "WriteConcernFailed" error
+code and an errmsg field contains the stringified writeConcernError from each shard. Note that each shard may return
+a different writeConcernError.</p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>See <a href="https://jira.mongodb.org/browse/SERVER-38850">https://jira.mongodb.org/browse/SERVER-38850</a></p>
+</div>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="change-streams-1"><a class="header" href="#change-streams-1">Change Streams</a></h1>
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-31"><a class="header" href="#abstract-31">Abstract</a></h2>
+<h2 id="abstract-32"><a class="header" href="#abstract-32">Abstract</a></h2>
 <p>As of version 3.6 of the MongoDB server a new <code>$changeStream</code> pipeline stage is supported in the aggregation framework.
 Specifying this stage first in an aggregation pipeline allows users to request that notifications are sent for all
 changes to a particular collection. This specification defines the means for creating change streams in drivers, as well
 as behavior during failure scenarios.</p>
-<h2 id="specification-30"><a class="header" href="#specification-30">Specification</a></h2>
+<h2 id="specification-31"><a class="header" href="#specification-31">Specification</a></h2>
 <h3 id="definitions-7"><a class="header" href="#definitions-7">Definitions</a></h3>
-<h4 id="meta-31"><a class="header" href="#meta-31">META</a></h4>
+<h4 id="meta-32"><a class="header" href="#meta-32">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h4 id="terms-20"><a class="header" href="#terms-20">Terms</a></h4>
@@ -20128,10 +20639,10 @@ a <code>$changeStream</code> stage, for the purpose of supporting resumability.<
 NOT throw a custom exception if multiple <code>$changeStream</code> stages are present (e.g. if a user also passed <code>$changeStream</code>
 in the pipeline supplied to the helper), as the server will return an error.</p>
 <p>The helper methods MUST determine a read concern for the operation in accordance with the
-<a href="https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#via-code">Read and Write Concern specification</a>.
-The initial implementation of change streams on the server requires a 'majority' read concern or no read concern.
-Drivers MUST document this requirement. Drivers SHALL NOT throw an exception if any other read concern is specified, but
-instead should depend on the server to return an error.</p>
+<a href="change-streams/../read-write-concern/read-write-concern.html#via-code">Read and Write Concern specification</a>. The initial implementation
+of change streams on the server requires a 'majority' read concern or no read concern. Drivers MUST document this
+requirement. Drivers SHALL NOT throw an exception if any other read concern is specified, but instead should depend on
+the server to return an error.</p>
 <p>The stage has the following shape:</p>
 <pre><code class="language-typescript">{ $changeStream: ChangeStreamOptions }
 </code></pre>
@@ -20487,9 +20998,9 @@ duration of <code>maxAwaitTimeMS</code> but finds no matching entries and return
 tries resuming. If we tried resuming with the most recent <code>_id</code>, this throws out the oplog scanning the server had done
 for the long sequence of getMores with empty responses. But resuming with the last <code>postBatchResumeToken</code> skips the
 unnecessary scanning of unmatched oplog entries.</p>
-<h2 id="test-plan-26"><a class="header" href="#test-plan-26">Test Plan</a></h2>
+<h2 id="test-plan-27"><a class="header" href="#test-plan-27">Test Plan</a></h2>
 <p>See <a href="change-streams/tests/README.html">tests/README.md</a></p>
-<h2 id="backwards-compatibility-22"><a class="header" href="#backwards-compatibility-22">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-23"><a class="header" href="#backwards-compatibility-23">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns.</p>
 <h2 id="reference-implementations-4"><a class="header" href="#reference-implementations-4">Reference Implementations</a></h2>
 <ul>
@@ -20497,7 +21008,7 @@ unnecessary scanning of unmatched oplog entries.</p>
 <li>PYTHON (PYTHON-1338)</li>
 <li>RUBY (RUBY-1228)</li>
 </ul>
-<h2 id="changelog-33"><a class="header" href="#changelog-33">Changelog</a></h2>
+<h2 id="changelog-34"><a class="header" href="#changelog-34">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-02-09: Migrated from reStructuredText to Markdown.</p>
@@ -20655,12 +21166,12 @@ concern for the helper method.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.2</li>
 </ul>
-<h2 id="abstract-32"><a class="header" href="#abstract-32">Abstract</a></h2>
+<h2 id="abstract-33"><a class="header" href="#abstract-33">Abstract</a></h2>
 <p>The Find, GetMore and KillCursors commands in MongoDB 3.2 or later replace the use of the legacy OP_QUERY, OP_GET_MORE
 and OP_KILL_CURSORS wire protocol messages. This specification lays out how drivers should interact with the new
 commands when compared to the legacy wire protocol level messages.</p>
 <h2 id="definitions-8"><a class="header" href="#definitions-8">Definitions</a></h2>
-<h3 id="meta-32"><a class="header" href="#meta-32">Meta</a></h3>
+<h3 id="meta-33"><a class="header" href="#meta-33">Meta</a></h3>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="terms-21"><a class="header" href="#terms-21">Terms</a></h3>
@@ -20954,7 +21465,7 @@ and <strong>getMore</strong> commands to access the returned documents.</p>
 <p>If the driver supports returning <strong>raw</strong> BSON buffers instead of deserialized documents there might be a need to be able
 to partially deserialize documents to be able to efficiently provide the behavior in comparison to existing <strong>OP_QUERY</strong>
 queryresults.</p>
-<h2 id="errors-1"><a class="header" href="#errors-1">Errors</a></h2>
+<h2 id="errors-4"><a class="header" href="#errors-4">Errors</a></h2>
 <p>The <strong>find</strong> and <strong>getMore</strong> commands will report errors using the standard mechanism: an "ok: 0" field paired with
 "errmsg" and "code" fields. See below for example error responses:</p>
 <pre><code class="language-javascript">db.runCommand({find: "t", sort: {padding: -1}})
@@ -20991,7 +21502,7 @@ Information about the command can be found in the
 <p>This format is general for all commands when executing against a Mongos proxy.</p>
 <p>More in depth information about passing read preferences to Mongos can be found in the Server Selection Specification
 <a href="./server-selection/server-selection.html#passing-read-preference-to-mongos">Server Selection Specification</a>.</p>
-<h2 id="changelog-34"><a class="header" href="#changelog-34">Changelog</a></h2>
+<h2 id="changelog-35"><a class="header" href="#changelog-35">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-30: Migrated from reStructuredText to Markdown.</p>
@@ -21040,7 +21551,7 @@ have same behavior as for OP_GET_MORE and OP_KILL_CURSORS.</p>
 <li>Minimum Server Version: 2.2</li>
 </ul>
 <hr />
-<h2 id="abstract-33"><a class="header" href="#abstract-33">Abstract</a></h2>
+<h2 id="abstract-34"><a class="header" href="#abstract-34">Abstract</a></h2>
 <p>GridFS is a convention drivers use to store and retrieve BSON binary data (type "x05") that exceeds MongoDB"s
 BSON-document size limit of 16 MiB. When this data, called a <strong>user file</strong>, is written to the system, GridFS divides the
 file into <strong>chunks</strong> that are stored as distinct documents in a <strong>chunks collection</strong>. To retrieve a stored file, GridFS
@@ -21052,7 +21563,7 @@ support in their implementations. Additionally, this document attempts to clarif
 in the GridFS data model, disambiguate GridFS terminology, and document configuration options that were previously
 unspecified.</p>
 <h2 id="definitions-9"><a class="header" href="#definitions-9">Definitions</a></h2>
-<h3 id="meta-33"><a class="header" href="#meta-33">META</a></h3>
+<h3 id="meta-34"><a class="header" href="#meta-34">META</a></h3>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="terms-22"><a class="header" href="#terms-22">Terms</a></h3>
@@ -21147,7 +21658,7 @@ driver's programming language to represent a file id. This would be something li
 <p><strong>User File</strong><br />
 A data added by a user to GridFS. This data may map to an actual file on disk, a stream of input, a large
 data object, or any other large amount of consecutive data.</p>
-<h2 id="specification-31"><a class="header" href="#specification-31">Specification</a></h2>
+<h2 id="specification-32"><a class="header" href="#specification-32">Specification</a></h2>
 <h3 id="guidance-4"><a class="header" href="#guidance-4">Guidance</a></h3>
 <h4 id="documentation-5"><a class="header" href="#documentation-5">Documentation</a></h4>
 <p>The documentation provided in code below is merely for driver authors and SHOULD NOT be taken as required documentation
@@ -21708,7 +22219,7 @@ given filename and execute "rename" on each corresponding <code>_id</code>.</p>
 </code></pre>
 <p>This method drops the files and chunks collections associated with this GridFS bucket.</p>
 <p>Drivers should drop the files collection first, and then the chunks collection.</p>
-<h2 id="test-plan-27"><a class="header" href="#test-plan-27">Test Plan</a></h2>
+<h2 id="test-plan-28"><a class="header" href="#test-plan-28">Test Plan</a></h2>
 <p>TBD</p>
 <h2 id="motivation-for-change-15"><a class="header" href="#motivation-for-change-15">Motivation for Change</a></h2>
 <p>The <a href="https://www.mongodb.com/docs/manual/core/gridfs/">existing GridFS documentation</a> is only concerned with the
@@ -21827,7 +22338,7 @@ custom file ids is implemented by adding a new method that takes the custom file
 should continue to support the original method if possible to maintain backward compatibility. This spec does not
 attempt to completely mandate how each driver should maintain backward compatibility, as different languages have
 different approaches and capabilities for maintaining backward compatibility.</p>
-<h2 id="backwards-compatibility-23"><a class="header" href="#backwards-compatibility-23">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-24"><a class="header" href="#backwards-compatibility-24">Backwards Compatibility</a></h2>
 <p>This spec presents a new API for GridFS systems, which may break existing functionality for some drivers. The following
 are suggestions for ways to mitigate these incompatibilities.</p>
 <p>File revisions<br />
@@ -21849,14 +22360,14 @@ Drivers MAY continue to create an "aliases" field within files collection docume
 depending on this field continue to work. However, drivers SHOULD make it clear in their documentation that this field
 is deprecated, and is not used at all in driver code. Documentation SHOULD encourage users to store aliases in the
 "metadata" document instead.</p>
-<h2 id="reference-implementation-19"><a class="header" href="#reference-implementation-19">Reference Implementation</a></h2>
+<h2 id="reference-implementation-20"><a class="header" href="#reference-implementation-20">Reference Implementation</a></h2>
 <p>TBD</p>
 <h2 id="future-work-14"><a class="header" href="#future-work-14">Future work</a></h2>
 <p>Changes to the GridFS data model are out-of-scope for this spec, but may be considered for the future.</p>
 <p>The ability to alter or append to existing GridFS files has been cited as something that would greatly improve the
 system. While this functionality is not in-scope for this spec (see "Why can"t I alter documents once they are in the
 system?") it is a potential area of growth for the future.</p>
-<h2 id="changelog-35"><a class="header" href="#changelog-35">Changelog</a></h2>
+<h2 id="changelog-36"><a class="header" href="#changelog-36">Changelog</a></h2>
 <ul>
 <li>2024-02-27: Migrated from reStructuredText to Markdown.</li>
 <li>2016-05-10: Support custom file ids</li>
@@ -21877,7 +22388,7 @@ system?") it is a potential area of growth for the future.</p>
 <li>Version: 1.14.0</li>
 </ul>
 <hr />
-<h2 id="abstract-34"><a class="header" href="#abstract-34">Abstract</a></h2>
+<h2 id="abstract-35"><a class="header" href="#abstract-35">Abstract</a></h2>
 <p>MongoDB 4.2 introduced support for client side encryption, guaranteeing that sensitive data can only be encrypted and
 decrypted with access to both MongoDB and a separate key management provider (supporting AWS, Azure, GCP, a local
 provider, and KMIP). Once enabled, data can be seamlessly encrypted and decrypted with minimal application code changes.
@@ -21885,7 +22396,7 @@ provider, and KMIP). Once enabled, data can be seamlessly encrypted and decrypte
 expressive encrypted search operations. This spec covers both capabilities - 1st generation, "Client Side Field Level
 Encryption" and generation 2, "Queryable Encryption" - as the associated core cryptographic library and supporting
 drivers share a common codebase.</p>
-<h2 id="meta-34"><a class="header" href="#meta-34">META</a></h2>
+<h2 id="meta-35"><a class="header" href="#meta-35">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="terms-23"><a class="header" href="#terms-23">Terms</a></h2>
@@ -23496,7 +24007,7 @@ below. Commands not listed in this table will result in an error returned by lib
 </div>
 <p>All AUTOENCRYPT commands are sent to mongocryptd, even if there is no JSONSchema. This is to ensure that commands that
 reference other collections (e.g. aggregate with <code>$lookup</code>) are handled properly.</p>
-<h2 id="test-plan-28"><a class="header" href="#test-plan-28">Test Plan</a></h2>
+<h2 id="test-plan-29"><a class="header" href="#test-plan-29">Test Plan</a></h2>
 <p>See the <a href="client-side-encryption/tests/README.html">README.md</a> in the test directory.</p>
 <h2 id="rationale-3"><a class="header" href="#rationale-3">Rationale</a></h2>
 <h3 id="design-principles"><a class="header" href="#design-principles">Design Principles</a></h3>
@@ -23839,7 +24350,7 @@ libmongocrypt would create multiple OP_MSGs to send.</p>
 <p>Key management functions currently assume there are no concurrent accesses of the key vault collection being operated
 on. To support concurrent access of the key vault collection, the key management functions may be overloaded to take an
 explicit session parameter as described in the <a href="client-side-encryption/../sessions/driver-sessions.html">Drivers Sessions Specification</a>.</p>
-<h2 id="changelog-36"><a class="header" href="#changelog-36">Changelog</a></h2>
+<h2 id="changelog-37"><a class="header" href="#changelog-37">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-29: Document range as stable.</p>
@@ -24002,15 +24513,15 @@ queryable encrypted fields in a new collection.</p>
 <li>Minimum Server Version: 4.2</li>
 </ul>
 <hr />
-<h2 id="abstract-35"><a class="header" href="#abstract-35">Abstract</a></h2>
+<h2 id="abstract-36"><a class="header" href="#abstract-36">Abstract</a></h2>
 <p>Client side encryption requires a new binary subtype to store (1) encrypted ciphertext with metadata, and (2) binary
 markings indicating what values must be encrypted in a document. (1) is stored in the server, but (2) is only used in
 the communication protocol between libmongocrypt and mongocryptd described in
 <a href="https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/client-side-encryption.rst">Driver Spec: Client Side Encryption Encryption</a>.</p>
-<h2 id="meta-35"><a class="header" href="#meta-35">META</a></h2>
+<h2 id="meta-36"><a class="header" href="#meta-36">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-32"><a class="header" href="#specification-32">Specification</a></h2>
+<h2 id="specification-33"><a class="header" href="#specification-33">Specification</a></h2>
 <p>This spec introduces a new BSON binary subtype with value 6. The binary has multiple formats determined by the first
 byte, but are all related to client side encryption. The first byte indicates the type and layout of the remaining data.</p>
 <p>All values are represented in little endian. The payload is generally optimized for storage size. The exception is the
@@ -24062,7 +24573,7 @@ intent-to-encrypt markings which are only used between libmongocrypt and mongocr
 <tr><td>ciphertext[]</td><td>The encrypted ciphertext (includes IV prepended).</td></tr>
 </tbody></table>
 </div>
-<h2 id="test-plan-29"><a class="header" href="#test-plan-29">Test Plan</a></h2>
+<h2 id="test-plan-30"><a class="header" href="#test-plan-30">Test Plan</a></h2>
 <p>Covered in
 <a href="https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/client-side-encryption.rst">Driver Spec: Client Side Encryption Encryption</a>.</p>
 <h2 id="design-rationale-24"><a class="header" href="#design-rationale-24">Design Rationale</a></h2>
@@ -24091,13 +24602,13 @@ queries but randomized does not.</p>
 <h3 id="why-is-the-original-bson-type-not-encrypted"><a class="header" href="#why-is-the-original-bson-type-not-encrypted">Why is the original BSON type not encrypted?</a></h3>
 <p>Exposing the underlying BSON type gives some validation of the data that is encrypted. A JSONSchema on the server can
 validate that the underlying encrypted BSON type is correct.</p>
-<h2 id="reference-implementation-20"><a class="header" href="#reference-implementation-20">Reference Implementation</a></h2>
+<h2 id="reference-implementation-21"><a class="header" href="#reference-implementation-21">Reference Implementation</a></h2>
 <p>libmongocrypt and mongocryptd will be the reference implementation of how BSON binary subtype 6 is used.</p>
 <h2 id="security-implication-2"><a class="header" href="#security-implication-2">Security Implication</a></h2>
 <p>It would be a very bad security flaw if intent-to-encrypt markings were confused with ciphertexts. This could lead to a
 marking inadvertently being stored on a server – meaning that plaintext is stored where ciphertext should have been.</p>
 <p>Therefore, the leading byte of the BSON binary subtype distinguishes between marking and ciphertext.</p>
-<h2 id="changelog-37"><a class="header" href="#changelog-37">Changelog</a></h2>
+<h2 id="changelog-38"><a class="header" href="#changelog-38">Changelog</a></h2>
 <ul>
 <li>2024-03-04: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter and create changelog.</li>
@@ -24109,12 +24620,12 @@ marking inadvertently being stored on a server – meaning that plaintext is st
 <li>Minimum Server Version: 2.4</li>
 </ul>
 <hr />
-<h2 id="abstract-36"><a class="header" href="#abstract-36">Abstract</a></h2>
+<h2 id="abstract-37"><a class="header" href="#abstract-37">Abstract</a></h2>
 <p>The SDAM logging and monitoring specification defines a set of behaviors in the driver for providing runtime information
 about server discovery and monitoring (SDAM) in log messages, as well as in events that users can consume
 programmatically, either directly or by integrating with third-party APM libraries.</p>
 <h3 id="definitions-10"><a class="header" href="#definitions-10">Definitions</a></h3>
-<h4 id="meta-36"><a class="header" href="#meta-36">META</a></h4>
+<h4 id="meta-37"><a class="header" href="#meta-37">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h4 id="terms-24"><a class="header" href="#terms-24">Terms</a></h4>
@@ -24133,7 +24644,7 @@ etc.). This may be a string or object. The name of the object is NOT REQUIRED.</
 <p>The term <code>Server</code> refers to the implementation in the driver's language of an abstraction of a mongod or mongos
 process, or a load balancer, as defined by the <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#server">SDAM specification</a>.</p>
 </blockquote>
-<h3 id="specification-33"><a class="header" href="#specification-33">Specification</a></h3>
+<h3 id="specification-34"><a class="header" href="#specification-34">Specification</a></h3>
 <h3 id="guidance-5"><a class="header" href="#guidance-5">Guidance</a></h3>
 <h4 id="documentation-6"><a class="header" href="#documentation-6">Documentation</a></h4>
 <p>The documentation provided in the code below is merely for driver authors and SHOULD NOT be taken as required
@@ -24578,7 +25089,7 @@ placeholders as appropriate:</p>
 </blockquote>
 <h3 id="tests-2"><a class="header" href="#tests-2">Tests</a></h3>
 <p>See the <a href="server-discovery-and-monitoring/tests/monitoring/README.html">README</a>.</p>
-<h2 id="changelog-38"><a class="header" href="#changelog-38">Changelog</a></h2>
+<h2 id="changelog-39"><a class="header" href="#changelog-39">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-05-02: Migrated from reStructuredText to Markdown.</p>
@@ -24620,12 +25131,12 @@ added requirements for SDAM log messages.</p>
 <li>Minimum Server Version: N/A</li>
 </ul>
 <hr />
-<h2 id="abstract-37"><a class="header" href="#abstract-37">Abstract</a></h2>
+<h2 id="abstract-38"><a class="header" href="#abstract-38">Abstract</a></h2>
 <p>This specification defines requirements for drivers' logging configuration and behavior.</p>
-<h2 id="meta-37"><a class="header" href="#meta-37">META</a></h2>
+<h2 id="meta-38"><a class="header" href="#meta-38">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-34"><a class="header" href="#specification-34">Specification</a></h2>
+<h2 id="specification-35"><a class="header" href="#specification-35">Specification</a></h2>
 <h3 id="terms-25"><a class="header" href="#terms-25">Terms</a></h3>
 <p><strong>Structured logging</strong><br />
 Structured logging refers to producing log messages in a structured format, i.e. a series of
@@ -24823,7 +25334,7 @@ use.</p>
 configuration MUST take precedence over environment variables. Drivers supporting both forms of configuration MUST
 document this behavior and MUST provide an example of how users can implement custom logic to allow an environment
 variable to override a programmatic default, so that users who prefer the opposite behavior have a way to achieve it.</p>
-<h2 id="test-plan-30"><a class="header" href="#test-plan-30">Test Plan</a></h2>
+<h2 id="test-plan-31"><a class="header" href="#test-plan-31">Test Plan</a></h2>
 <p>Tests for logging behavior are defined in each corresponding specification. The
 <a href="logging/../unified-test-format/unified-test-format.html">unified test runner specification</a> has support for specifying logging
 expectations in tests.</p>
@@ -24918,7 +25429,7 @@ override programmatic defaults), but if we went with the opposite default, it wo
 override: not all languages will necessarily have an easy way to override/unset an environment variable from within
 application code.</li>
 </ol>
-<h2 id="backwards-compatibility-24"><a class="header" href="#backwards-compatibility-24">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-25"><a class="header" href="#backwards-compatibility-25">Backwards Compatibility</a></h2>
 <p>This specification takes the stance that the contents of log messages (both structured and unstructured) are <em>not</em>
 covered by semantic versioning, but that logging components <em>are</em>, since changing the name of a component or removing a
 component altogether has the potential to break user logging configuration and cause users to silently miss log
@@ -24930,7 +25441,7 @@ components except in major version releases.</p>
 for configuring logging. If such APIs are incompatible with the logging specification requirements (for example, the
 driver defines its own set of log levels in a public type, which do not match the spec-defined levels), changes to match
 the specification should be staged in via semantic versioning.</p>
-<h2 id="reference-implementation-21"><a class="header" href="#reference-implementation-21">Reference Implementation</a></h2>
+<h2 id="reference-implementation-22"><a class="header" href="#reference-implementation-22">Reference Implementation</a></h2>
 <p>Links to be added once Rust and C# implementations have been merged.</p>
 <h2 id="security-implication-3"><a class="header" href="#security-implication-3">Security Implication</a></h2>
 <p>Drivers must take care to avoid exposing sensitive information (e.g. authentication credentials) in log messages. It
@@ -24945,7 +25456,7 @@ infinitely if each write to store a log message generates additional log message
 issue in drivers that already produce log messages, or with the command monitoring API, but if users start to run into
 this issue, we could try to address it at the specification level by e.g. requiring drivers to support disabling logging
 on individual clients or for particular namespaces.</p>
-<h2 id="changelog-39"><a class="header" href="#changelog-39">Changelog</a></h2>
+<h2 id="changelog-40"><a class="header" href="#changelog-40">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-03-06: Migrated from reStructuredText to Markdown.</p>
@@ -24978,13 +25489,13 @@ environment variables.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-38"><a class="header" href="#abstract-38">Abstract</a></h2>
+<h2 id="abstract-39"><a class="header" href="#abstract-39">Abstract</a></h2>
 <p>Drivers currently support a variety of options that allow users to configure connection pooling behavior. Users are
 confused by drivers supporting different subsets of these options. Additionally, drivers implement their connection
 pools differently, making it difficult to design cross-driver pool functionality. By unifying and codifying pooling
 options and behavior across all drivers, we will increase user comprehension and code base maintainability.</p>
 <p>This specification does not apply to drivers that do not support multitasking.</p>
-<h2 id="meta-38"><a class="header" href="#meta-38">META</a></h2>
+<h2 id="meta-39"><a class="header" href="#meta-39">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="definitions-11"><a class="header" href="#definitions-11">Definitions</a></h2>
@@ -26053,7 +26564,7 @@ interface WaitQueueTimeoutError {
   address: &lt;pool address&gt;;
 }
 </code></pre>
-<h2 id="test-plan-31"><a class="header" href="#test-plan-31">Test Plan</a></h2>
+<h2 id="test-plan-32"><a class="header" href="#test-plan-32">Test Plan</a></h2>
 <p>See <a href="connection-monitoring-and-pooling/tests/README.html">tests/README</a></p>
 <h2 id="design-rationale-26"><a class="header" href="#design-rationale-26">Design Rationale</a></h2>
 <h3 id="why-do-we-set-minpoolsize-across-all-members-of-a-replicaset-when-most-traffic-will-be-against-a-primary-1"><a class="header" href="#why-do-we-set-minpoolsize-across-all-members-of-a-replicaset-when-most-traffic-will-be-against-a-primary-1">Why do we set minPoolSize across all members of a replicaSet, when most traffic will be against a Primary?</a></h3>
@@ -26140,7 +26651,7 @@ higher or equal to .net 5.0. On macOS, there is no straight equivalent for this 
 some equivalent configuration, but this configuration will also require target frameworks higher than or equal to .net
 5.0. The advantage of using Background Thread to manage perished connections is that it will work regardless of
 environment setup.</p>
-<h2 id="backwards-compatibility-25"><a class="header" href="#backwards-compatibility-25">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-26"><a class="header" href="#backwards-compatibility-26">Backwards Compatibility</a></h2>
 <p>As mentioned in <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#deprecated-options">Deprecated Options</a>, some drivers currently implement the options <code>waitQueueSize</code>
 and/or <code>waitQueueMultiple</code>. These options will need to be deprecated and phased out of the drivers that have implemented
 them.</p>
@@ -26166,7 +26677,7 @@ Connection.</li>
 <h3 id="add-support-for-op_msg-exhaustallowed-1"><a class="header" href="#add-support-for-op_msg-exhaustallowed-1">Add support for OP_MSG exhaustAllowed</a></h3>
 <p>Exhaust Cursors may require changes to how we close <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> in the future, specifically to add a way
 to close and remove from its pool a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> which has unread exhaust messages.</p>
-<h2 id="changelog-40"><a class="header" href="#changelog-40">Changelog</a></h2>
+<h2 id="changelog-41"><a class="header" href="#changelog-41">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-01-23: Migrated from reStructuredText to Markdown.</p>
@@ -26228,12 +26739,12 @@ timeout specification.</p>
 <li>Current Schema Version: 1.19.0</li>
 </ul>
 <hr />
-<h2 id="abstract-39"><a class="header" href="#abstract-39">Abstract</a></h2>
+<h2 id="abstract-40"><a class="header" href="#abstract-40">Abstract</a></h2>
 <p>This project defines a unified schema for YAML and JSON specification tests, which run operations against a MongoDB
 deployment. By conforming various spec tests to a single schema, drivers can implement a single test runner to execute
 acceptance tests for multiple specifications, thereby reducing maintenance of existing specs and implementation time for
 new specifications.</p>
-<h2 id="meta-39"><a class="header" href="#meta-39">META</a></h2>
+<h2 id="meta-40"><a class="header" href="#meta-40">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <p>This document tends to use "SHOULD" more frequently than other specifications, but mainly in the context of providing
@@ -26254,7 +26765,7 @@ guidance on writing test files. This is discussed in more detail in <a href="uni
 </ul>
 <p>This is not an exhaustive list. Specifications that are known to not be supported by this format may be discussed under
 <a href="unified-test-format/unified-test-format.html#future-work">Future Work</a>.</p>
-<h2 id="specification-35"><a class="header" href="#specification-35">Specification</a></h2>
+<h2 id="specification-36"><a class="header" href="#specification-36">Specification</a></h2>
 <h3 id="terms-26"><a class="header" href="#terms-26">Terms</a></h3>
 <p><strong>Entity</strong> Any object or value that is indexed by a unique name and stored in the <a href="unified-test-format/unified-test-format.html#entity-map">Entity Map</a>. This will
 typically be a driver object (e.g. client, session) defined in <a href="unified-test-format/unified-test-format.html#createentities">createEntities</a> but may also be a
@@ -27494,7 +28005,7 @@ purposes.</p>
 <p>This section defines the structure of common options that are referenced from various contexts in the test format.
 Comprehensive documentation for some of these types and their parameters may be found in the following specifications:</p>
 <ul>
-<li><a href="unified-test-format/../read-write-concern/read-write-concern.rst">Read and Write Concern</a>.</li>
+<li><a href="unified-test-format/../read-write-concern/read-write-concern.html">Read and Write Concern</a>.</li>
 <li><a href="unified-test-format/../server-selection/server-selection.html#read-preference">Server Selection: Read Preference</a>.</li>
 <li><a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#topologydescription">Server Discovery and Monitoring: TopologyDescription</a>.</li>
 </ul>
@@ -29176,7 +29687,7 @@ CRUD spec and this spec and its schema.</p>
 <p>As discussed in <a href="unified-test-format/unified-test-format.html#executing-an-operation">Executing an Operation</a>, test runners MUST raise errors for unsupported
 operations and arguments. This is a concession until such time that better processes can be established for versioning
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
-<h2 id="changelog-41"><a class="header" href="#changelog-41">Changelog</a></h2>
+<h2 id="changelog-42"><a class="header" href="#changelog-42">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-05-08: <strong>Schema version 1.21.</strong><br />
@@ -29461,7 +29972,7 @@ MongoClient using a valid connection string without auth credentials and execute
 <p>Test that the driver can establish a connection with Atlas Data Lake with authentication. For these tests, create a
 MongoClient using a valid connection string with SCRAM-SHA-1 and credentials from the drivers-evergreen-tools ADL
 configuration and execute a ping command. Repeat this test using SCRAM-SHA-256.</p>
-<h2 id="changelog-42"><a class="header" href="#changelog-42">Changelog</a></h2>
+<h2 id="changelog-43"><a class="header" href="#changelog-43">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-03-08: Convert legacy ADL tests to unified format. Convert test README from reStructuredText to Markdown.</p>
@@ -29479,7 +29990,7 @@ each test.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-40"><a class="header" href="#abstract-40">Abstract</a></h2>
+<h2 id="abstract-41"><a class="header" href="#abstract-41">Abstract</a></h2>
 <p>This document describes a standard benchmarking suite for MongoDB drivers.</p>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <h3 id="name-and-purpose"><a class="header" href="#name-and-purpose">Name and purpose</a></h3>
@@ -29951,7 +30462,7 @@ minimize disk I/O impact?); same AWS zone as client</p>
 <p>TBD: spec system to hold scores over time</p>
 <h3 id="datasets"><a class="header" href="#datasets">Datasets</a></h3>
 <p>TBD: generated datasets should be park in S3 or somewhere for retrieval by URL</p>
-<h2 id="changelog-43"><a class="header" href="#changelog-43">Changelog</a></h2>
+<h2 id="changelog-44"><a class="header" href="#changelog-44">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-01-22: Migrated from reStructuredText to Markdown.</p>
@@ -30000,11 +30511,11 @@ iterations in a reasonable time (e.g. file sizes and number of documents in cert
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-41"><a class="header" href="#abstract-41">Abstract</a></h2>
+<h2 id="abstract-42"><a class="header" href="#abstract-42">Abstract</a></h2>
 <p>The official BSON specification does not include test data, so this pseudo-specification describes tests for BSON
 encoding and decoding. It also includes tests for MongoDB's "Extended JSON" specification (hereafter abbreviated as
 <code>extjson</code>).</p>
-<h2 id="meta-40"><a class="header" href="#meta-40">Meta</a></h2>
+<h2 id="meta-41"><a class="header" href="#meta-41">Meta</a></h2>
 <p>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="motivation-for-change-17"><a class="header" href="#motivation-for-change-17">Motivation for Change</a></h2>
@@ -30028,10 +30539,10 @@ pseudo-specification provides such tests.</p>
 <li>Replace or extend the official BSON spec at <a href="http://bsonspec.org">http://bsonspec.org</a>.</li>
 <li>Provide a formal specification for <code>extjson</code>.</li>
 </ul>
-<h2 id="specification-36"><a class="header" href="#specification-36">Specification</a></h2>
+<h2 id="specification-37"><a class="header" href="#specification-37">Specification</a></h2>
 <p>The specification for BSON lives at <a href="http://bsonspec.org">http://bsonspec.org</a>. The <code>extjson</code> format specification is
 <a href="bson-corpus/../extended-json.html">here</a>.</p>
-<h2 id="test-plan-32"><a class="header" href="#test-plan-32">Test Plan</a></h2>
+<h2 id="test-plan-33"><a class="header" href="#test-plan-33">Test Plan</a></h2>
 <p>This test plan describes a general approach for BSON testing. Future BSON specifications (such as for new types like
 Decimal128) may specialize or alter the approach described below.</p>
 <h3 id="description-of-the-bson-corpus"><a class="header" href="#description-of-the-bson-corpus">Description of the BSON Corpus</a></h3>
@@ -30269,7 +30780,7 @@ of this spec.</p>
 <h4 id="undefined"><a class="header" href="#undefined">Undefined</a></h4>
 <p>This type is deprecated. The provided converted form converts these to Null, but such conversion is outside the scope of
 this spec.</p>
-<h2 id="reference-implementation-22"><a class="header" href="#reference-implementation-22">Reference Implementation</a></h2>
+<h2 id="reference-implementation-23"><a class="header" href="#reference-implementation-23">Reference Implementation</a></h2>
 <p>The Java, C# and Perl drivers.</p>
 <h2 id="design-rationale-28"><a class="header" href="#design-rationale-28">Design Rationale</a></h2>
 <h3 id="use-of-extjson"><a class="header" href="#use-of-extjson">Use of extjson</a></h3>
@@ -30285,7 +30796,7 @@ to the Extended JSON Specification.</p>
 different in different cases, but the <code>canonical_bson</code> field is the same. This is by design so that each case stands
 alone and can be confirmed to be internally consistent via the assertions. This makes for easier and safer test case
 development.</p>
-<h2 id="changelog-44"><a class="header" href="#changelog-44">Changelog</a></h2>
+<h2 id="changelog-45"><a class="header" href="#changelog-45">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-01-22: Migrated from reStructuredText to Markdown.</p>
@@ -30461,13 +30972,13 @@ communication.</p>
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-42"><a class="header" href="#abstract-42">Abstract</a></h2>
+<h2 id="abstract-43"><a class="header" href="#abstract-43">Abstract</a></h2>
 <p>This specification is about the ability for drivers to automate tests for "Functions as a Service" from continuous
 integration.</p>
-<h2 id="meta-41"><a class="header" href="#meta-41">META</a></h2>
+<h2 id="meta-42"><a class="header" href="#meta-42">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-37"><a class="header" href="#specification-37">Specification</a></h2>
+<h2 id="specification-38"><a class="header" href="#specification-38">Specification</a></h2>
 <h3 id="terms-27"><a class="header" href="#terms-27">Terms</a></h3>
 <h4 id="faas-2"><a class="header" href="#faas-2">FaaS</a></h4>
 <p>"Function as a Service", such as AWS Lambda.</p>
@@ -30713,7 +31224,7 @@ limit. The variant itself MUST have the SAM CLI installed.</p>
 <li>Calls the frozen lambda function again.</li>
 <li>Deletes the Lambda function.</li>
 </ul>
-<h2 id="changelog-45"><a class="header" href="#changelog-45">Changelog</a></h2>
+<h2 id="changelog-46"><a class="header" href="#changelog-46">Changelog</a></h2>
 <ul>
 <li>2024-02-27: Migrated from reStructuredText to Markdown.</li>
 <li>2023-08-21: Drivers MUST assert that the streaming protocol is disabled in the Lambda function.</li>
