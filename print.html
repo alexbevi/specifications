@@ -19532,6 +19532,8 @@ specification.</p>
 entire <code>bulkWrite</code> command to receive a fresh cursor and retry iteration. This work was omitted to minimize the scope of
 the initial implementation and testing of the new bulk write API, but may be revisited in the future.</p>
 <h2 id="qa-10"><a class="header" href="#qa-10">Q&amp;A</a></h2>
+<h3 id="is-bulkwrite-supported-on-atlas-serverless"><a class="header" href="#is-bulkwrite-supported-on-atlas-serverless">Is <code>bulkWrite</code> supported on Atlas Serverless?</a></h3>
+<p>No. See <a href="https://jira.mongodb.org/browse/CLOUDP-256344">CLOUDP-256344</a></p>
 <h3 id="why-are-we-adding-a-new-bulk-write-api-rather-than-updating-the-mongocollectionbulkwrite-implementation"><a class="header" href="#why-are-we-adding-a-new-bulk-write-api-rather-than-updating-the-mongocollectionbulkwrite-implementation">Why are we adding a new bulk write API rather than updating the <code>MongoCollection.bulkWrite</code> implementation?</a></h3>
 <p>The new <code>bulkWrite</code> command is only available in MongoDB 8.0+, so it cannot function as a drop-in replacement for the
 existing bulk write implementation that uses the <code>insert</code>, <code>update</code>, and <code>delete</code> commands. Additionally, because the
