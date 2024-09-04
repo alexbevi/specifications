@@ -298,7 +298,7 @@ in a driver, and they SHOULD be deprecated and removed from drivers that impleme
   /**
    *  An alternative way of setting waitQueueSize, it specifies
    *  the maximum number of threads that can wait per connection.
-   *  waitQueueSize === waitQueueMultiple \* maxPoolSize
+   *  waitQueueSize === waitQueueMultiple * maxPoolSize
    */
   waitQueueMultiple?: number
 }
@@ -784,7 +784,7 @@ interrupting in-use connections, its next run MUST be scheduled as soon as possi
 <p>The pool MUST only interrupt in-use Connections whose generation is less than or equal to the generation of the pool at
 the moment of the clear (before the increment) that used the interruptInUseConnections flag. Any operations that have
 their Connections interrupted in this way MUST fail with a retryable error. If possible, the error SHOULD be a
-PoolClearedError with the following message: "Connection to &lt;pool address&gt; interrupted due to server monitor timeout".</p>
+PoolClearedError with the following message: "Connection to <pool address> interrupted due to server monitor timeout".</p>
 <h5 id="clearing-a-load-balanced-pool"><a class="header" href="#clearing-a-load-balanced-pool">Clearing a load balanced pool</a></h5>
 <p>A Pool MUST also have a method of clearing all <a href="#connection">Connections</a> for a specific <code>serviceId</code> for use when in
 load balancer mode. This method increments the generation of the pool for that specific <code>serviceId</code> in the generation
@@ -1375,8 +1375,7 @@ to close and remove from its pool a <a href="#connection">Connection</a> which h
 <p>2019-06-06: Add "connectionError" as a valid reason for ConnectionCheckOutFailedEvent</p>
 </li>
 <li>
-<p>2020-09-03: Clarify Connection states and definition. Require the use of a<br />
-background thread and/or async I/O. Add
+<p>2020-09-03: Clarify Connection states and definition. Require the use of a background thread and/or async I/O. Add
 tests to ensure ConnectionReadyEvents are fired after ConnectionCreatedEvents.</p>
 </li>
 <li>
@@ -1389,8 +1388,7 @@ tests to ensure ConnectionReadyEvents are fired after ConnectionCreatedEvents.</
 <p>2021-01-12: Clarify "clear" method behavior in load balancer mode.</p>
 </li>
 <li>
-<p>2021-01-19: Require that timeouts be applied per the client-side operations<br />
-timeout specification.</p>
+<p>2021-01-19: Require that timeouts be applied per the client-side operations timeout specification.</p>
 </li>
 <li>
 <p>2021-04-12: Adding in behaviour for load balancer mode.</p>

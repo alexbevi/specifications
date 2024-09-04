@@ -192,20 +192,19 @@ drivers share a common codebase.</p>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="terms"><a class="header" href="#terms">Terms</a></h2>
-<p><strong>encrypted MongoClient</strong><br />
-A MongoClient with client side encryption enabled.</p>
-<p><strong>data key</strong><br />
-A key used to encrypt and decrypt BSON values. Data keys are encrypted with a key management service (e.g.
-AWS KMS) and stored within a document in the MongoDB key vault collection (see
+<p><strong>encrypted MongoClient</strong></p>
+<p>A MongoClient with client side encryption enabled.</p>
+<p><strong>data key</strong></p>
+<p>A key used to encrypt and decrypt BSON values. Data keys are encrypted with a key management service (e.g. AWS KMS) and
+stored within a document in the MongoDB key vault collection (see
 <a href="#key-vault-collection-schema-for-data-keys">Key vault collection schema for data keys</a> for a description of the data
 key document). Therefore, a client needs access to both MongoDB and the external KMS service to utilize a data key.</p>
-<p><strong>MongoDB key vault collection</strong><br />
-A MongoDB collection designated to contain data keys. This can either be co-located
-with the data-bearing cluster, or in a separate external MongoDB cluster.</p>
-<p><strong>Key Management Service (KMS)</strong><br />
-An external service providing fixed-size encryption/decryption. Only data keys are
-encrypted and decrypted with KMS.</p>
-<p><strong>KMS providers</strong>\</p>
+<p><strong>MongoDB key vault collection</strong></p>
+<p>A MongoDB collection designated to contain data keys. This can either be co-located with the data-bearing cluster, or in
+a separate external MongoDB cluster.</p>
+<p><strong>Key Management Service (KMS)</strong></p>
+<p>An external service providing fixed-size encryption/decryption. Only data keys are encrypted and decrypted with KMS.</p>
+<p><strong>KMS providers</strong></p>
 <blockquote>
 <p>A map of KMS providers to credentials. Configured client-side. Example:</p>
 <pre><code class="language-python">kms_providers = {
@@ -219,33 +218,31 @@ encrypted and decrypted with KMS.</p>
 }
 </code></pre>
 </blockquote>
-<p><strong>KMS provider</strong><br />
-A configured KMS. Identified by a key in the KMS providers map. The key has the form
-"<KMS provider type>" or "<KMS provider type>:<KMS
-provider name>". Examples: "aws" or "aws:myname". In
-<a href="#libmongocrypt">libmongocrypt</a>, the key is referred to as the KMS ID.</p>
-<p><strong>KMS provider type</strong><br />
-The type of backing KMS. Identified by the string: "aws", "azure", "gcp", "kmip", or "local".</p>
-<p><strong>KMS provider name</strong><br />
-An optional name to identify a KMS provider. Enables configuring multiple KMS providers with the
-same KMS provider type (e.g. "aws:name1" and "aws:name2" can refer to different AWS accounts).</p>
-<p><strong>Customer Master Key (CMK)</strong><br />
-The underlying key AWS KMS uses to encrypt and decrypt. See
+<p><strong>KMS provider</strong></p>
+<p>A configured KMS. Identified by a key in the KMS providers map. The key has the form "<KMS provider type>" or
+"<KMS provider type>:<KMS
+provider name>". Examples: "aws" or "aws:myname". In <a href="#libmongocrypt">libmongocrypt</a>, the key
+is referred to as the KMS ID.</p>
+<p><strong>KMS provider type</strong></p>
+<p>The type of backing KMS. Identified by the string: "aws", "azure", "gcp", "kmip", or "local".</p>
+<p><strong>KMS provider name</strong></p>
+<p>An optional name to identify a KMS provider. Enables configuring multiple KMS providers with the same KMS provider type
+(e.g. "aws:name1" and "aws:name2" can refer to different AWS accounts).</p>
+<p><strong>Customer Master Key (CMK)</strong></p>
+<p>The underlying key AWS KMS uses to encrypt and decrypt. See
 <a href="https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#master_keys">AWS Key Management Service Concepts</a>.</p>
-<p><strong>schema</strong><br />
-A MongoDB JSON Schema (either supplied by the server or client-side) which may include metadata about
-encrypted fields. This is a JSON Schema based on draft 4 of the JSON Schema specification,
+<p><strong>schema</strong></p>
+<p>A MongoDB JSON Schema (either supplied by the server or client-side) which may include metadata about encrypted fields.
+This is a JSON Schema based on draft 4 of the JSON Schema specification,
 <a href="https://www.mongodb.com/docs/manual/reference/operator/query/jsonSchema/">as documented in the MongoDB manual.</a>.</p>
-<p><strong><a href="#libmongocrypt">libmongocrypt</a></strong><br />
-A library, written in C, that coordinates communication, does
-encryption/decryption, caches key and schemas. <a href="https://github.com/mongodb/libmongocrypt">Located here</a>.</p>
-<p><strong><a href="#mongocryptd">mongocryptd</a></strong><br />
-A local process the driver communicates with to determine how to encrypt values in a
-command.</p>
-<p><strong><a href="#crypt_shared">crypt_shared</a></strong><br />
-This term, spelled in all-lowercase with an underscore, refers to the client-side
-field-level-encryption dynamic library provided as part of a MongoDB Enterprise distribution. It replaces
-<a href="#mongocryptd">mongocryptd</a> as the method of
+<p><strong><a href="#libmongocrypt">libmongocrypt</a></strong></p>
+<p>A library, written in C, that coordinates communication, does encryption/decryption, caches key and schemas.
+<a href="https://github.com/mongodb/libmongocrypt">Located here</a>.</p>
+<p><strong><a href="#mongocryptd">mongocryptd</a></strong></p>
+<p>A local process the driver communicates with to determine how to encrypt values in a command.</p>
+<p><strong><a href="#crypt_shared">crypt_shared</a></strong></p>
+<p>This term, spelled in all-lowercase with an underscore, refers to the client-side field-level-encryption dynamic library
+provided as part of a MongoDB Enterprise distribution. It replaces <a href="#mongocryptd">mongocryptd</a> as the method of
 <code>marking-up a database command for encryption &lt;subtype6.intent-to-encrypt&gt;</code>.</p>
 <p>See also:</p>
 <blockquote>
@@ -254,21 +251,21 @@ field-level-encryption dynamic library provided as part of a MongoDB Enterprise 
 <li><a href="#enabling-crypt_shared">Enabling crypt_shared</a></li>
 </ul>
 </blockquote>
-<p><strong>ciphertext</strong><br />
-One of the data formats of
+<p><strong>ciphertext</strong></p>
+<p>One of the data formats of
 <a href="https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/subtype6.rst">BSON binary subtype 6</a>,
 representing an encoded BSON document containing encrypted ciphertext and metadata.</p>
-<p><strong>FLE</strong><br />
-FLE is the first version of Client-Side Field Level Encryption. FLE is almost entirely client-side with the
-exception of server-side JSON schema.</p>
-<p><strong>Queryable Encryption</strong><br />
-Queryable Encryption the second version of Client-Side Field Level Encryption. Data is
-encrypted client-side. Queryable Encryption supports indexed encrypted fields, which are further processed server-side.</p>
-<p><strong>In-Use Encryption</strong><br />
-Is an umbrella term describing the both FLE and Queryable Encryption.</p>
-<p><strong>encryptedFields</strong><br />
-A BSON document describing the Queryable Encryption encrypted fields. This is analogous to the JSON
-Schema in FLE. The following is an example encryptedFields in extended canonical JSON:</p>
+<p><strong>FLE</strong></p>
+<p>FLE is the first version of Client-Side Field Level Encryption. FLE is almost entirely client-side with the exception of
+server-side JSON schema.</p>
+<p><strong>Queryable Encryption</strong></p>
+<p>Queryable Encryption the second version of Client-Side Field Level Encryption. Data is encrypted client-side. Queryable
+Encryption supports indexed encrypted fields, which are further processed server-side.</p>
+<p><strong>In-Use Encryption</strong></p>
+<p>Is an umbrella term describing the both FLE and Queryable Encryption.</p>
+<p><strong>encryptedFields</strong></p>
+<p>A BSON document describing the Queryable Encryption encrypted fields. This is analogous to the JSON Schema in FLE. The
+following is an example encryptedFields in extended canonical JSON:</p>
 <pre><code class="language-javascript">{
     "escCollection": "enxcol_.CollectionName.esc",
     "ecocCollection": "enxcol_.CollectionName.ecoc",
@@ -1601,9 +1598,9 @@ documentation in MongoClient:</p>
 </blockquote>
 <h2 id="appendix"><a class="header" href="#appendix">Appendix</a></h2>
 <h3 id="appendix-terms"><a class="header" href="#appendix-terms">Appendix terms</a></h3>
-<p>intent-to-encrypt marking<br />
-One of the data formats of BSON binary subtype 6, representing an encoded BSON document
-containing plaintext and metadata.</p>
+<p><strong>intent-to-encrypt marking</strong></p>
+<p>One of the data formats of BSON binary subtype 6, representing an encoded BSON document containing plaintext and
+metadata.</p>
 <h3 id="key-vault-collection-schema-for-data-keys"><a class="header" href="#key-vault-collection-schema-for-data-keys">Key vault collection schema for data keys</a></h3>
 <p>Data keys are stored in the MongoDB key vault collection with the following schema:</p>
 <div class="table-wrapper"><table><thead><tr><th></th><th></th><th></th></tr></thead><tbody>

@@ -187,12 +187,12 @@ collections should be enumerated.</p>
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
-<p><strong>MongoClient</strong><br />
-Driver object representing a connection to MongoDB. This is the root object of a driver's API and MAY
-be named differently in some drivers.</p>
-<p><strong>Iterable</strong><br />
-An object or data structure that is a sequence of elements that can be iterated over. This spec is
-flexible on what that means as different drivers will have different requirements, types, and idioms.</p>
+<p><strong>MongoClient</strong></p>
+<p>Driver object representing a connection to MongoDB. This is the root object of a driver's API and MAY be named
+differently in some drivers.</p>
+<p><strong>Iterable</strong></p>
+<p>An object or data structure that is a sequence of elements that can be iterated over. This spec is flexible on what that
+means as different drivers will have different requirements, types, and idioms.</p>
 <h3 id="listcollections-database-command"><a class="header" href="#listcollections-database-command">listCollections Database Command</a></h3>
 <p>The <code>listCollections</code> command returns a cursor:</p>
 <pre><code class="language-javascript">db.runCommand( { listCollections: 1 } );
@@ -410,28 +410,23 @@ versions of MongoDB.</p>
 <p>2022-02-01: Add <code>comment</code> option to <code>listCollections</code> command.</p>
 </li>
 <li>
-<p>2022-01-20: Require that timeouts be applied per the client-side operations<br />
-timeout spec.</p>
+<p>2022-01-20: Require that timeouts be applied per the client-side operations timeout spec.</p>
 </li>
 <li>
-<p>2021-12-17: Support <code>authorizedCollections</code> option in <code>listCollections</code><br />
-command.</p>
+<p>2021-12-17: Support <code>authorizedCollections</code> option in <code>listCollections</code> command.</p>
 </li>
 <li>
 <p>2021-04-22: Update to use secondaryOk.</p>
 </li>
 <li>
-<p>2020-03-18: MongoDB 4.4 no longer includes <code>ns</code> field in <code>idIndex</code> field<br />
-for <code>listCollections</code> responses.</p>
+<p>2020-03-18: MongoDB 4.4 no longer includes <code>ns</code> field in <code>idIndex</code> field for <code>listCollections</code> responses.</p>
 </li>
 <li>
-<p>2019-03-21: The method that returns a list of collection names should be named<br />
-<code>listCollectionNames</code>. The method that
+<p>2019-03-21: The method that returns a list of collection names should be named <code>listCollectionNames</code>. The method that
 returns a list of collection objects may be named <code>listMongoCollections</code>.</p>
 </li>
 <li>
-<p>2018-07-03: Clarify that <code>nameOnly</code> must not be used with filters other than<br />
-<code>name</code>.</p>
+<p>2018-07-03: Clarify that <code>nameOnly</code> must not be used with filters other than <code>name</code>.</p>
 </li>
 <li>
 <p>2018-05-18: Support <code>nameOnly</code> option in <code>listCollections</code> command.</p>
@@ -440,13 +435,11 @@ returns a list of collection objects may be named <code>listMongoCollections</co
 <p>2017-09-27: Clarify reason for filtering collection names containing '$'.</p>
 </li>
 <li>
-<p>2015-01-14: Clarify trimming of database name. Put preferred method name for<br />
-listing collections with a cursor as
+<p>2015-01-14: Clarify trimming of database name. Put preferred method name for listing collections with a cursor as
 return value.</p>
 </li>
 <li>
-<p>2014-12-18: Update with the server change to return a cursor for<br />
-<code>listCollections</code>.</p>
+<p>2014-12-18: Update with the server change to return a cursor for <code>listCollections</code>.</p>
 </li>
 </ul>
 

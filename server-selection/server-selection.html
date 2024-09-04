@@ -217,86 +217,83 @@ sharded transaction because all operations in a sharded transaction need to go t
 variable names.</p>
 <p>This specification does not apply to commands issued for server monitoring or authentication.</p>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
-<p><strong>Available</strong><br />
-Describes a server that is believed to be reachable over the network and able to respond to requests. A
-server of type Unknown or PossiblePrimary is not available; other types are available.</p>
-<p><strong>Client</strong><br />
-Software that communicates with a MongoDB deployment. This includes both drivers and mongos.</p>
-<p><strong>Candidate</strong><br />
-Describes servers in a deployment that enter the selection process, determined by the read preference
-<code>mode</code> parameter and the servers' type. Depending on the <code>mode</code>, candidate servers might only include secondaries or
-might apply to all servers in the deployment.</p>
-<p><strong>Deployment</strong><br />
-One or more servers that collectively provide access to a single logical set of MongoDB databases.</p>
-<p><strong>Command</strong><br />
-An OP_QUERY operation targeting the '$cmd' collection namespace.</p>
-<p><strong>Direct connection</strong><br />
-A driver connection mode that sends all database operations to a single server without regard for
-type.</p>
+<p><strong>Available</strong></p>
+<p>Describes a server that is believed to be reachable over the network and able to respond to requests. A server of type
+Unknown or PossiblePrimary is not available; other types are available.</p>
+<p><strong>Client</strong></p>
+<p>Software that communicates with a MongoDB deployment. This includes both drivers and mongos.</p>
+<p><strong>Candidate</strong></p>
+<p>Describes servers in a deployment that enter the selection process, determined by the read preference <code>mode</code> parameter
+and the servers' type. Depending on the <code>mode</code>, candidate servers might only include secondaries or might apply to all
+servers in the deployment.</p>
+<p><strong>Deployment</strong></p>
+<p>One or more servers that collectively provide access to a single logical set of MongoDB databases.</p>
+<p><strong>Command</strong></p>
+<p>An OP_QUERY operation targeting the '$cmd' collection namespace.</p>
+<p><strong>Direct connection</strong></p>
+<p>A driver connection mode that sends all database operations to a single server without regard for type.</p>
 <p><span id="eligible"></span></p>
-<p><strong>Eligible</strong><br />
-Describes candidate servers that also meet the criteria specified by the <code>tag_sets</code> and
-<code>maxStalenessSeconds</code> read preference parameters.</p>
-<p><strong>Hedged Read</strong><br />
-A server mode in which the same query is dispatched in parallel to multiple replica set members.</p>
-<p><strong>Immediate topology check</strong><br />
-For a multi-threaded or asynchronous client, this means waking all server monitors for an
-immediate check. For a single-threaded client, this means a (blocking) scan of all servers.</p>
-<p><strong>Latency window</strong><br />
-When choosing between several suitable servers, the latency window is the range of acceptable RTTs
-from the shortest RTT to the shortest RTT plus the local threshold. E.g. if the shortest RTT is 15ms and the local
-threshold is 200ms, then the latency window ranges from 15ms - 215ms.</p>
-<p><strong>Local threshold</strong><br />
-The maximum acceptable difference in milliseconds between the shortest RTT and the longest RTT of
-servers suitable to be selected.</p>
-<p><strong>Mode</strong><br />
-One of several enumerated values used as part of a read preference, defining which server types are candidates
-for reads and the semantics for choosing a specific one.</p>
-<p><strong>Primary</strong><br />
-Describes a server of type RSPrimary.</p>
-<p><strong>Query</strong><br />
-An OP_QUERY operation targeting a regular (non '$cmd') collection namespace.</p>
-<p><strong>Read preference</strong><br />
-The parameters describing which servers in a deployment can receive read operations, including
-<code>mode</code>, <code>tag_sets</code>, <code>maxStalenessSeconds</code>, and <code>hedge</code>.</p>
-<p><strong>RS</strong><br />
-Abbreviation for "replica set".</p>
-<p><strong>RTT</strong><br />
-Abbreviation for "round trip time".</p>
-<p><strong>Round trip time</strong><br />
-The time in milliseconds to execute a <code>hello</code> or legacy hello command and receive a response for a
-given server. This spec differentiates between the RTT of a single <code>hello</code> or legacy hello command and a server's
-<em>average</em> RTT over several such commands.</p>
-<p><strong>Secondary</strong><br />
-A server of type RSSecondary.</p>
-<p><strong>Staleness</strong><br />
-A worst-case estimate of how far a secondary's replication lags behind the primary's last write.</p>
-<p><strong>Server</strong><br />
-A mongod or mongos process.</p>
-<p><strong>Server selection</strong><br />
-The process by which a server is chosen for a database operation out of all potential servers in a
-deployment.</p>
-<p><strong>Server type</strong><br />
-An enumerated type indicating whether a server is up or down, whether it is a mongod or mongos, whether
-it belongs to a replica set and, if so, what role it serves in the replica set. See the
+<p><strong>Eligible</strong></p>
+<p>Describes candidate servers that also meet the criteria specified by the <code>tag_sets</code> and <code>maxStalenessSeconds</code> read
+preference parameters.</p>
+<p><strong>Hedged Read</strong></p>
+<p>A server mode in which the same query is dispatched in parallel to multiple replica set members.</p>
+<p><strong>Immediate topology check</strong></p>
+<p>For a multi-threaded or asynchronous client, this means waking all server monitors for an immediate check. For a
+single-threaded client, this means a (blocking) scan of all servers.</p>
+<p><strong>Latency window</strong></p>
+<p>When choosing between several suitable servers, the latency window is the range of acceptable RTTs from the shortest RTT
+to the shortest RTT plus the local threshold. E.g. if the shortest RTT is 15ms and the local threshold is 200ms, then
+the latency window ranges from 15ms - 215ms.</p>
+<p><strong>Local threshold</strong></p>
+<p>The maximum acceptable difference in milliseconds between the shortest RTT and the longest RTT of servers suitable to be
+selected.</p>
+<p><strong>Mode</strong></p>
+<p>One of several enumerated values used as part of a read preference, defining which server types are candidates for reads
+and the semantics for choosing a specific one.</p>
+<p><strong>Primary</strong></p>
+<p>Describes a server of type RSPrimary.</p>
+<p><strong>Query</strong></p>
+<p>An OP_QUERY operation targeting a regular (non '$cmd') collection namespace.</p>
+<p><strong>Read preference</strong></p>
+<p>The parameters describing which servers in a deployment can receive read operations, including <code>mode</code>, <code>tag_sets</code>,
+<code>maxStalenessSeconds</code>, and <code>hedge</code>.</p>
+<p><strong>RS</strong></p>
+<p>Abbreviation for "replica set".</p>
+<p><strong>RTT</strong></p>
+<p>Abbreviation for "round trip time".</p>
+<p><strong>Round trip time</strong></p>
+<p>The time in milliseconds to execute a <code>hello</code> or legacy hello command and receive a response for a given server. This
+spec differentiates between the RTT of a single <code>hello</code> or legacy hello command and a server's <em>average</em> RTT over
+several such commands.</p>
+<p><strong>Secondary</strong></p>
+<p>A server of type RSSecondary.</p>
+<p><strong>Staleness</strong></p>
+<p>A worst-case estimate of how far a secondary's replication lags behind the primary's last write.</p>
+<p><strong>Server</strong></p>
+<p>A mongod or mongos process.</p>
+<p><strong>Server selection</strong></p>
+<p>The process by which a server is chosen for a database operation out of all potential servers in a deployment.</p>
+<p><strong>Server type</strong></p>
+<p>An enumerated type indicating whether a server is up or down, whether it is a mongod or mongos, whether it belongs to a
+replica set and, if so, what role it serves in the replica set. See the
 <a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
 spec for more details.</p>
-<p><strong>Suitable</strong><br />
-Describes a server that meets all specified criteria for a read or write operation.</p>
-<p><strong>Tag</strong><br />
-A single key/value pair describing either (1) a user-specified characteristic of a replica set member or (2) a
-desired characteristic for the target of a read operation. The key and value have no semantic meaning to the driver;
-they are arbitrary user choices.</p>
-<p><strong>Tag set</strong><br />
-A document of zero or more tags. Each member of a replica set can be configured with zero or one tag set.</p>
-<p><strong>Tag set list</strong><br />
-A list of zero or more tag sets. A read preference might have a tag set list used for selecting
-servers.</p>
-<p><strong>Topology</strong><br />
-The state of a deployment, including its type, which servers are members, and the server types of members.</p>
-<p><strong>Topology type</strong><br />
-An enumerated type indicating the semantics for monitoring servers and selecting servers for database
-operations. See the
+<p><strong>Suitable</strong></p>
+<p>Describes a server that meets all specified criteria for a read or write operation.</p>
+<p><strong>Tag</strong></p>
+<p>A single key/value pair describing either (1) a user-specified characteristic of a replica set member or (2) a desired
+characteristic for the target of a read operation. The key and value have no semantic meaning to the driver; they are
+arbitrary user choices.</p>
+<p><strong>Tag set</strong></p>
+<p>A document of zero or more tags. Each member of a replica set can be configured with zero or one tag set.</p>
+<p><strong>Tag set list</strong></p>
+<p>A list of zero or more tag sets. A read preference might have a tag set list used for selecting servers.</p>
+<p><strong>Topology</strong></p>
+<p>The state of a deployment, including its type, which servers are members, and the server types of members.</p>
+<p><strong>Topology type</strong></p>
+<p>An enumerated type indicating the semantics for monitoring servers and selecting servers for database operations. See
+the
 <a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
 spec for more details.</p>
 <h3 id="assumptions"><a class="header" href="#assumptions">Assumptions</a></h3>
@@ -409,19 +406,19 @@ If <code>tag_sets</code> and <code>maxStalenessSeconds</code> are set, they dete
 primaries or secondaries are deemed suitable. Topology types Single and Sharded have different selection criteria and
 are described elsewhere.</p>
 <p>Clients MUST support these modes:</p>
-<p><strong>primary</strong><br />
-Only an available primary is suitable.</p>
-<p><strong>secondary</strong><br />
-All secondaries (and <em>only</em> secondaries) are candidates, but only <a href="#eligible">eligible</a> candidates (i.e.
-after applying <code>tag_sets</code> and <code>maxStalenessSeconds</code>) are suitable.</p>
-<p><strong>primaryPreferred</strong><br />
-If a primary is available, only the primary is suitable. Otherwise, all secondaries are
-candidates, but only eligible secondaries are suitable.</p>
-<p><strong>secondaryPreferred</strong><br />
-All secondaries are candidates. If there is at least one eligible secondary, only eligible
-secondaries are suitable. Otherwise, when there are no eligible secondaries, the primary is suitable.</p>
-<p><strong>nearest</strong><br />
-The primary and all secondaries are candidates, but only eligible candidates are suitable.</p>
+<p><strong>primary</strong></p>
+<p>Only an available primary is suitable.</p>
+<p><strong>secondary</strong></p>
+<p>All secondaries (and <em>only</em> secondaries) are candidates, but only <a href="#eligible">eligible</a> candidates (i.e. after applying
+<code>tag_sets</code> and <code>maxStalenessSeconds</code>) are suitable.</p>
+<p><strong>primaryPreferred</strong></p>
+<p>If a primary is available, only the primary is suitable. Otherwise, all secondaries are candidates, but only eligible
+secondaries are suitable.</p>
+<p><strong>secondaryPreferred</strong></p>
+<p>All secondaries are candidates. If there is at least one eligible secondary, only eligible secondaries are suitable.
+Otherwise, when there are no eligible secondaries, the primary is suitable.</p>
+<p><strong>nearest</strong></p>
+<p>The primary and all secondaries are candidates, but only eligible candidates are suitable.</p>
 <p><em>Note on other server types</em>: The
 <a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
 spec defines several other server types that could appear in a replica set. Such types are never candidates, eligible or
@@ -1469,8 +1466,7 @@ specification</li>
 <p>2015-06-26: Updated single-threaded selection logic with "stale" and serverSelectionTryOnce.</p>
 </li>
 <li>
-<p>2015-08-10: Updated single-threaded selection logic to ensure a scan always<br />
-happens at least once under
+<p>2015-08-10: Updated single-threaded selection logic to ensure a scan always happens at least once under
 serverSelectionTryOnce if selection fails. Removed the general selection algorithm and put full algorithms for each of
 the single- and multi-threaded sections. Added a requirement that single-threaded drivers document selection time
 expectations.</p>
@@ -1479,51 +1475,43 @@ expectations.</p>
 <p>2016-07-21: Updated for Max Staleness support.</p>
 </li>
 <li>
-<p>2016-08-03: Clarify selection algorithm, in particular that maxStalenessMS<br />
-comes before tag_sets.</p>
+<p>2016-08-03: Clarify selection algorithm, in particular that maxStalenessMS comes before tag_sets.</p>
 </li>
 <li>
 <p>2016-10-24: Rename option from "maxStalenessMS" to "maxStalenessSeconds".</p>
 </li>
 <li>
-<p>2016-10-25: Change minimum maxStalenessSeconds value from 2 *<br />
-heartbeatFrequencyMS to heartbeatFrequencyMS +
+<p>2016-10-25: Change minimum maxStalenessSeconds value from 2 * heartbeatFrequencyMS to heartbeatFrequencyMS +
 idleWritePeriodMS (with proper conversions of course).</p>
 </li>
 <li>
-<p>2016-11-01: Update formula for secondary staleness estimate with the<br />
-equivalent, and clearer, expression of this
+<p>2016-11-01: Update formula for secondary staleness estimate with the equivalent, and clearer, expression of this
 formula from the Max Staleness Spec</p>
 </li>
 <li>
-<p>2016-11-21: Revert changes that would allow idleWritePeriodMS to change in the<br />
-future, require maxStalenessSeconds to
+<p>2016-11-21: Revert changes that would allow idleWritePeriodMS to change in the future, require maxStalenessSeconds to
 be at least 90.</p>
 </li>
 <li>
-<p>2017-06-07: Clarify socketCheckIntervalMS behavior, single-threaded drivers<br />
-must retry selection after checking an
+<p>2017-06-07: Clarify socketCheckIntervalMS behavior, single-threaded drivers must retry selection after checking an
 idle socket and discovering it is broken.</p>
 </li>
 <li>
 <p>2017-11-10: Added application-configurated server selector.</p>
 </li>
 <li>
-<p>2017-11-12: Specify read preferences for OP_MSG with direct connection, and<br />
-delete obsolete comment direct
-connections to secondaries getting "not writable primary" errors by design.</p>
+<p>2017-11-12: Specify read preferences for OP_MSG with direct connection, and delete obsolete comment direct connections
+to secondaries getting "not writable primary" errors by design.</p>
 </li>
 <li>
 <p>2018-01-22: Clarify that $query wrapping is only for OP_QUERY</p>
 </li>
 <li>
-<p>2018-01-22: Clarify that $out on aggregate follows the "$out Aggregation<br />
-Pipeline Operator" spec and warns if read
+<p>2018-01-22: Clarify that $out on aggregate follows the "$out Aggregation Pipeline Operator" spec and warns if read
 preference is not primary.</p>
 </li>
 <li>
-<p>2018-01-29: Remove reference to '$out Aggregation spec'. Clarify runCommand<br />
-selection rules.</p>
+<p>2018-01-29: Remove reference to '$out Aggregation spec'. Clarify runCommand selection rules.</p>
 </li>
 <li>
 <p>2018-12-13: Update tag_set example to use only String values</p>
@@ -1556,9 +1544,8 @@ selection rules.</p>
 <p>2021-09-03: Clarify that wire version check only applies to available servers.</p>
 </li>
 <li>
-<p>2021-09-28: Note that 5.0+ secondaries support aggregate with write stages<br />
-(e.g. <code>$out</code> and <code>$merge</code>). Clarify
-setting <code>SecondaryOk</code> wire protocol flag or <code>$readPreference</code> global command argument for replica set topology.</p>
+<p>2021-09-28: Note that 5.0+ secondaries support aggregate with write stages (e.g. <code>$out</code> and <code>$merge</code>). Clarify setting
+<code>SecondaryOk</code> wire protocol flag or <code>$readPreference</code> global command argument for replica set topology.</p>
 </li>
 <li>
 <p>2022-01-19: Require that timeouts be applied per the client-side operations timeout spec</p>

@@ -189,30 +189,29 @@ how a driver interacts with the server to implement snapshot reads.</p>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
-<p><strong>ClientSession</strong><br />
-The driver object representing a client session and the operations that can be performed on it.</p>
-<p><strong>MongoClient</strong><br />
-The root object of a driver's API. MAY be named differently in some drivers.</p>
-<p><strong>MongoCollection</strong><br />
-The driver object representing a collection and the operations that can be performed on it. MAY be
-named differently in some drivers.</p>
-<p><strong>MongoDatabase</strong><br />
-The driver object representing a database and the operations that can be performed on it. MAY be
-named differently in some drivers.</p>
-<p><strong>ServerSession</strong><br />
-The driver object representing a server session.</p>
-<p><strong>Session</strong><br />
-A session is an abstract concept that represents a set of sequential operations executed by an application
-that are related in some way. This specification defines how sessions are used to implement snapshot reads.</p>
-<p><strong>Snapshot reads</strong><br />
-Reads with read concern level <code>snapshot</code> that occur outside of transactions on both the primary and
-secondary nodes, including in sharded clusters. Snapshots reads are majority committed reads.</p>
-<p><strong>Snapshot timestamp</strong><br />
-Snapshot timestamp, representing timestamp of the first supported read operation (i.e.
-find/aggregate/distinct) in the session. The server creates a cursor in response to a snapshot find/aggregate command
-and reports <code>atClusterTime</code> within the <code>cursor</code> field in the response. For the distinct command the server adds a
-top-level <code>atClusterTime</code> field to the response. The <code>atClusterTime</code> field represents the timestamp of the read and is
-guaranteed to be majority committed.</p>
+<p><strong>ClientSession</strong></p>
+<p>The driver object representing a client session and the operations that can be performed on it.</p>
+<p><strong>MongoClient</strong></p>
+<p>The root object of a driver's API. MAY be named differently in some drivers.</p>
+<p><strong>MongoCollection</strong></p>
+<p>The driver object representing a collection and the operations that can be performed on it. MAY be named differently in
+some drivers.</p>
+<p><strong>MongoDatabase</strong></p>
+<p>The driver object representing a database and the operations that can be performed on it. MAY be named differently in
+some drivers.</p>
+<p><strong>ServerSession</strong></p>
+<p>The driver object representing a server session.</p>
+<p><strong>Session</strong></p>
+<p>A session is an abstract concept that represents a set of sequential operations executed by an application that are
+related in some way. This specification defines how sessions are used to implement snapshot reads.</p>
+<p><strong>Snapshot reads</strong></p>
+<p>Reads with read concern level <code>snapshot</code> that occur outside of transactions on both the primary and secondary nodes,
+including in sharded clusters. Snapshots reads are majority committed reads.</p>
+<p><strong>Snapshot timestamp</strong></p>
+<p>Snapshot timestamp, representing timestamp of the first supported read operation (i.e. find/aggregate/distinct) in the
+session. The server creates a cursor in response to a snapshot find/aggregate command and reports <code>atClusterTime</code> within
+the <code>cursor</code> field in the response. For the distinct command the server adds a top-level <code>atClusterTime</code> field to the
+response. The <code>atClusterTime</code> field represents the timestamp of the read and is guaranteed to be majority committed.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <p>An application requests snapshot reads by creating a <code>ClientSession</code> with options that specify that snapshot reads are
 desired. An application then passes the session as an argument to methods in the <code>MongoDatabase</code> and <code>MongoCollection</code>

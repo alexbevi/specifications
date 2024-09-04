@@ -187,12 +187,11 @@
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
-<p><strong>Structured logging</strong><br />
-Structured logging refers to producing log messages in a structured format, i.e. a series of
-key-value pairs, which can be converted to external formats such as JSON.</p>
-<p><strong>Unstructured logging</strong><br />
-Unstructured logging refers to producing string log messages which embed all attached
-information within that string.</p>
+<p><strong>Structured logging</strong></p>
+<p>Structured logging refers to producing log messages in a structured format, i.e. a series of key-value pairs, which can
+be converted to external formats such as JSON.</p>
+<p><strong>Unstructured logging</strong></p>
+<p>Unstructured logging refers to producing string log messages which embed all attached information within that string.</p>
 <h3 id="implementation-requirements"><a class="header" href="#implementation-requirements">Implementation requirements</a></h3>
 <p>Drivers SHOULD implement support for logging in a manner that is idiomatic for their language and ecosystem.</p>
 <h4 id="minimizing-required-code-changes"><a class="header" href="#minimizing-required-code-changes">Minimizing Required Code Changes</a></h4>
@@ -401,32 +400,30 @@ of drivers for our internal teams, and improve our documentation around troubles
 <h3 id="truncation-of-large-documents"><a class="header" href="#truncation-of-large-documents">Truncation of large documents</a></h3>
 <ol>
 <li>
-<p>Why have an option?<br />
-We considered a number of approaches for dealing with documents of potentially very large size
-in log messages, e.g. command documents, including 1) always logging the full document, 2) only logging documents
-with the potential to be large when the user opts in, and 3) truncating large documents by default, but allowing the
-user to adjust the maximum length logged. We chose the third option as we felt it struck the best balance between
-concerns around readability and usability of log messages. In the case where data is sufficiently small, the default
-behavior will show the user the full data. In the case where data is large, the user will receive a readable message
-with truncated data, but have the option to see more or all of the data.</p>
+<p>Why have an option?</p>
+<p>We considered a number of approaches for dealing with documents of potentially very large size in log messages, e.g.
+command documents, including 1) always logging the full document, 2) only logging documents with the potential to be
+large when the user opts in, and 3) truncating large documents by default, but allowing the user to adjust the
+maximum length logged. We chose the third option as we felt it struck the best balance between concerns around
+readability and usability of log messages. In the case where data is sufficiently small, the default behavior will
+show the user the full data. In the case where data is large, the user will receive a readable message with truncated
+data, but have the option to see more or all of the data.</p>
 </li>
 <li>
-<p>Why are the units for max document length flexible?<br />
-String APIs vary across languages, and not all drivers will be
-able to easily and efficiently truncate strings in the same exact manner. The important thing is that the option
-exists and that its default value is reasonable, and for all possible unit choices (byte, code point, code unit, or
-grapheme) we felt 1000 was a reasonable default. See <a href="https://exploringjs.com/impatient-js/ch_unicode.html">here</a> for
-a helpful primer on related Unicode concepts.</p>
+<p>Why are the units for max document length flexible?</p>
+<p>String APIs vary across languages, and not all drivers will be able to easily and efficiently truncate strings in the
+same exact manner. The important thing is that the option exists and that its default value is reasonable, and for
+all possible unit choices (byte, code point, code unit, or grapheme) we felt 1000 was a reasonable default. See
+<a href="https://exploringjs.com/impatient-js/ch_unicode.html">here</a> for a helpful primer on related Unicode concepts.</p>
 </li>
 <li>
-<p>Why do we implement naive truncation rather than truncating the JSON so it is still valid?<br />
-Designing and
-implementing a truncation algorithm for JSON that outputs valid JSON, but fits in as much of the original JSON as
-possible, would be non-trivial. The server team wrote an entire separate truncation design document when they
-implemented this for their log messages. This is more of a necessity for the server where the entire log message is
-JSON, but we don't know if parsing the documents included in log messages is something that users will actually need
-to do. Furthermore, any users who want parseable documents have an escape hatch to do so: they can set the max
-document length to a very large value. If we hear of use cases in the future for parsing the documents in log
+<p>Why do we implement naive truncation rather than truncating the JSON so it is still valid?</p>
+<p>Designing and implementing a truncation algorithm for JSON that outputs valid JSON, but fits in as much of the
+original JSON as possible, would be non-trivial. The server team wrote an entire separate truncation design document
+when they implemented this for their log messages. This is more of a necessity for the server where the entire log
+message is JSON, but we don't know if parsing the documents included in log messages is something that users will
+actually need to do. Furthermore, any users who want parseable documents have an escape hatch to do so: they can set
+the max document length to a very large value. If we hear of use cases in the future for parsing the documents in log
 messages, we could make an additive change to this specification to permit a smarter truncation algorithm.</p>
 </li>
 </ol>
@@ -526,8 +523,7 @@ on individual clients or for particular namespaces.</p>
 <p>2022-12-29: Fix typo in trace log level example</p>
 </li>
 <li>
-<p>2023-01-04: Elaborate on treatment of invalid values of environment variables.<br />
-Permit drivers to omit direct support
+<p>2023-01-04: Elaborate on treatment of invalid values of environment variables. Permit drivers to omit direct support
 for logging to file so long as they provide a straightforward way for users to consume the log messages
 programmatically and write to a file themselves. Require that programmatic configuration take precedence over
 environment variables.</p>

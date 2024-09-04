@@ -188,19 +188,18 @@ both of 2 unique APIs can be chosen to be implemented.</p>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h4 id="terms"><a class="header" href="#terms">Terms</a></h4>
-<p><strong>Collection</strong><br />
-The term <code>Collection</code> references the object in the driver that represents a collection on the server.</p>
-<p><strong>Cursor</strong><br />
-The term <code>Cursor</code> references the driver's cursor object.</p>
-<p><strong>Iterable</strong><br />
-The term <code>Iterable</code> is to describe an object that is a sequence of elements that can be iterated over.</p>
-<p><strong>Document</strong><br />
-The term <code>Document</code> refers to the implementation in the driver's language of a BSON document.</p>
-<p><strong>Result</strong><br />
-The term <code>Result</code> references the object that is normally returned by the driver as the result of a command
-execution. In the case of situations where an actual command is not executed, rather an insert or a query, an object
-that adheres to the same interface must be returned with as much information as possible that could be obtained from the
-operation.</p>
+<p><strong>Collection</strong></p>
+<p>The term <code>Collection</code> references the object in the driver that represents a collection on the server.</p>
+<p><strong>Cursor</strong></p>
+<p>The term <code>Cursor</code> references the driver's cursor object.</p>
+<p><strong>Iterable</strong></p>
+<p>The term <code>Iterable</code> is to describe an object that is a sequence of elements that can be iterated over.</p>
+<p><strong>Document</strong></p>
+<p>The term <code>Document</code> refers to the implementation in the driver's language of a BSON document.</p>
+<p><strong>Result</strong></p>
+<p>The term <code>Result</code> references the object that is normally returned by the driver as the result of a command execution. In
+the case of situations where an actual command is not executed, rather an insert or a query, an object that adheres to
+the same interface must be returned with as much information as possible that could be obtained from the operation.</p>
 <h3 id="guidance"><a class="header" href="#guidance">Guidance</a></h3>
 <h4 id="documentation"><a class="header" href="#documentation">Documentation</a></h4>
 <p>The documentation provided in code below is merely for driver authors and SHOULD NOT be taken as required documentation
@@ -1049,22 +1048,21 @@ interface SearchIndexView extends Iterable&lt;Document&gt; {
 }
 </code></pre>
 <h3 id="q--a"><a class="header" href="#q--a">Q &amp; A</a></h3>
-<p>Q: Where is write concern?<br />
-The <code>createIndexes</code> and <code>dropIndexes</code> commands take a write concern that indicates how the
-write is acknowledged. Since all operations defined in this specification are performed on a collection, it's uncommon
-that two different index operations on the same collection would use a different write concern. As such, the most
-natural place to indicate write concern is on the client, the database, or the collection itself and not the operations
-within it.</p>
+<p>Q: Where is write concern?</p>
+<p>The <code>createIndexes</code> and <code>dropIndexes</code> commands take a write concern that indicates how the write is acknowledged. Since
+all operations defined in this specification are performed on a collection, it's uncommon that two different index
+operations on the same collection would use a different write concern. As such, the most natural place to indicate write
+concern is on the client, the database, or the collection itself and not the operations within it.</p>
 <p>However, it might be that a driver needs to expose write concern to a user per operation for various reasons. It is
 permitted to allow a write concern option, but since writeConcern is a top-level command option, it MUST NOT be
 specified as part of an <code>IndexModel</code> passed into the helper. It SHOULD be specified via the options parameter of the
 helper. For example, it would be ambiguous to specify write concern for one or more models passed to <code>createIndexes()</code>,
 but it would not be to specify it via the <code>CreateIndexesOptions</code>.</p>
-<p>Q: What does the commitQuorum option do?<br />
-Prior to MongoDB 4.4, secondaries would simply replicate index builds once
-they were completed on the primary. Building indexes requires an exclusive lock on the collection being indexed, so the
-secondaries would be blocked from replicating all other operations while the index build took place. This would
-introduce replication lag correlated to however long the index build took.</p>
+<p>Q: What does the commitQuorum option do?</p>
+<p>Prior to MongoDB 4.4, secondaries would simply replicate index builds once they were completed on the primary. Building
+indexes requires an exclusive lock on the collection being indexed, so the secondaries would be blocked from replicating
+all other operations while the index build took place. This would introduce replication lag correlated to however long
+the index build took.</p>
 <p>Starting in MongoDB 4.4, secondaries build indexes simultaneously with the primary, and after starting an index build,
 the primary will wait for a certain number of data-bearing nodes, including itself, to have completed the build before
 it commits the index. <code>commitQuorum</code> configures this node requirement. Once the index is committed, all the secondaries
@@ -1074,21 +1072,21 @@ replication lag would be introduced. If a secondary had not finished building th
 committing the index.</p>
 <p>The server-default value for <code>commitQuorum</code> is "votingMembers", which means the primary will wait for all voting
 data-bearing nodes to complete building the index before it commits it.</p>
-<p>Q: Why would a user want to specify a non-default <code>commitQuorum</code>?<br />
-Like <code>w: "majority"</code>, <code>commitQuorum: "votingMembers"</code>
-doesn't consider non-voting data-bearing nodes such as analytics nodes. If a user wanted to ensure these nodes didn't
-lag behind, then they would specify <code>commitQuorum: &lt;total number of data-bearing nodes, including non-voting nodes&gt;</code>.
-Alternatively, if they wanted to ensure only specific non-voting nodes didn't lag behind, they could specify a
+<p>Q: Why would a user want to specify a non-default <code>commitQuorum</code></p>
+<p>Like <code>w: "majority"</code>, <code>commitQuorum: "votingMembers"</code> doesn't consider non-voting data-bearing nodes such as analytics
+nodes. If a user wanted to ensure these nodes didn't lag behind, then they would specify
+<code>commitQuorum: &lt;total number of data-bearing nodes, including non-voting nodes&gt;</code>. Alternatively, if they wanted to
+ensure only specific non-voting nodes didn't lag behind, they could specify a
 <a href="https://www.mongodb.com/docs/manual/reference/replica-configuration/#rsconf.settings.getLastErrorModes">custom getLastErrorMode based on the nodes' tag sets</a>
 (e.g. <code>commitQuorum: &lt;custom getLastErrorMode name&gt;</code>).</p>
 <p>Additionally, if a user has a high tolerance for replication lag, they can set a lower value for <code>commitQuorum</code>. This is
 useful for situations where certain secondaries take longer to build indexes than the primaries, and the user doesn't
 care if they lag behind.</p>
-<p>Q: What is the difference between write concern and <code>commitQuorum</code>?<br />
-While these two options share a lot in terms of how
-they are specified, they configure entirely different things. <code>commitQuorum</code> determines how much new replication lag an
-index build can tolerably introduce, but it says nothing of durability. Write concern specifies the durability
-requirements of an index build, but it makes no guarantees about introducing replication lag.</p>
+<p>Q: What is the difference between write concern and <code>commitQuorum</code>?</p>
+<p>While these two options share a lot in terms of how they are specified, they configure entirely different things.
+<code>commitQuorum</code> determines how much new replication lag an index build can tolerably introduce, but it says nothing of
+durability. Write concern specifies the durability requirements of an index build, but it makes no guarantees about
+introducing replication lag.</p>
 <p>For instance, an index built with <code>writeConcern: { w: 1 }, commitQuorum: "votingMembers"</code> could possibly be rolled back,
 but it will not introduce any new replication lag. Likewise, an index built with
 <code>writeConcern: { w: "majority", j: true }, commitQuorum: 0</code> will not be rolled back, but it may cause the secondaries to
@@ -1096,20 +1094,18 @@ lag. To ensure the index is both durable and will not introduce replication lag 
 <code>writeConcern: { w: "majority", j: true }, commitQuorum: "votingMembers"</code> must be used.</p>
 <p>Also note that, since indexes are built simultaneously, higher values of <code>commitQuorum</code> are not as expensive as higher
 values of <code>writeConcern</code>.</p>
-<p>Q: Why does the driver manually throw errors if the <code>commitQuorum</code> option is specified against a pre 4.4
-server?<br />
-Starting in 3.4, the server validates all options passed to the <code>createIndexes</code> command, but due to a bug in
-versions 4.2.0-4.2.5 of the server (SERVER-47193), specifying <code>commitQuorum</code> does not result in an error. The option is
-used internally by the server on those versions, and its value could have adverse effects on index builds. To prevent
-users from mistakenly specifying this option, drivers manually verify it is only sent to 4.4+ servers.</p>
+<p>Q: Why does the driver manually throw errors if the <code>commitQuorum</code> option is specified against a pre 4.4 server?<br>
+Starting in 3.4, the server validates all options passed to the <code>createIndexes</code> command, but due to a bug in versions
+4.2.0-4.2.5 of the server (SERVER-47193), specifying <code>commitQuorum</code> does not result in an error. The option is used
+internally by the server on those versions, and its value could have adverse effects on index builds. To prevent users
+from mistakenly specifying this option, drivers manually verify it is only sent to 4.4+ servers.</p>
 <h4 id="changelog"><a class="header" href="#changelog">Changelog</a></h4>
 <ul>
 <li>
 <p>2024-03-05: Migrated from reStructuredText to Markdown.</p>
 </li>
 <li>
-<p>2023-11-08: Clarify that <code>readConcern</code> and <code>writeConcern</code> must not be<br />
-applied to search index management commands.</p>
+<p>2023-11-08: Clarify that <code>readConcern</code> and <code>writeConcern</code> must not be applied to search index management commands.</p>
 </li>
 <li>
 <p>2023-07-27: Add search index management clarifications.</p>
@@ -1118,35 +1114,29 @@ applied to search index management commands.</p>
 <p>2023-05-18: Add the search index management API.</p>
 </li>
 <li>
-<p>2023-05-10: Merge index enumeration and index management specs and get rid of references<br />
-to legacy server versions.</p>
+<p>2023-05-10: Merge index enumeration and index management specs and get rid of references to legacy server versions.</p>
 </li>
 <li>
 <p>2022-10-05: Remove spec front matter and reformat changelog.</p>
 </li>
 <li>
-<p>2022-04-18: Added the <code>clustered</code> attribute to <code>IndexOptions</code> in order to<br />
-support clustered collections.</p>
+<p>2022-04-18: Added the <code>clustered</code> attribute to <code>IndexOptions</code> in order to support clustered collections.</p>
 </li>
 <li>
-<p>2022-02-10: Specified that <code>getMore</code> command must explicitly send inherited<br />
-comment.</p>
+<p>2022-02-10: Specified that <code>getMore</code> command must explicitly send inherited comment.</p>
 </li>
 <li>
 <p>2022-02-01: Added comment field to helper methods.</p>
 </li>
 <li>
-<p>2022-01-19: Require that timeouts be applied per the client-side operations<br />
-timeout spec.</p>
+<p>2022-01-19: Require that timeouts be applied per the client-side operations timeout spec.</p>
 </li>
 <li>
-<p>2020-03-30: Added options types to various helpers. Introduced <code>commitQuorum</code><br />
-option. Added deprecation message for
+<p>2020-03-30: Added options types to various helpers. Introduced <code>commitQuorum</code> option. Added deprecation message for
 <code>background</code> option.</p>
 </li>
 <li>
-<p>2019-04-24: Added <code>wildcardProjection</code> attribute to <code>IndexOptions</code> in order<br />
-to support setting a wildcard projection
+<p>2019-04-24: Added <code>wildcardProjection</code> attribute to <code>IndexOptions</code> in order to support setting a wildcard projection
 on a wildcard index.</p>
 </li>
 <li>
@@ -1156,20 +1146,17 @@ on a wildcard index.</p>
 <p>2017-05-31: Add Q &amp; A addressing write concern and maxTimeMS option.</p>
 </li>
 <li>
-<p>2016-10-11: Added note on 3.4 servers validation options passed to<br />
-<code>createIndexes</code>. Add note on server generated name
+<p>2016-10-11: Added note on 3.4 servers validation options passed to <code>createIndexes</code>. Add note on server generated name
 for the <code>_id</code> index.</p>
 </li>
 <li>
 <p>2016-08-08: Fixed <code>collation</code> language to not mention a collection default.</p>
 </li>
 <li>
-<p>2016-05-19: Added <code>collation</code> attribute to <code>IndexOptions</code> in order to<br />
-support setting a collation on an index.</p>
+<p>2016-05-19: Added <code>collation</code> attribute to <code>IndexOptions</code> in order to support setting a collation on an index.</p>
 </li>
 <li>
-<p>2015-09-17: Added <code>partialFilterExpression</code> attribute to <code>IndexOptions</code> in<br />
-order to support partial indexes. Fixed
+<p>2015-09-17: Added <code>partialFilterExpression</code> attribute to <code>IndexOptions</code> in order to support partial indexes. Fixed
 "provides" typo.</p>
 </li>
 </ul>

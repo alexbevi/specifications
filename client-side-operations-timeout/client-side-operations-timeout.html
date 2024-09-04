@@ -188,9 +188,9 @@ but not limited to server selection, connection checkout, and server-side execut
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
-<p>min(a, b)<br />
-Shorthand for "the minimum of a and b" where <code>a</code> and <code>b</code> are numeric values. For any cases where 0 means
-"infinite" (e.g. <a href="#timeoutms">timeoutMS</a>), <code>min(0, other)</code> MUST evaluate to <code>other</code>.</p>
+<p><strong>min(a, b)</strong></p>
+<p>Shorthand for "the minimum of a and b" where <code>a</code> and <code>b</code> are numeric values. For any cases where 0 means "infinite"
+(e.g. <a href="#timeoutms">timeoutMS</a>), <code>min(0, other)</code> MUST evaluate to <code>other</code>.</p>
 <h3 id="mongoclient-configuration"><a class="header" href="#mongoclient-configuration">MongoClient Configuration</a></h3>
 <p>This specification introduces a new configuration option and deprecates some existing options.</p>
 <h4 id="timeoutms"><a class="header" href="#timeoutms">timeoutMS</a></h4>

@@ -529,13 +529,11 @@ client-side setting.</p>
 <p>2016-10-24: Rename option from "maxStalenessMS" to "maxStalenessSeconds".</p>
 </li>
 <li>
-<p>2016-10-25: Change minimum maxStalenessSeconds value from 2 *<br />
-heartbeatFrequencyMS to heartbeatFrequencyMS +
+<p>2016-10-25: Change minimum maxStalenessSeconds value from 2 * heartbeatFrequencyMS to heartbeatFrequencyMS +
 idleWritePeriodMS (with proper conversions of course).</p>
 </li>
 <li>
-<p>2016-11-21: Revert changes that would allow idleWritePeriodMS to change in the<br />
-future, require maxStalenessSeconds to
+<p>2016-11-21: Revert changes that would allow idleWritePeriodMS to change in the future, require maxStalenessSeconds to
 be at least 90.</p>
 </li>
 </ul>

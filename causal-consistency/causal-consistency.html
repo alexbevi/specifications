@@ -188,42 +188,42 @@ consistency.</p>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
-<p><strong>Causal consistency</strong><br />
-A property that guarantees that an application can read its own writes and that a later read
-will never observe a version of the data that is older than an earlier read.</p>
-<p><strong>ClientSession</strong><br />
-The driver object representing a client session and the operations that can be performed on it.</p>
-<p><strong>Cluster time</strong><br />
-The current cluster time. The server reports its view of the current cluster time in the
-<code>$clusterTime</code> field in responses from the server and the driver participates in distributing the current cluster time
-to all nodes (called "gossipping the cluster time") by sending the highest <code>$clusterTime</code> it has seen so far in messages
-it sends to mongos servers. The current cluster time is a logical time, but is digitally signed to prevent malicious
-clients from propagating invalid cluster times. Cluster time is only used in replica sets and sharded clusters.</p>
-<p><strong>Logical time</strong><br />
-A time-like quantity that can be used to determine the order in which events occurred. Logical time is
-represented as a BsonTimestamp.</p>
-<p><strong>MongoClient</strong><br />
-The root object of a driver's API. MAY be named differently in some drivers.</p>
-<p><strong>MongoCollection</strong><br />
-The driver object representing a collection and the operations that can be performed on it. MAY be
-named differently in some drivers.</p>
-<p><strong>MongoDatabase</strong><br />
-The driver object representing a database and the operations that can be performed on it. MAY be
-named differently in some drivers.</p>
-<p><strong>Operation time</strong><br />
-The logical time at which an operation occurred. The server reports the operation time in the
-response to all commands, including error responses. The operation time by definition is always less than or equal to
-the cluster time. Operation times are tracked on a per <code>ClientSession</code> basis, so the <code>operationTime</code> of each
-<code>ClientSession</code> corresponds to the time of the last operation performed in that particular <code>ClientSession</code>.</p>
-<p><strong>ServerSession</strong><br />
-The driver object representing a server session.</p>
-<p><strong>Session</strong><br />
-A session is an abstract concept that represents a set of sequential operations executed by an application
-that are related in some way. This specification defines how sessions are used to implement causal consistency.</p>
-<p><strong>Unacknowledged writes</strong><br />
-Unacknowledged writes are write operations that are sent to the server without waiting for a
-reply acknowledging the write. See the "Unacknowledged Writes" section below for information on how unacknowledged
-writes interact with causal consistency.</p>
+<p><strong>Causal consistency</strong></p>
+<p>A property that guarantees that an application can read its own writes and that a later read will never observe a
+version of the data that is older than an earlier read.</p>
+<p><strong>ClientSession</strong></p>
+<p>The driver object representing a client session and the operations that can be performed on it.</p>
+<p><strong>Cluster time</strong></p>
+<p>The current cluster time. The server reports its view of the current cluster time in the <code>$clusterTime</code> field in
+responses from the server and the driver participates in distributing the current cluster time to all nodes (called
+"gossipping the cluster time") by sending the highest <code>$clusterTime</code> it has seen so far in messages it sends to mongos
+servers. The current cluster time is a logical time, but is digitally signed to prevent malicious clients from
+propagating invalid cluster times. Cluster time is only used in replica sets and sharded clusters.</p>
+<p><strong>Logical time</strong></p>
+<p>A time-like quantity that can be used to determine the order in which events occurred. Logical time is represented as a
+BsonTimestamp.</p>
+<p><strong>MongoClient</strong></p>
+<p>The root object of a driver's API. MAY be named differently in some drivers.</p>
+<p><strong>MongoCollection</strong></p>
+<p>The driver object representing a collection and the operations that can be performed on it. MAY be named differently in
+some drivers.</p>
+<p><strong>MongoDatabase</strong></p>
+<p>The driver object representing a database and the operations that can be performed on it. MAY be named differently in
+some drivers.</p>
+<p><strong>Operation time</strong></p>
+<p>The logical time at which an operation occurred. The server reports the operation time in the response to all commands,
+including error responses. The operation time by definition is always less than or equal to the cluster time. Operation
+times are tracked on a per <code>ClientSession</code> basis, so the <code>operationTime</code> of each <code>ClientSession</code> corresponds to the time
+of the last operation performed in that particular <code>ClientSession</code>.</p>
+<p><strong>ServerSession</strong></p>
+<p>The driver object representing a server session.</p>
+<p><strong>Session</strong></p>
+<p>A session is an abstract concept that represents a set of sequential operations executed by an application that are
+related in some way. This specification defines how sessions are used to implement causal consistency.</p>
+<p><strong>Unacknowledged writes</strong></p>
+<p>Unacknowledged writes are write operations that are sent to the server without waiting for a reply acknowledging the
+write. See the "Unacknowledged Writes" section below for information on how unacknowledged writes interact with causal
+consistency.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <p>An application requests causal consistency by creating a <code>ClientSession</code> with options that specify that causal
 consistency is desired. An application then passes the session as an argument to methods in the <code>MongoDatabase</code> and
@@ -544,13 +544,11 @@ resolving many discussions of spec details. A final reference implementation mus
 <p>2017-10-04: Added advanceOperationTime</p>
 </li>
 <li>
-<p>2017-09-28: Remove remaining references to collections being associated with<br />
-sessions. Update spec to reflect that
+<p>2017-09-28: Remove remaining references to collections being associated with sessions. Update spec to reflect that
 replica sets use $clusterTime also now.</p>
 </li>
 <li>
-<p>2017-09-13: Renamed "causally consistent reads" to "causal consistency". If no<br />
-value is supplied for
+<p>2017-09-13: Renamed "causally consistent reads" to "causal consistency". If no value is supplied for
 <code>causallyConsistent</code> assume true.</p>
 </li>
 </ul>

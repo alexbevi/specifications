@@ -527,8 +527,7 @@ firewall with outbound allowLists, and this benefit is worth adding another URI 
 <pre><code class="language-bash">find ~/profile/Library/Keychains -name 'ocspcache.sqlite3' \
 -exec sqlite3 "{}" 'DELETE FROM responses ;' \;
 </code></pre>
-<p>To delete only "Let's Encrypt" related entries, the following command<br />
-could be used:</p>
+<p>To delete only "Let's Encrypt" related entries, the following command could be used:</p>
 <pre><code class="language-bash">find ~/profile/Library/Keychains -name 'ocspcache.sqlite3' \
 -exec sqlite3 "{}" \
 'DELETE FROM responses WHERE responderURI LIKE "http://%.letsencrypt.org%";' \;
@@ -589,18 +588,15 @@ OCSP cache for a response from an OCSP endpoint specified in the server's certif
 <p>2021-04-07: Updated terminology to use allowList.</p>
 </li>
 <li>
-<p>2020-07-01: Default tlsDisableOCSPEndpointCheck or<br />
-tlsDisableCertificateRevocationCheck to true in the case that a
+<p>2020-07-01: Default tlsDisableOCSPEndpointCheck or tlsDisableCertificateRevocationCheck to true in the case that a
 driver's TLS library exhibits hard-fail behavior and add provision for platform-specific defaults.</p>
 </li>
 <li>
-<p>2020-03-20: Clarify OCSP documentation requirements for drivers unable to<br />
-enable OCSP by default on a per MongoClient
+<p>2020-03-20: Clarify OCSP documentation requirements for drivers unable to enable OCSP by default on a per MongoClient
 basis.</p>
 </li>
 <li>
-<p>2020-03-03: Add tlsDisableCertificateRevocationCheck URI option. Add Go as a<br />
-reference implementation. Add hard-fail
+<p>2020-03-03: Add tlsDisableCertificateRevocationCheck URI option. Add Go as a reference implementation. Add hard-fail
 backwards compatibility documentation requirements.</p>
 </li>
 <li>
@@ -613,8 +609,7 @@ backwards compatibility documentation requirements.</p>
 <p>2020-02-10: Add cache requirement.</p>
 </li>
 <li>
-<p>2020-01-31: Add SNI requirement and clarify design rationale regarding<br />
-minimizing round trips.</p>
+<p>2020-01-31: Add SNI requirement and clarify design rationale regarding minimizing round trips.</p>
 </li>
 <li>
 <p>2020-01-28: Clarify behavior regarding nonces and tolerance periods.</p>

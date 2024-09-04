@@ -370,7 +370,7 @@ default is to not send a value.</p>
 "transaction committed", and "transaction aborted". It transitions among these states according to the following
 diagram:</p>
 <p><img src="client-session-transaction-states.png"
-style="width:6.5in;height:3.68056in" alt="states" /><br />
+style="width:6.5in;height:3.68056in" alt="states" />
 (<a href="client-session-transaction-states.dot">GraphViz source</a>)</p>
 <p>When a ClientSession is created it starts in the "no transaction" state. Starting, committing, and aborting a
 transaction transitions the session between the "starting transaction", "transaction in progress", "transaction
@@ -825,20 +825,17 @@ Existing programs that do not make use of transactions will continue to compile 
 <p>Support retryable writes within a transaction.</p>
 </li>
 <li>
-<p>Support transactions on secondaries. In this case, drivers would be<br />
-required to pin a transaction to the server
+<p>Support transactions on secondaries. In this case, drivers would be required to pin a transaction to the server
 selected for the initial operation. All subsequent operations in the transaction would go to the pinned server.</p>
 </li>
 <li>
-<p>Support for transactions that read from multiple nodes in a replica<br />
-set. One interesting use case would be to run a
+<p>Support for transactions that read from multiple nodes in a replica set. One interesting use case would be to run a
 single transaction that performs low-latency reads with readPreference "nearest" followed by some writes.</p>
 </li>
 <li>
-<p>Support for unacknowledged transaction commits. This might be useful<br />
-when data consistency is paramount but
-durability is optional. Imagine a system that increments two counters in two different collections. The system may
-want to use transactions to guarantee that both counters are always incremented together or not at all.</p>
+<p>Support for unacknowledged transaction commits. This might be useful when data consistency is paramount but durability
+is optional. Imagine a system that increments two counters in two different collections. The system may want to use
+transactions to guarantee that both counters are always incremented together or not at all.</p>
 </li>
 </ul>
 <h2 id="justifications"><a class="header" href="#justifications"><strong>Justifications</strong></a></h2>
@@ -1003,8 +1000,7 @@ objective of avoiding duplicate commits.</p>
 <p>2024-02-15: Migrated from reStructuredText to Markdown.</p>
 </li>
 <li>
-<p>2023-11-22: Specify that non-transient transaction errors abort the transaction<br />
-on the server.</p>
+<p>2023-11-22: Specify that non-transient transaction errors abort the transaction on the server.</p>
 </li>
 <li>
 <p>2022-10-05: Remove spec front matter and reformat changelog</p>
@@ -1019,8 +1015,7 @@ on the server.</p>
 <p>2021-04-12: Adding in behaviour for load balancer mode.</p>
 </li>
 <li>
-<p>2020-04-07: Clarify that all abortTransaction attempts should unpin the session,<br />
-even if the command is not executed.</p>
+<p>2020-04-07: Clarify that all abortTransaction attempts should unpin the session, even if the command is not executed.</p>
 </li>
 <li>
 <p>2020-04-07: Specify that sessions should be unpinned once a transaction is aborted.</p>
@@ -1038,8 +1033,7 @@ even if the command is not executed.</p>
 <p>2019-06-07: Mention <code>$merge</code> stage for aggregate alongside <code>$out</code></p>
 </li>
 <li>
-<p>2019-05-13: Add support for maxTimeMS on transaction commit, MaxTimeMSExpired<br />
-errors on commit are labelled
+<p>2019-05-13: Add support for maxTimeMS on transaction commit, MaxTimeMSExpired errors on commit are labelled
 UnknownTransactionCommitResult.</p>
 </li>
 <li>
@@ -1055,15 +1049,13 @@ UnknownTransactionCommitResult.</p>
 <p>2018-11-13: Add mongos pinning to support sharded transaction.</p>
 </li>
 <li>
-<p>2018-06-18: Explicit readConcern and/or writeConcern are prohibited within<br />
-transactions, with a client-side error.</p>
+<p>2018-06-18: Explicit readConcern and/or writeConcern are prohibited within transactions, with a client-side error.</p>
 </li>
 <li>
 <p>2018-06-07: The count command is not supported within transactions.</p>
 </li>
 <li>
-<p>2018-06-14: Any retryable writes error raised by commitTransaction must be<br />
-labelled "UnknownTransactionCommitResult".</p>
+<p>2018-06-14: Any retryable writes error raised by commitTransaction must be labelled "UnknownTransactionCommitResult".</p>
 </li>
 </ul>
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>

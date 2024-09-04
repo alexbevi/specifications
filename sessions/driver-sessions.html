@@ -193,45 +193,44 @@ specification.</p>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
-<p><strong>ClientSession</strong><br />
-The driver object representing a client session and the operations that can be performed on it.
-Depending on the language a driver is written in this might be an interface or a class. See also <code>ServerSession</code>.</p>
-<p><strong>Deployment</strong><br />
-A set of servers that are all part of a single MongoDB cluster. We avoid the word "cluster" because some
-people interpret "cluster" to mean "sharded cluster".</p>
-<p><strong>Explicit session</strong><br />
-A session that was started explicitly by the application by calling <code>startSession</code> and passed as
-an argument to an operation.</p>
-<p><strong>MongoClient</strong><br />
-The root object of a driver's API. MAY be named differently in some drivers.</p>
-<p><strong>Implicit session</strong><br />
-A session that was started implicitly by the driver because the application called an operation
-without providing an explicit session.</p>
-<p><strong>MongoCollection</strong><br />
-The driver object representing a collection and the operations that can be performed on it. MAY be
-named differently in some drivers.</p>
-<p><strong>MongoDatabase</strong><br />
-The driver object representing a database and the operations that can be performed on it. MAY be
-named differently in some drivers.</p>
-<p><strong>ServerSession</strong><br />
-The driver object representing a server session. This type is an implementation detail and does not
-need to be public. See also <code>ClientSession</code>.</p>
-<p><strong>Server session ID</strong><br />
-A server session ID is a token used to identify a particular server session. A driver can ask the
-server for a session ID using the <code>startSession</code> command or it can generate one locally (see Generating a Session ID
-locally).</p>
-<p><strong>Session</strong><br />
-A session is an abstract concept that represents a set of sequential operations executed by an application
-that are related in some way. Other specifications define the various ways in which operations can be related, but
-examples include causally consistent reads and retryable writes.</p>
-<p><strong>Topology</strong><br />
-The current configuration and state of a deployment.</p>
-<p><strong>Unacknowledged writes</strong><br />
-Unacknowledged writes are write operations that are sent to the server without waiting for a
-reply acknowledging the write. See the "When using unacknowledged writes" section below for information on how
-unacknowledged writes interact with sessions.</p>
-<p><strong>Network error</strong><br />
-Any network exception writing to or reading from a socket (e.g. a socket timeout or error).</p>
+<p><strong>ClientSession</strong></p>
+<p>The driver object representing a client session and the operations that can be performed on it. Depending on the
+language a driver is written in this might be an interface or a class. See also <code>ServerSession</code>.</p>
+<p><strong>Deployment</strong></p>
+<p>A set of servers that are all part of a single MongoDB cluster. We avoid the word "cluster" because some people
+interpret "cluster" to mean "sharded cluster".</p>
+<p><strong>Explicit session</strong></p>
+<p>A session that was started explicitly by the application by calling <code>startSession</code> and passed as an argument to an
+operation.</p>
+<p><strong>MongoClient</strong></p>
+<p>The root object of a driver's API. MAY be named differently in some drivers.</p>
+<p><strong>Implicit session</strong></p>
+<p>A session that was started implicitly by the driver because the application called an operation without providing an
+explicit session.</p>
+<p><strong>MongoCollection</strong></p>
+<p>The driver object representing a collection and the operations that can be performed on it. MAY be named differently in
+some drivers.</p>
+<p><strong>MongoDatabase</strong></p>
+<p>The driver object representing a database and the operations that can be performed on it. MAY be named differently in
+some drivers.</p>
+<p><strong>ServerSession</strong></p>
+<p>The driver object representing a server session. This type is an implementation detail and does not need to be public.
+See also <code>ClientSession</code>.</p>
+<p><strong>Server session ID</strong></p>
+<p>A server session ID is a token used to identify a particular server session. A driver can ask the server for a session
+ID using the <code>startSession</code> command or it can generate one locally (see Generating a Session ID locally).</p>
+<p><strong>Session</strong></p>
+<p>A session is an abstract concept that represents a set of sequential operations executed by an application that are
+related in some way. Other specifications define the various ways in which operations can be related, but examples
+include causally consistent reads and retryable writes.</p>
+<p><strong>Topology</strong></p>
+<p>The current configuration and state of a deployment.</p>
+<p><strong>Unacknowledged writes</strong></p>
+<p>Unacknowledged writes are write operations that are sent to the server without waiting for a reply acknowledging the
+write. See the "When using unacknowledged writes" section below for information on how unacknowledged writes interact
+with sessions.</p>
+<p><strong>Network error</strong></p>
+<p>Any network exception writing to or reading from a socket (e.g. a socket timeout or error).</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <p>Drivers currently have no concept of a session. The driver API will be expanded to provide a way for applications to
 start and end sessions and to execute operations in the context of a session. The goal is to expand the API in a way

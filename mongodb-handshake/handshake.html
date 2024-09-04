@@ -194,16 +194,14 @@ server.</p>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="terms"><a class="header" href="#terms">Terms</a></h2>
-<p><strong>hello command</strong><br />
-The command named <code>hello</code>. It is the preferred and modern command for handshakes and topology
-monitoring.</p>
-<p><strong>legacy hello command</strong><br />
-The command named <code>isMaster</code>. It is the deprecated equivalent of the <code>hello</code> command. It was
-deprecated in MongoDB 5.0.</p>
-<p><strong>isMaster / ismaster</strong><br />
-The correct casing is <code>isMaster</code>, but servers will accept the alternate casing <code>ismaster</code>.
-Other case variations result in <code>CommandNotFound</code>. Drivers MUST take this case variation into account when determining
-which commands to encrypt, redact, or otherwise treat specially.</p>
+<p><strong>hello command</strong></p>
+<p>The command named <code>hello</code>. It is the preferred and modern command for handshakes and topology monitoring.</p>
+<p><strong>legacy hello command</strong></p>
+<p>The command named <code>isMaster</code>. It is the deprecated equivalent of the <code>hello</code> command. It was deprecated in MongoDB 5.0.</p>
+<p><strong>isMaster / ismaster</strong></p>
+<p>The correct casing is <code>isMaster</code>, but servers will accept the alternate casing <code>ismaster</code>. Other case variations result
+in <code>CommandNotFound</code>. Drivers MUST take this case variation into account when determining which commands to encrypt,
+redact, or otherwise treat specially.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="connection-handshake"><a class="header" href="#connection-handshake">Connection handshake</a></h3>
 <p>MongoDB uses the <code>hello</code> or <code>isMaster</code> commands for handshakes and topology monitoring. <code>hello</code> is the modern and

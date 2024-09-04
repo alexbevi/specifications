@@ -198,22 +198,20 @@ incurring data loss.</p>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="terminology"><a class="header" href="#terminology">Terminology</a></h2>
-<p><strong>IEEE 754-2008 128-bit decimal floating point (Decimal128)</strong>:<br />
-The Decimal128 specification supports 34 decimal digits
-of precision, a max value of approximately <code>10^6145</code>, and min value of approximately <code>-10^6145</code>. This is the new
-<code>BSON Decimal128</code> type (<code>"\x13"</code>).</p>
-<p><strong>Clamping</strong>:<br />
-Clamping happens when a value's exponent is too large for the destination format. This works by adding
-zeros to the coefficient to reduce the exponent to the largest usable value. An overflow occurs if the number of digits
-required is more than allowed in the destination format.</p>
-<p><strong>Binary Integer Decimal (BID)</strong>:<br />
-MongoDB uses this binary encoding for the coefficient as specified in <code>IEEE 754-2008</code>
-section 3.5.2 using method 2 "binary encoding" rather than method 1 "decimal encoding". The byte order is little-endian,
-like the rest of the BSON types.</p>
-<p><strong>Value Object</strong>:<br />
-An immutable container type representing a value (e.g. Decimal128). This Value Object MAY provide
-accessors that retrieve the abstracted value as a different type (e.g. casting it).
-<code>double x = valueObject.getAsDouble();</code></p>
+<p><strong>IEEE 754-2008 128-bit decimal floating point (Decimal128)</strong></p>
+<p>The Decimal128 specification supports 34 decimal digits of precision, a max value of approximately <code>10^6145</code>, and min
+value of approximately <code>-10^6145</code>. This is the new <code>BSON Decimal128</code> type (<code>"\x13"</code>).</p>
+<p><strong>Clamping</strong></p>
+<p>Clamping happens when a value's exponent is too large for the destination format. This works by adding zeros to the
+coefficient to reduce the exponent to the largest usable value. An overflow occurs if the number of digits required is
+more than allowed in the destination format.</p>
+<p><strong>Binary Integer Decimal (BID)</strong></p>
+<p>MongoDB uses this binary encoding for the coefficient as specified in <code>IEEE 754-2008</code> section 3.5.2 using method 2
+"binary encoding" rather than method 1 "decimal encoding". The byte order is little-endian, like the rest of the BSON
+types.</p>
+<p><strong>Value Object</strong></p>
+<p>An immutable container type representing a value (e.g. Decimal128). This Value Object MAY provide accessors that
+retrieve the abstracted value as a different type (e.g. casting it). <code>double x = valueObject.getAsDouble();</code></p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="bson-decimal128-implementation-details"><a class="header" href="#bson-decimal128-implementation-details">BSON Decimal128 implementation details</a></h3>
 <p>The <code>BSON Decimal128</code> data type implements the

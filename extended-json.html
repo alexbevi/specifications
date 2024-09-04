@@ -314,8 +314,8 @@ e.g.:</p>
 <p>or:</p>
 <pre><code class="language-javascript">{ "zipCode" : { $type : "string" } }
 </code></pre>
-<p>A parser SHOULD support at least 200 [levels of nesting](#levels of nesting) in an Extended JSON document but MAY set
-other limits on strings it can accept as defined in <a href="https://tools.ietf.org/html/rfc7159#section-9">section 9</a> of the
+<p>A parser SHOULD support at least 200 levels of nesting in an Extended JSON document but MAY set other limits on strings
+it can accept as defined in <a href="https://tools.ietf.org/html/rfc7159#section-9">section 9</a> of the
 <a href="https://tools.ietf.org/html/rfc7159">JSON specification</a>.</p>
 <p>When parsing a JSON object other than the top-level object, the presence of a <code>$</code>-prefixed key indicates the object
 could be a type wrapper object as described in the Extended JSON <a href="#conversion-table">Conversion table</a>. In such a case,
@@ -671,16 +671,24 @@ distinguishable from that of DBRef, so this specification creates a new format:
 <p>If a BSON type fell into category (3), above, this specification creates a type wrapper format for the type. The
 following new Extended JSON type wrappers are introduced by this spec:</p>
 <ul>
-<li><code>$dbPointer</code>- See above.</li>
-<li><code>$numberInt</code> - This is used to preserve the "int32" BSON type in Canonical Extended JSON. Without using <code>$numberInt</code>,
+<li>
+<p><code>$dbPointer</code>- See above.</p>
+</li>
+<li>
+<p><code>$numberInt</code> - This is used to preserve the "int32" BSON type in Canonical Extended JSON. Without using <code>$numberInt</code>,
 this type will be indistinguishable from a double in certain languages where the distinction does not exist, such as
-Javascript.</li>
-<li><code>$numberDouble</code> - This is used to preserve the <code>double</code>type in Canonical Extended JSON, as some JSON generators might
-omit a trailing ".0" for integral types.<br />
-It also supports representing non-finite values like NaN or Infinity which
-are prohibited in the JSON specification for numbers.</li>
-<li><code>$symbol</code> - The use of the <code>$symbol</code> key preserves the symbol type in Canonical Extended JSON, distinguishing it from
-JSON strings.</li>
+Javascript.</p>
+</li>
+<li>
+<p><code>$numberDouble</code> - This is used to preserve the <code>double</code>type in Canonical Extended JSON, as some JSON generators might
+omit a trailing ".0" for integral types.</p>
+<p>It also supports representing non-finite values like NaN or Infinity which are prohibited in the JSON specification
+for numbers.</p>
+</li>
+<li>
+<p><code>$symbol</code> - The use of the <code>$symbol</code> key preserves the symbol type in Canonical Extended JSON, distinguishing it from
+JSON strings.</p>
+</li>
 </ul>
 <h3 id="reference-implementation"><a class="header" href="#reference-implementation">Reference Implementation</a></h3>
 <p>[<em>Canonical Extended JSON format reference implementation needs to be updated</em>] PyMongo implements the Canonical
@@ -702,41 +710,37 @@ conflict with a future change by either specification.</p>
 <h3 id="future-work"><a class="header" href="#future-work">Future Work</a></h3>
 <p>This specification will need to be amended if future BSON types are added to the BSON specification.</p>
 <h2 id="qa"><a class="header" href="#qa">Q&amp;A</a></h2>
-<p><strong>Q</strong>. Why was version 2 of the spec necessary? <strong>A</strong>. After Version 1 was released, several stakeholders raised
-concerns that not providing an option to output BSON numbers as ordinary JSON numbers limited the utility of Extended
-JSON for common historical uses. We decided to provide a second format option and more clearly distinguish the use cases
-(and limitations) inherent in each format.</p>
+<p><strong>Q</strong>. Why was version 2 of the spec necessary?</p>
+<p><strong>A</strong>. After Version 1 was released, several stakeholders raised concerns that not providing an option to output BSON
+numbers as ordinary JSON numbers limited the utility of Extended JSON for common historical uses. We decided to provide
+a second format option and more clearly distinguish the use cases (and limitations) inherent in each format.</p>
 <p><strong>Q</strong>. My BSON parser doesn't distinguish every BSON type. Does my Extended JSON generator need to distinguish these
-types?<br />
-<strong>A</strong>. No. Some BSON parsers do not emit a unique type for each BSON type, making round-tripping BSON through
-such libraries impossible without changing the document. For example, a <code>DBPointer</code> will be parsed into a <code>DBRef</code> by
-PyMongo. In such cases, a generator must emit the Extended JSON form for whatever type the BSON parser emitted. It does
-not need to preserve type information when that information has been lost by the BSON parser.</p>
+types?</p>
+<p><strong>A</strong>. No. Some BSON parsers do not emit a unique type for each BSON type, making round-tripping BSON through such
+libraries impossible without changing the document. For example, a <code>DBPointer</code> will be parsed into a <code>DBRef</code> by PyMongo.
+In such cases, a generator must emit the Extended JSON form for whatever type the BSON parser emitted. It does not need
+to preserve type information when that information has been lost by the BSON parser.</p>
 <p><strong>Q</strong>. How can implementations which require backwards compatibility with Legacy Extended JSON, in which BSON regular
 expressions were represented with <code>$regex</code>, handle parsing of extended JSON test representing a MongoDB query filter
-containing the <code>$regex</code> operator?<br />
-<strong>A</strong>. An implementation can handle this in a number of ways: - Introduce an
-enumeration that determines the behavior of the parser. If the value is LEGACY, it will parse <code>$regex</code>and not treat
-<code>$regularExpression</code> specially, and if the value is CANONICAL, it will parse <code>$regularExpression</code> and not treat <code>$regex</code>
-specially. - Support both legacy and canonical forms in the parser without requiring the application to specify one or
-the other. Making that work for the <code>$regex</code> query operator use case will require that the rules set forth in the 1.0.0
-version of this specification are followed for <code>$regex</code>; specifically, that a document with a <code>$regex</code> key whose value
-is a JSON object should be parsed as a normal document and not reported as an error.</p>
-<p><strong>Q</strong>. How can implementations which require backwards compatibility with Legacy Extended JSON, in which BSON binary
-values were represented like <code>{"$binary": "AQIDBAU=", "$type": "80"}</code>, handle parsing of extended JSON test representing
-a MongoDB query filter containing the <code>$type</code>operator?<br />
-<strong>A</strong>. An implementation can handle this in a number of ways:<br />
--
-Introduce an enumeration that determines the behavior of the parser. If the value is LEGACY, it will parse the new
+containing the <code>$regex</code> operator?</p>
+<p><strong>A</strong>. An implementation can handle this in a number of ways: - Introduce an enumeration that determines the behavior of
+the parser. If the value is LEGACY, it will parse <code>$regex</code>and not treat <code>$regularExpression</code> specially, and if the value
+is CANONICAL, it will parse <code>$regularExpression</code> and not treat <code>$regex</code> specially. - Support both legacy and canonical
+forms in the parser without requiring the application to specify one or the other. Making that work for the <code>$regex</code>
+query operator use case will require that the rules set forth in the 1.0.0 version of this specification are followed
+for <code>$regex</code>; specifically, that a document with a <code>$regex</code> key whose value is a JSON object should be parsed as a
+normal document and not reported as an error.</p>
+<h2 id="q-how-can-implementations-which-require-backwards-compatibility-with-legacy-extended-json-in-which-bson-binary-values-were-represented-like-binary-aqidbau-type-80-handle-parsing-of-extended-json-test-representing-a-mongodb-query-filter-containing-the-typeoperator"><a class="header" href="#q-how-can-implementations-which-require-backwards-compatibility-with-legacy-extended-json-in-which-bson-binary-values-were-represented-like-binary-aqidbau-type-80-handle-parsing-of-extended-json-test-representing-a-mongodb-query-filter-containing-the-typeoperator"><strong>Q</strong>. How can implementations which require backwards compatibility with Legacy Extended JSON, in which BSON binary values were represented like <code>{"$binary": "AQIDBAU=", "$type": "80"}</code>, handle parsing of extended JSON test representing a MongoDB query filter containing the <code>$type</code>operator?</a></h2>
+<p><strong>A</strong>. An implementation can handle this in a number of ways:</p>
+<p>Introduce an enumeration that determines the behavior of the parser. If the value is LEGACY, it will parse the new
 binary form and not treat the legacy one specially, and if the value is CANONICAL, it will parse the new form and not
 treat the legacy form specially. - Support both legacy and canonical forms in the parser without requiring the
 application to specify one or the other. Making that work for the <code>$type</code> query operator use case will require that the
 rules set forth in the 1.0.0 version of this specification are followed for <code>$type</code>; specifically, that a document with
 a <code>$type</code> key whose value is an integral type, or a document with a <code>$type</code> key but without a <code>$binary</code> key, should be
 parsed as a normal document and not reported as an error.</p>
-<p><strong>Q</strong>. Sometimes I see the term "extjson" used in other specifications. Is "extjson" related to this
-specification?<br />
-<strong>A</strong>. Yes, "extjson" is short for "Extended JSON".</p>
+<p><strong>Q</strong>. Sometimes I see the term "extjson" used in other specifications. Is "extjson" related to this specification?</p>
+<p><strong>A</strong>. Yes, "extjson" is short for "Extended JSON".</p>
 <h3 id="changelog"><a class="header" href="#changelog">Changelog</a></h3>
 <ul>
 <li>2024-05-29: Migrated from reStructuredText to Markdown.</li>
@@ -756,7 +760,7 @@ with $").</li>
 <li>Added support for parsing <code>$uuid</code> fields as BSON Binary subtype 4.</li>
 <li>Changed the example to using the MongoDB Python Driver. It previously used the MongoDB Java Driver. The new example
 excludes the following BSON types that are unsupported in Python - <code>Symbol</code>,<code>SpecialFloat</code>,<code>DBPointer</code>, and
-<code>Undefined</code>. Transformations for these types are now only documented in the <code>Conversion table</code>_.</li>
+<code>Undefined</code>. Transformations for these types are now only documented in the <a href="#conversion-table">Conversion table</a></li>
 </ul>
 </li>
 <li>2017-07-20:

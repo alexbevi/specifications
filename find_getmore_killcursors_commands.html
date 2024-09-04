@@ -526,12 +526,10 @@ Information about the command can be found in the
 <p>2022-10-05: Remove spec front matter and reformat changelog.</p>
 </li>
 <li>
-<p>2022-02-01: Replace examples/tables for find, getMore, and killCursors with<br />
-server manual links.</p>
+<p>2022-02-01: Replace examples/tables for find, getMore, and killCursors with server manual links.</p>
 </li>
 <li>
-<p>2021-12-14: Exhaust cursors may fallback to non-exhaust cursors on 5.1+<br />
-servers. Relax requirement of OP_MSG for
+<p>2021-12-14: Exhaust cursors may fallback to non-exhaust cursors on 5.1+ servers. Relax requirement of OP_MSG for
 exhaust cursors.</p>
 </li>
 <li>
@@ -541,19 +539,15 @@ exhaust cursors.</p>
 <p>2021-04-06: Updated to use hello and secondaryOk.</p>
 </li>
 <li>
-<p>2015-10-21: If no <strong>maxAwaitTimeMS</strong> is specified, the driver SHOULD not set<br />
-<strong>maxTimeMS</strong> on the <strong>getMore</strong>
-command.</p>
+<p>2015-10-21: If no <strong>maxAwaitTimeMS</strong> is specified, the driver SHOULD not set <strong>maxTimeMS</strong> on the <strong>getMore</strong> command.</p>
 </li>
 <li>
-<p>2015-10-13: Added guidance on batchSize values as related to the <strong>getMore</strong><br />
-command. Legacy secondaryOk flag SHOULD
+<p>2015-10-13: Added guidance on batchSize values as related to the <strong>getMore</strong> command. Legacy secondaryOk flag SHOULD
 not be set on getMore and killCursors commands. Introduced maxAwaitTimeMS option for setting maxTimeMS on getMore
 commands when the cursor is a tailable cursor with awaitData set.</p>
 </li>
 <li>
-<p>2015-09-30: Legacy secondaryOk flag must be set to true on <strong>getMore</strong> and<br />
-<strong>killCursors</strong> commands to make drivers
+<p>2015-09-30: Legacy secondaryOk flag must be set to true on <strong>getMore</strong> and <strong>killCursors</strong> commands to make drivers
 have same behavior as for OP_GET_MORE and OP_KILL_CURSORS.</p>
 </li>
 </ul>

@@ -187,18 +187,18 @@ for enumerating databases.</p>
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
-<p><strong>MongoClient</strong><br />
-Driver object representing a connection to MongoDB. This is the root object of a driver's API and MAY
-be named differently in some drivers.</p>
-<p><strong>MongoDatabase</strong><br />
-Driver object representing a database and the operations that can be performed on it. MAY be named
+<p><strong>MongoClient</strong></p>
+<p>Driver object representing a connection to MongoDB. This is the root object of a driver's API and MAY be named
 differently in some drivers.</p>
-<p><strong>Iterable</strong><br />
-An object or data structure that is a sequence of elements that can be iterated over. This spec is
-flexible on what that means as different drivers will have different requirements, types, and idioms.</p>
-<p><strong>Document</strong><br />
-An object or data structure used by the driver to represent a BSON document. This spec is flexible on what
-that means as different drivers will have different requirements, types, and idioms.</p>
+<p><strong>MongoDatabase</strong></p>
+<p>Driver object representing a database and the operations that can be performed on it. MAY be named differently in some
+drivers.</p>
+<p><strong>Iterable</strong></p>
+<p>An object or data structure that is a sequence of elements that can be iterated over. This spec is flexible on what that
+means as different drivers will have different requirements, types, and idioms.</p>
+<p><strong>Document</strong></p>
+<p>An object or data structure used by the driver to represent a BSON document. This spec is flexible on what that means as
+different drivers will have different requirements, types, and idioms.</p>
 <h3 id="naming-deviations"><a class="header" href="#naming-deviations">Naming Deviations</a></h3>
 <p>This specification defines names for methods. To the extent possible, drivers SHOULD use the defined names. However,
 where a driver or language's naming conventions would conflict, drivers SHOULD honor their existing conventions. For
@@ -357,8 +357,7 @@ array of database information documents.</p>
 <p>2024-07-26: Migrated from reStructuredText to Markdown. Removed note that applied to pre-3.6 servers.</p>
 </li>
 <li>
-<p>2022-10-05: Remove spec front matter and reformat changelog. Also reverts the<br />
-minimum server version to 3.6, which is
+<p>2022-10-05: Remove spec front matter and reformat changelog. Also reverts the minimum server version to 3.6, which is
 where <code>nameOnly</code> and <code>filter</code> options were first introduced for <code>listDatabases</code>.</p>
 </li>
 <li>
