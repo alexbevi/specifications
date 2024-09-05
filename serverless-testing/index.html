@@ -173,7 +173,103 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="atlas-serverless-testing"><a class="header" href="#atlas-serverless-testing">Atlas Serverless Testing</a></h1>
+                        <h1 id="atlas-serverless-tests"><a class="header" href="#atlas-serverless-tests">Atlas Serverless Tests</a></h1>
+<ul>
+<li>Status: Accepted</li>
+<li>Minimum Server Version: N/A</li>
+</ul>
+<hr />
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>This file describes a subset of existing tests that drivers MUST use to assert compatibility with Atlas Serverless.</p>
+<h2 id="serverless-configuration"><a class="header" href="#serverless-configuration">Serverless Configuration</a></h2>
+<p>These tests MUST be run against a live Atlas Serverless instance. A new instance MUST be created each time the test
+suite is run, and that instance MUST be used for all of the tests required by this specification. Once the tests are
+finished, the instance MUST be deleted regardless of the outcome of the tests. The
+<a href="https://github.com/mongodb-labs/drivers-evergreen-tools/tree/master/.evergreen/serverless">serverless directory in the drivers-evergreen-tools repository</a>
+contains scripts for creating and deleting Atlas Serverless instances, and the <code>config.yml</code> contains an example
+Evergreen configuration that uses them to run the tests. It can take up to 15 minutes or so to provision a new Atlas
+Serverless instance, so it is recommended to create one manually via the scripts in drivers-evergreen-tools that can be
+reused for the initial implementation of the tests before moving to Evergreen patches.</p>
+<p>Drivers MUST use the
+<a href="https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/serverless/create-instance.sh">create-instance.sh</a>
+script in <code>drivers-evergreen-tools</code> to create a new Atlas Serverless instance for Evergreen tasks. The script writes a
+URI for the newly created instance to a YAML expansions file:</p>
+<ul>
+<li><code>SERVERLESS_URI</code> An SRV connection string to a load balancer fronting a single Atlas Serverless proxy.</li>
+</ul>
+<p>The <code>expansions.update</code> Evergreen command can be used to read this file and copy the URI into a <code>SERVERLESS_URI</code>
+environment variable.</p>
+<h2 id="test-runner-configuration"><a class="header" href="#test-runner-configuration">Test Runner Configuration</a></h2>
+<p>All tests MUST be run with wire protocol compression and authentication enabled.</p>
+<p>In contrast to the <a href="../load-balancers/tests/README.html">Load Balancer testing</a>, which has separate URIs for load
+balancers fronting a single or multiple servers, there is only a single URI for Atlas Serverless testing (i.e.
+<code>SERVERLESS_URI</code>).</p>
+<p>The TXT record for <code>SERVERLESS_URI</code> already specifies <code>loadBalanced=true</code> so drivers need not add that.</p>
+<p><code>SERVERLESS_URI</code> does not include authentication credentials. Drivers MUST specify a username and password (see:
+<a href="#required-variables">Required Variables</a>) when connecting to <code>SERVERLESS_URI</code>.</p>
+<p>Drivers MUST use <code>SERVERLESS_URI</code> to configure both internal clients and clients under test (as described in the
+<a href="../unified-test-format/unified-test-format.html">Unified Test Format spec</a>).</p>
+<h3 id="required-variables"><a class="header" href="#required-variables">Required Variables</a></h3>
+<p>Managing the Atlas Serverless instances and connecting to them requires a few variables to be specified. The variables
+marked "private" are confidential and MUST be specified as private Evergreen variables or used only in private Evergreen
+projects. If using a public Evergreen project, xtrace MUST be disabled when using these variables to help prevent
+accidental leaks.</p>
+<ul>
+<li><code>${SERVERLESS_DRIVERS_GROUP}</code>: Contains the ID of the Atlas group dedicated to drivers testing of Atlas Serverless.
+The backing multi-tenant MongoDB (MTM) MUST have the <code>SINGLE_TARGET_SERVERLESS_DEPLOYMENT</code> feature flag enabled
+(<a href="https://jira.mongodb.org/browse/CLOUDP-117288">CLOUDP-117288</a>).</li>
+<li><code>${SERVERLESS_API_PUBLIC_KEY}</code>: The public key required to use the Atlas API for managing Atlas Serverless instances.</li>
+<li><code>${SERVERLESS_API_PRIVATE_KEY}</code>: (private) The private key required to use the Atlas API for managing Atlas Serverless
+instances.</li>
+<li><code>${SERVERLESS_ATLAS_USER}</code>: (private) The SCRAM username used to authenticate to any Atlas Serverless instance created
+in the drivers testing Atlas group.</li>
+<li><code>${SERVERLESS_ATLAS_PASSWORD}</code>: (private) The SCRAM password used to authenticate to any Atlas Serverless instance
+created in the drivers testing Atlas group.</li>
+</ul>
+<h2 id="existing-spec-tests"><a class="header" href="#existing-spec-tests">Existing Spec Tests</a></h2>
+<p>Unified spec tests from all specifications MUST be run against Atlas Serverless. Since schema version 1.4, unified tests
+can specify Atlas Serverless compatibility in their <code>runOnRequirements</code>.</p>
+<p>Any prose and legacy spec tests defined in the following specifications MUST be included in a driver's Atlas Serverless
+testing suite:</p>
+<ul>
+<li>CRUD</li>
+<li>Load Balancer</li>
+<li>Retryable Reads</li>
+<li>Retryable Writes</li>
+<li>Sessions</li>
+<li>Transactions (excluding convenient API)
+<ul>
+<li>Note: the killAllSessions command is not supported on Serverless, so the transactions tests may hang if an
+individual test leaves a transaction open when it finishes
+(<a href="https://jira.mongodb.org/browse/CLOUDP-84298">CLOUDP-84298</a>).</li>
+</ul>
+</li>
+<li>Versioned/Stable API</li>
+<li>Client Side Encryption
+<ul>
+<li>Drivers MUST test with a version of the <code>crypt_shared</code> shared library that matches the MongoDB Server version
+running in Serverless. See
+<a href="https://github.com/mongodb/specifications/tree/e761591616849d9b507287811e77f7a359fb9587/source/client-side-encryption/tests#using-crypt-shared">Using crypt_shared</a>.</li>
+</ul>
+</li>
+</ul>
+<p>Note that the legacy JSON/YAML test formats for these specifications were updated to include a new <code>runOnRequirement</code>
+specifically for Atlas Serverless testing. To ensure these requirements are enforced properly, the runner MUST be
+informed that it is running against an Atlas Serverless instance through some indicator (e.g. an environment variable).</p>
+<p>Note that since Atlas Serverless testing uses a load balancer fronting a single Atlas Serverless proxy, the connection
+string cannot be modified for <code>useMultipleMongoses</code>. Drivers SHOULD ignore <code>useMultipleMongoses</code> for purposes of Atlas
+Serverless testing.</p>
+<h2 id="other-tests"><a class="header" href="#other-tests">Other Tests</a></h2>
+<p>Any other existing tests for cursor behavior that a driver may have implemented independently of any spec requirements
+SHOULD also be included in the driver's Atlas Serverless testing suite. Note that change streams are not supported by
+the proxy, so their spec and prose tests MUST be skipped.</p>
+<h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
+<ul>
+<li>2024-09-02: Migrated from reStructuredText to Markdown.</li>
+<li>2022-10-05: Add spec front matter</li>
+<li>2022-04-22: Testing uses a load balancer fronting a single proxy.</li>
+<li>2021-08-25: Update tests for load balanced serverless instances.</li>
+</ul>
 
                     </main>
 

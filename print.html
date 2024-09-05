@@ -3078,7 +3078,7 @@ for details.</p>
 <a href="uri-options/../load-balancers/load-balancers.html#uri-validation">Load Balancer spec</a> for details.</p>
 <h3 id="socks5-options"><a class="header" href="#socks5-options">SOCKS5 options</a></h3>
 <p>For URI option validation pertaining to <code>proxyHost</code>, <code>proxyPort</code>, <code>proxyUsername</code> and <code>proxyPassword</code> please see the
-<a href="uri-options/../socks5-support/socks5.rst#mongoclient-configuration">SOCKS5 support spec</a> for details.</p>
+<a href="uri-options/../socks5-support/socks5.html#mongoclient-configuration">SOCKS5 support spec</a> for details.</p>
 <h3 id="list-of-specified-options"><a class="header" href="#list-of-specified-options">List of specified options</a></h3>
 <p>Each driver option below MUST be implemented in each driver unless marked as optional. If an option is marked as
 optional, a driver MUST meet any conditions specified for leaving it out if it is not included. If a driver already
@@ -3104,10 +3104,10 @@ to URI options apply here.</p>
 <tr><td>maxConnecting</td><td>positive integer</td><td>defined in the <a href="uri-options/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options-1">Connection Pooling spec</a></td><td>required for drivers with connection pools</td><td>The maximum number of Connections a Pool may be establishing concurrently.</td></tr>
 <tr><td>maxStalenessSeconds</td><td>-1 (no max staleness check) or integer &gt;= 90</td><td>defined in <a href="uri-options/../max-staleness/max-staleness.html#api">max staleness spec</a></td><td>no</td><td>The maximum replication lag, in wall clock time, that a secondary can suffer and still be eligible for server selection</td></tr>
 <tr><td>minPoolSize</td><td>non-negative integer</td><td>defined in the <a href="uri-options/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options-1">Connection Pooling spec</a></td><td>required for drivers with connection pools</td><td>The number of connections the driver should create and maintain in the pool even when no operations are occurring. This count includes connections which are currently checked out.</td></tr>
-<tr><td>proxyHost</td><td>any string</td><td>defined in the <a href="uri-options/../socks5-support/socks5.rst#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The IPv4/IPv6 address or domain name of a SOCKS5 proxy server used for connecting to MongoDB services.</td></tr>
-<tr><td>proxyPort</td><td>non-negative integer</td><td>defined in the <a href="uri-options/../socks5-support/socks5.rst#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The port of the SOCKS5 proxy server specified in <code>proxyHost</code>.</td></tr>
-<tr><td>proxyUsername</td><td>any string</td><td>defined in the <a href="uri-options/../socks5-support/socks5.rst#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The username for username/password authentication to the SOCKS5 proxy server specified in <code>proxyHost</code>.</td></tr>
-<tr><td>proxyPassword</td><td>any string</td><td>defined in the <a href="uri-options/../socks5-support/socks5.rst#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The password for username/password authentication to the SOCKS5 proxy server specified in <code>proxyHost</code>.</td></tr>
+<tr><td>proxyHost</td><td>any string</td><td>defined in the <a href="uri-options/../socks5-support/socks5.html#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The IPv4/IPv6 address or domain name of a SOCKS5 proxy server used for connecting to MongoDB services.</td></tr>
+<tr><td>proxyPort</td><td>non-negative integer</td><td>defined in the <a href="uri-options/../socks5-support/socks5.html#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The port of the SOCKS5 proxy server specified in <code>proxyHost</code>.</td></tr>
+<tr><td>proxyUsername</td><td>any string</td><td>defined in the <a href="uri-options/../socks5-support/socks5.html#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The username for username/password authentication to the SOCKS5 proxy server specified in <code>proxyHost</code>.</td></tr>
+<tr><td>proxyPassword</td><td>any string</td><td>defined in the <a href="uri-options/../socks5-support/socks5.html#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The password for username/password authentication to the SOCKS5 proxy server specified in <code>proxyHost</code>.</td></tr>
 <tr><td>readConcernLevel</td><td>any string (<a href="uri-options/../read-write-concern/read-write-concern.html#unknown-levels-and-additional-options-for-string-based-readconcerns">to allow for forwards compatibility with the server</a>)</td><td>no read concern specified</td><td>no</td><td>Default read concern for the client</td></tr>
 <tr><td>readPreference</td><td>any string; currently supported values are defined in the <a href="uri-options/../server-selection/server-selection.html#mode">server selection spec</a>, but must be lowercase camelCase, e.g. "primaryPreferred"</td><td>defined in <a href="uri-options/../server-selection/server-selection.html#mode">server selection spec</a></td><td>no</td><td>Default read preference for the client (excluding tags)</td></tr>
 <tr><td>readPreferenceTags</td><td>comma-separated key:value pairs (e.g. "dc:ny,rack:1" and "dc:ny)<br><br>can be specified multiple times; each instance of this key is a separate tag set</td><td>no tags specified</td><td>no</td><td>Default read preference tags for the client; only valid if the read preference mode is not primary<br><br>The order of the tag sets in the read preference is the same as the order they are specified in the URI</td></tr>
@@ -4573,14 +4573,113 @@ which could originate on any type of platform, which may or may not support snap
 <li>2017-06-13: Don't require clients to implement legacy opcodes</li>
 <li>2017-05-10: Initial commit.</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="socks5"><a class="header" href="#socks5">SOCKS5</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="initial-dns-seedlist-discovery"><a class="header" href="#initial-dns-seedlist-discovery">Initial DNS Seedlist Discovery</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="socks5-support"><a class="header" href="#socks5-support">SOCKS5 Support</a></h1>
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
 <hr />
 <h2 id="abstract-12"><a class="header" href="#abstract-12">Abstract</a></h2>
+<p>SOCKS5 is a standardized protocol for connecting to network services through a separate proxy server. It can be used for
+connecting to hosts that would otherwise be unreachable from the local network by connecting to a proxy server, which
+receives the intended target host's address from the client and then connects to that address.</p>
+<p>This specification defines driver behaviour when connecting to MongoDB services through a SOCKS5 proxy.</p>
+<h2 id="meta-12"><a class="header" href="#meta-12">META</a></h2>
+<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<h2 id="specification-11"><a class="header" href="#specification-11">Specification</a></h2>
+<h3 id="terms-5"><a class="header" href="#terms-5">Terms</a></h3>
+<h4 id="socks5"><a class="header" href="#socks5">SOCKS5</a></h4>
+<p>The SOCKS protocol, version 5, as defined in <a href="https://datatracker.ietf.org/doc/html/rfc1928">RFC1928</a>, restricted to
+either no authentication or username/password authentication as defined in
+<a href="https://datatracker.ietf.org/doc/html/rfc1929">RFC1929</a>.</p>
+<h3 id="mongoclient-configuration-1"><a class="header" href="#mongoclient-configuration-1">MongoClient Configuration</a></h3>
+<h4 id="proxyhost"><a class="header" href="#proxyhost">proxyHost</a></h4>
+<p>To specify to the driver to connect using a SOCKS5 proxy, a connection string option of <code>proxyHost=host</code> MUST be added
+to the connection string or passed through an equivalent <code>MongoClient</code> option. This option specifies a domain name or
+IPv4 or IPv6 address on which a SOCKS5 proxy is listening. This option MUST only be configurable at the level of a
+<code>MongoClient</code>.</p>
+<h4 id="proxyport"><a class="header" href="#proxyport">proxyPort</a></h4>
+<p>To specify to the driver to connect using a SOCKS5 proxy listening on a non-default port, a connection string option of
+<code>proxyPort=port</code> MUST be added to the connection string or passed through an equivalent <code>MongoClient</code> option. This
+option specifies a TCP port number. The default for this option MUST be <code>1080</code>. This option MUST only be configurable at
+the level of a <code>MongoClient</code>. Drivers MUST error if this option was specified and <code>proxyHost</code> was not specified.</p>
+<h4 id="proxyusername"><a class="header" href="#proxyusername">proxyUsername</a></h4>
+<p>To specify to the driver to connect using a SOCKS5 proxy requiring username/password authentication, a connection string
+option of - Code:<code>proxyUsername=username</code> MUST be added to the connection string or passed through an equivalent
+<code>MongoClient</code> option. This option specifies a string of non-zero length. Drivers MUST ignore this option if it specifies
+a zero-length string. Drivers MUST error if this option was specified and <code>proxyHost</code> was not specified or
+<code>proxyPassword</code> was not specified.</p>
+<h4 id="proxypassword"><a class="header" href="#proxypassword">proxyPassword</a></h4>
+<p>To specify to the driver to connect using a SOCKS5 proxy requiring username/password authentication, a connection string
+option of - Code:<code>proxyPassword=password</code> MUST be added to the connection string or passed through an equivalent
+<code>MongoClient</code> option. This option specifies a string of non-zero length. Drivers MUST ignore this option if it specifies
+a zero-length string. Drivers MUST error if this option was specified and <code>proxyHost</code> was not specified or
+<code>proxyUsername</code> was not specified.</p>
+<h3 id="connection-pooling"><a class="header" href="#connection-pooling">Connection Pooling</a></h3>
+<h4 id="connection-establishment"><a class="header" href="#connection-establishment">Connection Establishment</a></h4>
+<p>When establishing a new outgoing TCP connection, drivers MUST perform the following steps if <code>proxyHost</code> was specified:</p>
+<ol>
+<li>
+<p>Connect to the SOCKS5 proxy host, using <code>proxyHost</code> and <code>proxyPort</code> as specified.</p>
+</li>
+<li>
+<p>Perform a SOCKS5 handshake as specified in RFC1928.</p>
+<blockquote>
+<p>If <code>proxyUsername</code> and <code>proxyPassword</code> were passed, drivers MUST indicate in the handshake that both "no
+authentication" and "username/password authentication" are supported. Otherwise, drivers MUST indicate support for
+"no authentication" only.</p>
+<p>Drivers MUST NOT attempt to perform DNS A or AAAA record resolution of the destination hostname and instead pass
+the hostname to the proxy as-is.</p>
+</blockquote>
+</li>
+<li>
+<p>Continue with connection establishment as if the connection was one to the destination host.</p>
+</li>
+</ol>
+<p>Drivers MUST use the SOCKS5 proxy for connections to MongoDB services and
+<a href="socks5-support/../client-side-encryption/client-side-encryption.html#kms-provider">client-side field-level encryption KMS servers</a>.</p>
+<p>Drivers MUST NOT use the SOCKS5 proxy for connections to - Code:<code>mongocryptd</code> processes spawned for automatic
+client-side field-level encryption.</p>
+<p>Drivers MUST treat a connection failure when connecting to the SOCKS5 proxy or a SOCKS5 handshake or authentication
+failure the same as a network error (e.g. <code>ECONNREFUSED</code>).</p>
+<h3 id="events"><a class="header" href="#events">Events</a></h3>
+<p>SOCKS5 proxies are fully transparent to connection monitoring events. In particular, in <code>CommandStartedEvent</code>,
+<code>CommandSucceededEvent</code>, and - Code:<code>CommandFailedEvent</code>, the driver SHOULD NOT reference the SOCKS5 proxy as part of
+the <code>connectionId</code> field or other fields.</p>
+<h3 id="qa-5"><a class="header" href="#qa-5">Q&amp;A</a></h3>
+<h4 id="why-not-include-dns-requests-in-the-set-of-proxied-network-communication"><a class="header" href="#why-not-include-dns-requests-in-the-set-of-proxied-network-communication">Why not include DNS requests in the set of proxied network communication?</a></h4>
+<p>While SOCKS5 as a protocol does support UDP forwarding, using this feature has a number of downsides. Notably, only a
+subset of SOCKS5 client libraries and SOCKS5 server implementations support UDP forwarding (e.g. the OpenSSH client's
+dynamic forwarding feature does not). This would also considerably increase implementation complexity in drivers that do
+not use DNS libraries in which the driver is in control of how the UDP packets are sent and received.</p>
+<h4 id="why-not-support-other-proxy-protocols-such-as-socks4socks4a-http-connect-proxies-etc"><a class="header" href="#why-not-support-other-proxy-protocols-such-as-socks4socks4a-http-connect-proxies-etc">Why not support other proxy protocols, such as Socks4/Socks4a, HTTP Connect proxies, etc.?</a></h4>
+<p>SOCKS5 is a powerful, standardized and widely used proxy protocol. It is likely that almost all users which require
+tunneling/proxying of some sort will be able to use it, and those who require another protocol or a more advanced setup
+like proxy chaining, can work around that by using a local SOCKS5 intermediate proxy.</p>
+<h4 id="why-are-the-connection-string-parameters-generic-with-no-explicit-mention-of-socks5"><a class="header" href="#why-are-the-connection-string-parameters-generic-with-no-explicit-mention-of-socks5">Why are the connection string parameters generic, with no explicit mention of SOCKS5?</a></h4>
+<p>In the case that future changes will enable drivers using other proxy protocols, keeping the option names generic allows
+their re-use. In that case, another option would specify the protocol and SOCKS5 would be the implied default. However,
+since there is no reason to believe that such additions will be made in the foreseeable future, no option for specifying
+the proxy protocol is introduced here.</p>
+<h4 id="why-is-support-for-authentication-methods-limited-to-no-authentication-and-usernamepassword-authentication"><a class="header" href="#why-is-support-for-authentication-methods-limited-to-no-authentication-and-usernamepassword-authentication">Why is support for authentication methods limited to no authentication and username/password authentication?</a></h4>
+<p>This matches the set of authentication methods most commonly implemented by SOCKS5 client libraries and thus reduces
+implementation complexity for drivers. This advantage is sufficient to ignore the possible advantages that would come
+with enabling other authentication methods.</p>
+<h3 id="design-rationales"><a class="header" href="#design-rationales">Design Rationales</a></h3>
+<h3 id="alternative-designs"><a class="header" href="#alternative-designs">Alternative Designs</a></h3>
+<h2 id="changelog-12"><a class="header" href="#changelog-12">Changelog</a></h2>
+<ul>
+<li>2024-09-04: Migrated from reStructuredText to Markdown.</li>
+<li>2022-10-05: Remove spec front matter</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="initial-dns-seedlist-discovery"><a class="header" href="#initial-dns-seedlist-discovery">Initial DNS Seedlist Discovery</a></h1>
+<ul>
+<li>Status: Accepted</li>
+<li>Minimum Server Version: N/A</li>
+</ul>
+<hr />
+<h2 id="abstract-13"><a class="header" href="#abstract-13">Abstract</a></h2>
 <p>Presently, seeding a driver with an initial list of ReplicaSet or MongoS addresses is somewhat cumbersome, requiring a
 comma-delimited list of host names to attempt connections to. A standardized answer to this problem exists in the form
 of SRV records, which allow administrators to configure a single domain to return a list of host names. Supporting this
@@ -4589,10 +4688,10 @@ an application level.</p>
 <p>This specification builds on the <a href="initial-dns-seedlist-discovery/../connection-string/connection-string-spec.html">Connection String</a> specification. It
 adds a new protocol scheme and modifies how the
 <a href="initial-dns-seedlist-discovery/../connection-string/connection-string-spec.html#host-information">Host Information</a> is interpreted.</p>
-<h2 id="meta-12"><a class="header" href="#meta-12">META</a></h2>
+<h2 id="meta-13"><a class="header" href="#meta-13">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-11"><a class="header" href="#specification-11">Specification</a></h2>
+<h2 id="specification-12"><a class="header" href="#specification-12">Specification</a></h2>
 <h3 id="connection-string-format"><a class="header" href="#connection-string-format">Connection String Format</a></h3>
 <p>The connection string parser in the driver is extended with a new protocol <code>mongodb+srv</code> as a logical pre-processing
 step before it considers the connection string and SDAM specifications. In this protocol, the comma separated list of
@@ -4601,7 +4700,7 @@ host names is replaced with a single host name. The format is:</p>
 </code></pre>
 <p><code>{options}</code> refers to the optional elements from the <a href="initial-dns-seedlist-discovery/../connection-string/connection-string-spec.html">Connection String</a>
 specification following the <code>Host Information</code>. This includes the <code>Auth database</code> and <code>Connection Options</code>.</p>
-<h3 id="mongoclient-configuration-1"><a class="header" href="#mongoclient-configuration-1">MongoClient Configuration</a></h3>
+<h3 id="mongoclient-configuration-2"><a class="header" href="#mongoclient-configuration-2">MongoClient Configuration</a></h3>
 <h4 id="srvmaxhosts"><a class="header" href="#srvmaxhosts">srvMaxHosts</a></h4>
 <p>This option is used to limit the number of mongos connections that may be created for sharded topologies. This option
 limits the number of SRV records used to populate the seedlist during initial discovery, as well as the number of
@@ -4745,7 +4844,7 @@ left the behaviour of supporting UTF-8 characters as unspecified.</p>
 <p>There are no backwards compatibility concerns.</p>
 <h2 id="future-work-5"><a class="header" href="#future-work-5">Future Work</a></h2>
 <p>In the future we could consider using the priority and weight fields of the SRV records.</p>
-<h2 id="changelog-12"><a class="header" href="#changelog-12">ChangeLog</a></h2>
+<h2 id="changelog-13"><a class="header" href="#changelog-13">ChangeLog</a></h2>
 <ul>
 <li>
 <p>2024-03-06: Migrated from reStructuredText to Markdown.</p>
@@ -4813,7 +4912,7 @@ Connection String Spec tests.</p>
 <li>Minimum Server Version: 2.4</li>
 </ul>
 <hr />
-<h2 id="abstract-13"><a class="header" href="#abstract-13">Abstract</a></h2>
+<h2 id="abstract-14"><a class="header" href="#abstract-14">Abstract</a></h2>
 <p>This spec defines how a MongoDB client discovers and monitors one or more servers. It covers monitoring a single server,
 a set of mongoses, or a replica set. How does the client determine what type of servers they are? How does it keep this
 information up to date? How does the client find an entire replica set from a seed list, and how does it respond to a
@@ -4835,10 +4934,10 @@ implementation notes for driver authors.</p>
 Spec. But there is a section describing the interaction between monitoring and server selection.</p>
 <p>There is no discussion of driver architecture and data structures, nor is there any specification of a user-facing API.
 This spec is only concerned with the algorithm for monitoring the server topology.</p>
-<h2 id="meta-13"><a class="header" href="#meta-13">Meta</a></h2>
+<h2 id="meta-14"><a class="header" href="#meta-14">Meta</a></h2>
 <p>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-12"><a class="header" href="#specification-12">Specification</a></h2>
+<h2 id="specification-13"><a class="header" href="#specification-13">Specification</a></h2>
 <h3 id="general-requirements"><a class="header" href="#general-requirements">General Requirements</a></h3>
 <p><strong>Direct connections:</strong> A client MUST be able to connect to a single server of any type. This includes querying hidden
 replica set members, and connecting to uninitialized members (see <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#rsghost-and-rsother">RSGhost</a>) in order to run
@@ -4853,7 +4952,7 @@ primary is down.</p>
 <p><strong>Mongos:</strong> A client MUST be able to connect to a set of mongoses and monitor their availability and
 <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#round-trip-time">round trip time</a>. This spec defines how mongoses are discovered and monitored, but does not define
 which mongos is selected for a given operation.</p>
-<h3 id="terms-5"><a class="header" href="#terms-5">Terms</a></h3>
+<h3 id="terms-6"><a class="header" href="#terms-6">Terms</a></h3>
 <h4 id="server"><a class="header" href="#server">Server</a></h4>
 <p>A mongod or mongos process, or a load balancer.</p>
 <h4 id="deployment"><a class="header" href="#deployment">Deployment</a></h4>
@@ -6306,7 +6405,7 @@ comparison in code as a tuple of the two to ensure their always updated together
 <p>Jeff Yemin's code for the Java driver 2.12, and his patient explanation thereof, is the major inspiration for this spec.
 Mathias Stearn's beautiful design for replica set monitoring in mongos 2.6 contributed as well. Bernie Hackett gently
 oversaw the specification process.</p>
-<h2 id="changelog-13"><a class="header" href="#changelog-13">Changelog</a></h2>
+<h2 id="changelog-14"><a class="header" href="#changelog-14">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-08-16: Updated host b wire versions in <code>too_new</code> and <code>too_old</code> tests</p>
@@ -6448,13 +6547,13 @@ by the Server Selection Spec.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-14"><a class="header" href="#abstract-14">Abstract</a></h2>
+<h2 id="abstract-15"><a class="header" href="#abstract-15">Abstract</a></h2>
 <p>Drivers currently support a variety of options that allow users to configure connection pooling behavior. Users are
 confused by drivers supporting different subsets of these options. Additionally, drivers implement their connection
 pools differently, making it difficult to design cross-driver pool functionality. By unifying and codifying pooling
 options and behavior across all drivers, we will increase user comprehension and code base maintainability.</p>
 <p>This specification does not apply to drivers that do not support multitasking.</p>
-<h2 id="meta-14"><a class="header" href="#meta-14">META</a></h2>
+<h2 id="meta-15"><a class="header" href="#meta-15">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="definitions-1"><a class="header" href="#definitions-1">Definitions</a></h2>
@@ -7110,7 +7209,7 @@ implemented, drivers SHOULD use this method as the default method of checking ou
 the pool. If a user subscribes to Connection Monitoring events, these events MUST be emitted when specified in
 "Connection Pool Behaviors". Events SHOULD be created and subscribed to in a manner idiomatic to their language and
 driver.</p>
-<h4 id="events"><a class="header" href="#events">Events</a></h4>
+<h4 id="events-1"><a class="header" href="#events-1">Events</a></h4>
 <p>See the <a href="connection-monitoring-and-pooling/../load-balancers/load-balancers.html#events">Load Balancer Specification</a> for details on the <code>serviceId</code> field.</p>
 <pre><code class="language-typescript">/**
  *  Emitted when a Connection Pool is created
@@ -7636,7 +7735,7 @@ Connection.</li>
 <h3 id="add-support-for-op_msg-exhaustallowed"><a class="header" href="#add-support-for-op_msg-exhaustallowed">Add support for OP_MSG exhaustAllowed</a></h3>
 <p>Exhaust Cursors may require changes to how we close <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> in the future, specifically to add a way
 to close and remove from its pool a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> which has unread exhaust messages.</p>
-<h2 id="changelog-14"><a class="header" href="#changelog-14">Changelog</a></h2>
+<h2 id="changelog-15"><a class="header" href="#changelog-15">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-01-23: Migrated from reStructuredText to Markdown.</p>
@@ -7695,19 +7794,19 @@ tests to ensure ConnectionReadyEvents are fired after ConnectionCreatedEvents.</
 <li>Minimum Server Version: 5.0</li>
 </ul>
 <hr />
-<h2 id="abstract-15"><a class="header" href="#abstract-15">Abstract</a></h2>
+<h2 id="abstract-16"><a class="header" href="#abstract-16">Abstract</a></h2>
 <p>This specification defines driver behaviour when connected to MongoDB services through a load balancer.</p>
-<h2 id="meta-15"><a class="header" href="#meta-15">META</a></h2>
+<h2 id="meta-16"><a class="header" href="#meta-16">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-13"><a class="header" href="#specification-13">Specification</a></h2>
-<h3 id="terms-6"><a class="header" href="#terms-6">Terms</a></h3>
+<h2 id="specification-14"><a class="header" href="#specification-14">Specification</a></h2>
+<h3 id="terms-7"><a class="header" href="#terms-7">Terms</a></h3>
 <h4 id="sdam-1"><a class="header" href="#sdam-1">SDAM</a></h4>
 <p>An abbreviated form of "Server Discovery and Monitoring", specification defined in
 <a href="load-balancers/../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring Specification</a>.</p>
 <h4 id="service"><a class="header" href="#service">Service</a></h4>
 <p>Any MongoDB service that can run behind a load balancer.</p>
-<h3 id="mongoclient-configuration-2"><a class="header" href="#mongoclient-configuration-2">MongoClient Configuration</a></h3>
+<h3 id="mongoclient-configuration-3"><a class="header" href="#mongoclient-configuration-3">MongoClient Configuration</a></h3>
 <h4 id="loadbalanced"><a class="header" href="#loadbalanced">loadBalanced</a></h4>
 <p>To specify to the driver to operate in load balancing mode, a connection string option of <code>loadBalanced=true</code> MUST be
 added to the connection string. This boolean option specifies whether or not the driver is connecting to a MongoDB
@@ -7777,8 +7876,8 @@ the session pool when implemented by the driver.</p>
 <p>During command construction, the LoadBalancer server MUST be treated like a mongos and drivers MUST add a
 <code>$readPreference</code> field to the command when required by
 <a href="load-balancers/../server-selection/server-selection.html#passing-read-preference-to-mongos-and-load-balancers">Passing read preference to mongos and load balancers</a>.</p>
-<h3 id="connection-pooling"><a class="header" href="#connection-pooling">Connection Pooling</a></h3>
-<h4 id="connection-establishment"><a class="header" href="#connection-establishment">Connection Establishment</a></h4>
+<h3 id="connection-pooling-1"><a class="header" href="#connection-pooling-1">Connection Pooling</a></h3>
+<h4 id="connection-establishment-1"><a class="header" href="#connection-establishment-1">Connection Establishment</a></h4>
 <p>In the case of the driver having the <code>loadBalanced=true</code> connection string option specified, every pooled connection
 MUST add a <code>loadBalanced</code> field to the - Code:<code>hello</code> command in its
 <a href="load-balancers/../mongodb-handshake/handshake.html#connection-handshake">handshake</a>. The value of the field MUST be <code>true</code>. If
@@ -7848,7 +7947,7 @@ connections for the <code>serviceId</code>.</p>
 driver MUST NOT make any changes to the <code>TopologyDescription</code> or the <code>ServerDescription</code> of the load balancer (i.e. it
 MUST NOT mark the load balancer as <code>Unknown</code>). If the error requires the connection pool to be cleared, the driver MUST
 only clear connections with the same <code>serviceId</code> as the connection which errored.</p>
-<h3 id="events-1"><a class="header" href="#events-1">Events</a></h3>
+<h3 id="events-2"><a class="header" href="#events-2">Events</a></h3>
 <p>When in load balancer mode the driver MUST now include the <code>serviceId</code> in the - Code:<code>CommandStartedEvent</code>,
 <code>CommandSucceededEvent</code>, and - Code:<code>CommandFailedEvent</code>. The driver MAY decide how to expose this information. Drivers
 that have a <code>ConnectionId</code> object for example, MAY choose to provide a - Code:<code>serviceId</code> in that object. The
@@ -7873,7 +7972,7 @@ transaction when the connection associated with the transaction is closed.</p>
 <p>Any applications that connect directly to services and not through the load balancer MUST connect via the regular
 service port as they normally would and not the port specified by the <code>loadBalancerPort</code> option. The <code>loadBalanced=true</code>
 URI option MUST be omitted in this case.</p>
-<h3 id="qa-5"><a class="header" href="#qa-5">Q&amp;A</a></h3>
+<h3 id="qa-6"><a class="header" href="#qa-6">Q&amp;A</a></h3>
 <h4 id="why-use-a-connection-string-option-instead-of-a-new-uri-scheme"><a class="header" href="#why-use-a-connection-string-option-instead-of-a-new-uri-scheme">Why use a connection string option instead of a new URI scheme?</a></h4>
 <p>Use of a connection string option would allow the driver to continue to use SRV records that pointed at a load balancer
 instead of a replica set without needing to change the URI provided to the <code>MongoClient</code>. The SRV records could also
@@ -7904,11 +8003,11 @@ applications or adjust their pool options accordingly.</p>
 <h4 id="why-does-this-specification-not-address-load-balancer-restarts-or-maintenance"><a class="header" href="#why-does-this-specification-not-address-load-balancer-restarts-or-maintenance">Why does this specification not address load balancer restarts or maintenance?</a></h4>
 <p>The Layer 4 load balancers that would be in use for this feature lack the ability that a layer 7 load balancer could
 potentially have to be able to understand the MongoDB wire protocol and respond to monitoring requests.</p>
-<h3 id="design-rationales"><a class="header" href="#design-rationales">Design Rationales</a></h3>
+<h3 id="design-rationales-1"><a class="header" href="#design-rationales-1">Design Rationales</a></h3>
 <p>Services cannot dynamically switch from running behind a load balancer and not running behind a load balancer. Based on
 that, this design forces the application to opt-in to this behaviour and make potential changes that require restarts to
 their applications. If this were to change, see alternative designs below.</p>
-<h3 id="alternative-designs"><a class="header" href="#alternative-designs">Alternative Designs</a></h3>
+<h3 id="alternative-designs-1"><a class="header" href="#alternative-designs-1">Alternative Designs</a></h3>
 <h4 id="service-proxy-detection"><a class="header" href="#service-proxy-detection">Service PROXY Detection</a></h4>
 <p>An alternative to the driver using a connection string option to put it into load balancing mode would be for the
 service the driver is connected to to inform the driver it is behind a load balancer. A possible solution for this would
@@ -7925,7 +8024,7 @@ the results of the server monitors. From a service perspective, every service wo
 PROXY protocol header bytes prepended to the initial connection and modify their states and hello responses accordingly.
 Additionally load balancers would need to have additional configuration as noted in the reference section below, and
 only load balancers that support the PROXY protocol would be supported.</p>
-<h2 id="changelog-15"><a class="header" href="#changelog-15">Changelog</a></h2>
+<h2 id="changelog-16"><a class="header" href="#changelog-16">Changelog</a></h2>
 <ul>
 <li>2024-04-25: Clarify that <code>TopologyDescriptionChangedEvent</code> must be emitted on topology close</li>
 <li>2024-03-06: Migrated from reStructuredText to Markdown.</li>
@@ -7940,15 +8039,15 @@ only load balancers that support the PROXY protocol would be supported.</p>
 <li>Minimum Server Version: 2.4</li>
 </ul>
 <hr />
-<h2 id="abstract-16"><a class="header" href="#abstract-16">Abstract</a></h2>
+<h2 id="abstract-17"><a class="header" href="#abstract-17">Abstract</a></h2>
 <p>This spec defines how a driver monitors a MongoDB server. In summary, the client monitors each server in the topology.
 The scope of server monitoring is to provide the topology with updated ServerDescriptions based on hello or legacy hello
 command responses.</p>
-<h2 id="meta-16"><a class="header" href="#meta-16">META</a></h2>
+<h2 id="meta-17"><a class="header" href="#meta-17">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-14"><a class="header" href="#specification-14">Specification</a></h2>
-<h3 id="terms-7"><a class="header" href="#terms-7">Terms</a></h3>
+<h2 id="specification-15"><a class="header" href="#specification-15">Specification</a></h2>
+<h3 id="terms-8"><a class="header" href="#terms-8">Terms</a></h3>
 <p>See the terms in the <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html">main SDAM spec</a>.</p>
 <h4 id="check-1"><a class="header" href="#check-1">check</a></h4>
 <p>The client checks a server by attempting to call hello or legacy hello on it, and recording the outcome.</p>
@@ -8701,7 +8800,7 @@ performance, and reliability.</p>
 <p>The serverMonitoringMode knob provides a workaround in cases where the polling protocol would be a better choice but the
 driver is not running on a FaaS platform. It also provides a workaround in case the FaaS detection logic becomes
 outdated or inaccurate.</p>
-<h2 id="changelog-16"><a class="header" href="#changelog-16">Changelog</a></h2>
+<h2 id="changelog-17"><a class="header" href="#changelog-17">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-05-02: Migrated from reStructuredText to Markdown.</p>
@@ -8758,18 +8857,18 @@ connections to measure RTT when using the polling protocol.</p>
 <li>Minimum Server Version: N/A</li>
 </ul>
 <hr />
-<h2 id="abstract-17"><a class="header" href="#abstract-17">Abstract</a></h2>
+<h2 id="abstract-18"><a class="header" href="#abstract-18">Abstract</a></h2>
 <p>Currently the <a href="polling-srv-records-for-mongos-discovery/../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html">Initial DNS Seedlist Discovery</a>
 functionality provides a static seedlist when a MongoClient is constructed. Periodically polling the DNS SRV records
 would allow for the mongos proxy list to be updated without having to change client configuration.</p>
 <p>This specification builds on top of the original Initial DNS Seedlist Discovery specification, and modifies the
 <a href="polling-srv-records-for-mongos-discovery/../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> specification's
 definition of monitoring a set of mongos servers in a Sharded TopologyType.</p>
-<h2 id="meta-17"><a class="header" href="#meta-17">META</a></h2>
+<h2 id="meta-18"><a class="header" href="#meta-18">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-15"><a class="header" href="#specification-15">Specification</a></h2>
-<h3 id="terms-8"><a class="header" href="#terms-8">Terms</a></h3>
+<h2 id="specification-16"><a class="header" href="#specification-16">Specification</a></h2>
+<h3 id="terms-9"><a class="header" href="#terms-9">Terms</a></h3>
 <h4 id="rescan-rescanning"><a class="header" href="#rescan-rescanning">rescan, rescanning</a></h4>
 <p>A rescan is the periodic scan of all DNS SRV records to discover a new set of mongos hosts.</p>
 <h4 id="rescansrvintervalms"><a class="header" href="#rescansrvintervalms">rescanSRVIntervalMS</a></h4>
@@ -8884,7 +8983,7 @@ were familiar with the old behaviour. We do not expect this to negatively impact
 <a href="polling-srv-records-for-mongos-discovery/../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html">Initial DNS Seedlist Discovery</a> specification.</p>
 <h2 id="future-work-7"><a class="header" href="#future-work-7">Future work</a></h2>
 <p>No future work is expected.</p>
-<h2 id="changelog-17"><a class="header" href="#changelog-17">Changelog</a></h2>
+<h2 id="changelog-18"><a class="header" href="#changelog-18">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-08-22: Migrated from reStructuredText to Markdown.</p>
@@ -8905,12 +9004,12 @@ option.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 2.4</li>
 </ul>
-<h2 id="abstract-18"><a class="header" href="#abstract-18">Abstract</a></h2>
+<h2 id="abstract-19"><a class="header" href="#abstract-19">Abstract</a></h2>
 <p>MongoDB deployments may offer more than one server that can service an operation. This specification describes how
 MongoDB drivers and mongos shall select a server for either read or write operations. It includes the definition of a
 "read preference" document, configuration options, and algorithms for selecting a server for different deployment
 topologies.</p>
-<h2 id="meta-18"><a class="header" href="#meta-18">Meta</a></h2>
+<h2 id="meta-19"><a class="header" href="#meta-19">Meta</a></h2>
 <p>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="motivation-for-change-9"><a class="header" href="#motivation-for-change-9">Motivation for Change</a></h2>
@@ -8930,7 +9029,7 @@ or other deficiencies:</p>
 <li>Selection of a server for write operations</li>
 <li>Server selection retry and timeout</li>
 </ul>
-<h2 id="specification-16"><a class="header" href="#specification-16">Specification</a></h2>
+<h2 id="specification-17"><a class="header" href="#specification-17">Specification</a></h2>
 <h3 id="scope-and-general-requirements"><a class="header" href="#scope-and-general-requirements">Scope and general requirements</a></h3>
 <p>This specification describes how MongoDB drivers and mongos select a server for read and write operations, including
 commands, OP_QUERY, OP_INSERT, OP_UPDATE, and OP_DELETE. For read operations, it describes how drivers and mongos shall
@@ -8943,7 +9042,7 @@ sharded transaction because all operations in a sharded transaction need to go t
 <p>Drivers and mongos MUST conform to the semantics of this document, but SHOULD use language-appropriate data models or
 variable names.</p>
 <p>This specification does not apply to commands issued for server monitoring or authentication.</p>
-<h3 id="terms-9"><a class="header" href="#terms-9">Terms</a></h3>
+<h3 id="terms-10"><a class="header" href="#terms-10">Terms</a></h3>
 <p><strong>Available</strong></p>
 <p>Describes a server that is believed to be reachable over the network and able to respond to requests. A server of type
 Unknown or PossiblePrimary is not available; other types are available.</p>
@@ -9051,7 +9150,7 @@ misconfiguration.</li>
 </ul>
 </li>
 </ol>
-<h3 id="mongoclient-configuration-3"><a class="header" href="#mongoclient-configuration-3">MongoClient Configuration</a></h3>
+<h3 id="mongoclient-configuration-4"><a class="header" href="#mongoclient-configuration-4">MongoClient Configuration</a></h3>
 <p>Selecting a server requires the following client-level configuration options:</p>
 <h4 id="localthresholdms"><a class="header" href="#localthresholdms">localThresholdMS</a></h4>
 <p>This defines the size of the latency window for selecting among multiple suitable servers. The default is 15
@@ -10187,7 +10286,7 @@ specification</li>
 <li><a href="server-selection/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">Connection Monitoring and Pooling</a>
 specification</li>
 </ul>
-<h2 id="changelog-18"><a class="header" href="#changelog-18">Changelog</a></h2>
+<h2 id="changelog-19"><a class="header" href="#changelog-19">Changelog</a></h2>
 <ul>
 <li>
 <p>2015-06-26: Updated single-threaded selection logic with "stale" and serverSelectionTryOnce.</p>
@@ -10299,14 +10398,14 @@ related to maxStalenessSeconds.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.4</li>
 </ul>
-<h2 id="abstract-19"><a class="header" href="#abstract-19">Abstract</a></h2>
+<h2 id="abstract-20"><a class="header" href="#abstract-20">Abstract</a></h2>
 <p>Read preference gains a new option, "maxStalenessSeconds".</p>
 <p>A client (driver or mongos) MUST estimate the staleness of each secondary, based on lastWriteDate values provided in
 server hello responses, and select only those secondaries whose staleness is less than or equal to maxStalenessSeconds.</p>
 <p>Most of the implementation of the maxStalenessSeconds option is specified in the Server Discovery And Monitoring Spec
 and the Server Selection Spec. This document supplements those specs by collecting information specifically about
 maxStalenessSeconds.</p>
-<h2 id="meta-19"><a class="header" href="#meta-19">Meta</a></h2>
+<h2 id="meta-20"><a class="header" href="#meta-20">Meta</a></h2>
 <p>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="motivation-for-change-10"><a class="header" href="#motivation-for-change-10">Motivation for Change</a></h2>
@@ -10331,7 +10430,7 @@ primary regardless of actual replication lag.</li>
 routers and shards).</li>
 <li>Compensate for the duration of server checks in staleness estimations.</li>
 </ul>
-<h2 id="specification-17"><a class="header" href="#specification-17">Specification</a></h2>
+<h2 id="specification-18"><a class="header" href="#specification-18">Specification</a></h2>
 <h3 id="api"><a class="header" href="#api">API</a></h3>
 <p>"maxStalenessSeconds" is a new read preference option, with a positive integer value. It MUST be configurable similar to
 other read preference options like "readPreference" and "tag_sets". Clients MUST also recognize it in the connection
@@ -10623,7 +10722,7 @@ server communicates is staleness configuration in its hello response like:</p>
 </code></pre>
 <p>... then a future client can use the value from the server as its default maxStalenessSeconds when there is no
 client-side setting.</p>
-<h2 id="changelog-19"><a class="header" href="#changelog-19">Changelog</a></h2>
+<h2 id="changelog-20"><a class="header" href="#changelog-20">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-08-09: Updated wire versions in tests to 4.0+.</p>
@@ -10664,7 +10763,7 @@ be at least 90.</p>
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-20"><a class="header" href="#abstract-20">Abstract</a></h2>
+<h2 id="abstract-21"><a class="header" href="#abstract-21">Abstract</a></h2>
 <p>This specification is about the ability for drivers to automatically retry any read operation that has not yet received
 any results—due to a transient network error, a "not writable primary" error after a replica set failover, etc.</p>
 <p>This specification will</p>
@@ -10672,11 +10771,11 @@ any results—due to a transient network error, a "not writable primary" error a
 <li>outline how an API for retryable read operations will be implemented in drivers</li>
 <li>define an option to enable retryable reads for an application.</li>
 </ul>
-<h2 id="meta-20"><a class="header" href="#meta-20">META</a></h2>
+<h2 id="meta-21"><a class="header" href="#meta-21">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-18"><a class="header" href="#specification-18">Specification</a></h2>
-<h3 id="terms-10"><a class="header" href="#terms-10">Terms</a></h3>
+<h2 id="specification-19"><a class="header" href="#specification-19">Specification</a></h2>
+<h3 id="terms-11"><a class="header" href="#terms-11">Terms</a></h3>
 <h4 id="retryable-error"><a class="header" href="#retryable-error">Retryable Error</a></h4>
 <p>An error is considered retryable if it meets any of the criteria defined under
 <a href="retryable-reads/../retryable-writes/retryable-writes.html#terms">Retryable Writes: Terms: Retryable Error</a>, minus the final criterion
@@ -10708,7 +10807,7 @@ below.</p>
 <li>Any of the above retryable errors that occur during a connection handshake (including the authentication step). For
 example, a network error or ShutdownInProgress error encountered when running the hello or saslContinue commands.</li>
 </ul>
-<h3 id="mongoclient-configuration-4"><a class="header" href="#mongoclient-configuration-4">MongoClient Configuration</a></h3>
+<h3 id="mongoclient-configuration-5"><a class="header" href="#mongoclient-configuration-5">MongoClient Configuration</a></h3>
 <p>This specification introduces the following client-level configuration option.</p>
 <h4 id="retryreads"><a class="header" href="#retryreads">retryReads</a></h4>
 <p>This boolean option determines whether retryable behavior will be applied to all read operations executed within the
@@ -11097,7 +11196,7 @@ need to be reflected in the retryable reads specification, and vice versa.</li>
 <li>Once <a href="https://jira.mongodb.org/browse/DRIVERS-560">DRIVERS-560</a> is resolved, tests will be added to allow testing
 Retryable Reads on MongoDB 3.6. See the <a href="retryable-reads/./tests/README.html">test plan</a> for additional information.</li>
 </ol>
-<h2 id="qa-6"><a class="header" href="#qa-6">Q&amp;A</a></h2>
+<h2 id="qa-7"><a class="header" href="#qa-7">Q&amp;A</a></h2>
 <h3 id="why-is-retrying-cursorgetmore-not-supported"><a class="header" href="#why-is-retrying-cursorgetmore-not-supported">Why is retrying <code>Cursor.getMore()</code> not supported?</a></h3>
 <p><code>Cursor.getMore()</code> cannot be retried because of the inability for the client to discern if the cursor was advanced. In
 other words, since the driver does not know if the original <code>getMore()</code> succeeded or not, the driver cannot reliably
@@ -11151,7 +11250,7 @@ that no client is interested in. This prevents applications from seeing degraded
 retried. Upon further discussion, we decided that "Early Failure on Socket Disconnect" should not be required to retry
 reads because the resilience benefit of retryable reads outweighs the minor risk of degraded performance. Additionally,
 any customers experiencing degraded performance can simply disable <code>retryableReads</code>.</p>
-<h2 id="changelog-20"><a class="header" href="#changelog-20">Changelog</a></h2>
+<h2 id="changelog-21"><a class="header" href="#changelog-21">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-04-30: Migrated from reStructuredText to Markdown.</p>
@@ -11208,7 +11307,7 @@ will always return an error code</p>
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-21"><a class="header" href="#abstract-21">Abstract</a></h2>
+<h2 id="abstract-22"><a class="header" href="#abstract-22">Abstract</a></h2>
 <p>MongoDB 3.6 will implement support for server sessions, which are shared resources within a cluster identified by a
 session ID. Drivers compatible with MongoDB 3.6 will also implement support for client sessions, which are always
 associated with a server session and will allow for certain commands to be executed within the context of a server
@@ -11219,11 +11318,11 @@ obtain a write result (e.g. network error or "not writable primary" error after 
 specification will outline how an API for retryable write operations will be implemented in drivers. The specification
 will define an option to enable retryable writes for an application and describe how a transaction ID will be provided
 to write commands executed therein.</p>
-<h2 id="meta-21"><a class="header" href="#meta-21">META</a></h2>
+<h2 id="meta-22"><a class="header" href="#meta-22">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-19"><a class="header" href="#specification-19">Specification</a></h2>
-<h3 id="terms-11"><a class="header" href="#terms-11">Terms</a></h3>
+<h2 id="specification-20"><a class="header" href="#specification-20">Specification</a></h2>
+<h3 id="terms-12"><a class="header" href="#terms-12">Terms</a></h3>
 <p><strong>Transaction ID</strong></p>
 <p>The transaction ID identifies the transaction as part of which the command is running. In a write command where the
 client has requested retryable behavior, it is expressed by the top-level <code>lsid</code> and <code>txnNumber</code> fields. The <code>lsid</code>
@@ -11247,7 +11346,7 @@ constructor), drivers SHOULD use the defined name but MAY deviate to comply with
 example, a driver may use <code>retry_writes</code> instead of <code>retryWrites</code>.</p>
 <p>For any other names in the spec, drivers SHOULD use the defined name but MAY deviate to comply with their existing
 conventions.</p>
-<h3 id="mongoclient-configuration-5"><a class="header" href="#mongoclient-configuration-5">MongoClient Configuration</a></h3>
+<h3 id="mongoclient-configuration-6"><a class="header" href="#mongoclient-configuration-6">MongoClient Configuration</a></h3>
 <p>This specification introduces the following client-level configuration option.</p>
 <h4 id="retrywrites"><a class="header" href="#retrywrites">retryWrites</a></h4>
 <p>This boolean option determines whether retryable behavior will be applied to all supported write operations executed
@@ -11755,7 +11854,7 @@ same from a replica set or sharded cluster (mongos just forwards the error from 
 (MongoDB version 4.4 and newer) only add the label to an error when the client has added a txnNumber to the command,
 which only happens when the retryWrites option is true on the client. For the driver to add the label even if
 retryWrites is not true would be inconsistent with the server and potentially confusing to developers.</p>
-<h2 id="changelog-21"><a class="header" href="#changelog-21">Changelog</a></h2>
+<h2 id="changelog-22"><a class="header" href="#changelog-22">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-05-08: Add guidance for client-level <code>bulkWrite()</code> retryability.</p>
@@ -11891,19 +11990,19 @@ IDs will not be included in unsupported write commands, irrespective of the <cod
 <li>Minimum Server Version: 2.6</li>
 </ul>
 <hr />
-<h2 id="abstract-22"><a class="header" href="#abstract-22">Abstract</a></h2>
+<h2 id="abstract-23"><a class="header" href="#abstract-23">Abstract</a></h2>
 <p>This specification outlines a new <code>timeoutMS</code> option to govern the amount of time that a single operation can execute
 before control is returned to the user. This timeout applies to all of the work done to execute the operation, including
 but not limited to server selection, connection checkout, and server-side execution.</p>
-<h2 id="meta-22"><a class="header" href="#meta-22">META</a></h2>
+<h2 id="meta-23"><a class="header" href="#meta-23">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-20"><a class="header" href="#specification-20">Specification</a></h2>
-<h3 id="terms-12"><a class="header" href="#terms-12">Terms</a></h3>
+<h2 id="specification-21"><a class="header" href="#specification-21">Specification</a></h2>
+<h3 id="terms-13"><a class="header" href="#terms-13">Terms</a></h3>
 <p><strong>min(a, b)</strong></p>
 <p>Shorthand for "the minimum of a and b" where <code>a</code> and <code>b</code> are numeric values. For any cases where 0 means "infinite"
 (e.g. <a href="client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a>), <code>min(0, other)</code> MUST evaluate to <code>other</code>.</p>
-<h3 id="mongoclient-configuration-6"><a class="header" href="#mongoclient-configuration-6">MongoClient Configuration</a></h3>
+<h3 id="mongoclient-configuration-7"><a class="header" href="#mongoclient-configuration-7">MongoClient Configuration</a></h3>
 <p>This specification introduces a new configuration option and deprecates some existing options.</p>
 <h4 id="timeoutms"><a class="header" href="#timeoutms">timeoutMS</a></h4>
 <p>This 64-bit integer option specifies the per-operation timeout value in milliseconds. The default value is unset which
@@ -12400,7 +12499,7 @@ during non-MongoDB operations (e.g. streaming data read from a GridFS stream int
 toggling GridFS behavior via an option similar to <code>timeoutMode</code> for cursors. To avoid backwards-breaking behavioral
 changes, the default would continue to cap the stream lifetime but there could be another mode that refreshes the
 timeout for each database operation. This would mimic using <code>timeoutMode=ITERATION</code> for cursors.</p>
-<h2 id="changelog-22"><a class="header" href="#changelog-22">Changelog</a></h2>
+<h2 id="changelog-23"><a class="header" href="#changelog-23">Changelog</a></h2>
 <ul>
 <li>2023-12-07: Migrated from reStructuredText to Markdown.</li>
 <li>2022-11-17: Use minimum RTT for maxTimeMS calculation instead of 90th percentile RTT.</li>
@@ -12413,7 +12512,7 @@ timeout for each database operation. This would mimic using <code>timeoutMode=IT
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-23"><a class="header" href="#abstract-23">Abstract</a></h2>
+<h2 id="abstract-24"><a class="header" href="#abstract-24">Abstract</a></h2>
 <p>Version 3.6 of the server introduces the concept of logical sessions for clients. A session is an abstract concept that
 represents a set of sequential operations executed by an application that are related in some way. This specification is
 limited to how applications start and end sessions. Other specifications define various ways in which sessions are used
@@ -12423,10 +12522,10 @@ process known as "gossipping the cluster time". While gossipping the cluster tim
 any driver that implements sessions MUST also implement gossipping the cluster time, so it is included in this
 specification.</p>
 <h2 id="definitions-2"><a class="header" href="#definitions-2">Definitions</a></h2>
-<h3 id="meta-23"><a class="header" href="#meta-23">META</a></h3>
+<h3 id="meta-24"><a class="header" href="#meta-24">META</a></h3>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h3 id="terms-13"><a class="header" href="#terms-13">Terms</a></h3>
+<h3 id="terms-14"><a class="header" href="#terms-14">Terms</a></h3>
 <p><strong>ClientSession</strong></p>
 <p>The driver object representing a client session and the operations that can be performed on it. Depending on the
 language a driver is written in this might be an interface or a class. See also <code>ServerSession</code>.</p>
@@ -12465,7 +12564,7 @@ write. See the "When using unacknowledged writes" section below for information 
 with sessions.</p>
 <p><strong>Network error</strong></p>
 <p>Any network exception writing to or reading from a socket (e.g. a socket timeout or error).</p>
-<h2 id="specification-21"><a class="header" href="#specification-21">Specification</a></h2>
+<h2 id="specification-22"><a class="header" href="#specification-22">Specification</a></h2>
 <p>Drivers currently have no concept of a session. The driver API will be expanded to provide a way for applications to
 start and end sessions and to execute operations in the context of a session. The goal is to expand the API in a way
 that introduces no backward breaking changes. Existing applications that don't use sessions don't need to be changed,
@@ -12998,7 +13097,7 @@ resolving many discussions of spec details. A final reference implementation mus
 <p>Use this section to discuss any possible work for a future spec. This could cover issues where no consensus could be
 reached but that don't block this spec, changes that were rejected due to unclear use cases, etc.</p>
 <h2 id="open-questions"><a class="header" href="#open-questions">Open questions</a></h2>
-<h2 id="qa-7"><a class="header" href="#qa-7">Q&amp;A</a></h2>
+<h2 id="qa-8"><a class="header" href="#qa-8">Q&amp;A</a></h2>
 <h3 id="why-do-we-say-drivers-must-not-attempt-to-detect-unsafe-multi-threaded-or-multi-process-use-of-clientsession"><a class="header" href="#why-do-we-say-drivers-must-not-attempt-to-detect-unsafe-multi-threaded-or-multi-process-use-of-clientsession">Why do we say drivers MUST NOT attempt to detect unsafe multi-threaded or multi-process use of <code>ClientSession</code>?</a></h3>
 <p>Because doing so would provide an illusion of safety. It doesn't make these instances thread safe. And even if when
 testing an application no such exceptions are encountered, that doesn't prove anything. The application might still be
@@ -13063,7 +13162,7 @@ could over allocate sessions. But those scenarios are extenuating and outside th
 <p>There are a variety of cases, such as retryable operations or cursor creating operations, where a <code>serverSession</code> must
 remain acquired by the <code>ClientSession</code> after an operation is attempted. Attempting to account for all these scenarios
 has risks that do not justify the potential guaranteed <code>ServerSession</code> allocation limiting.</p>
-<h2 id="changelog-23"><a class="header" href="#changelog-23">Changelog</a></h2>
+<h2 id="changelog-24"><a class="header" href="#changelog-24">Changelog</a></h2>
 <ul>
 <li>2024-05-08: Migrated from reStructuredText to Markdown.</li>
 <li>2017-09-13: If causalConsistency option is omitted assume true</li>
@@ -13104,15 +13203,15 @@ has risks that do not justify the potential guaranteed <code>ServerSession</code
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-24"><a class="header" href="#abstract-24">Abstract</a></h2>
+<h2 id="abstract-25"><a class="header" href="#abstract-25">Abstract</a></h2>
 <p>Version 3.6 of the server introduces support for causal consistency. This spec builds upon the Sessions Specification to
 define how an application requests causal consistency and how a driver interacts with the server to implement causal
 consistency.</p>
 <h2 id="definitions-3"><a class="header" href="#definitions-3">Definitions</a></h2>
-<h3 id="meta-24"><a class="header" href="#meta-24">META</a></h3>
+<h3 id="meta-25"><a class="header" href="#meta-25">META</a></h3>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h3 id="terms-14"><a class="header" href="#terms-14">Terms</a></h3>
+<h3 id="terms-15"><a class="header" href="#terms-15">Terms</a></h3>
 <p><strong>Causal consistency</strong></p>
 <p>A property that guarantees that an application can read its own writes and that a later read will never observe a
 version of the data that is older than an earlier read.</p>
@@ -13149,7 +13248,7 @@ related in some way. This specification defines how sessions are used to impleme
 <p>Unacknowledged writes are write operations that are sent to the server without waiting for a reply acknowledging the
 write. See the "Unacknowledged Writes" section below for information on how unacknowledged writes interact with causal
 consistency.</p>
-<h2 id="specification-22"><a class="header" href="#specification-22">Specification</a></h2>
+<h2 id="specification-23"><a class="header" href="#specification-23">Specification</a></h2>
 <p>An application requests causal consistency by creating a <code>ClientSession</code> with options that specify that causal
 consistency is desired. An application then passes the session as an argument to methods in the <code>MongoDatabase</code> and
 <code>MongoCollection</code> classes. Any operations performed against that session will then be causally consistent.</p>
@@ -13435,8 +13534,8 @@ programs that don't use causal consistency continue to compile and run correctly
 before the spec is "Accepted". While there is merit to the approach of reaching consensus on the specification and
 rationale before writing code, the principle of "rough consensus and running code" is still useful when it comes to
 resolving many discussions of spec details. A final reference implementation must include test code and documentation.</p>
-<h2 id="qa-8"><a class="header" href="#qa-8">Q&amp;A</a></h2>
-<h2 id="changelog-24"><a class="header" href="#changelog-24">Changelog</a></h2>
+<h2 id="qa-9"><a class="header" href="#qa-9">Q&amp;A</a></h2>
+<h2 id="changelog-25"><a class="header" href="#changelog-25">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-02-08: Migrated from reStructuredText to Markdown.</p>
@@ -13483,16 +13582,16 @@ replica sets use $clusterTime also now.</p>
 <li>Minimum Server Version: 5.0</li>
 </ul>
 <hr />
-<h2 id="abstract-25"><a class="header" href="#abstract-25">Abstract</a></h2>
+<h2 id="abstract-26"><a class="header" href="#abstract-26">Abstract</a></h2>
 <p>Version 5.0 of the server introduces support for read concern level "snapshot" (non-speculative) for read commands
 outside of transactions, including on secondaries. This spec builds upon the
 <a href="sessions/./driver-sessions.html">Sessions Specification</a> to define how an application requests "snapshot" level read concern and
 how a driver interacts with the server to implement snapshot reads.</p>
 <h2 id="definitions-4"><a class="header" href="#definitions-4">Definitions</a></h2>
-<h3 id="meta-25"><a class="header" href="#meta-25">META</a></h3>
+<h3 id="meta-26"><a class="header" href="#meta-26">META</a></h3>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h3 id="terms-15"><a class="header" href="#terms-15">Terms</a></h3>
+<h3 id="terms-16"><a class="header" href="#terms-16">Terms</a></h3>
 <p><strong>ClientSession</strong></p>
 <p>The driver object representing a client session and the operations that can be performed on it.</p>
 <p><strong>MongoClient</strong></p>
@@ -13516,7 +13615,7 @@ including in sharded clusters. Snapshots reads are majority committed reads.</p>
 session. The server creates a cursor in response to a snapshot find/aggregate command and reports <code>atClusterTime</code> within
 the <code>cursor</code> field in the response. For the distinct command the server adds a top-level <code>atClusterTime</code> field to the
 response. The <code>atClusterTime</code> field represents the timestamp of the read and is guaranteed to be majority committed.</p>
-<h2 id="specification-23"><a class="header" href="#specification-23">Specification</a></h2>
+<h2 id="specification-24"><a class="header" href="#specification-24">Specification</a></h2>
 <p>An application requests snapshot reads by creating a <code>ClientSession</code> with options that specify that snapshot reads are
 desired. An application then passes the session as an argument to methods in the <code>MongoDatabase</code> and <code>MongoCollection</code>
 classes. Read operations (find/aggregate/distinct) performed against that session will be read from the same snapshot.</p>
@@ -13642,8 +13741,8 @@ Existing programs that don't use snapshot reads continue to compile and run corr
 <h2 id="reference-implementation-13"><a class="header" href="#reference-implementation-13">Reference Implementation</a></h2>
 <p>C# driver will provide the reference implementation. The corresponding ticket is
 <a href="https://jira.mongodb.org/browse/CSHARP-3668">CSHARP-3668</a>.</p>
-<h2 id="qa-9"><a class="header" href="#qa-9">Q&amp;A</a></h2>
-<h2 id="changelog-25"><a class="header" href="#changelog-25">Changelog</a></h2>
+<h2 id="qa-10"><a class="header" href="#qa-10">Q&amp;A</a></h2>
+<h2 id="changelog-26"><a class="header" href="#changelog-26">Changelog</a></h2>
 <ul>
 <li>2024-05-08: Migrated from reStructuredText to Markdown.</li>
 <li>2021-06-15: Initial version.</li>
@@ -13659,17 +13758,17 @@ Existing programs that don't use snapshot reads continue to compile and run corr
 <li>Minimum Server Version: 4.0</li>
 </ul>
 <hr />
-<h2 id="abstract-26"><a class="header" href="#abstract-26"><strong>Abstract</strong></a></h2>
+<h2 id="abstract-27"><a class="header" href="#abstract-27"><strong>Abstract</strong></a></h2>
 <p>Version 4.0 of the server introduces multi-statement transactions. This spec builds upon the
 <a href="transactions/../sessions/driver-sessions.html">Driver Sessions Specification</a> to define how an application uses transactions and how a
 driver interacts with the server to implement transactions.</p>
 <p>The API for transactions must be specified to ensure that all drivers and the mongo shell are consistent with each
 other, and to provide a natural interface for application developers and DBAs who use multi-statement transactions.</p>
-<h2 id="meta-26"><a class="header" href="#meta-26"><strong>META</strong></a></h2>
+<h2 id="meta-27"><a class="header" href="#meta-27"><strong>META</strong></a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-24"><a class="header" href="#specification-24"><strong>Specification</strong></a></h2>
-<h3 id="terms-16"><a class="header" href="#terms-16"><strong>Terms</strong></a></h3>
+<h2 id="specification-25"><a class="header" href="#specification-25"><strong>Specification</strong></a></h2>
+<h3 id="terms-17"><a class="header" href="#terms-17"><strong>Terms</strong></a></h3>
 <p>This specification uses the terms defined in the <a href="transactions/../sessions/driver-sessions.html">Driver Sessions Specification</a> and
 <a href="transactions/../retryable-writes/retryable-writes.html">Retryable Writes Specification</a>. Additional terms are defined below.</p>
 <h4 id="resource-management-block"><a class="header" href="#resource-management-block">Resource Management Block</a></h4>
@@ -14471,7 +14570,7 @@ custom write concerns. Excluding the edge case where
 <a href="https://www.mongodb.com/docs/manual/reference/replica-configuration/#rsconf.writeConcernMajorityJournalDefault">writeConcernMajorityJournalDefault</a>
 has been disabled, drivers can readily trust that a majority write concern is durable, which achieves the primary
 objective of avoiding duplicate commits.</p>
-<h2 id="changelog-26"><a class="header" href="#changelog-26"><strong>Changelog</strong></a></h2>
+<h2 id="changelog-27"><a class="header" href="#changelog-27"><strong>Changelog</strong></a></h2>
 <ul>
 <li>
 <p>2024-05-08: Add bulkWrite to the list of commands allowed in transactions.</p>
@@ -14551,14 +14650,14 @@ this case, the new mongos will return a transient error indicating that the tran
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-27"><a class="header" href="#abstract-27">Abstract</a></h2>
+<h2 id="abstract-28"><a class="header" href="#abstract-28">Abstract</a></h2>
 <p>A driver can provide functionality to enumerate all databases on a server. This specification defines several methods
 for enumerating databases.</p>
-<h2 id="meta-27"><a class="header" href="#meta-27">META</a></h2>
+<h2 id="meta-28"><a class="header" href="#meta-28">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-25"><a class="header" href="#specification-25">Specification</a></h2>
-<h3 id="terms-17"><a class="header" href="#terms-17">Terms</a></h3>
+<h2 id="specification-26"><a class="header" href="#specification-26">Specification</a></h2>
+<h3 id="terms-18"><a class="header" href="#terms-18">Terms</a></h3>
 <p><strong>MongoClient</strong></p>
 <p>Driver object representing a connection to MongoDB. This is the root object of a driver's API and MAY be named
 differently in some drivers.</p>
@@ -14723,7 +14822,7 @@ database information documents is the primary result. Returning a tuple or compo
 driver method would complicate the general use case, as opposed to an optional output argument (if supported by the
 language). Furthermore, the <code>totalSize</code> value can be calculated client-side by summing all <code>sizeOnDisk</code> fields in the
 array of database information documents.</p>
-<h2 id="changelog-27"><a class="header" href="#changelog-27">Changelog</a></h2>
+<h2 id="changelog-28"><a class="header" href="#changelog-28">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-26: Migrated from reStructuredText to Markdown. Removed note that applied to pre-3.6 servers.</p>
@@ -14754,14 +14853,14 @@ where <code>nameOnly</code> and <code>filter</code> options were first introduce
 <li>Minimum Server Version: 1.8</li>
 </ul>
 <hr />
-<h2 id="abstract-28"><a class="header" href="#abstract-28">Abstract</a></h2>
+<h2 id="abstract-29"><a class="header" href="#abstract-29">Abstract</a></h2>
 <p>A driver can contain a feature to enumerate all collections belonging to a database. This specification defines how
 collections should be enumerated.</p>
-<h2 id="meta-28"><a class="header" href="#meta-28">META</a></h2>
+<h2 id="meta-29"><a class="header" href="#meta-29">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-26"><a class="header" href="#specification-26">Specification</a></h2>
-<h3 id="terms-18"><a class="header" href="#terms-18">Terms</a></h3>
+<h2 id="specification-27"><a class="header" href="#specification-27">Specification</a></h2>
+<h3 id="terms-19"><a class="header" href="#terms-19">Terms</a></h3>
 <p><strong>MongoClient</strong></p>
 <p>Driver object representing a connection to MongoDB. This is the root object of a driver's API and MAY be named
 differently in some drivers.</p>
@@ -14970,7 +15069,7 @@ versions of MongoDB.</p>
 <h2 id="reference-implementation-16"><a class="header" href="#reference-implementation-16">Reference Implementation</a></h2>
 <p>The shell implements the first algorithm for falling back if the <code>listCollections</code> command does not exist
 (<a href="https://github.com/mongodb/mongo/blob/f32ba54f971c045fb589fe4c3a37da77dc486cee/src/mongo/shell/db.js#L550">https://github.com/mongodb/mongo/blob/f32ba54f971c045fb589fe4c3a37da77dc486cee/src/mongo/shell/db.js#L550</a>).</p>
-<h2 id="changelog-28"><a class="header" href="#changelog-28">Changelog</a></h2>
+<h2 id="changelog-29"><a class="header" href="#changelog-29">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-26: Migrated from reStructuredText to Markdown. Drop description of behavior for MongoDB 2.x servers.</p>
@@ -15023,15 +15122,15 @@ return value.</p>
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="specification-27"><a class="header" href="#specification-27">Specification</a></h2>
+<h2 id="specification-28"><a class="header" href="#specification-28">Specification</a></h2>
 <p>The index management spec defines a set of behaviour in the drivers for creating, removing and viewing indexes in a
 collection. It defines implementation details when required but also provides flexibility in the driver in that one or
 both of 2 unique APIs can be chosen to be implemented.</p>
 <h3 id="definitions-5"><a class="header" href="#definitions-5">Definitions</a></h3>
-<h4 id="meta-29"><a class="header" href="#meta-29">META</a></h4>
+<h4 id="meta-30"><a class="header" href="#meta-30">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-19"><a class="header" href="#terms-19">Terms</a></h4>
+<h4 id="terms-20"><a class="header" href="#terms-20">Terms</a></h4>
 <p><strong>Collection</strong></p>
 <p>The term <code>Collection</code> references the object in the driver that represents a collection on the server.</p>
 <p><strong>Cursor</strong></p>
@@ -15943,7 +16042,7 @@ Starting in 3.4, the server validates all options passed to the <code>createInde
 4.2.0-4.2.5 of the server (SERVER-47193), specifying <code>commitQuorum</code> does not result in an error. The option is used
 internally by the server on those versions, and its value could have adverse effects on index builds. To prevent users
 from mistakenly specifying this option, drivers manually verify it is only sent to 4.4+ servers.</p>
-<h4 id="changelog-29"><a class="header" href="#changelog-29">Changelog</a></h4>
+<h4 id="changelog-30"><a class="header" href="#changelog-30">Changelog</a></h4>
 <ul>
 <li>
 <p>2024-03-05: Migrated from reStructuredText to Markdown.</p>
@@ -16010,18 +16109,18 @@ for the <code>_id</code> index.</p>
 <li>Minimum Server Version: 2.6</li>
 </ul>
 <hr />
-<h2 id="abstract-29"><a class="header" href="#abstract-29">Abstract</a></h2>
+<h2 id="abstract-30"><a class="header" href="#abstract-30">Abstract</a></h2>
 <p>The CRUD API defines a set of related methods and structures defining a driver's API. As not all languages/frameworks
 have the same abilities, parts of the spec may or may not apply. These sections have been called out.</p>
-<h2 id="specification-28"><a class="header" href="#specification-28">Specification</a></h2>
+<h2 id="specification-29"><a class="header" href="#specification-29">Specification</a></h2>
 <p>This specification is about <a href="crud/crud.html#guidance">Guidance</a> in 3 areas related to the CRUD API as well as a specification for the
 API itself. It does not define implementation details and provides room and flexibility for the idioms and differences
 in languages and frameworks.</p>
 <h3 id="definitions-6"><a class="header" href="#definitions-6">Definitions</a></h3>
-<h4 id="meta-30"><a class="header" href="#meta-30">META</a></h4>
+<h4 id="meta-31"><a class="header" href="#meta-31">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-20"><a class="header" href="#terms-20">Terms</a></h4>
+<h4 id="terms-21"><a class="header" href="#terms-21">Terms</a></h4>
 <p><strong>Collection:</strong></p>
 <p>The term <code>interface Collection</code> will be seen in most of the sections. Each driver will likely have a class or interface
 defined for the concept of a collection. Operations appearing inside the <code>interface Collection</code> are required operations
@@ -18244,7 +18343,7 @@ Given that the original switch to <code>$collStats</code> was a breaking change 
 using estimatedDocumentCount with <code>apiStrict: true</code> is small, and the server is back-porting the addition of <code>count</code> to
 the Stable API, it was decided that this change was acceptable to make in minor version releases of the drivers per the
 aforementioned allowance in the SemVer spec.</p>
-<h2 id="changelog-30"><a class="header" href="#changelog-30">Changelog</a></h2>
+<h2 id="changelog-31"><a class="header" href="#changelog-31">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-02-20: Migrated from reStructuredText to Markdown.</p>
@@ -18442,7 +18541,7 @@ calculating batchSize for opcode writes.</p>
 <li>Minimum Server Version: 1.8</li>
 </ul>
 <hr />
-<h2 id="abstract-30"><a class="header" href="#abstract-30">Abstract</a></h2>
+<h2 id="abstract-31"><a class="header" href="#abstract-31">Abstract</a></h2>
 <p>As of MongoDB server version 3.4 (maxWireVersion 5), a collation option is supported by the query system for matching
 and sorting on language strings in a locale-aware fashion.</p>
 <p>A driver MUST support a Collation option for each of the relevant operations in server versions &gt;= 3.4 (maxWireVersion
@@ -18450,7 +18549,7 @@ and sorting on language strings in a locale-aware fashion.</p>
 maxWireVersion &lt; 5 or if the user is using opcode-based unacknowledged writes.</p>
 <p>The CRUD and Index Management specs include the collation option in descriptions of API elements where it is supported.
 This document provides more details on the specific driver behavior required to handle the collation option.</p>
-<h2 id="meta-31"><a class="header" href="#meta-31">META</a></h2>
+<h2 id="meta-32"><a class="header" href="#meta-32">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="design-rationale-22"><a class="header" href="#design-rationale-22">Design Rationale</a></h2>
@@ -18470,7 +18569,7 @@ gains.</p>
 Because a Collation defines how documents are matched and sorted for both read and write operations, behavior
 differences between server versions are significant. Drivers therefore MUST throw an error if a user specifies a
 Collation and the selected server has a maxWireVersion &lt; 5 or if using opcode-based unacknowledged writes.</p>
-<h2 id="specification-29"><a class="header" href="#specification-29">Specification</a></h2>
+<h2 id="specification-30"><a class="header" href="#specification-30">Specification</a></h2>
 <h3 id="collation-document-model"><a class="header" href="#collation-document-model">Collation Document Model</a></h3>
 <p>For naming and deviation guidance, see the <a href="collation/../crud/crud.html#naming">CRUD specification</a>. Defined below are the
 constructs for drivers. Note that the only required field is <code>locale</code>, but the driver should let the server validate the
@@ -18606,7 +18705,7 @@ server has maxWireVersion &lt; 5.</p>
 collation when deleting a document matching <code>ObjectID()</code> doesn’t change anything, but matching a string value would.</p>
 <p>Q: How do I create a collection with default collation? Does it affect my existing collection creation helper?</p>
 <p>A: A collection with a default collation can be created using the create helper and by providing a collation option.</p>
-<h2 id="changelog-31"><a class="header" href="#changelog-31">Changelog</a></h2>
+<h2 id="changelog-32"><a class="header" href="#changelog-32">Changelog</a></h2>
 <ul>
 <li>2024-02-15: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter and reformat changelog.</li>
@@ -18986,7 +19085,7 @@ corresponding response off the wire -- even if the caller is not interested in t
 <p>It must convert that request into write operations + gle's and use the old op codes.</p>
 <h3 id="are-we-discontinuing-the-use-of-getlasterror"><a class="header" href="#are-we-discontinuing-the-use-of-getlasterror">Are we discontinuing the use of getLastError?</a></h3>
 <p>Yes but as of 2.6 the existing getLastError behavior is supported for backward compatibility.</p>
-<h2 id="changelog-32"><a class="header" href="#changelog-32">Changelog</a></h2>
+<h2 id="changelog-33"><a class="header" href="#changelog-33">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-31: Migrated from reStructuredText to Markdown.</p>
@@ -19018,13 +19117,13 @@ paragraphs; re-ordered the response field sections.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 8.0</li>
 </ul>
-<h2 id="abstract-31"><a class="header" href="#abstract-31">Abstract</a></h2>
+<h2 id="abstract-32"><a class="header" href="#abstract-32">Abstract</a></h2>
 <p>This specification defines the driver API for the <code>bulkWrite</code> server command introduced in MongoDB 8.0. The API defined
 in this specification allows users to perform insert, update, and delete operations against mixed namespaces in a
 minimized number of round trips, and to receive detailed results for each operation performed. This API is distinct from
 the <a href="crud/../crud/crud.html#insert-update-replace-delete-and-bulk-writes">collection-level bulkWrite method</a> defined in the
 CRUD specification and the <a href="crud/../driver-bulk-update.rst">deprecated bulk write specification</a>.</p>
-<h2 id="specification-30"><a class="header" href="#specification-30">Specification</a></h2>
+<h2 id="specification-31"><a class="header" href="#specification-31">Specification</a></h2>
 <blockquote>
 <p>[!NOTE]
 The <code>BulkWriteOptions</code>, <code>BulkWriteResult</code>, and <code>BulkWriteException</code> types defined in this specification are similar to
@@ -19691,7 +19790,7 @@ specification.</p>
 <p>When a <code>getMore</code> fails with a retryable error when attempting to iterate the results cursor, drivers could retry the
 entire <code>bulkWrite</code> command to receive a fresh cursor and retry iteration. This work was omitted to minimize the scope of
 the initial implementation and testing of the new bulk write API, but may be revisited in the future.</p>
-<h2 id="qa-10"><a class="header" href="#qa-10">Q&amp;A</a></h2>
+<h2 id="qa-11"><a class="header" href="#qa-11">Q&amp;A</a></h2>
 <h3 id="is-bulkwrite-supported-on-atlas-serverless"><a class="header" href="#is-bulkwrite-supported-on-atlas-serverless">Is <code>bulkWrite</code> supported on Atlas Serverless?</a></h3>
 <p>No. See <a href="https://jira.mongodb.org/browse/CLOUDP-256344">CLOUDP-256344</a></p>
 <h3 id="why-are-we-adding-a-new-bulk-write-api-rather-than-updating-the-mongocollectionbulkwrite-implementation"><a class="header" href="#why-are-we-adding-a-new-bulk-write-api-rather-than-updating-the-mongocollectionbulkwrite-implementation">Why are we adding a new bulk write API rather than updating the <code>MongoCollection.bulkWrite</code> implementation?</a></h3>
@@ -19743,7 +19842,7 @@ number was determined by constructing <code>OP_MSG</code> messages with various 
 <code>OP_MSG</code> structure or the introduction of new command-agnostic fields.</p>
 <p>Drivers are required to use this value even if they are capable of determining the exact size of the message prior to
 batch-splitting to standardize implementations across drivers and simplify batch-splitting testing.</p>
-<h2 id="changelog-33"><a class="header" href="#changelog-33"><strong>Changelog</strong></a></h2>
+<h2 id="changelog-34"><a class="header" href="#changelog-34"><strong>Changelog</strong></a></h2>
 <ul>
 <li>
 <p>2024-05-17: Update specification status to "Accepted".</p>
@@ -19761,17 +19860,17 @@ batch-splitting to standardize implementations across drivers and simplify batch
 <li>Minimum Server Version: 2.4</li>
 </ul>
 <hr />
-<h2 id="abstract-32"><a class="header" href="#abstract-32">Abstract</a></h2>
+<h2 id="abstract-33"><a class="header" href="#abstract-33">Abstract</a></h2>
 <p>A driver must support configuring and sending read concern and write concerns to a server. This specification defines
 the API drivers must implement as well as how that API is translated into messages for communication with the server.</p>
-<h2 id="meta-32"><a class="header" href="#meta-32">META</a></h2>
+<h2 id="meta-33"><a class="header" href="#meta-33">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="terminology-1"><a class="header" href="#terminology-1">Terminology</a></h2>
 <p>MaxWireVersion The <code>maxWireVersion</code> value reported by the <code>hello</code> command.</p>
 <p>Server Selection The process of selecting a server to read or write from. See
 <a href="https://github.com/mongodb/specifications/tree/master/source/server-selection">the server selection specification</a>.</p>
-<h2 id="specification-31"><a class="header" href="#specification-31">Specification</a></h2>
+<h2 id="specification-32"><a class="header" href="#specification-32">Specification</a></h2>
 <p>This specification includes guidance for implementing <a href="read-write-concern/read-write-concern.html#read-concern">Read Concern</a> and <a href="read-write-concern/read-write-concern.html#write-concern">Write Concern</a>
 in a driver. It does not define how read and write concern behave or are implemented on the server.</p>
 <h3 id="read-concern"><a class="header" href="#read-concern">Read Concern</a></h3>
@@ -20194,7 +20293,7 @@ set differently. While this setting does not currently exist for <code>ReadConce
 costs a driver nothing to be prepared for it. Second, it makes sense that if a user doesn't specify a <code>ReadConcern</code>, we
 don't send one and if a user does specify a <code>ReadConcern</code>, we do send one. If the user specifies level="local", for
 instance, we send it.</p>
-<h2 id="changelog-34"><a class="header" href="#changelog-34">Changelog</a></h2>
+<h2 id="changelog-35"><a class="header" href="#changelog-35">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-08-23: Migrated from reStructuredText to Markdown.</p>
@@ -20274,17 +20373,17 @@ a different writeConcernError.</p>
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-33"><a class="header" href="#abstract-33">Abstract</a></h2>
+<h2 id="abstract-34"><a class="header" href="#abstract-34">Abstract</a></h2>
 <p>As of version 3.6 of the MongoDB server a new <code>$changeStream</code> pipeline stage is supported in the aggregation framework.
 Specifying this stage first in an aggregation pipeline allows users to request that notifications are sent for all
 changes to a particular collection. This specification defines the means for creating change streams in drivers, as well
 as behavior during failure scenarios.</p>
-<h2 id="specification-32"><a class="header" href="#specification-32">Specification</a></h2>
+<h2 id="specification-33"><a class="header" href="#specification-33">Specification</a></h2>
 <h3 id="definitions-7"><a class="header" href="#definitions-7">Definitions</a></h3>
-<h4 id="meta-33"><a class="header" href="#meta-33">META</a></h4>
+<h4 id="meta-34"><a class="header" href="#meta-34">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-21"><a class="header" href="#terms-21">Terms</a></h4>
+<h4 id="terms-22"><a class="header" href="#terms-22">Terms</a></h4>
 <h5 id="resumable-error"><a class="header" href="#resumable-error">Resumable Error</a></h5>
 <p>An error is considered resumable if it meets any of the criteria listed below. For any criteria with wire version
 constraints, the driver MUST use the wire version of the connection used to do the initial <code>aggregate</code> or the <code>getMore</code>
@@ -21170,7 +21269,7 @@ unnecessary scanning of unmatched oplog entries.</p>
 <li>PYTHON (PYTHON-1338)</li>
 <li>RUBY (RUBY-1228)</li>
 </ul>
-<h2 id="changelog-35"><a class="header" href="#changelog-35">Changelog</a></h2>
+<h2 id="changelog-36"><a class="header" href="#changelog-36">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-02-09: Migrated from reStructuredText to Markdown.</p>
@@ -21319,15 +21418,15 @@ unnecessary scanning of unmatched oplog entries.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.2</li>
 </ul>
-<h2 id="abstract-34"><a class="header" href="#abstract-34">Abstract</a></h2>
+<h2 id="abstract-35"><a class="header" href="#abstract-35">Abstract</a></h2>
 <p>The Find, GetMore and KillCursors commands in MongoDB 3.2 or later replace the use of the legacy OP_QUERY, OP_GET_MORE
 and OP_KILL_CURSORS wire protocol messages. This specification lays out how drivers should interact with the new
 commands when compared to the legacy wire protocol level messages.</p>
 <h2 id="definitions-8"><a class="header" href="#definitions-8">Definitions</a></h2>
-<h3 id="meta-34"><a class="header" href="#meta-34">Meta</a></h3>
+<h3 id="meta-35"><a class="header" href="#meta-35">Meta</a></h3>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h3 id="terms-22"><a class="header" href="#terms-22">Terms</a></h3>
+<h3 id="terms-23"><a class="header" href="#terms-23">Terms</a></h3>
 <h4 id="document"><a class="header" href="#document">Document</a></h4>
 <p>The term Document refers to the implementation in the driver's language of a BSON document.</p>
 <h4 id="command"><a class="header" href="#command">Command</a></h4>
@@ -21655,7 +21754,7 @@ Information about the command can be found in the
 <p>This format is general for all commands when executing against a Mongos proxy.</p>
 <p>More in depth information about passing read preferences to Mongos can be found in the Server Selection Specification
 <a href="./server-selection/server-selection.html#passing-read-preference-to-mongos">Server Selection Specification</a>.</p>
-<h2 id="changelog-36"><a class="header" href="#changelog-36">Changelog</a></h2>
+<h2 id="changelog-37"><a class="header" href="#changelog-37">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-30: Migrated from reStructuredText to Markdown.</p>
@@ -21698,7 +21797,7 @@ have same behavior as for OP_GET_MORE and OP_KILL_CURSORS.</p>
 <li>Minimum Server Version: 2.2</li>
 </ul>
 <hr />
-<h2 id="abstract-35"><a class="header" href="#abstract-35">Abstract</a></h2>
+<h2 id="abstract-36"><a class="header" href="#abstract-36">Abstract</a></h2>
 <p>GridFS is a convention drivers use to store and retrieve BSON binary data (type "x05") that exceeds MongoDB"s
 BSON-document size limit of 16 MiB. When this data, called a <strong>user file</strong>, is written to the system, GridFS divides the
 file into <strong>chunks</strong> that are stored as distinct documents in a <strong>chunks collection</strong>. To retrieve a stored file, GridFS
@@ -21710,10 +21809,10 @@ support in their implementations. Additionally, this document attempts to clarif
 in the GridFS data model, disambiguate GridFS terminology, and document configuration options that were previously
 unspecified.</p>
 <h2 id="definitions-9"><a class="header" href="#definitions-9">Definitions</a></h2>
-<h3 id="meta-35"><a class="header" href="#meta-35">META</a></h3>
+<h3 id="meta-36"><a class="header" href="#meta-36">META</a></h3>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h3 id="terms-23"><a class="header" href="#terms-23">Terms</a></h3>
+<h3 id="terms-24"><a class="header" href="#terms-24">Terms</a></h3>
 <p><strong>Bucket name</strong></p>
 <p>A prefix under which a GridFS system"s collections are stored. Collection names for the files and chunks collections are
 prefixed with the bucket name. The bucket name MUST be configurable by the user. Multiple buckets may exist within a
@@ -21801,7 +21900,7 @@ language to represent a file id. This would be something like object, BsonValue 
 <p><strong>User File</strong></p>
 <p>A data added by a user to GridFS. This data may map to an actual file on disk, a stream of input, a large data object,
 or any other large amount of consecutive data.</p>
-<h2 id="specification-33"><a class="header" href="#specification-33">Specification</a></h2>
+<h2 id="specification-34"><a class="header" href="#specification-34">Specification</a></h2>
 <h3 id="guidance-4"><a class="header" href="#guidance-4">Guidance</a></h3>
 <h4 id="documentation-5"><a class="header" href="#documentation-5">Documentation</a></h4>
 <p>The documentation provided in code below is merely for driver authors and SHOULD NOT be taken as required documentation
@@ -22501,7 +22600,7 @@ instead.</p>
 <p>The ability to alter or append to existing GridFS files has been cited as something that would greatly improve the
 system. While this functionality is not in-scope for this spec (see "Why can"t I alter documents once they are in the
 system?") it is a potential area of growth for the future.</p>
-<h2 id="changelog-37"><a class="header" href="#changelog-37">Changelog</a></h2>
+<h2 id="changelog-38"><a class="header" href="#changelog-38">Changelog</a></h2>
 <ul>
 <li>2024-02-27: Migrated from reStructuredText to Markdown.</li>
 <li>2016-05-10: Support custom file ids</li>
@@ -22522,7 +22621,7 @@ system?") it is a potential area of growth for the future.</p>
 <li>Version: 1.14.0</li>
 </ul>
 <hr />
-<h2 id="abstract-36"><a class="header" href="#abstract-36">Abstract</a></h2>
+<h2 id="abstract-37"><a class="header" href="#abstract-37">Abstract</a></h2>
 <p>MongoDB 4.2 introduced support for client side encryption, guaranteeing that sensitive data can only be encrypted and
 decrypted with access to both MongoDB and a separate key management provider (supporting AWS, Azure, GCP, a local
 provider, and KMIP). Once enabled, data can be seamlessly encrypted and decrypted with minimal application code changes.
@@ -22530,10 +22629,10 @@ provider, and KMIP). Once enabled, data can be seamlessly encrypted and decrypte
 expressive encrypted search operations. This spec covers both capabilities - 1st generation, "Client Side Field Level
 Encryption" and generation 2, "Queryable Encryption" - as the associated core cryptographic library and supporting
 drivers share a common codebase.</p>
-<h2 id="meta-36"><a class="header" href="#meta-36">META</a></h2>
+<h2 id="meta-37"><a class="header" href="#meta-37">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="terms-24"><a class="header" href="#terms-24">Terms</a></h2>
+<h2 id="terms-25"><a class="header" href="#terms-25">Terms</a></h2>
 <p><strong>encrypted MongoClient</strong></p>
 <p>A MongoClient with client side encryption enabled.</p>
 <p><strong>data key</strong></p>
@@ -24481,7 +24580,7 @@ libmongocrypt would create multiple OP_MSGs to send.</p>
 <p>Key management functions currently assume there are no concurrent accesses of the key vault collection being operated
 on. To support concurrent access of the key vault collection, the key management functions may be overloaded to take an
 explicit session parameter as described in the <a href="client-side-encryption/../sessions/driver-sessions.html">Drivers Sessions Specification</a>.</p>
-<h2 id="changelog-38"><a class="header" href="#changelog-38">Changelog</a></h2>
+<h2 id="changelog-39"><a class="header" href="#changelog-39">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-29: Document range as stable.</p>
@@ -24644,15 +24743,15 @@ queryable encrypted fields in a new collection.</p>
 <li>Minimum Server Version: 4.2</li>
 </ul>
 <hr />
-<h2 id="abstract-37"><a class="header" href="#abstract-37">Abstract</a></h2>
+<h2 id="abstract-38"><a class="header" href="#abstract-38">Abstract</a></h2>
 <p>Client side encryption requires a new binary subtype to store (1) encrypted ciphertext with metadata, and (2) binary
 markings indicating what values must be encrypted in a document. (1) is stored in the server, but (2) is only used in
 the communication protocol between libmongocrypt and mongocryptd described in
 <a href="https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/client-side-encryption.rst">Driver Spec: Client Side Encryption Encryption</a>.</p>
-<h2 id="meta-37"><a class="header" href="#meta-37">META</a></h2>
+<h2 id="meta-38"><a class="header" href="#meta-38">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-34"><a class="header" href="#specification-34">Specification</a></h2>
+<h2 id="specification-35"><a class="header" href="#specification-35">Specification</a></h2>
 <p>This spec introduces a new BSON binary subtype with value 6. The binary has multiple formats determined by the first
 byte, but are all related to client side encryption. The first byte indicates the type and layout of the remaining data.</p>
 <p>All values are represented in little endian. The payload is generally optimized for storage size. The exception is the
@@ -24739,7 +24838,7 @@ validate that the underlying encrypted BSON type is correct.</p>
 <p>It would be a very bad security flaw if intent-to-encrypt markings were confused with ciphertexts. This could lead to a
 marking inadvertently being stored on a server – meaning that plaintext is stored where ciphertext should have been.</p>
 <p>Therefore, the leading byte of the BSON binary subtype distinguishes between marking and ciphertext.</p>
-<h2 id="changelog-39"><a class="header" href="#changelog-39">Changelog</a></h2>
+<h2 id="changelog-40"><a class="header" href="#changelog-40">Changelog</a></h2>
 <ul>
 <li>2024-03-04: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter and create changelog.</li>
@@ -24751,15 +24850,15 @@ marking inadvertently being stored on a server – meaning that plaintext is st
 <li>Minimum Server Version: 2.4</li>
 </ul>
 <hr />
-<h2 id="abstract-38"><a class="header" href="#abstract-38">Abstract</a></h2>
+<h2 id="abstract-39"><a class="header" href="#abstract-39">Abstract</a></h2>
 <p>The SDAM logging and monitoring specification defines a set of behaviors in the driver for providing runtime information
 about server discovery and monitoring (SDAM) in log messages, as well as in events that users can consume
 programmatically, either directly or by integrating with third-party APM libraries.</p>
 <h3 id="definitions-10"><a class="header" href="#definitions-10">Definitions</a></h3>
-<h4 id="meta-38"><a class="header" href="#meta-38">META</a></h4>
+<h4 id="meta-39"><a class="header" href="#meta-39">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-25"><a class="header" href="#terms-25">Terms</a></h4>
+<h4 id="terms-26"><a class="header" href="#terms-26">Terms</a></h4>
 <p><code>ServerAddress</code></p>
 <blockquote>
 <p>The term <code>ServerAddress</code> refers to the implementation in the driver's language of a server host/port pair. This may be
@@ -24775,7 +24874,7 @@ etc.). This may be a string or object. The name of the object is NOT REQUIRED.</
 <p>The term <code>Server</code> refers to the implementation in the driver's language of an abstraction of a mongod or mongos
 process, or a load balancer, as defined by the <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#server">SDAM specification</a>.</p>
 </blockquote>
-<h3 id="specification-35"><a class="header" href="#specification-35">Specification</a></h3>
+<h3 id="specification-36"><a class="header" href="#specification-36">Specification</a></h3>
 <h3 id="guidance-5"><a class="header" href="#guidance-5">Guidance</a></h3>
 <h4 id="documentation-6"><a class="header" href="#documentation-6">Documentation</a></h4>
 <p>The documentation provided in the code below is merely for driver authors and SHOULD NOT be taken as required
@@ -25220,7 +25319,7 @@ placeholders as appropriate:</p>
 </blockquote>
 <h3 id="tests-2"><a class="header" href="#tests-2">Tests</a></h3>
 <p>See the <a href="server-discovery-and-monitoring/tests/monitoring/README.html">README</a>.</p>
-<h2 id="changelog-40"><a class="header" href="#changelog-40">Changelog</a></h2>
+<h2 id="changelog-41"><a class="header" href="#changelog-41">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-05-02: Migrated from reStructuredText to Markdown.</p>
@@ -25262,13 +25361,13 @@ added requirements for SDAM log messages.</p>
 <li>Minimum Server Version: N/A</li>
 </ul>
 <hr />
-<h2 id="abstract-39"><a class="header" href="#abstract-39">Abstract</a></h2>
+<h2 id="abstract-40"><a class="header" href="#abstract-40">Abstract</a></h2>
 <p>This specification defines requirements for drivers' logging configuration and behavior.</p>
-<h2 id="meta-39"><a class="header" href="#meta-39">META</a></h2>
+<h2 id="meta-40"><a class="header" href="#meta-40">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-36"><a class="header" href="#specification-36">Specification</a></h2>
-<h3 id="terms-26"><a class="header" href="#terms-26">Terms</a></h3>
+<h2 id="specification-37"><a class="header" href="#specification-37">Specification</a></h2>
+<h3 id="terms-27"><a class="header" href="#terms-27">Terms</a></h3>
 <p><strong>Structured logging</strong></p>
 <p>Structured logging refers to producing log messages in a structured format, i.e. a series of key-value pairs, which can
 be converted to external formats such as JSON.</p>
@@ -25584,7 +25683,7 @@ infinitely if each write to store a log message generates additional log message
 issue in drivers that already produce log messages, or with the command monitoring API, but if users start to run into
 this issue, we could try to address it at the specification level by e.g. requiring drivers to support disabling logging
 on individual clients or for particular namespaces.</p>
-<h2 id="changelog-41"><a class="header" href="#changelog-41">Changelog</a></h2>
+<h2 id="changelog-42"><a class="header" href="#changelog-42">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-03-06: Migrated from reStructuredText to Markdown.</p>
@@ -25616,13 +25715,13 @@ environment variables.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-40"><a class="header" href="#abstract-40">Abstract</a></h2>
+<h2 id="abstract-41"><a class="header" href="#abstract-41">Abstract</a></h2>
 <p>Drivers currently support a variety of options that allow users to configure connection pooling behavior. Users are
 confused by drivers supporting different subsets of these options. Additionally, drivers implement their connection
 pools differently, making it difficult to design cross-driver pool functionality. By unifying and codifying pooling
 options and behavior across all drivers, we will increase user comprehension and code base maintainability.</p>
 <p>This specification does not apply to drivers that do not support multitasking.</p>
-<h2 id="meta-40"><a class="header" href="#meta-40">META</a></h2>
+<h2 id="meta-41"><a class="header" href="#meta-41">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="definitions-11"><a class="header" href="#definitions-11">Definitions</a></h2>
@@ -26278,7 +26377,7 @@ implemented, drivers SHOULD use this method as the default method of checking ou
 the pool. If a user subscribes to Connection Monitoring events, these events MUST be emitted when specified in
 "Connection Pool Behaviors". Events SHOULD be created and subscribed to in a manner idiomatic to their language and
 driver.</p>
-<h4 id="events-2"><a class="header" href="#events-2">Events</a></h4>
+<h4 id="events-3"><a class="header" href="#events-3">Events</a></h4>
 <p>See the <a href="connection-monitoring-and-pooling/../load-balancers/load-balancers.html#events">Load Balancer Specification</a> for details on the <code>serviceId</code> field.</p>
 <pre><code class="language-typescript">/**
  *  Emitted when a Connection Pool is created
@@ -26804,7 +26903,7 @@ Connection.</li>
 <h3 id="add-support-for-op_msg-exhaustallowed-1"><a class="header" href="#add-support-for-op_msg-exhaustallowed-1">Add support for OP_MSG exhaustAllowed</a></h3>
 <p>Exhaust Cursors may require changes to how we close <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> in the future, specifically to add a way
 to close and remove from its pool a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> which has unread exhaust messages.</p>
-<h2 id="changelog-42"><a class="header" href="#changelog-42">Changelog</a></h2>
+<h2 id="changelog-43"><a class="header" href="#changelog-43">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-01-23: Migrated from reStructuredText to Markdown.</p>
@@ -26864,12 +26963,12 @@ tests to ensure ConnectionReadyEvents are fired after ConnectionCreatedEvents.</
 <li>Current Schema Version: 1.19.0</li>
 </ul>
 <hr />
-<h2 id="abstract-41"><a class="header" href="#abstract-41">Abstract</a></h2>
+<h2 id="abstract-42"><a class="header" href="#abstract-42">Abstract</a></h2>
 <p>This project defines a unified schema for YAML and JSON specification tests, which run operations against a MongoDB
 deployment. By conforming various spec tests to a single schema, drivers can implement a single test runner to execute
 acceptance tests for multiple specifications, thereby reducing maintenance of existing specs and implementation time for
 new specifications.</p>
-<h2 id="meta-41"><a class="header" href="#meta-41">META</a></h2>
+<h2 id="meta-42"><a class="header" href="#meta-42">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <p>This document tends to use "SHOULD" more frequently than other specifications, but mainly in the context of providing
@@ -26890,8 +26989,8 @@ guidance on writing test files. This is discussed in more detail in <a href="uni
 </ul>
 <p>This is not an exhaustive list. Specifications that are known to not be supported by this format may be discussed under
 <a href="unified-test-format/unified-test-format.html#future-work">Future Work</a>.</p>
-<h2 id="specification-37"><a class="header" href="#specification-37">Specification</a></h2>
-<h3 id="terms-27"><a class="header" href="#terms-27">Terms</a></h3>
+<h2 id="specification-38"><a class="header" href="#specification-38">Specification</a></h2>
+<h3 id="terms-28"><a class="header" href="#terms-28">Terms</a></h3>
 <p><strong>Entity</strong> Any object or value that is indexed by a unique name and stored in the <a href="unified-test-format/unified-test-format.html#entity-map">Entity Map</a>. This will
 typically be a driver object (e.g. client, session) defined in <a href="unified-test-format/unified-test-format.html#createentities">createEntities</a> but may also be a
 <a href="unified-test-format/unified-test-format.html#operation_saveResultAsEntity">saved operation result</a>. A exhaustive list of supported types is presented in
@@ -29810,7 +29909,7 @@ CRUD spec and this spec and its schema.</p>
 <p>As discussed in <a href="unified-test-format/unified-test-format.html#executing-an-operation">Executing an Operation</a>, test runners MUST raise errors for unsupported
 operations and arguments. This is a concession until such time that better processes can be established for versioning
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
-<h2 id="changelog-43"><a class="header" href="#changelog-43">Changelog</a></h2>
+<h2 id="changelog-44"><a class="header" href="#changelog-44">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-05-08: <strong>Schema version 1.21.</strong></p>
@@ -30070,7 +30169,7 @@ MongoClient using a valid connection string without auth credentials and execute
 <p>Test that the driver can establish a connection with Atlas Data Lake with authentication. For these tests, create a
 MongoClient using a valid connection string with SCRAM-SHA-1 and credentials from the drivers-evergreen-tools ADL
 configuration and execute a ping command. Repeat this test using SCRAM-SHA-256.</p>
-<h2 id="changelog-44"><a class="header" href="#changelog-44">Changelog</a></h2>
+<h2 id="changelog-45"><a class="header" href="#changelog-45">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-03-08: Convert legacy ADL tests to unified format. Convert test README from reStructuredText to Markdown.</p>
@@ -30088,7 +30187,7 @@ each test.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-42"><a class="header" href="#abstract-42">Abstract</a></h2>
+<h2 id="abstract-43"><a class="header" href="#abstract-43">Abstract</a></h2>
 <p>This document describes a standard benchmarking suite for MongoDB drivers.</p>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <h3 id="name-and-purpose"><a class="header" href="#name-and-purpose">Name and purpose</a></h3>
@@ -30560,7 +30659,7 @@ minimize disk I/O impact?); same AWS zone as client</p>
 <p>TBD: spec system to hold scores over time</p>
 <h3 id="datasets"><a class="header" href="#datasets">Datasets</a></h3>
 <p>TBD: generated datasets should be park in S3 or somewhere for retrieval by URL</p>
-<h2 id="changelog-45"><a class="header" href="#changelog-45">Changelog</a></h2>
+<h2 id="changelog-46"><a class="header" href="#changelog-46">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-01-22: Migrated from reStructuredText to Markdown.</p>
@@ -30609,11 +30708,11 @@ iterations in a reasonable time (e.g. file sizes and number of documents in cert
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-43"><a class="header" href="#abstract-43">Abstract</a></h2>
+<h2 id="abstract-44"><a class="header" href="#abstract-44">Abstract</a></h2>
 <p>The official BSON specification does not include test data, so this pseudo-specification describes tests for BSON
 encoding and decoding. It also includes tests for MongoDB's "Extended JSON" specification (hereafter abbreviated as
 <code>extjson</code>).</p>
-<h2 id="meta-42"><a class="header" href="#meta-42">Meta</a></h2>
+<h2 id="meta-43"><a class="header" href="#meta-43">Meta</a></h2>
 <p>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="motivation-for-change-17"><a class="header" href="#motivation-for-change-17">Motivation for Change</a></h2>
@@ -30637,7 +30736,7 @@ pseudo-specification provides such tests.</p>
 <li>Replace or extend the official BSON spec at <a href="http://bsonspec.org">http://bsonspec.org</a>.</li>
 <li>Provide a formal specification for <code>extjson</code>.</li>
 </ul>
-<h2 id="specification-38"><a class="header" href="#specification-38">Specification</a></h2>
+<h2 id="specification-39"><a class="header" href="#specification-39">Specification</a></h2>
 <p>The specification for BSON lives at <a href="http://bsonspec.org">http://bsonspec.org</a>. The <code>extjson</code> format specification is
 <a href="bson-corpus/../extended-json.html">here</a>.</p>
 <h2 id="test-plan-33"><a class="header" href="#test-plan-33">Test Plan</a></h2>
@@ -30894,7 +30993,7 @@ to the Extended JSON Specification.</p>
 different in different cases, but the <code>canonical_bson</code> field is the same. This is by design so that each case stands
 alone and can be confirmed to be internally consistent via the assertions. This makes for easier and safer test case
 development.</p>
-<h2 id="changelog-46"><a class="header" href="#changelog-46">Changelog</a></h2>
+<h2 id="changelog-47"><a class="header" href="#changelog-47">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-01-22: Migrated from reStructuredText to Markdown.</p>
@@ -31065,14 +31164,14 @@ communication.</p>
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-44"><a class="header" href="#abstract-44">Abstract</a></h2>
+<h2 id="abstract-45"><a class="header" href="#abstract-45">Abstract</a></h2>
 <p>This specification is about the ability for drivers to automate tests for "Functions as a Service" from continuous
 integration.</p>
-<h2 id="meta-43"><a class="header" href="#meta-43">META</a></h2>
+<h2 id="meta-44"><a class="header" href="#meta-44">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-39"><a class="header" href="#specification-39">Specification</a></h2>
-<h3 id="terms-28"><a class="header" href="#terms-28">Terms</a></h3>
+<h2 id="specification-40"><a class="header" href="#specification-40">Specification</a></h2>
+<h3 id="terms-29"><a class="header" href="#terms-29">Terms</a></h3>
 <h4 id="faas-2"><a class="header" href="#faas-2">FaaS</a></h4>
 <p>"Function as a Service", such as AWS Lambda.</p>
 <h3 id="implementing-automated-faas-tests"><a class="header" href="#implementing-automated-faas-tests">Implementing Automated FaaS Tests</a></h3>
@@ -31317,7 +31416,7 @@ limit. The variant itself MUST have the SAM CLI installed.</p>
 <li>Calls the frozen lambda function again.</li>
 <li>Deletes the Lambda function.</li>
 </ul>
-<h2 id="changelog-47"><a class="header" href="#changelog-47">Changelog</a></h2>
+<h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
 <ul>
 <li>2024-02-27: Migrated from reStructuredText to Markdown.</li>
 <li>2023-08-21: Drivers MUST assert that the streaming protocol is disabled in the Lambda function.</li>
@@ -31325,7 +31424,103 @@ limit. The variant itself MUST have the SAM CLI installed.</p>
 <li>2023-06-22: Updated evergreen configuration to use task groups.</li>
 <li>2023-04-14: Added list of supported variants, added additional template config.</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="atlas-serverless-testing"><a class="header" href="#atlas-serverless-testing">Atlas Serverless Testing</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="atlas-serverless-tests"><a class="header" href="#atlas-serverless-tests">Atlas Serverless Tests</a></h1>
+<ul>
+<li>Status: Accepted</li>
+<li>Minimum Server Version: N/A</li>
+</ul>
+<hr />
+<h2 id="introduction-2"><a class="header" href="#introduction-2">Introduction</a></h2>
+<p>This file describes a subset of existing tests that drivers MUST use to assert compatibility with Atlas Serverless.</p>
+<h2 id="serverless-configuration"><a class="header" href="#serverless-configuration">Serverless Configuration</a></h2>
+<p>These tests MUST be run against a live Atlas Serverless instance. A new instance MUST be created each time the test
+suite is run, and that instance MUST be used for all of the tests required by this specification. Once the tests are
+finished, the instance MUST be deleted regardless of the outcome of the tests. The
+<a href="https://github.com/mongodb-labs/drivers-evergreen-tools/tree/master/.evergreen/serverless">serverless directory in the drivers-evergreen-tools repository</a>
+contains scripts for creating and deleting Atlas Serverless instances, and the <code>config.yml</code> contains an example
+Evergreen configuration that uses them to run the tests. It can take up to 15 minutes or so to provision a new Atlas
+Serverless instance, so it is recommended to create one manually via the scripts in drivers-evergreen-tools that can be
+reused for the initial implementation of the tests before moving to Evergreen patches.</p>
+<p>Drivers MUST use the
+<a href="https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/serverless/create-instance.sh">create-instance.sh</a>
+script in <code>drivers-evergreen-tools</code> to create a new Atlas Serverless instance for Evergreen tasks. The script writes a
+URI for the newly created instance to a YAML expansions file:</p>
+<ul>
+<li><code>SERVERLESS_URI</code> An SRV connection string to a load balancer fronting a single Atlas Serverless proxy.</li>
+</ul>
+<p>The <code>expansions.update</code> Evergreen command can be used to read this file and copy the URI into a <code>SERVERLESS_URI</code>
+environment variable.</p>
+<h2 id="test-runner-configuration"><a class="header" href="#test-runner-configuration">Test Runner Configuration</a></h2>
+<p>All tests MUST be run with wire protocol compression and authentication enabled.</p>
+<p>In contrast to the <a href="serverless-testing/../load-balancers/tests/README.html">Load Balancer testing</a>, which has separate URIs for load
+balancers fronting a single or multiple servers, there is only a single URI for Atlas Serverless testing (i.e.
+<code>SERVERLESS_URI</code>).</p>
+<p>The TXT record for <code>SERVERLESS_URI</code> already specifies <code>loadBalanced=true</code> so drivers need not add that.</p>
+<p><code>SERVERLESS_URI</code> does not include authentication credentials. Drivers MUST specify a username and password (see:
+<a href="serverless-testing/index.html#required-variables">Required Variables</a>) when connecting to <code>SERVERLESS_URI</code>.</p>
+<p>Drivers MUST use <code>SERVERLESS_URI</code> to configure both internal clients and clients under test (as described in the
+<a href="serverless-testing/../unified-test-format/unified-test-format.html">Unified Test Format spec</a>).</p>
+<h3 id="required-variables"><a class="header" href="#required-variables">Required Variables</a></h3>
+<p>Managing the Atlas Serverless instances and connecting to them requires a few variables to be specified. The variables
+marked "private" are confidential and MUST be specified as private Evergreen variables or used only in private Evergreen
+projects. If using a public Evergreen project, xtrace MUST be disabled when using these variables to help prevent
+accidental leaks.</p>
+<ul>
+<li><code>${SERVERLESS_DRIVERS_GROUP}</code>: Contains the ID of the Atlas group dedicated to drivers testing of Atlas Serverless.
+The backing multi-tenant MongoDB (MTM) MUST have the <code>SINGLE_TARGET_SERVERLESS_DEPLOYMENT</code> feature flag enabled
+(<a href="https://jira.mongodb.org/browse/CLOUDP-117288">CLOUDP-117288</a>).</li>
+<li><code>${SERVERLESS_API_PUBLIC_KEY}</code>: The public key required to use the Atlas API for managing Atlas Serverless instances.</li>
+<li><code>${SERVERLESS_API_PRIVATE_KEY}</code>: (private) The private key required to use the Atlas API for managing Atlas Serverless
+instances.</li>
+<li><code>${SERVERLESS_ATLAS_USER}</code>: (private) The SCRAM username used to authenticate to any Atlas Serverless instance created
+in the drivers testing Atlas group.</li>
+<li><code>${SERVERLESS_ATLAS_PASSWORD}</code>: (private) The SCRAM password used to authenticate to any Atlas Serverless instance
+created in the drivers testing Atlas group.</li>
+</ul>
+<h2 id="existing-spec-tests"><a class="header" href="#existing-spec-tests">Existing Spec Tests</a></h2>
+<p>Unified spec tests from all specifications MUST be run against Atlas Serverless. Since schema version 1.4, unified tests
+can specify Atlas Serverless compatibility in their <code>runOnRequirements</code>.</p>
+<p>Any prose and legacy spec tests defined in the following specifications MUST be included in a driver's Atlas Serverless
+testing suite:</p>
+<ul>
+<li>CRUD</li>
+<li>Load Balancer</li>
+<li>Retryable Reads</li>
+<li>Retryable Writes</li>
+<li>Sessions</li>
+<li>Transactions (excluding convenient API)
+<ul>
+<li>Note: the killAllSessions command is not supported on Serverless, so the transactions tests may hang if an
+individual test leaves a transaction open when it finishes
+(<a href="https://jira.mongodb.org/browse/CLOUDP-84298">CLOUDP-84298</a>).</li>
+</ul>
+</li>
+<li>Versioned/Stable API</li>
+<li>Client Side Encryption
+<ul>
+<li>Drivers MUST test with a version of the <code>crypt_shared</code> shared library that matches the MongoDB Server version
+running in Serverless. See
+<a href="https://github.com/mongodb/specifications/tree/e761591616849d9b507287811e77f7a359fb9587/source/client-side-encryption/tests#using-crypt-shared">Using crypt_shared</a>.</li>
+</ul>
+</li>
+</ul>
+<p>Note that the legacy JSON/YAML test formats for these specifications were updated to include a new <code>runOnRequirement</code>
+specifically for Atlas Serverless testing. To ensure these requirements are enforced properly, the runner MUST be
+informed that it is running against an Atlas Serverless instance through some indicator (e.g. an environment variable).</p>
+<p>Note that since Atlas Serverless testing uses a load balancer fronting a single Atlas Serverless proxy, the connection
+string cannot be modified for <code>useMultipleMongoses</code>. Drivers SHOULD ignore <code>useMultipleMongoses</code> for purposes of Atlas
+Serverless testing.</p>
+<h2 id="other-tests"><a class="header" href="#other-tests">Other Tests</a></h2>
+<p>Any other existing tests for cursor behavior that a driver may have implemented independently of any spec requirements
+SHOULD also be included in the driver's Atlas Serverless testing suite. Note that change streams are not supported by
+the proxy, so their spec and prose tests MUST be skipped.</p>
+<h2 id="changelog-49"><a class="header" href="#changelog-49">Changelog</a></h2>
+<ul>
+<li>2024-09-02: Migrated from reStructuredText to Markdown.</li>
+<li>2022-10-05: Add spec front matter</li>
+<li>2022-04-22: Testing uses a load balancer fronting a single proxy.</li>
+<li>2021-08-25: Update tests for load balanced serverless instances.</li>
+</ul>
 
                     </main>
 
