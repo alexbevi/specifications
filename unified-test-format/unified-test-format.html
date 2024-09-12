@@ -194,14 +194,14 @@ guidance on writing test files. This is discussed in more detail in <a href="#de
 <p>This test format can be used to define tests for the following specifications:</p>
 <ul>
 <li><a href="../change-streams/change-streams.html">Change Streams</a></li>
-<li><a href="../command-logging-and-monitoring/command-logging-and-monitoring.rst">Command Logging and Monitoring</a></li>
+<li><a href="../command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a></li>
 <li><a href="../crud/crud.html">CRUD</a></li>
 <li><a href="../gridfs/gridfs-spec.html">GridFS</a></li>
 <li><a href="../retryable-reads/retryable-reads.html">Retryable Reads</a></li>
 <li><a href="../retryable-writes/retryable-writes.html">Retryable Writes</a></li>
 <li><a href="../sessions/driver-sessions.html">Sessions</a></li>
 <li><a href="../transactions/transactions.html">Transactions</a></li>
-<li><a href="../transactions-convenient-api/transactions-convenient-api.rst">Convenient API for Transactions</a></li>
+<li><a href="../transactions-convenient-api/transactions-convenient-api.html">Convenient API for Transactions</a></li>
 <li><a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a></li>
 </ul>
 <p>This is not an exhaustive list. Specifications that are known to not be supported by this format may be discussed under
@@ -626,11 +626,11 @@ and any commands containing sensitive information (per the
 <p><span id="entity_client_observeSensitiveCommands"></span></p>
 <ul>
 <li><code>observeSensitiveCommands</code>: Optional boolean. If true, events associated with sensitive commands (per the
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.rst#security">Command Logging and Monitoring</a>
-spec) will be observed for this client. Note that the command and replies for such events will already have been
-redacted by the driver. If false or not specified, events for commands containing sensitive information MUST be
-ignored. Authentication SHOULD be disabled when this property is true, i.e. <a href="#runOnRequirement_auth">auth</a> should be
-false for each <code>runOnRequirement</code>. See <a href="#rationale_observeSensitiveCommands">rationale_observeSensitiveCommands</a>.</li>
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#security">Command Logging and Monitoring</a> spec)
+will be observed for this client. Note that the command and replies for such events will already have been redacted
+by the driver. If false or not specified, events for commands containing sensitive information MUST be ignored.
+Authentication SHOULD be disabled when this property is true, i.e. <a href="#runOnRequirement_auth">auth</a> should be false
+for each <code>runOnRequirement</code>. See <a href="#rationale_observeSensitiveCommands">rationale_observeSensitiveCommands</a>.</li>
 </ul>
 <p><span id="entity_client_storeEventsAsEntities"></span></p>
 <ul>
@@ -815,7 +815,7 @@ used within <a href="#entity_client_storeEventsAsEntities">storeEventsAsEntities
 <li><code>id</code>: Required string. Unique name for this entity.</li>
 <li><code>events</code>: Required array of one or more strings, which denote the events to be collected. Currently, only the
 following <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">CMAP</a> and
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.rst">command monitoring</a> events MUST be supported:
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html">command monitoring</a> events MUST be supported:
 <ul>
 <li>PoolCreatedEvent</li>
 <li>PoolReadyEvent</li>
@@ -868,7 +868,7 @@ documents even if the respective field name is different in the driver's event o
 <p><code>deprecationErrors</code>: Optional boolean.</p>
 </li>
 </ul>
-<p>See the <a href="../versioned-api/versioned-api.rst">Stable API</a> spec for more details on these fields.</p>
+<p>See the <a href="../versioned-api/versioned-api.html">Stable API</a> spec for more details on these fields.</p>
 <h4 id="collectiondata"><a class="header" href="#collectiondata">collectionData</a></h4>
 <p>List of documents corresponding to the contents of a collection. This structure is used by both
 <a href="#initialData">initialData</a> and <a href="#test_outcome">test.outcome</a>, which insert and read documents, respectively.</p>
@@ -1113,7 +1113,7 @@ BulkWriteException), this assertion SHOULD utilize the <a href="#unsetormatches"
 <li><code>client</code>: Required string. Client entity on which the events are expected to be observed. See
 <a href="#commonOptions_client">commonOptions_client</a>.</li>
 <li><code>eventType</code>: Optional string. Specifies the type of the monitor which captured the events. Valid values are <code>command</code>
-for <a href="../command-logging-and-monitoring/command-logging-and-monitoring.rst#events-api">Command Monitoring</a> events,
+for <a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#events-api">Command Monitoring</a> events,
 <code>cmap</code> for <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#events">CMAP</a> events, and <code>sdam</code>
 for <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events">SDAM</a>
 events. Defaults to <code>command</code> if omitted.</li>
@@ -1144,7 +1144,7 @@ monitoring events as an example, <code>requestId</code> and <code>operationId</c
 <ul>
 <li>
 <p><code>commandStartedEvent</code>: Optional object. Assertions for one or more
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.rst#api">CommandStartedEvent</a> fields.</p>
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#api">CommandStartedEvent</a> fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>command</code>: Optional document. A value corresponding to the expected command document. Test runners MUST follow the
@@ -1162,7 +1162,7 @@ SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node
 <ul>
 <li>
 <p><code>commandSucceededEvent</code>: Optional object. Assertions for one or more
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.rst#api">CommandSucceededEvent</a> fields.</p>
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#api">CommandSucceededEvent</a> fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>reply</code>: Optional document. A value corresponding to the expected reply document. Test runners MUST follow the rules
@@ -1180,7 +1180,7 @@ SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node
 <ul>
 <li>
 <p><code>commandFailedEvent</code>: Optional object. Assertions for one or more
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.rst#api">CommandFailedEvent</a> fields.</p>
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#api">CommandFailedEvent</a> fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>commandName</code>: Optional string. Test runners MUST assert that the command name matches this value.</li>
@@ -1415,7 +1415,7 @@ language-specific component name. Test runners MUST assert that the actual compo
 contain a <code>failure</code> value.</p>
 <p>When <code>failureIsRedacted</code> is present and its value is <code>true</code>, the test runner MUST assert that a failure is present and
 that the failure has been redacted according to the rules defined for error redaction in the
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.rst#security">command logging and monitoring specification</a>.</p>
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#security">command logging and monitoring specification</a>.</p>
 <p>When <code>false</code>, the test runner MUST assert that a failure is present and that the failure has NOT been redacted.</p>
 <p>The exact form of these assertions and how thorough they are will vary based on the driver's chosen error
 representation in logs; e.g. drivers that use strings may only be able to assert on the presence/absence of
@@ -1839,7 +1839,7 @@ and any optional fields within, as in the following examples:</p>
 <h3 id="session-operations"><a class="header" href="#session-operations">Session Operations</a></h3>
 <p>These operations and their arguments may be documented in the following specifications:</p>
 <ul>
-<li><a href="../transactions-convenient-api/transactions-convenient-api.rst">Convenient API for Transactions</a></li>
+<li><a href="../transactions-convenient-api/transactions-convenient-api.html">Convenient API for Transactions</a></li>
 <li><a href="../sessions/driver-sessions.html">Driver Sessions</a></li>
 </ul>
 <p>Session operations that require special handling or are not documented by an existing specification are described below.</p>
@@ -2821,7 +2821,7 @@ special operations such as <a href="#assertsamelsidonlasttwocommands">assertSame
 <li>Any <code>configureFailPoint</code> commands executed for <a href="#failpoint">failPoint</a> and <a href="#targetedfailpoint">targetedFailPoint</a>
 operations.</li>
 <li>Any commands containing sensitive information (per the
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.rst#security">Command Logging and Monitoring</a> spec)
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#security">Command Logging and Monitoring</a> spec)
 unless <a href="#entity_client_observeSensitiveCommands">observeSensitiveCommands</a> is true. Note that drivers will redact
 commands and replies for sensitive commands. For <code>hello</code> and legacy hello, which are conditionally sensitive based on
 the presence of a <code>speculativeAuthenticate</code> field, the test runner may need to infer that the events are sensitive

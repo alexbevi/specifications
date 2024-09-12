@@ -573,7 +573,7 @@ through the BulkWriteException, in accordance with the <a href="../crud/crud.htm
 messages.</p>
 <h2 id="command-monitoring"><a class="header" href="#command-monitoring">Command Monitoring</a></h2>
 <p>In accordance with the
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.rst">Command Logging and Monitoring</a> specification,
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a> specification,
 drivers MUST guarantee that each <code>CommandStartedEvent</code> has either a correlating <code>CommandSucceededEvent</code> or
 <code>CommandFailedEvent</code> and that every "command started" log message has either a correlating "command succeeded" log
 message or "command failed" log message. If the first attempt of a retryable write operation encounters a retryable
@@ -583,7 +583,7 @@ that the second <code>CommandStartedEvent</code> and "command succeeded" log mes
 writable server is reselected for the retry attempt.</p>
 <p>Each attempt of a retryable write operation SHOULD report a different <code>requestId</code> so that events for each attempt can be
 properly correlated with one another.</p>
-<p>The <a href="../command-logging-and-monitoring/command-logging-and-monitoring.rst">Command Logging and Monitoring</a> specification
+<p>The <a href="../command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a> specification
 states that the <code>operationId</code> field is a driver-generated, 64-bit integer and may be "used to link events together such
 as bulk write operations." Each attempt of a retryable write operation SHOULD report the same <code>operationId</code>; however,
 drivers SHOULD NOT use the <code>operationId</code> field to relay information about a transaction ID. A bulk write operation may

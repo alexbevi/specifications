@@ -235,7 +235,7 @@ and <a href="#why-introduce-a-knob-for-servermonitoringmode">Why introduce a kno
 <a href="#streaming-protocol">Streaming Protocol</a> to continuously stream hello or legacy hello responses from the server. In
 MongoDB &lt;= 4.2, a monitor uses the <a href="#polling-protocol">Polling Protocol</a> pausing heartbeatFrequencyMS between
 <a href="#check">checks</a>. Clients check servers sooner in response to certain events.</p>
-<p>If a <a href="../versioned-api/versioned-api.rst">server API version</a> is requested, then the driver must use hello for
+<p>If a <a href="../versioned-api/versioned-api.html">server API version</a> is requested, then the driver must use hello for
 monitoring. If a server API version is not requested, the initial handshake using the legacy hello command must include
 <code>helloOk: true</code>. If the response contains <code>helloOk: true</code>, then the driver must use the <code>hello</code> command for monitoring.
 If the response does not contain <code>helloOk: true</code>, then the driver must use the legacy hello command for monitoring.</p>

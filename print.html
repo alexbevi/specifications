@@ -2491,7 +2491,7 @@ it is a write and MUST NOT attach a <code>txnNumber</code>.</p>
 <p>The command sent MUST attach stable API fields as configured on the MongoClient.</p>
 <ul>
 <li>See Stable API's section on
-<a href="https://github.com/mongodb/specifications/blob/master/source/versioned-api/versioned-api.rst#generic-command-helper">Generic Command Helper Behaviour</a></li>
+<a href="run-command/../versioned-api/versioned-api.html#generic-command-helper">Generic Command Helper Behaviour</a></li>
 </ul>
 <h5 id="client-side-operations-timeout"><a class="header" href="#client-side-operations-timeout">Client Side Operations Timeout</a></h5>
 <p>RunCommand MUST provide an optional <code>timeoutMS</code> option to support client side operations timeout. Drivers MUST NOT
@@ -3718,7 +3718,7 @@ redact, or otherwise treat specially.</p>
 <p>MongoDB uses the <code>hello</code> or <code>isMaster</code> commands for handshakes and topology monitoring. <code>hello</code> is the modern and
 preferred command. <code>hello</code> must always be sent using the <code>OP_MSG</code> protocol. <code>isMaster</code> is referred to as "legacy hello"
 and is maintained for backwards compatibility with servers that do not support the <code>hello</code> command.</p>
-<p>If a <a href="mongodb-handshake/../versioned-api/versioned-api.rst">server API version</a> is requested or <code>loadBalanced: True</code>, drivers MUST use the
+<p>If a <a href="mongodb-handshake/../versioned-api/versioned-api.html">server API version</a> is requested or <code>loadBalanced: True</code>, drivers MUST use the
 <code>hello</code> command for the initial handshake and use the <code>OP_MSG</code> protocol. If server API version is not requested and
 <code>loadBalanced: False</code>, drivers MUST use legacy hello for the first message of the initial handshake with the <code>OP_QUERY</code>
 protocol (before switching to <code>OP_MSG</code> if the <code>maxWireVersion</code> indicates compatibility), and include <code>helloOk:true</code> in
@@ -8095,7 +8095,7 @@ and <a href="server-discovery-and-monitoring/server-monitoring.html#why-introduc
 <a href="server-discovery-and-monitoring/server-monitoring.html#streaming-protocol">Streaming Protocol</a> to continuously stream hello or legacy hello responses from the server. In
 MongoDB &lt;= 4.2, a monitor uses the <a href="server-discovery-and-monitoring/server-monitoring.html#polling-protocol">Polling Protocol</a> pausing heartbeatFrequencyMS between
 <a href="server-discovery-and-monitoring/server-monitoring.html#check">checks</a>. Clients check servers sooner in response to certain events.</p>
-<p>If a <a href="server-discovery-and-monitoring/../versioned-api/versioned-api.rst">server API version</a> is requested, then the driver must use hello for
+<p>If a <a href="server-discovery-and-monitoring/../versioned-api/versioned-api.html">server API version</a> is requested, then the driver must use hello for
 monitoring. If a server API version is not requested, the initial handshake using the legacy hello command must include
 <code>helloOk: true</code>. If the response contains <code>helloOk: true</code>, then the driver must use the <code>hello</code> command for monitoring.
 If the response does not contain <code>helloOk: true</code>, then the driver must use the legacy hello command for monitoring.</p>
@@ -11127,7 +11127,7 @@ function executeRetryableRead(command, session) {
 retry attempts for read operations. This specification does not define a format for such log messages.</p>
 <h3 id="command-monitoring"><a class="header" href="#command-monitoring">Command Monitoring</a></h3>
 <p><a href="retryable-reads/../retryable-writes/retryable-writes.html#command-monitoring">As with retryable writes</a>, in accordance with the
-<a href="retryable-reads/../command-logging-and-monitoring/command-logging-and-monitoring.rst">Command Logging and Monitoring</a> specification,
+<a href="retryable-reads/../command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a> specification,
 drivers MUST guarantee that each <code>CommandStartedEvent</code> has either a correlating <code>CommandSucceededEvent</code> or
 <code>CommandFailedEvent</code> and that every "command started" log message has either a correlating "command succeeded" log
 message or "command failed" log message. If the first attempt of a retryable read operation encounters a retryable
@@ -11701,7 +11701,7 @@ through the BulkWriteException, in accordance with the <a href="retryable-writes
 messages.</p>
 <h2 id="command-monitoring-1"><a class="header" href="#command-monitoring-1">Command Monitoring</a></h2>
 <p>In accordance with the
-<a href="retryable-writes/../command-logging-and-monitoring/command-logging-and-monitoring.rst">Command Logging and Monitoring</a> specification,
+<a href="retryable-writes/../command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a> specification,
 drivers MUST guarantee that each <code>CommandStartedEvent</code> has either a correlating <code>CommandSucceededEvent</code> or
 <code>CommandFailedEvent</code> and that every "command started" log message has either a correlating "command succeeded" log
 message or "command failed" log message. If the first attempt of a retryable write operation encounters a retryable
@@ -11711,7 +11711,7 @@ that the second <code>CommandStartedEvent</code> and "command succeeded" log mes
 writable server is reselected for the retry attempt.</p>
 <p>Each attempt of a retryable write operation SHOULD report a different <code>requestId</code> so that events for each attempt can be
 properly correlated with one another.</p>
-<p>The <a href="retryable-writes/../command-logging-and-monitoring/command-logging-and-monitoring.rst">Command Logging and Monitoring</a> specification
+<p>The <a href="retryable-writes/../command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a> specification
 states that the <code>operationId</code> field is a driver-generated, 64-bit integer and may be "used to link events together such
 as bulk write operations." Each attempt of a retryable write operation SHOULD report the same <code>operationId</code>; however,
 drivers SHOULD NOT use the <code>operationId</code> field to relay information about a transaction ID. A bulk write operation may
@@ -12059,7 +12059,7 @@ progresses.</p>
 <li><a href="client-side-operations-timeout/../gridfs/gridfs-spec.html">GridFS</a></li>
 <li><a href="client-side-operations-timeout/../index-management/index-management.html">Index Management</a></li>
 <li><a href="client-side-operations-timeout/../transactions/transactions.html">Transactions</a></li>
-<li><a href="client-side-operations-timeout/../transactions-convenient-api/transactions-convenient-api.rst">Convenient API for Transactions</a></li>
+<li><a href="client-side-operations-timeout/../transactions-convenient-api/transactions-convenient-api.html">Convenient API for Transactions</a></li>
 </ul>
 <p>In addition, it applies to all operations on cursor objects that may perform blocking work (e.g. methods to iterate or
 close a cursor, any method that reads documents from a cursor into an array, etc).</p>
@@ -14643,21 +14643,327 @@ committed. If the initial commit on the original mongos itself failed to initiat
 then a retry attempt on a new mongos will block until the transaction is automatically timed out by the cluster. In
 this case, the new mongos will return a transient error indicating that the transaction was aborted.</p>
 </div>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="convenient-transactions-api-1"><a class="header" href="#convenient-transactions-api-1">Convenient Transactions API</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="convenient-api-for-transactions"><a class="header" href="#convenient-api-for-transactions">Convenient API for Transactions</a></h1>
+<ul>
+<li>Status: Accepted</li>
+<li>Minimum Server Version: 4.0</li>
+</ul>
+<hr />
+<h2 id="abstract-28"><a class="header" href="#abstract-28">Abstract</a></h2>
+<p>Reliably committing a transaction in the face of errors can be a complicated endeavor using the MongoDB 4.0 drivers API.
+This specification introduces a <code>withTransaction</code> method on the ClientSession object that allows application logic to be
+executed within a transaction. This method is capable of retrying either the commit operation or entire transaction as
+needed (and when the error permits) to better ensure that the transaction can complete successfully.</p>
+<h2 id="meta-28"><a class="header" href="#meta-28">META</a></h2>
+<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<h2 id="specification-26"><a class="header" href="#specification-26">Specification</a></h2>
+<h3 id="terms-18"><a class="header" href="#terms-18">Terms</a></h3>
+<div id="callback">
+<p><strong>Callback</strong></p>
+<p>A user-defined function that will be passed to the helper method defined in this specification. Depending on the
+implementing language, this may be a closure, function pointer, or other callable type.</p>
+<p><strong>ClientSession</strong></p>
+<p>Driver object representing a client session, as defined in the <a href="transactions-convenient-api/../sessions/driver-sessions.html">Driver Session</a>
+specification. The name of this object MAY vary across drivers.</p>
+<p><strong>MongoClient</strong></p>
+<p>The root object of a driver's API. The name of this object MAY vary across drivers.</p>
+<div id="TransactionOptions">
+<p><strong>TransactionOptions</strong></p>
+<p>Options for <code>ClientSession.startTransaction</code>, as defined in the <a href="transactions-convenient-api/../transactions/transactions.html">Transactions</a>
+specification. The structure of these options MAY vary across drivers (e.g. dictionary, typed class).</p>
+<h3 id="naming-deviations-4"><a class="header" href="#naming-deviations-4">Naming Deviations</a></h3>
+<p>This specification defines the name for a new ClientSession method, <code>withTransaction</code>. Drivers SHOULD use the defined
+name but MAY deviate to comply with their existing conventions. For example, a driver may use <code>with_transaction</code> instead
+of <code>withTransaction</code>.</p>
+<h3 id="callback-semantics"><a class="header" href="#callback-semantics">Callback Semantics</a></h3>
+<p>The purpose of the callback is to allow the application to specify some sequence of operations to be executed within the
+body of a transaction. In an ideal scenario, <code>withTransaction</code> will start a transaction, execute the callback, and
+commit the transaction. In the event of error, the commit or entire transaction may need to be retried and thusly the
+callback could be invoked multiple times.</p>
+<p>Drivers MUST ensure that the application can access the ClientSession within the callback, since the ClientSession will
+be needed to associate operations with the transaction. Drivers may elect an idiomatic approach to satisfy this
+requirement (e.g. require the callback to receive the ClientSession as its first argument, expect the callback to access
+the ClientSession from its lexical scope). Drivers MAY allow the callback to support additional parameters as needed
+(e.g. user data parameter, error output parameter). Drivers MAY allow the callback to return a value to be propagated as
+the return value of <code>withTransaction</code>.</p>
+<h3 id="clientsession-changes-3"><a class="header" href="#clientsession-changes-3">ClientSession Changes</a></h3>
+<p>This specification introduces a <code>withTransaction</code> method on the ClientSession class:</p>
+<pre><code class="language-typescript">interface ClientSession {
+    withTransaction(function&lt;any(...)&gt; callback,
+                    Optional&lt;TransactionOptions&gt; options,
+                    ... /* other arguments as needed */): any
+
+    // other existing members of ClientSession
+}
+</code></pre>
+<h4 id="clientsessionwithtransaction"><a class="header" href="#clientsessionwithtransaction">ClientSession.withTransaction</a></h4>
+<p>This method is responsible for starting a transaction, invoking a callback, and committing a transaction. The callback
+is expected to execute one or more operations with the transaction; however, that is not enforced. The callback is
+allowed to execute other operations not associated with the transaction.</p>
+<p>Since <code>withTransaction</code> includes logic to retry transactions and commits, drivers MUST apply timeouts per
+<a href="transactions-convenient-api/../client-side-operations-timeout/client-side-operations-timeout.html#convenient-transactions-api">Client Side Operations Timeout: Convenient Transactions API</a>.
+If <code>timeoutMS</code> is unset for a <code>withTransaction</code> call, drivers MUST enforce a 120-second timeout to limit retry behavior
+and safeguard applications from long-running (or infinite) retry loops. Drivers SHOULD use a monotonic clock to
+determine elapsed time.</p>
+<p>If an UnknownTransactionCommitResult error is encountered for a commit, the driver MUST retry the commit if and only if
+the error is not MaxTimeMSExpired and the retry timeout has not been exceeded. Otherwise, the driver MUST NOT retry the
+commit and allow <code>withTransaction</code> to propagate the error to its caller.</p>
+<p>If a TransientTransactionError is encountered at any point, the entire transaction may be retried. If the retry timeout
+has not been exceeded, the driver MUST retry a transaction that fails with an error bearing the
+"TransientTransactionError" label. Since retrying the entire transaction will entail invoking the callback again,
+drivers MUST document that the callback may be invoked multiple times (i.e. one additional time per retry attempt) and
+MUST document the risk of side effects from using a non-idempotent callback. If the retry timeout has been exceeded,
+drivers MUST NOT retry the transaction and allow <code>withTransaction</code> to propagate the error to its caller.</p>
+<p>If an error bearing neither the UnknownTransactionCommitResult nor the TransientTransactionError label is encountered at
+any point, the driver MUST NOT retry and MUST allow <code>withTransaction</code> to propagate the error to its caller.</p>
+<p>This method MUST receive a <a href="transactions-convenient-api/transactions-convenient-api.html#callback">callback</a> as its first parameter. An optional
+<a href="transactions-convenient-api/transactions-convenient-api.html#TransactionOptions">TransactionOptions</a> MUST be provided as its second parameter (with deviations permitted as
+outlined in the <a href="transactions-convenient-api/../crud/crud.html#deviations">CRUD</a> specification). Drivers MAY support other parameters or options as
+needed (e.g. user data to pass as a parameter to the callback).</p>
+<h5 id="sequence-of-actions"><a class="header" href="#sequence-of-actions">Sequence of Actions</a></h5>
+<p>This method should perform the following sequence of actions:</p>
+<ol>
+<li>Record the current monotonic time, which will be used to enforce the 120-second timeout before later retry attempts.</li>
+<li>Invoke <a href="transactions-convenient-api/../transactions/transactions.html#starttransaction">startTransaction</a> on the session. If TransactionOptions
+were specified in the call to <code>withTransaction</code>, those MUST be used for <code>startTransaction</code>. Note that
+<code>ClientSession.defaultTransactionOptions</code> will be used in the absence of any explicit TransactionOptions.</li>
+<li>If <code>startTransaction</code> reported an error, propagate that error to the caller of <code>withTransaction</code> and return
+immediately.</li>
+<li>Invoke the callback. Drivers MUST ensure that the ClientSession can be accessed within the callback (e.g. pass
+ClientSession as the first parameter, rely on lexical scoping). Drivers MAY pass additional parameters as needed
+(e.g. user data solicited by withTransaction).</li>
+<li>Control returns to <code>withTransaction</code>. Determine the current
+<a href="transactions-convenient-api/../transactions/transactions.html#clientsession-changes">state</a> of the ClientSession and whether the callback
+reported an error (e.g. thrown exception, error output parameter).</li>
+<li>If the callback reported an error:
+<ol>
+<li>If the ClientSession is in the "starting transaction" or "transaction in progress" state, invoke
+<a href="transactions-convenient-api/../transactions/transactions.html#aborttransaction">abortTransaction</a> on the session.</li>
+<li>If the callback's error includes a "TransientTransactionError" label and the elapsed time of <code>withTransaction</code> is
+less than 120 seconds, jump back to step two.</li>
+<li>If the callback's error includes a "UnknownTransactionCommitResult" label, the callback must have manually
+committed a transaction, propagate the callback's error to the caller of <code>withTransaction</code> and return
+immediately.</li>
+<li>Otherwise, propagate the callback's error to the caller of <code>withTransaction</code> and return immediately.</li>
+</ol>
+</li>
+<li>If the ClientSession is in the "no transaction", "transaction aborted", or "transaction committed" state, assume the
+callback intentionally aborted or committed the transaction and return immediately.</li>
+<li>Invoke <a href="transactions-convenient-api/../transactions/transactions.html#committransaction">commitTransaction</a> on the session.</li>
+<li>If <code>commitTransaction</code> reported an error:
+<ol>
+<li>If the <code>commitTransaction</code> error includes a "UnknownTransactionCommitResult" label and the error is not
+MaxTimeMSExpired and the elapsed time of <code>withTransaction</code> is less than 120 seconds, jump back to step eight. We
+will trust <code>commitTransaction</code> to apply a majority write concern on retry attempts (see:
+<a href="transactions-convenient-api/transactions-convenient-api.html#majority-write-concern-is-used-when-retrying-committransaction">Majority write concern is used when retrying commitTransaction</a>).</li>
+<li>If the <code>commitTransaction</code> error includes a "TransientTransactionError" label and the elapsed time of
+<code>withTransaction</code> is less than 120 seconds, jump back to step two.</li>
+<li>Otherwise, propagate the <code>commitTransaction</code> error to the caller of <code>withTransaction</code> and return immediately.</li>
+</ol>
+</li>
+<li>The transaction was committed successfully. Return immediately.</li>
+</ol>
+<h5 id="pseudo-code"><a class="header" href="#pseudo-code">Pseudo-code</a></h5>
+<p>This method can be expressed by the following pseudo-code:</p>
+<pre><code class="language-typescript">withTransaction(callback, options) {
+    // Note: drivers SHOULD use a monotonic clock to determine elapsed time
+    var startTime = Date.now(); // milliseconds since Unix epoch
+
+    retryTransaction: while (true) {
+        this.startTransaction(options); // may throw on error
+
+        try {
+            callback(this);
+        } catch (error) {
+            if (this.transactionState == STARTING ||
+                this.transactionState == IN_PROGRESS) {
+                this.abortTransaction();
+            }
+
+            if (error.hasErrorLabel("TransientTransactionError") &amp;&amp;
+                Date.now() - startTime &lt; 120000) {
+                continue retryTransaction;
+            }
+
+            throw error;
+        }
+
+        if (this.transactionState == NO_TXN ||
+            this.transactionState == COMMITTED ||
+            this.transactionState == ABORTED) {
+            return; // Assume callback intentionally ended the transaction
+        }
+
+        retryCommit: while (true) {
+            try {
+                /* We will rely on ClientSession.commitTransaction() to
+                 * apply a majority write concern if commitTransaction is
+                 * being retried (see: DRIVERS-601) */
+                this.commitTransaction();
+            } catch (error) {
+                /* Note: a maxTimeMS error will have the MaxTimeMSExpired
+                 * code (50) and can be reported as a top-level error or
+                 * inside writeConcernError, ie:
+                 * {ok:0, code: 50, codeName: "MaxTimeMSExpired"}
+                 * {ok:1, writeConcernError: {code: 50, codeName: "MaxTimeMSExpired"}}
+                 */
+                if (!isMaxTimeMSExpiredError(error) &amp;&amp;
+                    error.hasErrorLabel("UnknownTransactionCommitResult") &amp;&amp;
+                    Date.now() - startTime &lt; 120000) {
+                    continue retryCommit;
+                }
+
+                if (error.hasErrorLabel("TransientTransactionError") &amp;&amp;
+                    Date.now() - startTime &lt; 120000) {
+                    continue retryTransaction;
+                }
+
+                throw error;
+            }
+            break; // Commit was successful
+        }
+        break; // Transaction was successful
+    }
+}
+</code></pre>
+<h3 id="clientsession-must-provide-access-to-a-mongoclient"><a class="header" href="#clientsession-must-provide-access-to-a-mongoclient">ClientSession must provide access to a MongoClient</a></h3>
+<p>The callback invoked by <code>withTransaction</code> is only guaranteed to receive a ClientSession parameter. Drivers MUST ensure
+that it is possible to obtain a MongoClient within the callback in order to execute operations within the transaction.
+Per the <a href="transactions-convenient-api/../sessions/driver-sessions.html">Driver Session</a> specification, ClientSessions should already provide access to
+a client object.</p>
+<h3 id="handling-errors-inside-the-callback"><a class="header" href="#handling-errors-inside-the-callback">Handling errors inside the callback</a></h3>
+<p>Drivers MUST document that the callback MUST NOT silently handle command errors without allowing such errors to
+propagate. Command errors may abort the transaction on the server, and an attempt to commit the transaction will be
+rejected with <code>NoSuchTransaction</code> error.</p>
+<p>For example, <code>DuplicateKeyError</code> is an error that aborts a transaction on the server. If the callback catches
+<code>DuplicateKeyError</code> and does not re-throw it, the driver will attempt to commit the transaction. The server will reject
+the commit attempt with <code>NoSuchTransaction</code> error. This error has the "TransientTransactionError" label and the driver
+will retry the commit. This will result in an infinite loop.</p>
+<p>Drivers MUST recommend that the callback re-throw command errors if they need to be handled inside the callback. Drivers
+SHOULD also recommend using Core Transaction API if a user wants to handle errors in a custom way.</p>
+<h2 id="test-plan-21"><a class="header" href="#test-plan-21">Test Plan</a></h2>
+<p>See the <a href="transactions-convenient-api/tests/README.html">README</a> for tests.</p>
+<h2 id="motivation-for-change-14"><a class="header" href="#motivation-for-change-14">Motivation for Change</a></h2>
+<p>Reliably committing a transaction in the face of errors can be a complicated endeavor using the MongoDB 4.0 drivers API.
+Providing helper method in the driver to execute a transaction (and retry when possible) will enable our users to make
+better use of transactions in their applications.</p>
+<h2 id="design-rationale-21"><a class="header" href="#design-rationale-21">Design Rationale</a></h2>
+<p>This specification introduces a helper method on the ClientSession object that applications may optionally employ to
+execute a user-defined function within a transaction. An application does not need to be modified unless it wants to
+take advantage of this helper method.</p>
+<h3 id="majority-write-concern-is-used-when-retrying-committransaction-1"><a class="header" href="#majority-write-concern-is-used-when-retrying-committransaction-1">Majority write concern is used when retrying commitTransaction</a></h3>
+<p>Drivers should apply a majority write concern when retrying commitTransaction to guard against a transaction being
+applied twice. This requirement was originally enforced in the implementation of <code>withTransaction</code>, but will now be
+handled by the transaction spec itself in order to benefit applications irrespective of whether they use
+<code>withTransaction</code> (see the corresponding section in the
+<a href="transactions-convenient-api/../transactions/transactions.html#majority-write-concern-is-used-when-retrying-committransaction">Transactions spec Design Rationale</a>).</p>
+<h3 id="the-callback-function-has-a-flexible-signature"><a class="header" href="#the-callback-function-has-a-flexible-signature">The callback function has a flexible signature</a></h3>
+<p>An original design considered requiring the callback to accept a ClientSession as its first parameter. That could be
+superfluous for languages where the callback might already have access to ClientSession through its lexical scope.
+Instead, the spec simply requires that drivers ensure the callback will be able to access the ClientSession.</p>
+<p>Similarly, the specification does not concern itself with the return type of the callback function. If drivers allow the
+callback to return a value, they may also choose to propagate that value as the return value of withTransaction.</p>
+<p>An earlier design also considered using the callback's return value to indicate whether control should break out of
+<code>withTransaction</code> (and its retry loop) and return to the application. The design allows this to be accomplished in one
+of two ways:</p>
+<ul>
+<li>The callback aborts the transaction directly and returns to <code>withTransaction</code>, which will then return to its caller.</li>
+<li>The callback raises an error without the "TransientTransactionError" label, in which case <code>withTransaction</code> will abort
+the transaction and return to its caller.</li>
+</ul>
+<h3 id="applications-are-responsible-for-passing-clientsession-for-operations-within-a-transaction"><a class="header" href="#applications-are-responsible-for-passing-clientsession-for-operations-within-a-transaction">Applications are responsible for passing ClientSession for operations within a transaction</a></h3>
+<p>It remains the responsibility of the application to pass a ClientSession to all operations that should be included in a
+transaction. With regard to <code>withTransaction</code>, applications are free to execute any operations within the callback,
+irrespective of whether those operations are associated with the transaction.</p>
+<h3 id="it-is-assumed-that-the-callback-will-not-start-a-new-transaction-on-the-clientsession"><a class="header" href="#it-is-assumed-that-the-callback-will-not-start-a-new-transaction-on-the-clientsession">It is assumed that the callback will not start a new transaction on the ClientSession</a></h3>
+<p>Under normal circumstances, the callback should not commit the transaction nor should it start a new transaction. The
+<code>withTransaction</code> method will inspect the ClientSession's transaction state after the callback returns and take the most
+sensible course of action; however, it will not detect whether the callback has started a new transaction.</p>
+<h3 id="the-callback-function-may-be-executed-multiple-times"><a class="header" href="#the-callback-function-may-be-executed-multiple-times">The callback function may be executed multiple times</a></h3>
+<p>The callback may be executed any number of times. Drivers are free to encourage their users to design idempotent
+callbacks.</p>
+<h3 id="the-commit-is-retried-after-a-write-concern-timeout-ie-wtimeout-error"><a class="header" href="#the-commit-is-retried-after-a-write-concern-timeout-ie-wtimeout-error">The commit is retried after a write concern timeout (i.e. wtimeout) error</a></h3>
+<p>Per the Transactions specification, drivers internally retry <code>commitTransaction</code> once if it fails due to a retryable
+error (as defined in the <a href="transactions-convenient-api/../retryable-writes/retryable-writes.html#terms">Retryable Writes</a> specification). Beyond that,
+applications may manually retry <code>commitTransaction</code> if it fails with any error bearing the
+<a href="transactions-convenient-api/../transactions/transactions.html#unknowntransactioncommitresult">UnknownTransactionCommitResult</a> error label. This label
+is applied for the the following errors:</p>
+<ul>
+<li>Server selection failure</li>
+<li>Retryable error (as defined in the <a href="transactions-convenient-api/../retryable-writes/retryable-writes.html#terms">Retryable Writes</a> specification)</li>
+<li>Write concern failure or timeout (excluding UnsatisfiableWriteConcern and UnknownReplWriteConcern)</li>
+<li>MaxTimeMSExpired errors, ie <code>{ok:0, code: 50, codeName: "MaxTimeMSExpired"}</code> and
+<code>{ok:1, writeConcernError: {code: 50, codeName: "MaxTimeMSExpired"}}</code>.</li>
+</ul>
+<p>A previous design for <code>withTransaction</code> retried for all of these errors <em>except</em> for write concern timeouts, so as not
+to exceed the user's original intention for <code>wtimeout</code>. The current design of this specification no longer excludes
+write concern timeouts, and simply retries <code>commitTransaction</code> within its timeout period for all errors bearing the
+"UnknownTransactionCommitResult" label.</p>
+<h3 id="the-commit-is-not-retried-after-a-maxtimemsexpired-error"><a class="header" href="#the-commit-is-not-retried-after-a-maxtimemsexpired-error">The commit is not retried after a MaxTimeMSExpired error</a></h3>
+<p>This specification intentionally chooses not to retry commit operations after a MaxTimeMSExpired error as doing so would
+exceed the user's original intention for <code>maxTimeMS</code>.</p>
+<h3 id="the-transaction-and-commit-may-be-retried-any-number-of-times-within-a-timeout-period"><a class="header" href="#the-transaction-and-commit-may-be-retried-any-number-of-times-within-a-timeout-period">The transaction and commit may be retried any number of times within a timeout period</a></h3>
+<p>The callback may be executed any number of times. Drivers are free to encourage their users to design idempotent
+callbacks.</p>
+<p>A previous design had no limits for retrying commits or entire transactions. The callback is always able indicate that
+<code>withTransaction</code> should return to its caller (without future retry attempts) by aborting the transaction directly;
+however, that puts the onus on avoiding very long (or infinite) retry loops on the application. We expect the most
+common cause of retry loops will be due to TransientTransactionErrors caused by write conflicts, as those can occur
+regularly in a healthy application, as opposed to UnknownTransactionCommitResult, which would typically be caused by an
+election.</p>
+<p>In order to avoid blocking the application with infinite retry loops, <code>withTransaction</code> will cease retrying invocations
+of the callback or commitTransaction if it has exceeded a fixed timeout period of 120 seconds. This limit is a
+non-configurable default and is intentionally twice the value of MongoDB 4.0's default for the
+<a href="https://www.mongodb.com/docs/manual/reference/parameters/#param.transactionLifetimeLimitSeconds">transactionLifetimeLimitSeconds</a>
+parameter (60 seconds). Applications that desire longer retry periods may call <code>withTransaction</code> additional times as
+needed. Applications that desire shorter retry periods should not use this method.</p>
+<h2 id="backwards-compatibility-18"><a class="header" href="#backwards-compatibility-18">Backwards Compatibility</a></h2>
+<p>The specification introduces a new method on the ClientSession class and does not introduce any backward breaking
+changes. Existing programs that do not make use of this new method will continue to compile and run correctly.</p>
+<h2 id="reference-implementation-15"><a class="header" href="#reference-implementation-15">Reference Implementation</a></h2>
+<p>The C, Java, and Ruby drivers will provide reference implementations. The corresponding tickets for those
+implementations may be found via <a href="https://jira.mongodb.org/browse/DRIVERS-556">DRIVERS-556</a>.</p>
+<h2 id="security-implication-2"><a class="header" href="#security-implication-2">Security Implication</a></h2>
+<p>Applications that use transaction guarantees to enforce security rules will benefit from a less error-prone API. Adding
+a helper method to execute a user-defined function within a transaction has few security implications, as it only
+provides an implementation of a technique already described in the MongoDB 4.0 documentation
+(<a href="https://jira.mongodb.org/browse/DRIVERS-488">DRIVERS-488</a>).</p>
+<h2 id="changelog-28"><a class="header" href="#changelog-28">Changelog</a></h2>
+<ul>
+<li>
+<p>2024-09-06: Migrated from reStructuredText to Markdown.</p>
+</li>
+<li>
+<p>2023-11-22: Document error handling inside the callback.</p>
+</li>
+<li>
+<p>2022-10-05: Remove spec front matter and reformat changelog.</p>
+</li>
+<li>
+<p>2022-01-19: withTransaction applies timeouts per the client-side operations timeout specification.</p>
+</li>
+<li>
+<p>2019-04-24: withTransaction does not retry when commit fails with MaxTimeMSExpired.</p>
+</li>
+<li>
+<p>2018-02-13: withTransaction should retry commits after a wtimeout</p>
+</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="enumerating-databases"><a class="header" href="#enumerating-databases">Enumerating Databases</a></h1>
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-28"><a class="header" href="#abstract-28">Abstract</a></h2>
+<h2 id="abstract-29"><a class="header" href="#abstract-29">Abstract</a></h2>
 <p>A driver can provide functionality to enumerate all databases on a server. This specification defines several methods
 for enumerating databases.</p>
-<h2 id="meta-28"><a class="header" href="#meta-28">META</a></h2>
+<h2 id="meta-29"><a class="header" href="#meta-29">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-26"><a class="header" href="#specification-26">Specification</a></h2>
-<h3 id="terms-18"><a class="header" href="#terms-18">Terms</a></h3>
+<h2 id="specification-27"><a class="header" href="#specification-27">Specification</a></h2>
+<h3 id="terms-19"><a class="header" href="#terms-19">Terms</a></h3>
 <p><strong>MongoClient</strong></p>
 <p>Driver object representing a connection to MongoDB. This is the root object of a driver's API and MAY be named
 differently in some drivers.</p>
@@ -14670,7 +14976,7 @@ means as different drivers will have different requirements, types, and idioms.<
 <p><strong>Document</strong></p>
 <p>An object or data structure used by the driver to represent a BSON document. This spec is flexible on what that means as
 different drivers will have different requirements, types, and idioms.</p>
-<h3 id="naming-deviations-4"><a class="header" href="#naming-deviations-4">Naming Deviations</a></h3>
+<h3 id="naming-deviations-5"><a class="header" href="#naming-deviations-5">Naming Deviations</a></h3>
 <p>This specification defines names for methods. To the extent possible, drivers SHOULD use the defined names. However,
 where a driver or language's naming conventions would conflict, drivers SHOULD honor their existing conventions. For
 example, a driver may use <code>list_databases</code> instead of <code>listDatabases</code>.</p>
@@ -14768,7 +15074,7 @@ inherited by selecting an individual MongoDatabase through MongoClient (e.g. rea
 <h3 id="replica-sets-1"><a class="header" href="#replica-sets-1">Replica Sets</a></h3>
 <p>The <code>listDatabases</code> command may be run on a secondary node. Drivers MUST run the <code>listDatabases</code> command only on the
 primary node in replica set topology, unless directly connected to a secondary node in Single topology.</p>
-<h2 id="test-plan-21"><a class="header" href="#test-plan-21">Test Plan</a></h2>
+<h2 id="test-plan-22"><a class="header" href="#test-plan-22">Test Plan</a></h2>
 <h3 id="test-environments"><a class="header" href="#test-environments">Test Environments</a></h3>
 <p>The test plan should be executed against the following servers:</p>
 <ul>
@@ -14802,18 +15108,18 @@ primary node in replica set topology, unless directly connected to a secondary n
 </ul>
 </li>
 </ul>
-<h2 id="motivation-for-change-14"><a class="header" href="#motivation-for-change-14">Motivation for Change</a></h2>
+<h2 id="motivation-for-change-15"><a class="header" href="#motivation-for-change-15">Motivation for Change</a></h2>
 <p>Although most drivers provide a <code>listDatabases</code> command helper in their API, there was previously no spec for a database
 enumeration. MongoDB 3.6 introduced a <code>nameOnly</code> option to the <code>listDatabases</code> database command. The driver API should
 to be expanded to support this option.</p>
-<h2 id="design-rationale-21"><a class="header" href="#design-rationale-21">Design Rationale</a></h2>
+<h2 id="design-rationale-22"><a class="header" href="#design-rationale-22">Design Rationale</a></h2>
 <p>The design of this specification is inspired by the <a href="./enumerate-collections.rst">Collection Enumeration</a> and
 <a href="./enumerate-indexes.rst">Index Enumeration</a> specifications. Since most drivers already implement a <code>listDatabases</code>
 command helper in some fashion, this spec is flexible when it comes to existing APIs.</p>
-<h2 id="backwards-compatibility-18"><a class="header" href="#backwards-compatibility-18">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-19"><a class="header" href="#backwards-compatibility-19">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns. This specification merely deals with how to enumerate databases in
 future versions of MongoDB and allows flexibility for existing driver APIs.</p>
-<h2 id="reference-implementation-15"><a class="header" href="#reference-implementation-15">Reference Implementation</a></h2>
+<h2 id="reference-implementation-16"><a class="header" href="#reference-implementation-16">Reference Implementation</a></h2>
 <p>TBD</p>
 <h2 id="q--a-4"><a class="header" href="#q--a-4">Q &amp; A</a></h2>
 <h3 id="why-is-reporting-the-total-size-of-all-databases-optional"><a class="header" href="#why-is-reporting-the-total-size-of-all-databases-optional">Why is reporting the total size of all databases optional?</a></h3>
@@ -14822,7 +15128,7 @@ database information documents is the primary result. Returning a tuple or compo
 driver method would complicate the general use case, as opposed to an optional output argument (if supported by the
 language). Furthermore, the <code>totalSize</code> value can be calculated client-side by summing all <code>sizeOnDisk</code> fields in the
 array of database information documents.</p>
-<h2 id="changelog-28"><a class="header" href="#changelog-28">Changelog</a></h2>
+<h2 id="changelog-29"><a class="header" href="#changelog-29">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-26: Migrated from reStructuredText to Markdown. Removed note that applied to pre-3.6 servers.</p>
@@ -14853,14 +15159,14 @@ where <code>nameOnly</code> and <code>filter</code> options were first introduce
 <li>Minimum Server Version: 1.8</li>
 </ul>
 <hr />
-<h2 id="abstract-29"><a class="header" href="#abstract-29">Abstract</a></h2>
+<h2 id="abstract-30"><a class="header" href="#abstract-30">Abstract</a></h2>
 <p>A driver can contain a feature to enumerate all collections belonging to a database. This specification defines how
 collections should be enumerated.</p>
-<h2 id="meta-29"><a class="header" href="#meta-29">META</a></h2>
+<h2 id="meta-30"><a class="header" href="#meta-30">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-27"><a class="header" href="#specification-27">Specification</a></h2>
-<h3 id="terms-19"><a class="header" href="#terms-19">Terms</a></h3>
+<h2 id="specification-28"><a class="header" href="#specification-28">Specification</a></h2>
+<h3 id="terms-20"><a class="header" href="#terms-20">Terms</a></h3>
 <p><strong>MongoClient</strong></p>
 <p>Driver object representing a connection to MongoDB. This is the root object of a driver's API and MAY be named
 differently in some drivers.</p>
@@ -15027,7 +15333,7 @@ method</p>
 <li>Drivers MUST run <code>listCollections</code> on the primary node when in a replica set topology, unless directly connected to a
 secondary node in Single topology.</li>
 </ul>
-<h2 id="test-plan-22"><a class="header" href="#test-plan-22">Test Plan</a></h2>
+<h2 id="test-plan-23"><a class="header" href="#test-plan-23">Test Plan</a></h2>
 <h3 id="configurations"><a class="header" href="#configurations">Configurations</a></h3>
 <ul>
 <li>standalone node</li>
@@ -15063,13 +15369,13 @@ secondary node in Single topology.</li>
 </ul>
 </li>
 </ul>
-<h2 id="backwards-compatibility-19"><a class="header" href="#backwards-compatibility-19">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-20"><a class="header" href="#backwards-compatibility-20">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns. This SPEC merely deals with how to enumerate collections in future
 versions of MongoDB.</p>
-<h2 id="reference-implementation-16"><a class="header" href="#reference-implementation-16">Reference Implementation</a></h2>
+<h2 id="reference-implementation-17"><a class="header" href="#reference-implementation-17">Reference Implementation</a></h2>
 <p>The shell implements the first algorithm for falling back if the <code>listCollections</code> command does not exist
 (<a href="https://github.com/mongodb/mongo/blob/f32ba54f971c045fb589fe4c3a37da77dc486cee/src/mongo/shell/db.js#L550">https://github.com/mongodb/mongo/blob/f32ba54f971c045fb589fe4c3a37da77dc486cee/src/mongo/shell/db.js#L550</a>).</p>
-<h2 id="changelog-29"><a class="header" href="#changelog-29">Changelog</a></h2>
+<h2 id="changelog-30"><a class="header" href="#changelog-30">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-26: Migrated from reStructuredText to Markdown. Drop description of behavior for MongoDB 2.x servers.</p>
@@ -15122,15 +15428,15 @@ return value.</p>
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="specification-28"><a class="header" href="#specification-28">Specification</a></h2>
+<h2 id="specification-29"><a class="header" href="#specification-29">Specification</a></h2>
 <p>The index management spec defines a set of behaviour in the drivers for creating, removing and viewing indexes in a
 collection. It defines implementation details when required but also provides flexibility in the driver in that one or
 both of 2 unique APIs can be chosen to be implemented.</p>
 <h3 id="definitions-5"><a class="header" href="#definitions-5">Definitions</a></h3>
-<h4 id="meta-30"><a class="header" href="#meta-30">META</a></h4>
+<h4 id="meta-31"><a class="header" href="#meta-31">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-20"><a class="header" href="#terms-20">Terms</a></h4>
+<h4 id="terms-21"><a class="header" href="#terms-21">Terms</a></h4>
 <p><strong>Collection</strong></p>
 <p>The term <code>Collection</code> references the object in the driver that represents a collection on the server.</p>
 <p><strong>Cursor</strong></p>
@@ -15169,7 +15475,7 @@ consolidate them into one with a clear name. For instance, it would be permissib
 <h4 id="naming-1"><a class="header" href="#naming-1">Naming</a></h4>
 <p>All drivers MUST name operations and parameters as defined in the following sections. Exceptions to this rule are noted
 in the appropriate section. Class and interface names may vary according to the driver and language best practices.</p>
-<h4 id="naming-deviations-5"><a class="header" href="#naming-deviations-5">Naming Deviations</a></h4>
+<h4 id="naming-deviations-6"><a class="header" href="#naming-deviations-6">Naming Deviations</a></h4>
 <p>When deviating from a defined name, an author should consider if the altered name is recognizable and discoverable to
 the user of another driver.</p>
 <p>A non-exhaustive list of acceptable naming deviations are as follows:</p>
@@ -16062,7 +16368,7 @@ Starting in 3.4, the server validates all options passed to the <code>createInde
 4.2.0-4.2.5 of the server (SERVER-47193), specifying <code>commitQuorum</code> does not result in an error. The option is used
 internally by the server on those versions, and its value could have adverse effects on index builds. To prevent users
 from mistakenly specifying this option, drivers manually verify it is only sent to 4.4+ servers.</p>
-<h4 id="changelog-30"><a class="header" href="#changelog-30">Changelog</a></h4>
+<h4 id="changelog-31"><a class="header" href="#changelog-31">Changelog</a></h4>
 <ul>
 <li>
 <p>2024-09-05: Moved options in SearchIndexModel to SearchIndexOptions for consistency with IndexModel and IndexOptions.</p>
@@ -16135,18 +16441,18 @@ for the <code>_id</code> index.</p>
 <li>Minimum Server Version: 2.6</li>
 </ul>
 <hr />
-<h2 id="abstract-30"><a class="header" href="#abstract-30">Abstract</a></h2>
+<h2 id="abstract-31"><a class="header" href="#abstract-31">Abstract</a></h2>
 <p>The CRUD API defines a set of related methods and structures defining a driver's API. As not all languages/frameworks
 have the same abilities, parts of the spec may or may not apply. These sections have been called out.</p>
-<h2 id="specification-29"><a class="header" href="#specification-29">Specification</a></h2>
+<h2 id="specification-30"><a class="header" href="#specification-30">Specification</a></h2>
 <p>This specification is about <a href="crud/crud.html#guidance">Guidance</a> in 3 areas related to the CRUD API as well as a specification for the
 API itself. It does not define implementation details and provides room and flexibility for the idioms and differences
 in languages and frameworks.</p>
 <h3 id="definitions-6"><a class="header" href="#definitions-6">Definitions</a></h3>
-<h4 id="meta-31"><a class="header" href="#meta-31">META</a></h4>
+<h4 id="meta-32"><a class="header" href="#meta-32">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-21"><a class="header" href="#terms-21">Terms</a></h4>
+<h4 id="terms-22"><a class="header" href="#terms-22">Terms</a></h4>
 <p><strong>Collection:</strong></p>
 <p>The term <code>interface Collection</code> will be seen in most of the sections. Each driver will likely have a class or interface
 defined for the concept of a collection. Operations appearing inside the <code>interface Collection</code> are required operations
@@ -18238,18 +18544,18 @@ can be enforced within a single server selection attempt.</p>
 the <a href="crud/../message/OP_MSG.html#global-command-arguments">$readPreference global command argument</a> and
 <a href="crud/../server-selection/server-selection.html#passing-read-preference-to-mongos-and-load-balancers">passing read preference to mongos and load balancers</a>
 (if applicable).</p>
-<h2 id="test-plan-23"><a class="header" href="#test-plan-23">Test Plan</a></h2>
+<h2 id="test-plan-24"><a class="header" href="#test-plan-24">Test Plan</a></h2>
 <p>See the <a href="crud/tests/README.html">README</a> for tests.</p>
 <h2 id="motivation-4"><a class="header" href="#motivation-4">Motivation</a></h2>
 <p>Current drivers have chosen slightly different names and semantics for the same operations and options. In addition, not
 all drivers offer all the same operations and methods. As such, it is difficult to transition from driver to driver
 making the jobs of polyglot developers, documentation authors, and support engineers more difficult.</p>
-<h2 id="backwards-compatibility-20"><a class="header" href="#backwards-compatibility-20">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-21"><a class="header" href="#backwards-compatibility-21">Backwards Compatibility</a></h2>
 <p>This spec should be mostly backwards compatible as it is very lenient. Drivers finding a backwards compatibility problem
 should attempt to work around it using an acceptable deviation. In rare cases, a driver may need to break backwards
 compatibility. This should be done in accordance with a versioning scheme indicating that a backwards compatible break
 may have occurred in conjunction with release documentation and warnings.</p>
-<h2 id="reference-implementation-17"><a class="header" href="#reference-implementation-17">Reference Implementation</a></h2>
+<h2 id="reference-implementation-18"><a class="header" href="#reference-implementation-18">Reference Implementation</a></h2>
 <p>See Test Plan</p>
 <h2 id="related-terminology"><a class="header" href="#related-terminology">Related Terminology</a></h2>
 <p>If a driver needs to refer to items in the following list, the below are the accepted forms of those terms and
@@ -18369,7 +18675,7 @@ Given that the original switch to <code>$collStats</code> was a breaking change 
 using estimatedDocumentCount with <code>apiStrict: true</code> is small, and the server is back-porting the addition of <code>count</code> to
 the Stable API, it was decided that this change was acceptable to make in minor version releases of the drivers per the
 aforementioned allowance in the SemVer spec.</p>
-<h2 id="changelog-31"><a class="header" href="#changelog-31">Changelog</a></h2>
+<h2 id="changelog-32"><a class="header" href="#changelog-32">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-02-20: Migrated from reStructuredText to Markdown.</p>
@@ -18567,7 +18873,7 @@ calculating batchSize for opcode writes.</p>
 <li>Minimum Server Version: 1.8</li>
 </ul>
 <hr />
-<h2 id="abstract-31"><a class="header" href="#abstract-31">Abstract</a></h2>
+<h2 id="abstract-32"><a class="header" href="#abstract-32">Abstract</a></h2>
 <p>As of MongoDB server version 3.4 (maxWireVersion 5), a collation option is supported by the query system for matching
 and sorting on language strings in a locale-aware fashion.</p>
 <p>A driver MUST support a Collation option for each of the relevant operations in server versions &gt;= 3.4 (maxWireVersion
@@ -18575,10 +18881,10 @@ and sorting on language strings in a locale-aware fashion.</p>
 maxWireVersion &lt; 5 or if the user is using opcode-based unacknowledged writes.</p>
 <p>The CRUD and Index Management specs include the collation option in descriptions of API elements where it is supported.
 This document provides more details on the specific driver behavior required to handle the collation option.</p>
-<h2 id="meta-32"><a class="header" href="#meta-32">META</a></h2>
+<h2 id="meta-33"><a class="header" href="#meta-33">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="design-rationale-22"><a class="header" href="#design-rationale-22">Design Rationale</a></h2>
+<h2 id="design-rationale-23"><a class="header" href="#design-rationale-23">Design Rationale</a></h2>
 <h3 id="collation-is-not-a-setting-on-a-driver-client-collection-or-database-object"><a class="header" href="#collation-is-not-a-setting-on-a-driver-client-collection-or-database-object">Collation is not a setting on a driver Client, Collection, or Database object</a></h3>
 <p>MongoDB supports a server-side collation default on a collection. It is problematic to add a default Collation option on
 a driver’s Collection or Database object, because automatic collection and index creation would bypass any driver
@@ -18595,7 +18901,7 @@ gains.</p>
 Because a Collation defines how documents are matched and sorted for both read and write operations, behavior
 differences between server versions are significant. Drivers therefore MUST throw an error if a user specifies a
 Collation and the selected server has a maxWireVersion &lt; 5 or if using opcode-based unacknowledged writes.</p>
-<h2 id="specification-30"><a class="header" href="#specification-30">Specification</a></h2>
+<h2 id="specification-31"><a class="header" href="#specification-31">Specification</a></h2>
 <h3 id="collation-document-model"><a class="header" href="#collation-document-model">Collation Document Model</a></h3>
 <p>For naming and deviation guidance, see the <a href="collation/../crud/crud.html#naming">CRUD specification</a>. Defined below are the
 constructs for drivers. Note that the only required field is <code>locale</code>, but the driver should let the server validate the
@@ -18707,7 +19013,7 @@ user will provide BulkWrite operation models as in the following example:</p>
 <p>The driver must inspect each operation for a Collation if maxWireVersion is &lt; 5 and fail the entire bulkWrite if a
 collation was explicitly specified. In the example above, that means even the insertOne (without Collation) MUST NOT be
 sent.</p>
-<h2 id="test-plan-24"><a class="header" href="#test-plan-24">Test Plan</a></h2>
+<h2 id="test-plan-25"><a class="header" href="#test-plan-25">Test Plan</a></h2>
 <p>There is no specific test plan for driver Collation support; however drivers should test each affected CRUD, Index
 Management API, and collection creation/modification component to ensure that Collation is a supported option.</p>
 <p>In addition, drivers should test that two indexes can be created with identical key patterns and different collations. A
@@ -18715,9 +19021,9 @@ custom name must be provided for one of them. Then, the test should ensure that 
 delete_one is called with an index name.</p>
 <p>Drivers should also test that errors are raised in each place Collation can be provided to a API method and the selected
 server has maxWireVersion &lt; 5.</p>
-<h2 id="backwards-compatibility-21"><a class="header" href="#backwards-compatibility-21">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-22"><a class="header" href="#backwards-compatibility-22">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns.</p>
-<h2 id="reference-implementation-18"><a class="header" href="#reference-implementation-18">Reference Implementation</a></h2>
+<h2 id="reference-implementation-19"><a class="header" href="#reference-implementation-19">Reference Implementation</a></h2>
 <p>Reference Implementation:</p>
 <ul>
 <li><a href="https://jira.mongodb.org/browse/RUBY-1126">RUBY-1126</a></li>
@@ -18731,7 +19037,7 @@ server has maxWireVersion &lt; 5.</p>
 collation when deleting a document matching <code>ObjectID()</code> doesn’t change anything, but matching a string value would.</p>
 <p>Q: How do I create a collection with default collation? Does it affect my existing collection creation helper?</p>
 <p>A: A collection with a default collation can be created using the create helper and by providing a collation option.</p>
-<h2 id="changelog-32"><a class="header" href="#changelog-32">Changelog</a></h2>
+<h2 id="changelog-33"><a class="header" href="#changelog-33">Changelog</a></h2>
 <ul>
 <li>2024-02-15: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter and reformat changelog.</li>
@@ -19111,7 +19417,7 @@ corresponding response off the wire -- even if the caller is not interested in t
 <p>It must convert that request into write operations + gle's and use the old op codes.</p>
 <h3 id="are-we-discontinuing-the-use-of-getlasterror"><a class="header" href="#are-we-discontinuing-the-use-of-getlasterror">Are we discontinuing the use of getLastError?</a></h3>
 <p>Yes but as of 2.6 the existing getLastError behavior is supported for backward compatibility.</p>
-<h2 id="changelog-33"><a class="header" href="#changelog-33">Changelog</a></h2>
+<h2 id="changelog-34"><a class="header" href="#changelog-34">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-31: Migrated from reStructuredText to Markdown.</p>
@@ -19143,13 +19449,13 @@ paragraphs; re-ordered the response field sections.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 8.0</li>
 </ul>
-<h2 id="abstract-32"><a class="header" href="#abstract-32">Abstract</a></h2>
+<h2 id="abstract-33"><a class="header" href="#abstract-33">Abstract</a></h2>
 <p>This specification defines the driver API for the <code>bulkWrite</code> server command introduced in MongoDB 8.0. The API defined
 in this specification allows users to perform insert, update, and delete operations against mixed namespaces in a
 minimized number of round trips, and to receive detailed results for each operation performed. This API is distinct from
 the <a href="crud/../crud/crud.html#insert-update-replace-delete-and-bulk-writes">collection-level bulkWrite method</a> defined in the
 CRUD specification and the <a href="crud/../driver-bulk-update.rst">deprecated bulk write specification</a>.</p>
-<h2 id="specification-31"><a class="header" href="#specification-31">Specification</a></h2>
+<h2 id="specification-32"><a class="header" href="#specification-32">Specification</a></h2>
 <blockquote>
 <p>[!NOTE]
 The <code>BulkWriteOptions</code>, <code>BulkWriteResult</code>, and <code>BulkWriteException</code> types defined in this specification are similar to
@@ -19804,7 +20110,7 @@ However, drivers MUST throw an exception at the end of execution if any write co
 individual write error is encountered during an ordered bulk write, drivers MUST record the error in <code>writeErrors</code> and
 immediately throw the exception. Otherwise, drivers MUST continue to iterate the results cursor and execute any further
 <code>bulkWrite</code> batches.</p>
-<h2 id="test-plan-25"><a class="header" href="#test-plan-25">Test Plan</a></h2>
+<h2 id="test-plan-26"><a class="header" href="#test-plan-26">Test Plan</a></h2>
 <p>The majority of tests for <code>MongoClient.bulkWrite</code> are written in the
 <a href="crud/../unified-test-format/unified-test-format.html">Unified Test Format</a> and reside in the
 <a href="crud/../crud/tests/unified/">CRUD unified tests directory</a>.</p>
@@ -19868,7 +20174,7 @@ number was determined by constructing <code>OP_MSG</code> messages with various 
 <code>OP_MSG</code> structure or the introduction of new command-agnostic fields.</p>
 <p>Drivers are required to use this value even if they are capable of determining the exact size of the message prior to
 batch-splitting to standardize implementations across drivers and simplify batch-splitting testing.</p>
-<h2 id="changelog-34"><a class="header" href="#changelog-34"><strong>Changelog</strong></a></h2>
+<h2 id="changelog-35"><a class="header" href="#changelog-35"><strong>Changelog</strong></a></h2>
 <ul>
 <li>
 <p>2024-05-17: Update specification status to "Accepted".</p>
@@ -19886,17 +20192,17 @@ batch-splitting to standardize implementations across drivers and simplify batch
 <li>Minimum Server Version: 2.4</li>
 </ul>
 <hr />
-<h2 id="abstract-33"><a class="header" href="#abstract-33">Abstract</a></h2>
+<h2 id="abstract-34"><a class="header" href="#abstract-34">Abstract</a></h2>
 <p>A driver must support configuring and sending read concern and write concerns to a server. This specification defines
 the API drivers must implement as well as how that API is translated into messages for communication with the server.</p>
-<h2 id="meta-33"><a class="header" href="#meta-33">META</a></h2>
+<h2 id="meta-34"><a class="header" href="#meta-34">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="terminology-1"><a class="header" href="#terminology-1">Terminology</a></h2>
 <p>MaxWireVersion The <code>maxWireVersion</code> value reported by the <code>hello</code> command.</p>
 <p>Server Selection The process of selecting a server to read or write from. See
 <a href="https://github.com/mongodb/specifications/tree/master/source/server-selection">the server selection specification</a>.</p>
-<h2 id="specification-32"><a class="header" href="#specification-32">Specification</a></h2>
+<h2 id="specification-33"><a class="header" href="#specification-33">Specification</a></h2>
 <p>This specification includes guidance for implementing <a href="read-write-concern/read-write-concern.html#read-concern">Read Concern</a> and <a href="read-write-concern/read-write-concern.html#write-concern">Write Concern</a>
 in a driver. It does not define how read and write concern behave or are implemented on the server.</p>
 <h3 id="read-concern"><a class="header" href="#read-concern">Read Concern</a></h3>
@@ -20283,10 +20589,10 @@ mongodb://server:27017/db?wtimeoutMS=1000
 
 mongodb://server:27017/db?w=majority&amp;wtimeoutMS=1000
 </code></pre>
-<h2 id="backwards-compatibility-22"><a class="header" href="#backwards-compatibility-22">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-23"><a class="header" href="#backwards-compatibility-23">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns. This specification merely deals with how to specify read and write
 concerns.</p>
-<h2 id="test-plan-26"><a class="header" href="#test-plan-26">Test Plan</a></h2>
+<h2 id="test-plan-27"><a class="header" href="#test-plan-27">Test Plan</a></h2>
 <p>Yaml tests are located here: <a href="https://github.com/mongodb/specifications/tree/master/source/read-write-concern/tests">https://github.com/mongodb/specifications/tree/master/source/read-write-concern/tests</a></p>
 <p>Below are English descriptions of other items that should be tested:</p>
 <h3 id="readconcern-1"><a class="header" href="#readconcern-1">ReadConcern</a></h3>
@@ -20305,7 +20611,7 @@ command or as a getLastError.</li>
 <li>FindAndModify helper methods MUST NOT send a write concern when the MaxWireVersion is less than 4.</li>
 <li>Helper methods for other commands that write MUST NOT send a write concern when the MaxWireVersion is less than 5.</li>
 </ol>
-<h2 id="reference-implementation-19"><a class="header" href="#reference-implementation-19">Reference Implementation</a></h2>
+<h2 id="reference-implementation-20"><a class="header" href="#reference-implementation-20">Reference Implementation</a></h2>
 <p>These are currently under construction.</p>
 <h2 id="q--a-8"><a class="header" href="#q--a-8">Q &amp; A</a></h2>
 <p>Q: Why is specifying a non-default <code>ReadConcern</code> for servers &lt; 3.2 an error while a non-default write concern gets
@@ -20319,7 +20625,7 @@ set differently. While this setting does not currently exist for <code>ReadConce
 costs a driver nothing to be prepared for it. Second, it makes sense that if a user doesn't specify a <code>ReadConcern</code>, we
 don't send one and if a user does specify a <code>ReadConcern</code>, we do send one. If the user specifies level="local", for
 instance, we send it.</p>
-<h2 id="changelog-35"><a class="header" href="#changelog-35">Changelog</a></h2>
+<h2 id="changelog-36"><a class="header" href="#changelog-36">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-08-23: Migrated from reStructuredText to Markdown.</p>
@@ -20399,17 +20705,17 @@ a different writeConcernError.</p>
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-34"><a class="header" href="#abstract-34">Abstract</a></h2>
+<h2 id="abstract-35"><a class="header" href="#abstract-35">Abstract</a></h2>
 <p>As of version 3.6 of the MongoDB server a new <code>$changeStream</code> pipeline stage is supported in the aggregation framework.
 Specifying this stage first in an aggregation pipeline allows users to request that notifications are sent for all
 changes to a particular collection. This specification defines the means for creating change streams in drivers, as well
 as behavior during failure scenarios.</p>
-<h2 id="specification-33"><a class="header" href="#specification-33">Specification</a></h2>
+<h2 id="specification-34"><a class="header" href="#specification-34">Specification</a></h2>
 <h3 id="definitions-7"><a class="header" href="#definitions-7">Definitions</a></h3>
-<h4 id="meta-34"><a class="header" href="#meta-34">META</a></h4>
+<h4 id="meta-35"><a class="header" href="#meta-35">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-22"><a class="header" href="#terms-22">Terms</a></h4>
+<h4 id="terms-23"><a class="header" href="#terms-23">Terms</a></h4>
 <h5 id="resumable-error"><a class="header" href="#resumable-error">Resumable Error</a></h5>
 <p>An error is considered resumable if it meets any of the criteria listed below. For any criteria with wire version
 constraints, the driver MUST use the wire version of the connection used to do the initial <code>aggregate</code> or the <code>getMore</code>
@@ -21285,9 +21591,9 @@ duration of <code>maxAwaitTimeMS</code> but finds no matching entries and return
 tries resuming. If we tried resuming with the most recent <code>_id</code>, this throws out the oplog scanning the server had done
 for the long sequence of getMores with empty responses. But resuming with the last <code>postBatchResumeToken</code> skips the
 unnecessary scanning of unmatched oplog entries.</p>
-<h2 id="test-plan-27"><a class="header" href="#test-plan-27">Test Plan</a></h2>
+<h2 id="test-plan-28"><a class="header" href="#test-plan-28">Test Plan</a></h2>
 <p>See <a href="change-streams/tests/README.html">tests/README.md</a></p>
-<h2 id="backwards-compatibility-23"><a class="header" href="#backwards-compatibility-23">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-24"><a class="header" href="#backwards-compatibility-24">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns.</p>
 <h2 id="reference-implementations-4"><a class="header" href="#reference-implementations-4">Reference Implementations</a></h2>
 <ul>
@@ -21295,7 +21601,7 @@ unnecessary scanning of unmatched oplog entries.</p>
 <li>PYTHON (PYTHON-1338)</li>
 <li>RUBY (RUBY-1228)</li>
 </ul>
-<h2 id="changelog-36"><a class="header" href="#changelog-36">Changelog</a></h2>
+<h2 id="changelog-37"><a class="header" href="#changelog-37">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-02-09: Migrated from reStructuredText to Markdown.</p>
@@ -21444,15 +21750,15 @@ unnecessary scanning of unmatched oplog entries.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.2</li>
 </ul>
-<h2 id="abstract-35"><a class="header" href="#abstract-35">Abstract</a></h2>
+<h2 id="abstract-36"><a class="header" href="#abstract-36">Abstract</a></h2>
 <p>The Find, GetMore and KillCursors commands in MongoDB 3.2 or later replace the use of the legacy OP_QUERY, OP_GET_MORE
 and OP_KILL_CURSORS wire protocol messages. This specification lays out how drivers should interact with the new
 commands when compared to the legacy wire protocol level messages.</p>
 <h2 id="definitions-8"><a class="header" href="#definitions-8">Definitions</a></h2>
-<h3 id="meta-35"><a class="header" href="#meta-35">Meta</a></h3>
+<h3 id="meta-36"><a class="header" href="#meta-36">Meta</a></h3>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h3 id="terms-23"><a class="header" href="#terms-23">Terms</a></h3>
+<h3 id="terms-24"><a class="header" href="#terms-24">Terms</a></h3>
 <h4 id="document"><a class="header" href="#document">Document</a></h4>
 <p>The term Document refers to the implementation in the driver's language of a BSON document.</p>
 <h4 id="command"><a class="header" href="#command">Command</a></h4>
@@ -21780,7 +22086,7 @@ Information about the command can be found in the
 <p>This format is general for all commands when executing against a Mongos proxy.</p>
 <p>More in depth information about passing read preferences to Mongos can be found in the Server Selection Specification
 <a href="./server-selection/server-selection.html#passing-read-preference-to-mongos">Server Selection Specification</a>.</p>
-<h2 id="changelog-37"><a class="header" href="#changelog-37">Changelog</a></h2>
+<h2 id="changelog-38"><a class="header" href="#changelog-38">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-30: Migrated from reStructuredText to Markdown.</p>
@@ -21823,7 +22129,7 @@ have same behavior as for OP_GET_MORE and OP_KILL_CURSORS.</p>
 <li>Minimum Server Version: 2.2</li>
 </ul>
 <hr />
-<h2 id="abstract-36"><a class="header" href="#abstract-36">Abstract</a></h2>
+<h2 id="abstract-37"><a class="header" href="#abstract-37">Abstract</a></h2>
 <p>GridFS is a convention drivers use to store and retrieve BSON binary data (type "x05") that exceeds MongoDB"s
 BSON-document size limit of 16 MiB. When this data, called a <strong>user file</strong>, is written to the system, GridFS divides the
 file into <strong>chunks</strong> that are stored as distinct documents in a <strong>chunks collection</strong>. To retrieve a stored file, GridFS
@@ -21835,10 +22141,10 @@ support in their implementations. Additionally, this document attempts to clarif
 in the GridFS data model, disambiguate GridFS terminology, and document configuration options that were previously
 unspecified.</p>
 <h2 id="definitions-9"><a class="header" href="#definitions-9">Definitions</a></h2>
-<h3 id="meta-36"><a class="header" href="#meta-36">META</a></h3>
+<h3 id="meta-37"><a class="header" href="#meta-37">META</a></h3>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h3 id="terms-24"><a class="header" href="#terms-24">Terms</a></h3>
+<h3 id="terms-25"><a class="header" href="#terms-25">Terms</a></h3>
 <p><strong>Bucket name</strong></p>
 <p>A prefix under which a GridFS system"s collections are stored. Collection names for the files and chunks collections are
 prefixed with the bucket name. The bucket name MUST be configurable by the user. Multiple buckets may exist within a
@@ -21926,7 +22232,7 @@ language to represent a file id. This would be something like object, BsonValue 
 <p><strong>User File</strong></p>
 <p>A data added by a user to GridFS. This data may map to an actual file on disk, a stream of input, a large data object,
 or any other large amount of consecutive data.</p>
-<h2 id="specification-34"><a class="header" href="#specification-34">Specification</a></h2>
+<h2 id="specification-35"><a class="header" href="#specification-35">Specification</a></h2>
 <h3 id="guidance-4"><a class="header" href="#guidance-4">Guidance</a></h3>
 <h4 id="documentation-5"><a class="header" href="#documentation-5">Documentation</a></h4>
 <p>The documentation provided in code below is merely for driver authors and SHOULD NOT be taken as required documentation
@@ -22487,9 +22793,9 @@ given filename and execute "rename" on each corresponding <code>_id</code>.</p>
 </code></pre>
 <p>This method drops the files and chunks collections associated with this GridFS bucket.</p>
 <p>Drivers should drop the files collection first, and then the chunks collection.</p>
-<h2 id="test-plan-28"><a class="header" href="#test-plan-28">Test Plan</a></h2>
+<h2 id="test-plan-29"><a class="header" href="#test-plan-29">Test Plan</a></h2>
 <p>TBD</p>
-<h2 id="motivation-for-change-15"><a class="header" href="#motivation-for-change-15">Motivation for Change</a></h2>
+<h2 id="motivation-for-change-16"><a class="header" href="#motivation-for-change-16">Motivation for Change</a></h2>
 <p>The <a href="https://www.mongodb.com/docs/manual/core/gridfs/">existing GridFS documentation</a> is only concerned with the
 underlying data model for this feature, and does not specify what basic set of features an implementation of GridFS
 should or should not provide. As a result, GridFS is currently implemented across drivers, but with varying APIs,
@@ -22498,7 +22804,7 @@ features, and behavior guarantees. Current implementations also may not conform 
 that drivers may choose to support. This spec is also explicit about what features/behaviors of GridFS are not specified
 and should not be supported. Additionally, this spec validates and clarifies the existing data model, deprecating fields
 that are undesirable or incorrect.</p>
-<h2 id="design-rationale-23"><a class="header" href="#design-rationale-23">Design Rationale</a></h2>
+<h2 id="design-rationale-24"><a class="header" href="#design-rationale-24">Design Rationale</a></h2>
 <p>Why is the default chunk size 255 KiB?</p>
 <p>On MMAPv1, the server provides documents with extra padding to allow for in-place updates. When the "data" field of a
 chunk is limited to 255 KiB, it ensures that the whole chunk document (the chunk data along with an <code>_id</code> and other
@@ -22598,7 +22904,7 @@ method returned an ObjectId, and support for custom file ids is implemented by a
 file id as an additional parameter. Drivers should continue to support the original method if possible to maintain
 backward compatibility. This spec does not attempt to completely mandate how each driver should maintain backward
 compatibility, as different languages have different approaches and capabilities for maintaining backward compatibility.</p>
-<h2 id="backwards-compatibility-24"><a class="header" href="#backwards-compatibility-24">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-25"><a class="header" href="#backwards-compatibility-25">Backwards Compatibility</a></h2>
 <p>This spec presents a new API for GridFS systems, which may break existing functionality for some drivers. The following
 are suggestions for ways to mitigate these incompatibilities.</p>
 <p>File revisions</p>
@@ -22619,14 +22925,14 @@ deprecated, and is not used at all in driver code. Documentation SHOULD encourag
 this field continue to work. However, drivers SHOULD make it clear in their documentation that this field is deprecated,
 and is not used at all in driver code. Documentation SHOULD encourage users to store aliases in the "metadata" document
 instead.</p>
-<h2 id="reference-implementation-20"><a class="header" href="#reference-implementation-20">Reference Implementation</a></h2>
+<h2 id="reference-implementation-21"><a class="header" href="#reference-implementation-21">Reference Implementation</a></h2>
 <p>TBD</p>
 <h2 id="future-work-14"><a class="header" href="#future-work-14">Future work</a></h2>
 <p>Changes to the GridFS data model are out-of-scope for this spec, but may be considered for the future.</p>
 <p>The ability to alter or append to existing GridFS files has been cited as something that would greatly improve the
 system. While this functionality is not in-scope for this spec (see "Why can"t I alter documents once they are in the
 system?") it is a potential area of growth for the future.</p>
-<h2 id="changelog-38"><a class="header" href="#changelog-38">Changelog</a></h2>
+<h2 id="changelog-39"><a class="header" href="#changelog-39">Changelog</a></h2>
 <ul>
 <li>2024-02-27: Migrated from reStructuredText to Markdown.</li>
 <li>2016-05-10: Support custom file ids</li>
@@ -22639,7 +22945,176 @@ system?") it is a potential area of growth for the future.</p>
 <li>2022-01-19: Require that timeouts be applied per the client-side operations timeout spec</li>
 <li>2022-10-05: Remove spec front matter and reformat changelog.</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="stable-api-1"><a class="header" href="#stable-api-1">Stable API</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="stable-api-for-drivers"><a class="header" href="#stable-api-for-drivers">Stable API For Drivers</a></h1>
+<ul>
+<li>Status: Accepted</li>
+<li>Minimum Server Version: N/A</li>
+</ul>
+<hr />
+<h2 id="abstract-38"><a class="header" href="#abstract-38">Abstract</a></h2>
+<p>As MongoDB moves toward more frequent releases (a.k.a. continuous delivery), we want to enable users to take advantage
+of our rapidly released features, without exposing applications to incompatible server changes due to automatic server
+upgrades. A stable API will help accomplish that goal.</p>
+<h2 id="meta-38"><a class="header" href="#meta-38">META</a></h2>
+<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>This document tends to use "SHOULD" more frequently than other specifications, but mainly in the context of providing
+guidance on writing test files. This is discussed in more detail in <a href="versioned-api/versioned-api.html#design-rationale">Design Rationale</a>.</p>
+<h2 id="specification-36"><a class="header" href="#specification-36">Specification</a></h2>
+<h3 id="background"><a class="header" href="#background">Background</a></h3>
+<p>When applications interact with MongoDB, both the driver and the server participate in executing operations. Therefore,
+when determining application compatibility with MongoDB, both the driver and the server behavior must be taken into
+account.</p>
+<p>An application can specify the server API version when creating MongoClient. When this is done:</p>
+<ul>
+<li>The client sends the specified API version to the server, causing the server to behave in a manner compatible with
+that API version.</li>
+<li>The driver will behave in a manner compatible with a server configured with that API version, regardless of the
+server's actual release version.</li>
+</ul>
+<p>Presently there is no specification for how a driver must behave when a particular server API version is requested, or
+what driver operations are subject to API compatibility guarantees. Such requirements may be stipulated in subsequent
+specifications.</p>
+<p>This specification requires MongoClient to validate that it supports the specified server API version, if any, but does
+not define what such support means.</p>
+<h3 id="mongoclient-changes-2"><a class="header" href="#mongoclient-changes-2"><code>MongoClient</code> changes</a></h3>
+<p><code>MongoClient</code> instances accept a new <code>serverApi</code> option to allow the user to declare an API version:</p>
+<pre><code class="language-typescript">class MongoClient {
+    MongoClient(... serverApi: ServerApi);
+}
+
+enum ServerApiVersion {
+    v1 = "1",
+}
+
+class ServerApi {
+    version: string|ServerApiVersion;
+    strict: Optional&lt;Boolean&gt;; // Default false
+    deprecationErrors: Optional&lt;Boolean&gt;; // Default false
+}
+</code></pre>
+<p>Drivers SHOULD group the <code>serverApi</code> option with other similar client options like <code>autoEncryptionOpts</code>. Drivers MUST
+NOT allow specification of any stable API options via the connection string. See the
+<a href="versioned-api/versioned-api.html#design-rationale">Design Rationale</a> for more details.</p>
+<h4 id="serverapiversion-enumeration"><a class="header" href="#serverapiversion-enumeration">ServerApiVersion enumeration</a></h4>
+<p>This specification and subsequent specifications will define the known API versions. Drivers SHOULD define an
+enumeration containing the known API versions, using the version identifiers given. Drivers MAY deviate from the version
+identifiers used in this and subsequent specifications if doing so is necessary given the driver's programming
+language's constraints. Drivers MUST ensure that adding new API versions to this enumeration does not result in backward
+compatibility breaks in non-major releases. This can be the case in languages that allow exhaustive <code>switch</code> statements
+(e.g. Swift).</p>
+<p>Drivers for languages that don't have enums (e.g. PHP) MUST expose the version as a string, but SHOULD offer constants
+to allow for IDE features such as code completion. In these cases, the driver MUST validate (e.g. when the application
+provides a version string to the <code>ServerApi</code> class) that the version string is valid and trigger a client-side error if
+an unknown API version was used.</p>
+<h4 id="serverapi-class"><a class="header" href="#serverapi-class">ServerApi class</a></h4>
+<p>The <code>ServerApi</code> class stores an API version, along with flags that decide whether or not unknown or deprecated commands
+in the specified API version trigger a server-side error. A <code>version</code> MUST be specified when declaring an API version,
+while the <code>strict</code> and <code>deprecationErrors</code> options are both optional. The <code>ServerApi</code> class is considered immutable;
+changes to the declared API version MUST be prohibited.</p>
+<h4 id="declared-version-inheritance"><a class="header" href="#declared-version-inheritance">Declared Version Inheritance</a></h4>
+<p>Drivers MUST ensure that users cannot override the API version declared in the <code>MongoClient</code> instance. This includes the
+<code>MongoDatabase</code> and <code>MongoCollection</code> classes, as well as any operations in these classes. See the rationale for more
+details.</p>
+<h3 id="sending-declared-api-version-to-the-server"><a class="header" href="#sending-declared-api-version-to-the-server">Sending Declared API Version to the Server</a></h3>
+<p>The declared API version MUST be sent to the server as part of every command request, with the exception of the cases
+listed below. Drivers MUST NOT use a server's reported <code>maxWireVersion</code> to decide whether it supports the stable API.
+The server will reply with an error if the declared API version is not supported, or if the command does not support API
+versioning options. If the user does not declare an API version, the driver MUST NOT send any API versioning options to
+the server.</p>
+<p>If an API version is declared then the driver MUST use <code>OP_MSG</code> for all messages, including the initial handshake.</p>
+<h4 id="command-syntax"><a class="header" href="#command-syntax">Command Syntax</a></h4>
+<p>The options from the declared API version are mapped to the following command options:</p>
+<div class="table-wrapper"><table><thead><tr><th><strong>ServerApi field</strong></th><th><strong>Command option</strong></th></tr></thead><tbody>
+<tr><td><code>version</code></td><td><code>apiVersion</code></td></tr>
+<tr><td><code>strict</code></td><td><code>apiStrict</code></td></tr>
+<tr><td><code>deprecationErrors</code></td><td><code>apiDeprecationErrors</code></td></tr>
+</tbody></table>
+</div>
+<p>If an API version was declared, drivers MUST add the <code>apiVersion</code> option to every command that is sent to a server.
+Drivers MUST add the <code>apiStrict</code> and <code>apiDeprecationErrors</code> options if they were specified by the user, even when the
+specified value is equal to the server default. Drivers MUST NOT add any API versioning options if the user did not
+specify them. This includes the <code>getMore</code> command as well as all commands that are part of a transaction. A previous
+version of this specification excluded those commands, but that has since changed in the server.</p>
+<h4 id="handshake-behavior"><a class="header" href="#handshake-behavior">Handshake behavior</a></h4>
+<p>If an API version was declared, drivers MUST NOT use the legacy hello command during the initial handshake or
+afterwards. Instead, drivers MUST use the <code>hello</code> command exclusively and use the <code>OP_MSG</code> protocol. If the server does
+not support <code>hello</code>, the server description MUST reflect this with an <code>Unknown</code> server type.</p>
+<h4 id="cursors-2"><a class="header" href="#cursors-2">Cursors</a></h4>
+<p>For <code>getMore</code>, drivers MUST submit API parameters. If the values given do not match the API parameters given in the
+cursor-initiating command, the server will reply with an error.</p>
+<h4 id="transactions-1"><a class="header" href="#transactions-1">Transactions</a></h4>
+<p>When running commands as part of a transaction, drivers MUST send API parameters with all commands that are part of a
+transaction, including <code>commitTransaction</code> and <code>abortTransaction</code>. If the API parameters for a command in a transaction
+do not match those of the transaction-starting command, the server will reply with an error.</p>
+<h4 id="generic-command-helper"><a class="header" href="#generic-command-helper">Generic command helper</a></h4>
+<p>Drivers that offer a generic command helper (e.g. <code>command()</code> or <code>runCommand()</code>) MUST NOT inspect the command document
+to detect API versioning options. As with all other commands, drivers MUST inherit the API version from the client.
+Specifying API versioning options in the command document and declaring an API version on the client is not supported.
+Drivers MUST document that the behaviour of the command helper is undefined in this case.</p>
+<h2 id="design-rationale-25"><a class="header" href="#design-rationale-25">Design Rationale</a></h2>
+<h3 id="no-uri-options"><a class="header" href="#no-uri-options">No URI Options</a></h3>
+<p>Since changing the API version can cause the application to behave differently, drivers MUST NOT allow users to change
+the declared API version without deploying code changes. This ensures that users don't copy a connection string with a
+declared API version that may be different from what their application expects. A URI option can be added later if we
+realise our users need it, while the opposite is not easily accomplished.</p>
+<h3 id="dont-allow-overriding-the-declared-api-version"><a class="header" href="#dont-allow-overriding-the-declared-api-version">Don't Allow Overriding the Declared API Version</a></h3>
+<p>While users are used to overriding options like read preference, read concern, and write concern in <code>MongoDatabase</code> and
+<code>MongoCollection</code> objects, or on an operation level, we explicitly decided against this for the declared API version.
+With a single API version available to start, we can't anticipate what use cases users may have to override the API
+version. Not including this feature at the beginning allows us to gather feedback on use cases and add the features
+users are looking for. On the other hand, adding the ability to override the declared API version can't be undone until
+a future major release, which is almost impossible to accomplish across all drivers.</p>
+<h3 id="generic-command-helper-behaviour"><a class="header" href="#generic-command-helper-behaviour">Generic Command Helper Behaviour</a></h3>
+<p>The runCommand helper is a way for the user to run a native command with the driver doing little to no inspection in the
+command. This allows users to run arbitrary commands that may not have helpers in the driver, or to pass options that
+are not supported by the driver version they are currently using. Commands run using this helper do not inherit any
+<code>readConcern</code> or <code>writeConcern</code> options that may have been set on the <code>MongoClient</code> or <code>MongoDatabase</code> objects.</p>
+<p>However, the declared API version is a different case. We are introducing this feature to give users a certain peace of
+mind when upgrading driver or server versions, by ensuring that their code will continue to show the same behaviour
+they've gotten used to. This includes all commands run using the generic command helper. Thus, the helper will inherit
+the API version declared on the client.</p>
+<h3 id="hardcode-supported-versions-in-drivers"><a class="header" href="#hardcode-supported-versions-in-drivers">Hardcode supported versions in drivers</a></h3>
+<p>Since a new API version might require driver changes (e.g. to account for removed commands), we don't yet know what
+changes drivers must make for a future version. Until we do, we must prevent users from choosing any unknown API
+version.</p>
+<h2 id="backward-compatibility"><a class="header" href="#backward-compatibility">Backward Compatibility</a></h2>
+<p>Driver changes are fully backward compatible. Not declaring an API version when creating a client may cause an error if
+the server was started with the <code>requireApiVersion</code> option enabled, but this is outside of driver control.</p>
+<h2 id="future-work-15"><a class="header" href="#future-work-15">Future Work</a></h2>
+<h3 id="overriding-the-declared-api-version"><a class="header" href="#overriding-the-declared-api-version">Overriding the Declared API Version</a></h3>
+<p>In the future, we may want to allow users to override the declared API version on a <code>MongoDatabase</code>, <code>MongoCollection</code>,
+or individual operation level. However, this is not necessary until there is a different API version and we have data on
+why and how users would want to override the declared API version.</p>
+<h3 id="stable-crud-api"><a class="header" href="#stable-crud-api">Stable CRUD API</a></h3>
+<p>Drivers may also want to provide specialized <code>MongoClient</code>, <code>MongoDatabase</code>, and <code>MongoCollection</code> classes to only
+include features that are part of the stable API. This is not covered in this specification.</p>
+<h2 id="changelog-40"><a class="header" href="#changelog-40">Changelog</a></h2>
+<ul>
+<li>
+<p>2024-09-10: Migrated from reStructuredText to Markdown.</p>
+</li>
+<li>
+<p>2022-10-05: Remove spec front matter and reformat changelog.</p>
+</li>
+<li>
+<p>2022-02-24: Rename Versioned API to Stable API</p>
+</li>
+<li>
+<p>2022-01-14: Require <code>OP_MSG</code> for all messages including the initial step of<br />
+the handshake when using stable API.</p>
+</li>
+<li>
+<p>2021-05-05: Require sending stable API parameters with <code>getMore</code> and<br />
+transaction-continuing commands.</p>
+</li>
+<li>
+<p>2021-04-20: Require using <code>hello</code> when using the stable API.</p>
+</li>
+<li>
+<p>2021-04-10: Replaced usages of <code>acceptAPIVersion2</code> with <code>acceptApiVersion2</code>.</p>
+</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="client-side-encryption-1"><a class="header" href="#client-side-encryption-1">Client Side Encryption</a></h1>
 <ul>
 <li>Status: Accepted</li>
@@ -22647,7 +23122,7 @@ system?") it is a potential area of growth for the future.</p>
 <li>Version: 1.14.0</li>
 </ul>
 <hr />
-<h2 id="abstract-37"><a class="header" href="#abstract-37">Abstract</a></h2>
+<h2 id="abstract-39"><a class="header" href="#abstract-39">Abstract</a></h2>
 <p>MongoDB 4.2 introduced support for client side encryption, guaranteeing that sensitive data can only be encrypted and
 decrypted with access to both MongoDB and a separate key management provider (supporting AWS, Azure, GCP, a local
 provider, and KMIP). Once enabled, data can be seamlessly encrypted and decrypted with minimal application code changes.
@@ -22655,10 +23130,10 @@ provider, and KMIP). Once enabled, data can be seamlessly encrypted and decrypte
 expressive encrypted search operations. This spec covers both capabilities - 1st generation, "Client Side Field Level
 Encryption" and generation 2, "Queryable Encryption" - as the associated core cryptographic library and supporting
 drivers share a common codebase.</p>
-<h2 id="meta-37"><a class="header" href="#meta-37">META</a></h2>
+<h2 id="meta-39"><a class="header" href="#meta-39">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="terms-25"><a class="header" href="#terms-25">Terms</a></h2>
+<h2 id="terms-26"><a class="header" href="#terms-26">Terms</a></h2>
 <p><strong>encrypted MongoClient</strong></p>
 <p>A MongoClient with client side encryption enabled.</p>
 <p><strong>data key</strong></p>
@@ -22884,7 +23359,7 @@ implementation.</p>
 in an idiomatic way (e.g. keyword arguments, builder classes, etc.).</p>
 <p>Drivers MAY use a native UUID type in place of a parameter or return type specified as a BSON binary with subtype 0x04
 as described in <a href="client-side-encryption/../uuid.html">Handling of Native UUID Types</a>.</p>
-<h3 id="mongoclient-changes-2"><a class="header" href="#mongoclient-changes-2">MongoClient Changes</a></h3>
+<h3 id="mongoclient-changes-3"><a class="header" href="#mongoclient-changes-3">MongoClient Changes</a></h3>
 <p><span id="MongoClient"></span></p>
 <pre><code class="language-typescript">class MongoClient {
    MongoClient(... autoEncryptionOpts: AutoEncryptionOpts);
@@ -24263,7 +24738,7 @@ below. Commands not listed in this table will result in an error returned by lib
 </div>
 <p>All AUTOENCRYPT commands are sent to mongocryptd, even if there is no JSONSchema. This is to ensure that commands that
 reference other collections (e.g. aggregate with <code>$lookup</code>) are handled properly.</p>
-<h2 id="test-plan-29"><a class="header" href="#test-plan-29">Test Plan</a></h2>
+<h2 id="test-plan-30"><a class="header" href="#test-plan-30">Test Plan</a></h2>
 <p>See the <a href="client-side-encryption/tests/README.html">README.md</a> in the test directory.</p>
 <h2 id="rationale-3"><a class="header" href="#rationale-3">Rationale</a></h2>
 <h3 id="design-principles"><a class="header" href="#design-principles">Design Principles</a></h3>
@@ -24573,7 +25048,7 @@ if needed.</p>
 <p>By default, the KMS will retrieve the key encryption key from the KMIP server and use it to encrypt the data key. If the
 <code>delegated</code> option is set to true (recommended), the KMIP server will instead perform encryption and decryption locally,
 ensuring that the key encryption key never leaves the server.</p>
-<h2 id="future-work-15"><a class="header" href="#future-work-15">Future work</a></h2>
+<h2 id="future-work-16"><a class="header" href="#future-work-16">Future work</a></h2>
 <h3 id="make-libmonogocrypt-cache-window-configurable"><a class="header" href="#make-libmonogocrypt-cache-window-configurable">Make libmonogocrypt cache window configurable</a></h3>
 <p>There's a principle at MongoDB, "no knobs", that we should honor wherever possible. Configurability is bad, mandating
 one well-chosen value is good. But if our default caching behavior is discovered unsuitable for some use cases we may
@@ -24606,7 +25081,7 @@ libmongocrypt would create multiple OP_MSGs to send.</p>
 <p>Key management functions currently assume there are no concurrent accesses of the key vault collection being operated
 on. To support concurrent access of the key vault collection, the key management functions may be overloaded to take an
 explicit session parameter as described in the <a href="client-side-encryption/../sessions/driver-sessions.html">Drivers Sessions Specification</a>.</p>
-<h2 id="changelog-39"><a class="header" href="#changelog-39">Changelog</a></h2>
+<h2 id="changelog-41"><a class="header" href="#changelog-41">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-29: Document range as stable.</p>
@@ -24769,15 +25244,15 @@ queryable encrypted fields in a new collection.</p>
 <li>Minimum Server Version: 4.2</li>
 </ul>
 <hr />
-<h2 id="abstract-38"><a class="header" href="#abstract-38">Abstract</a></h2>
+<h2 id="abstract-40"><a class="header" href="#abstract-40">Abstract</a></h2>
 <p>Client side encryption requires a new binary subtype to store (1) encrypted ciphertext with metadata, and (2) binary
 markings indicating what values must be encrypted in a document. (1) is stored in the server, but (2) is only used in
 the communication protocol between libmongocrypt and mongocryptd described in
 <a href="https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/client-side-encryption.rst">Driver Spec: Client Side Encryption Encryption</a>.</p>
-<h2 id="meta-38"><a class="header" href="#meta-38">META</a></h2>
+<h2 id="meta-40"><a class="header" href="#meta-40">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-35"><a class="header" href="#specification-35">Specification</a></h2>
+<h2 id="specification-37"><a class="header" href="#specification-37">Specification</a></h2>
 <p>This spec introduces a new BSON binary subtype with value 6. The binary has multiple formats determined by the first
 byte, but are all related to client side encryption. The first byte indicates the type and layout of the remaining data.</p>
 <p>All values are represented in little endian. The payload is generally optimized for storage size. The exception is the
@@ -24829,10 +25304,10 @@ intent-to-encrypt markings which are only used between libmongocrypt and mongocr
 <tr><td>ciphertext[]</td><td>The encrypted ciphertext (includes IV prepended).</td></tr>
 </tbody></table>
 </div>
-<h2 id="test-plan-30"><a class="header" href="#test-plan-30">Test Plan</a></h2>
+<h2 id="test-plan-31"><a class="header" href="#test-plan-31">Test Plan</a></h2>
 <p>Covered in
 <a href="https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/client-side-encryption.rst">Driver Spec: Client Side Encryption Encryption</a>.</p>
-<h2 id="design-rationale-24"><a class="header" href="#design-rationale-24">Design Rationale</a></h2>
+<h2 id="design-rationale-26"><a class="header" href="#design-rationale-26">Design Rationale</a></h2>
 <h3 id="why-not-use-a-new-bson-type"><a class="header" href="#why-not-use-a-new-bson-type">Why not use a new BSON type?</a></h3>
 <p>An alternative to using a new binary subtype would be introducing a new BSON type. This would be a needless backwards
 breaking change. Since FLE is largely a client side feature, it should be possible to store encrypted data in old
@@ -24858,33 +25333,492 @@ queries but randomized does not.</p>
 <h3 id="why-is-the-original-bson-type-not-encrypted"><a class="header" href="#why-is-the-original-bson-type-not-encrypted">Why is the original BSON type not encrypted?</a></h3>
 <p>Exposing the underlying BSON type gives some validation of the data that is encrypted. A JSONSchema on the server can
 validate that the underlying encrypted BSON type is correct.</p>
-<h2 id="reference-implementation-21"><a class="header" href="#reference-implementation-21">Reference Implementation</a></h2>
+<h2 id="reference-implementation-22"><a class="header" href="#reference-implementation-22">Reference Implementation</a></h2>
 <p>libmongocrypt and mongocryptd will be the reference implementation of how BSON binary subtype 6 is used.</p>
-<h2 id="security-implication-2"><a class="header" href="#security-implication-2">Security Implication</a></h2>
+<h2 id="security-implication-3"><a class="header" href="#security-implication-3">Security Implication</a></h2>
 <p>It would be a very bad security flaw if intent-to-encrypt markings were confused with ciphertexts. This could lead to a
 marking inadvertently being stored on a server – meaning that plaintext is stored where ciphertext should have been.</p>
 <p>Therefore, the leading byte of the BSON binary subtype distinguishes between marking and ciphertext.</p>
-<h2 id="changelog-40"><a class="header" href="#changelog-40">Changelog</a></h2>
+<h2 id="changelog-42"><a class="header" href="#changelog-42">Changelog</a></h2>
 <ul>
 <li>2024-03-04: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter and create changelog.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="command-logging-and-monitoring"><a class="header" href="#command-logging-and-monitoring">Command Logging and Monitoring</a></h1>
+<ul>
+<li>Status: Accepted</li>
+<li>Minimum Server Version: 2.4</li>
+</ul>
+<hr />
+<h2 id="specification-38"><a class="header" href="#specification-38">Specification</a></h2>
+<p>The command logging and monitoring specification defines a set of behaviour in the drivers for providing runtime
+information about commands in log messages as well as in events which users can consume programmatically, either
+directly or by integrating with third-party APM libraries.</p>
+<h3 id="definitions-10"><a class="header" href="#definitions-10">Definitions</a></h3>
+<h4 id="meta-41"><a class="header" href="#meta-41">META</a></h4>
+<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<h4 id="terms-27"><a class="header" href="#terms-27">Terms</a></h4>
+<p><strong>Document</strong></p>
+<p>The term <code>Document</code> refers to the implementation in the driver's language of a BSON document.</p>
+<h3 id="guidance-5"><a class="header" href="#guidance-5">Guidance</a></h3>
+<h4 id="documentation-6"><a class="header" href="#documentation-6">Documentation</a></h4>
+<p>The documentation provided in code below is merely for driver authors and SHOULD NOT be taken as required documentation
+for the driver.</p>
+<h4 id="messages-and-events"><a class="header" href="#messages-and-events">Messages and Events</a></h4>
+<p>All drivers MUST implement the specified event types as well as log messages.</p>
+<p>Implementation details are noted in the comments when a specific implementation is required. Within each event and log
+message, all properties are REQUIRED unless noted otherwise.</p>
+<h4 id="naming-4"><a class="header" href="#naming-4">Naming</a></h4>
+<p>All drivers MUST name types, properties, and log message values as defined in the following sections. Exceptions to this
+rule are noted in the appropriate section. Class and interface names may vary according to the driver and language best
+practices.</p>
+<h4 id="publishing--subscribing"><a class="header" href="#publishing--subscribing">Publishing &amp; Subscribing</a></h4>
+<p>The driver SHOULD publish events in a manner that is standard to the driver's language publish/subscribe patterns and is
+not strictly mandated in this specification.</p>
+<p>Similarly, as described in the <a href="command-logging-and-monitoring/../logging/logging.html#implementation-requirements">logging specification</a> the driver
+SHOULD emit log messages in a manner that is standard for the language.</p>
+<h4 id="guarantees"><a class="header" href="#guarantees">Guarantees</a></h4>
+<p>The driver MUST guarantee that every <code>CommandStartedEvent</code> has either a correlating <code>CommandSucceededEvent</code> or
+<code>CommandFailedEvent</code>, and that every "command started" log message has either a correlating "command succeeded" log
+message or "command failed" log message.</p>
+<p>The driver MUST guarantee that the <code>requestId</code> of the <code>CommandStartedEvent</code> and the corresponding
+<code>CommandSucceededEvent</code> or <code>CommandFailedEvent</code> is the same, and that the <code>requestId</code> of the "command started" log
+message and the corresponding "command succeeded" or "command failed" log message is the same.</p>
+<h4 id="unacknowledgedacknowledged-writes"><a class="header" href="#unacknowledgedacknowledged-writes">Unacknowledged/Acknowledged Writes</a></h4>
+<p>Unacknowledged writes must provide a <code>CommandSucceededEvent</code> and a "command succeeded" log message with a <code>{ ok: 1 }</code>
+reply.</p>
+<p>A non-default write concern MUST be included in the published command. The default write concern is not required to be
+included.</p>
+<h4 id="succeeded-or-failed"><a class="header" href="#succeeded-or-failed">Succeeded or Failed</a></h4>
+<p>Commands that executed on the server and return a status of <code>{ ok: 1.0 }</code> are considered successful commands and MUST
+generate a <code>CommandSucceededEvent</code> and "command succeeded" log message. Commands that have write errors are included
+since the actual command did succeed, only writes failed.</p>
+<h4 id="error-handling-4"><a class="header" href="#error-handling-4">Error Handling</a></h4>
+<p>If an exception occurs while sending the operation to the server, the driver MUST generate a <code>CommandFailedEvent</code> and
+"command failed" log message with the exception or message, and re-raise the exception.</p>
+<h4 id="bulk-writes"><a class="header" href="#bulk-writes">Bulk Writes</a></h4>
+<p>This specification defines the monitoring and logging of individual commands and in that respect MUST generate events
+and log messages for each command a bulk write executes. Each of these commands, however, must be linked together via
+the same <code>operationId</code>.</p>
+<h4 id="implementation-notes-5"><a class="header" href="#implementation-notes-5">Implementation Notes</a></h4>
+<p>When a driver sends an OP_MSG with a document sequence, it MUST include the document sequence as a BSON array in
+<code>CommandStartedEvent.command</code>. The array's field name MUST be the OP_MSG sequence identifier. For example, if the driver
+sends an <code>update</code> command using OP_MSG, and sends a document sequence as a separate section of payload type 1 with
+identifier <code>updates</code>, the driver MUST include the documents as a BSON array in <code>CommandStartedEvent.command</code> with field
+name <code>updates</code>.</p>
+<p>See "Why are document sequences included as BSON arrays?" in the <a href="command-logging-and-monitoring/command-logging-and-monitoring.html#rationale">rationale</a>.</p>
+<h3 id="rationale-4"><a class="header" href="#rationale-4">Rationale</a></h3>
+<p><em>1. Why are commands with</em> <code>{ ok: 1 }</code> <em>treated as successful and</em> <code>{ ok: 0 }</code> <em>as failed?</em></p>
+<p>The specification is consistent with what the server deems as a successful or failed command and reports this as so.
+This also allows for server changes around this behaviour in the future to require no change in the drivers to continue
+to be compliant.</p>
+<p>The command listener API is responsible only for receiving and handling events sent from the lowest level of the driver,
+and is only about informing listeners about what commands are sent and what replies are received. As such, it would be
+innappropiate at this level for a driver to execute custom logic around particular commands to determine what failure or
+success means for a particular command. Implementers of the API are free to handle these events as they see fit, which
+may include code that further interprets replies to specific commands based on the presence or absence of other fields
+in the reply beyond the <code>ok</code> field.</p>
+<p><em>2. Why are document sequences included as BSON arrays?</em></p>
+<p>The OP_MSG wire protocol was introduced in MongoDB 3.6, with document sequences as an optimization for bulk writes. We
+have chosen to represent these OP_MSGs as single command documents for now, until a need for a more accurate (and
+perhaps better-performing) command monitoring API for document sequences has been demonstrated.</p>
+<p><em>3. Why is BSON serialization and deserialization optional to include in durations?</em></p>
+<p>Different drivers will serialize and deserialize BSON at different levels of the driver architecture. For example, some
+parts of a command (e.g. inserted document structs) could be pre-encoded early into a "raw" BSON form and the final
+command with late additions like a session ID could encoded just before putting it on the wire.</p>
+<p>Rather than specify a duration rule that would be hard to satisfy consistently, we allow duration to include BSON
+serialization/deserialization or not based on the architecture needs of each driver.</p>
+<h3 id="security"><a class="header" href="#security">Security</a></h3>
+<p>Some commands and replies will contain sensitive data relating to authentication.</p>
+<p>In order to not risk leaking this data to external sources or logs, for these commands:</p>
+<ul>
+<li>
+<p>The "command" field in <code>CommandStartedEvent</code> and "command started" log messages MUST be replaced with an empty BSON
+document.</p>
+</li>
+<li>
+<p>The "reply" field in <code>CommandSucceededEvent</code> and "command succeeded" log messages MUST be replaced with an empty BSON
+document.</p>
+</li>
+<li>
+<p>If the error is a server-side error, the "failure" field in <code>CommandFailedEvent</code> and "command failed" log messages
+MUST have all fields besides the following redacted:</p>
+<ul>
+<li><code>code</code></li>
+<li><code>codeName</code></li>
+<li><code>errorLabels</code></li>
+</ul>
+<p>The exact implementation of redaction is flexible depending on the type the driver uses to represent a failure in
+these events and log messages. For example, a driver could choose to set all properties besides these on an error
+object to null. Alternatively, a driver that uses strings to represent failures could replace relevant portions of the
+string with "REDACTED".</p>
+</li>
+</ul>
+<p>The list of sensitive commands is as follows:</p>
+<div class="table-wrapper"><table><thead><tr><th>Command</th></tr></thead><tbody>
+<tr><td><code>authenticate</code></td></tr>
+<tr><td><code>saslStart</code></td></tr>
+<tr><td><code>saslContinue</code></td></tr>
+<tr><td><code>getnonce</code></td></tr>
+<tr><td><code>createUser</code></td></tr>
+<tr><td><code>updateUser</code></td></tr>
+<tr><td><code>copydbgetnonce</code></td></tr>
+<tr><td><code>copydbsaslstart</code></td></tr>
+<tr><td><code>copydb</code></td></tr>
+<tr><td><code>hello</code> (or legacy hello) when <code>speculativeAuthenticate</code> is present</td></tr>
+</tbody></table>
+</div>
+<p>See the <a href="command-logging-and-monitoring/../mongodb-handshake/handshake.html">MongoDB Handshake spec</a> for more information on <code>hello</code> and legacy hello.
+Note that legacy hello has two different letter casings that must be taken into account. See the previously mentioned
+MongoDB Handshake spec for details.</p>
+<h3 id="events-api"><a class="header" href="#events-api">Events API</a></h3>
+<p>See the <a href="command-logging-and-monitoring/../load-balancers/load-balancers.html#events">Load Balancer Specification</a> for details on the <code>serviceId</code> field.</p>
+<pre><code class="language-typescript">interface CommandStartedEvent {
+
+  /**
+   * Returns the command.
+   */
+  command: Document;
+
+  /**
+   * Returns the database name.
+   */
+  databaseName: String;
+
+  /**
+   * Returns the command name.
+   */
+  commandName: String;
+
+  /**
+   * Returns the driver generated request id.
+   */
+  requestId: Int64;
+
+  /**
+   * Returns the driver generated operation id. This is used to link events together such
+   * as bulk write operations. OPTIONAL.
+   */
+  operationId: Int64;
+
+  /**
+   * Returns the connection id for the command. For languages that do not have this,
+   * this MUST return the driver equivalent which MUST include the server address and port.
+   * The name of this field is flexible to match the object that is returned from the driver.
+   */
+  connectionId: ConnectionId;
+
+  /**
+   * Returns the server connection id for the command. The server connection id is distinct from
+   * the connection id and is returned by the hello or legacy hello response as "connectionId"
+   * from the server on 4.2+. Drivers MUST use an Int64 to represent the server connection ID value.
+   */
+  serverConnectionId: Optional&lt;Int64&gt;;
+
+  /**
+   * Returns the service id for the command when the driver is in load balancer mode.
+   * For drivers that wish to include this in their ConnectionId object, this field is
+   * optional.
+   */
+  serviceId: Optional&lt;ObjectId&gt;;
+}
+
+interface CommandSucceededEvent {
+
+  /**
+   * Returns the execution time of the event in the highest possible resolution for the platform.
+   * The calculated value MUST be the time to send the message and receive the reply from the server
+   * and MAY include BSON serialization and/or deserialization. The name can imply the units in which the
+   * value is returned, i.e. durationMS, durationNanos.
+   */
+  duration: Int64;
+
+  /**
+   * Returns the command reply.
+   */
+  reply: Document;
+
+  /**
+   * Returns the command name.
+   */
+  commandName: String;
+
+  /**
+   * Returns the database name.
+   */
+  databaseName: String;
+
+  /**
+   * Returns the driver generated request id.
+   */
+  requestId: Int64;
+
+  /**
+   * Returns the driver generated operation id. This is used to link events together such
+   * as bulk write operations. OPTIONAL.
+   */
+  operationId: Int64;
+
+  /**
+   * Returns the connection id for the command. For languages that do not have this,
+   * this MUST return the driver equivalent which MUST include the server address and port.
+   * The name of this field is flexible to match the object that is returned from the driver.
+   */
+  connectionId: ConnectionId;
+
+  /**
+   * Returns the server connection id for the command. The server connection id is distinct from
+   * the connection id and is returned by the hello or legacy hello response as "connectionId"
+   * from the server on 4.2+. Drivers MUST use an Int64 to represent the server connection ID value.
+   */
+  serverConnectionId: Optional&lt;Int64&gt;;
+
+  /**
+   * Returns the service id for the command when the driver is in load balancer mode.
+   * For drivers that wish to include this in their ConnectionId object, this field is
+   * optional.
+   */
+  serviceId: Optional&lt;ObjectId&gt;;
+}
+
+interface CommandFailedEvent {
+
+  /**
+   * Returns the execution time of the event in the highest possible resolution for the platform.
+   * The calculated value MUST be the time to send the message and receive the reply from the server
+   * and MAY include BSON serialization and/or deserialization. The name can imply the units in which the
+   * value is returned, i.e. durationMS, durationNanos.
+   */
+  duration: Int64;
+
+  /**
+   * Returns the command name.
+   */
+  commandName: String;
+
+  /**
+   * Returns the database name.
+   */
+  databaseName: String;
+
+  /**
+   * Returns the failure. Based on the language, this SHOULD be a message string, exception
+   * object, or error document.
+   */
+  failure: String,Exception,Document;
+
+  /**
+   * Returns the client generated request id.
+   */
+  requestId: Int64;
+
+  /**
+   * Returns the driver generated operation id. This is used to link events together such
+   * as bulk write operations. OPTIONAL.
+   */
+  operationId: Int64;
+
+  /**
+   * Returns the connection id for the command. For languages that do not have this,
+   * this MUST return the driver equivalent which MUST include the server address and port.
+   * The name of this field is flexible to match the object that is returned from the driver.
+   */
+  connectionId: ConnectionId;
+
+  /**
+   * Returns the server connection id for the command. The server connection id is distinct from
+   * the connection id and is returned by the hello or legacy hello response as "connectionId"
+   * from the server on 4.2+. Drivers MUST use an Int64 to represent the server connection ID value.
+   */
+  serverConnectionId: Optional&lt;Int64&gt;;
+
+  /**
+   * Returns the service id for the command when the driver is in load balancer mode.
+   * For drivers that wish to include this in their ConnectionId object, this field is
+   * optional.
+   */
+  serviceId: Optional&lt;ObjectId&gt;;
+}
+</code></pre>
+<h3 id="log-messages-1"><a class="header" href="#log-messages-1">Log Messages</a></h3>
+<p>Please refer to the <a href="command-logging-and-monitoring/../logging/logging.html">logging specification</a> for details on logging implementations in general,
+including log levels, log components, and structured versus unstructured logging.</p>
+<p>Drivers MUST support logging of command information via the following types of log messages. These messages MUST be
+logged at <code>Debug</code> level and use the <code>command</code> log component.</p>
+<p>The log messages are intended to match the information contained in the events above. Drivers MAY implement command
+logging support via an event subscriber if it is convenient to do so.</p>
+<p>The types used in the structured message definitions below are demonstrative, and drivers MAY use similar types instead
+so long as the information is present (e.g. a double instead of an integer, or a string instead of an integer if the
+structured logging framework does not support numeric types.)</p>
+<p>Drivers MUST not emit command log messages for commands issued as part of the handshake with the server, or heartbeat
+commands issued by server monitors.</p>
+<h4 id="common-fields-2"><a class="header" href="#common-fields-2">Common Fields</a></h4>
+<p>The following key-value pairs MUST be included in all command messages:</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
+<tr><td>commandName</td><td>String</td><td>The command name.</td></tr>
+<tr><td>databaseName</td><td>String</td><td>The database name.</td></tr>
+<tr><td>requestId</td><td>Int</td><td>The driver-generated request ID.</td></tr>
+<tr><td>operationId</td><td>Int</td><td>The driver-generated operation ID. Optional; only present if the driver generated operation IDs and this command has one.</td></tr>
+<tr><td>driverConnectionId</td><td>Int64</td><td>The driver's ID for the connection used for the command. Note this is NOT the same as <code>CommandStartedEvent.connectionId</code> defined above, but refers to the <code>connectionId</code> defined in the <a href="command-logging-and-monitoring/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">connection monitoring and pooling specification</a>. Unlike <code>CommandStartedEvent.connectionId</code> this field MUST NOT contain the host/port; that information MUST be in the following fields, <code>serverHost</code> and <code>serverPort</code>. This field is optional for drivers that do not implement CMAP if they do have an equivalent concept of a connection ID.</td></tr>
+<tr><td>serverHost</td><td>String</td><td>The hostname or IP address for the server the command is being run on.</td></tr>
+<tr><td>serverPort</td><td>Int</td><td>The port for the server the command is being run on. Optional; not present for Unix domain sockets. When the user does not specify a port and the default (27017) is used, the driver SHOULD include it here.</td></tr>
+<tr><td>serverConnectionId</td><td>Int64</td><td>The server's ID for the connection used for the command. Optional; only present for server versions 4.2+. NOTE: Existing drivers may represent this as an Int32 already. For strongly-typed languages, you may have to introduce a new Int64 field and deprecate the old Int32 field. The next major version should remove the old Int32 field.</td></tr>
+<tr><td>serviceId</td><td>String</td><td>The hex string representation of the service ID for the command. Optional; only present when the driver is in load balancer mode.</td></tr>
+</tbody></table>
+</div>
+<h4 id="command-started-message"><a class="header" href="#command-started-message">Command Started Message</a></h4>
+<p>In addition to the common fields, command started messages MUST contain the following key-value pairs:</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
+<tr><td>message</td><td>String</td><td>"Command started"</td></tr>
+<tr><td>command</td><td>String</td><td>Relaxed extJSON representation of the command. This document MUST be truncated appropriately according to rules defined in the <a href="command-logging-and-monitoring/../logging/logging.html#configurable-max-document-length">logging specification</a>, and MUST be replaced with an empty document "{ }" if the command is considered sensitive.</td></tr>
+</tbody></table>
+</div>
+<p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
+placeholders as appropriate:</p>
+<blockquote>
+<p>Command "{{commandName}}" started on database "{{databaseName}}" using a connection with driver-generated ID
+{{driverConnectionId}} and server-generated ID {{serverConnectionId}} to {{serverHost}}:{{serverPort}} with service ID
+{{serviceId}}. The requestID is {{requestId}} and the operation ID is {{operationId}}. Command: {{command}}</p>
+</blockquote>
+<h4 id="command-succeeded-message"><a class="header" href="#command-succeeded-message">Command Succeeded Message</a></h4>
+<p>In addition to the common fields, command succeeded messages MUST contain the following key-value pairs:</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
+<tr><td>message</td><td>String</td><td>"Command succeeded"</td></tr>
+<tr><td>durationMS</td><td>Int</td><td>The execution time for the command in milliseconds. The calculated value MUST be the time to send the message and receive the reply from the server and MAY include BSON serialization and/or deserialization.</td></tr>
+<tr><td>reply</td><td>String</td><td>Relaxed extJSON representation of the reply. This document MUST be truncated appropriately according to rules defined in the <a href="command-logging-and-monitoring/../logging/logging.html#configurable-max-document-length">logging specification</a>, and MUST be replaced with an empty document "{ }" if the command is considered sensitive.</td></tr>
+</tbody></table>
+</div>
+<p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
+placeholders as appropriate:</p>
+<blockquote>
+<p>Command "{{commandName}}" succeeded on database "{{databaseName}}" in {{durationMS}} ms using a connection with
+driver-generated ID {{driverConnectionId}} and server-generated ID {{serverConnectionId}} to
+{{serverHost}}:{{serverPort}} with service ID {{serviceId}}. The requestID is {{requestId}} and the operation ID is
+{{operationId}}. Command reply: {{command}}</p>
+</blockquote>
+<h4 id="command-failed-message"><a class="header" href="#command-failed-message">Command Failed Message</a></h4>
+<p>In addition to the common fields, command failed messages MUST contain the following key-value pairs:</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
+<tr><td>message</td><td>String</td><td>"Command failed"</td></tr>
+<tr><td>durationMS</td><td>Int</td><td>The execution time for the command in milliseconds. The calculated value MUST be the time to send the message and receive the reply from the server and MAY include BSON serialization and/or deserialization.</td></tr>
+<tr><td>failure</td><td>Flexible</td><td>The error. The type and format of this value is flexible; see the <a href="command-logging-and-monitoring/../logging/logging.html#representing-errors-in-log-messages">logging specification</a> for details on representing errors in log messages. If the command is considered sensitive, the error MUST be redacted and replaced with a language-appropriate alternative for a redacted error, e.g. an empty string, empty document, or null.</td></tr>
+</tbody></table>
+</div>
+<p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
+placeholders as appropriate:</p>
+<blockquote>
+<p>Command "{{commandName}}" failed on database "{{databaseName}}" in {{durationMS}} ms using a connection with
+driver-generated ID {{driverConnectionId}} and server-generated ID {{serverConnectionId}} to
+{{serverHost}}:{{serverPort}} with service ID {{serviceId}}. The requestID is {{requestId}} and the operation ID is
+{{operationId}}. Error: {{error}}</p>
+</blockquote>
+<h3 id="testing"><a class="header" href="#testing">Testing</a></h3>
+<p>See the README in the test directory for requirements and guidance.</p>
+<h2 id="qa-12"><a class="header" href="#qa-12">Q&amp;A</a></h2>
+<h3 id="why-is-the-command-document-only-available-in-the-commandstartevent"><a class="header" href="#why-is-the-command-document-only-available-in-the-commandstartevent">Why is the command document only available in the <code>CommandStartEvent</code>?</a></h3>
+<p>Some drivers may realize the command document as raw BSON, treating it as a component of the message transmitted to the
+server and stored in an internal buffer. By the time the server's response is received, this buffer may have been
+released. Requiring the retention of this buffer until command completion could result in unacceptable performance
+penalties, particularly when event listeners are introduced.</p>
+<h2 id="changelog-43"><a class="header" href="#changelog-43">Changelog</a></h2>
+<ul>
+<li>
+<p>2024-09-11: Migrated from reStructuredText to Markdown.</p>
+</li>
+<li>
+<p>2015-09-16: Removed <code>limit</code> from find test with options to support 3.2.<br />
+Changed find test read preference to
+<code>primaryPreferred</code>.</p>
+</li>
+<li>
+<p>2015-10-01: Changed find test with a kill cursors to not run on server versions<br />
+greater than 3.0. Added a find test
+with no kill cursors command which only runs on 3.1 and higher. Added notes on which tests should run based on server
+versions.</p>
+</li>
+<li>
+<p>2015-10-19: Changed batchSize in the 3.2 find tests to expect the remaining value.</p>
+</li>
+<li>
+<p>2015-10-31: Changed find test on 3.1 and higher to ignore being run on sharded clusters.</p>
+</li>
+<li>
+<p>2015-11-22: Specify how to merge OP_MSG document sequences into command-started events.</p>
+</li>
+<li>
+<p>2016-03-29: Added note on guarantee of the request ids.</p>
+</li>
+<li>
+<p>2016-11-02: Added clause for not upconverting commands larger than maxBsonSize.</p>
+</li>
+<li>
+<p>2018-04-16: Made inclusion of BSON serialization/deserialization in command<br />
+durations to be optional.</p>
+</li>
+<li>
+<p>2020-02-12: Added legacy hello <code>speculativeAuthenticate</code> to the list of<br />
+values that should be redacted.</p>
+</li>
+<li>
+<p>2021-04-15: Added <code>serviceId</code> field to events.</p>
+</li>
+<li>
+<p>2021-05-05: Updated to use hello and legacy hello.</p>
+</li>
+<li>
+<p>2021-08-30: Added <code>serverConnectionId</code> field to <code>CommandStartedEvent</code>,<br />
+<code>CommandSucceededEvent</code> and
+<code>CommandFailedEvent</code>.</p>
+</li>
+<li>
+<p>2022-05-18: Converted legacy tests to the unified test format.</p>
+</li>
+<li>
+<p>2022-09-02: Remove material that only applies to MongoDB versions &lt; 3.6.</p>
+</li>
+<li>
+<p>2022-10-05: Remove spec front matter and reformat changelog.</p>
+</li>
+<li>
+<p>2022-10-11: Add command logging information and tests.</p>
+</li>
+<li>
+<p>2022-11-16: Update sensitive command tests to only run on server versions where the commands are supported.</p>
+</li>
+<li>
+<p>2022-12-13: Updated log message <code>serverPort</code> field description to clarify drivers should populate it with the<br />
+default
+port 27017 when relevant. Updated suggested unstructured forms of log messages to more clearly label connection IDs
+and use more readable server address representations.</p>
+</li>
+<li>
+<p>2023-03-23: Updated <code>serverConnectionId</code> field to be Int64 as long-running servers can return Int64.</p>
+</li>
+<li>
+<p>2023-06-13: Added <code>databaseName</code> field to <code>CommandFailedEvent</code> and <code>CommandSucceededEvent</code>.<br />
+Updated suggested
+unstructured forms of log messages reflecting the changes.</p>
+</li>
+<li>
+<p>2023-10-19: Add Q&amp;A section</p>
+</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="sdam-logging-and-monitoring-specification"><a class="header" href="#sdam-logging-and-monitoring-specification">SDAM Logging and Monitoring Specification</a></h1>
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 2.4</li>
 </ul>
 <hr />
-<h2 id="abstract-39"><a class="header" href="#abstract-39">Abstract</a></h2>
+<h2 id="abstract-41"><a class="header" href="#abstract-41">Abstract</a></h2>
 <p>The SDAM logging and monitoring specification defines a set of behaviors in the driver for providing runtime information
 about server discovery and monitoring (SDAM) in log messages, as well as in events that users can consume
 programmatically, either directly or by integrating with third-party APM libraries.</p>
-<h3 id="definitions-10"><a class="header" href="#definitions-10">Definitions</a></h3>
-<h4 id="meta-39"><a class="header" href="#meta-39">META</a></h4>
+<h3 id="definitions-11"><a class="header" href="#definitions-11">Definitions</a></h3>
+<h4 id="meta-42"><a class="header" href="#meta-42">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-26"><a class="header" href="#terms-26">Terms</a></h4>
+<h4 id="terms-28"><a class="header" href="#terms-28">Terms</a></h4>
 <p><code>ServerAddress</code></p>
 <blockquote>
 <p>The term <code>ServerAddress</code> refers to the implementation in the driver's language of a server host/port pair. This may be
@@ -24900,16 +25834,16 @@ etc.). This may be a string or object. The name of the object is NOT REQUIRED.</
 <p>The term <code>Server</code> refers to the implementation in the driver's language of an abstraction of a mongod or mongos
 process, or a load balancer, as defined by the <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#server">SDAM specification</a>.</p>
 </blockquote>
-<h3 id="specification-36"><a class="header" href="#specification-36">Specification</a></h3>
-<h3 id="guidance-5"><a class="header" href="#guidance-5">Guidance</a></h3>
-<h4 id="documentation-6"><a class="header" href="#documentation-6">Documentation</a></h4>
+<h3 id="specification-39"><a class="header" href="#specification-39">Specification</a></h3>
+<h3 id="guidance-6"><a class="header" href="#guidance-6">Guidance</a></h3>
+<h4 id="documentation-7"><a class="header" href="#documentation-7">Documentation</a></h4>
 <p>The documentation provided in the code below is merely for driver authors and SHOULD NOT be taken as required
 documentation for the driver.</p>
-<h4 id="messages-and-events"><a class="header" href="#messages-and-events">Messages and Events</a></h4>
+<h4 id="messages-and-events-1"><a class="header" href="#messages-and-events-1">Messages and Events</a></h4>
 <p>All drivers MUST implement the specified event types as well as log messages.</p>
 <p>Implementation details are noted below when a specific implementation is required. Within each event and log message,
 all properties are REQUIRED unless noted otherwise.</p>
-<h4 id="naming-4"><a class="header" href="#naming-4">Naming</a></h4>
+<h4 id="naming-5"><a class="header" href="#naming-5">Naming</a></h4>
 <p>All drivers MUST name types, properties, and log message values as defined in the following sections. Exceptions to this
 rule are noted in the appropriate section. Class and interface names may vary according to the driver and language best
 practices.</p>
@@ -24918,7 +25852,7 @@ practices.</p>
 not strictly mandated in this specification.</p>
 <p>Similarly, as described in the <a href="server-discovery-and-monitoring/../logging/logging.html#implementation-requirements">logging specification</a> the driver
 SHOULD emit log messages in a manner that is standard for the language.</p>
-<h3 id="guarantees"><a class="header" href="#guarantees">Guarantees</a></h3>
+<h3 id="guarantees-1"><a class="header" href="#guarantees-1">Guarantees</a></h3>
 <h4 id="event-order-and-concurrency"><a class="header" href="#event-order-and-concurrency">Event Order and Concurrency</a></h4>
 <p>Events and log messages MUST be published in the order that their corresponding changes are processed in the driver.
 Events MUST NOT be published concurrently for the same topology ID or server ID, but MAY be published concurrently for
@@ -24929,7 +25863,7 @@ differing topology IDs and server IDs.</p>
 has either a correlating "server heartbeat succeeded" or "server heartbeat failed" log message.</p>
 <p>Drivers that use the streaming heartbeat protocol MUST publish a <code>ServerHeartbeatStartedEvent</code> and "server heartbeat
 started" log message before attempting to read the next <code>hello</code> or legacy hello exhaust response.</p>
-<h4 id="error-handling-4"><a class="header" href="#error-handling-4">Error Handling</a></h4>
+<h4 id="error-handling-5"><a class="header" href="#error-handling-5">Error Handling</a></h4>
 <p>If an exception occurs while sending the <code>hello</code> or legacy hello operation to the server, the driver MUST generate a
 <code>ServerHeartbeatFailedEvent</code> and "server heartbeat failed" log message with the exception or message and re-raise the
 exception. The SDAM mandated retry of the <code>hello</code> or legacy hello call should be visible to consumers.</p>
@@ -24943,14 +25877,14 @@ previous description in the events and log messages will never be null.</p>
 <h4 id="initial-topology-description"><a class="header" href="#initial-topology-description">Initial Topology Description</a></h4>
 <p>The first <code>TopologyDescriptionChangedEvent</code> to be emitted from a monitored Topology MUST set its <code>previousDescription</code>
 property to be a <code>TopologyDescription</code> object in the "unknown" state.</p>
-<h3 id="events-api"><a class="header" href="#events-api">Events API</a></h3>
+<h3 id="events-api-1"><a class="header" href="#events-api-1">Events API</a></h3>
 <p>The first <code>TopologyDescriptionChangedEvent</code> to be emitted from a monitored Topology MUST set its <code>previousDescription</code>
 property to be a <code>TopologyDescription</code> object in the "unknown" state.</p>
 <h2 id="closing-topology-description"><a class="header" href="#closing-topology-description">Closing Topology Description</a></h2>
 <p>When a <code>Topology</code> object or equivalent is being shut-down or closed, the driver MUST change the <code>TopologyDescription</code> to
 an "unknown" state.</p>
 <hr />
-<h2 id="events-api-1"><a class="header" href="#events-api-1">Events API</a></h2>
+<h2 id="events-api-2"><a class="header" href="#events-api-2">Events API</a></h2>
 <p>This specification defines 9 main events that MUST be published in the scenarios described. 6 of these events are the
 core behaviour within the cluster lifecycle, and the remaining 3 server heartbeat events are fired from the server
 monitor and follow the guidelines for publishing in the command monitoring specification.</p>
@@ -25200,7 +26134,7 @@ preference is passed to <code>hasReadableServer</code>, the driver MUST default 
 <tr><td>LoadBalanced</td><td><code>true</code></td><td><code>true</code></td></tr>
 </tbody></table>
 </div>
-<h3 id="log-messages-1"><a class="header" href="#log-messages-1">Log Messages</a></h3>
+<h3 id="log-messages-2"><a class="header" href="#log-messages-2">Log Messages</a></h3>
 <p>Please refer to the <a href="server-discovery-and-monitoring/../logging/logging.html">logging specification</a> for details on logging implementations in general,
 including log levels, log components, and structured versus unstructured logging.</p>
 <p>Drivers MUST support logging of SDAM information via the following types of log messages. These messages MUST be logged
@@ -25213,7 +26147,7 @@ equivalent log message.</p>
 <p>The types used in the structured message definitions below are demonstrative, and drivers MAY use similar types instead
 so long as the information is present (e.g. a double instead of an integer, or a string instead of an integer if the
 structured logging framework does not support numeric types.)</p>
-<h4 id="common-fields-2"><a class="header" href="#common-fields-2">Common Fields</a></h4>
+<h4 id="common-fields-3"><a class="header" href="#common-fields-3">Common Fields</a></h4>
 <p>The following key-value pairs are common to all or several log messages and MUST be included in the "applicable
 messages":</p>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Applicable Messages</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
@@ -25345,7 +26279,7 @@ placeholders as appropriate:</p>
 </blockquote>
 <h3 id="tests-2"><a class="header" href="#tests-2">Tests</a></h3>
 <p>See the <a href="server-discovery-and-monitoring/tests/monitoring/README.html">README</a>.</p>
-<h2 id="changelog-41"><a class="header" href="#changelog-41">Changelog</a></h2>
+<h2 id="changelog-44"><a class="header" href="#changelog-44">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-05-02: Migrated from reStructuredText to Markdown.</p>
@@ -25387,13 +26321,13 @@ added requirements for SDAM log messages.</p>
 <li>Minimum Server Version: N/A</li>
 </ul>
 <hr />
-<h2 id="abstract-40"><a class="header" href="#abstract-40">Abstract</a></h2>
+<h2 id="abstract-42"><a class="header" href="#abstract-42">Abstract</a></h2>
 <p>This specification defines requirements for drivers' logging configuration and behavior.</p>
-<h2 id="meta-40"><a class="header" href="#meta-40">META</a></h2>
+<h2 id="meta-43"><a class="header" href="#meta-43">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-37"><a class="header" href="#specification-37">Specification</a></h2>
-<h3 id="terms-27"><a class="header" href="#terms-27">Terms</a></h3>
+<h2 id="specification-40"><a class="header" href="#specification-40">Specification</a></h2>
+<h3 id="terms-29"><a class="header" href="#terms-29">Terms</a></h3>
 <p><strong>Structured logging</strong></p>
 <p>Structured logging refers to producing log messages in a structured format, i.e. a series of key-value pairs, which can
 be converted to external formats such as JSON.</p>
@@ -25491,7 +26425,7 @@ command component could be named <code>org.mongodb.driver.protocol.command</code
 <p>Drivers MAY define additional language-specific components in addition to these for any driver-specific messages they
 produce.</p>
 <div class="table-wrapper"><table><thead><tr><th>Component Name</th><th>Specification(s)</th><th>Environment Variable</th></tr></thead><tbody>
-<tr><td>command</td><td><a href="logging/../command-logging-and-monitoring/command-logging-and-monitoring.rst">Command Logging and Monitoring</a></td><td><code>MONGODB_LOG_COMMAND</code></td></tr>
+<tr><td>command</td><td><a href="logging/../command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a></td><td><code>MONGODB_LOG_COMMAND</code></td></tr>
 <tr><td>topology</td><td><a href="logging/../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a></td><td><code>MONGODB_LOG_TOPOLOGY</code></td></tr>
 <tr><td>serverSelection</td><td><a href="logging/../server-selection/server-selection.html">Server Selection</a></td><td><code>MONGODB_LOG_SERVER_SELECTION</code></td></tr>
 <tr><td>connection</td><td><a href="logging/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">Connection Monitoring and Pooling</a></td><td><code>MONGODB_LOG_CONNECTION</code></td></tr>
@@ -25589,11 +26523,11 @@ use.</p>
 configuration MUST take precedence over environment variables. Drivers supporting both forms of configuration MUST
 document this behavior and MUST provide an example of how users can implement custom logic to allow an environment
 variable to override a programmatic default, so that users who prefer the opposite behavior have a way to achieve it.</p>
-<h2 id="test-plan-31"><a class="header" href="#test-plan-31">Test Plan</a></h2>
+<h2 id="test-plan-32"><a class="header" href="#test-plan-32">Test Plan</a></h2>
 <p>Tests for logging behavior are defined in each corresponding specification. The
 <a href="logging/../unified-test-format/unified-test-format.html">unified test runner specification</a> has support for specifying logging
 expectations in tests.</p>
-<h2 id="motivation-for-change-16"><a class="header" href="#motivation-for-change-16">Motivation for Change</a></h2>
+<h2 id="motivation-for-change-17"><a class="header" href="#motivation-for-change-17">Motivation for Change</a></h2>
 <p>A common complaint from our support team is that they don't know how to easily get debugging information from drivers.
 Some drivers provide debug logging, but others do not. For drivers that do provide it, the log messages produced and the
 mechanisms for enabling debug logging are inconsistent.</p>
@@ -25603,7 +26537,7 @@ needed, and to remove the changes afterward. Additionally, there are useful scen
 existing events. Standardizing on debug log messages that drivers produce and how to enable/configure logging will
 provide TSEs, CEs, and MongoDB users an easier way to get debugging information out of our drivers, facilitate support
 of drivers for our internal teams, and improve our documentation around troubleshooting.</p>
-<h2 id="design-rationale-25"><a class="header" href="#design-rationale-25">Design Rationale</a></h2>
+<h2 id="design-rationale-27"><a class="header" href="#design-rationale-27">Design Rationale</a></h2>
 <h3 id="truncation-of-large-documents"><a class="header" href="#truncation-of-large-documents">Truncation of large documents</a></h3>
 <ol>
 <li>
@@ -25682,7 +26616,7 @@ override programmatic defaults), but if we went with the opposite default, it wo
 override: not all languages will necessarily have an easy way to override/unset an environment variable from within
 application code.</li>
 </ol>
-<h2 id="backwards-compatibility-25"><a class="header" href="#backwards-compatibility-25">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-26"><a class="header" href="#backwards-compatibility-26">Backwards Compatibility</a></h2>
 <p>This specification takes the stance that the contents of log messages (both structured and unstructured) are <em>not</em>
 covered by semantic versioning, but that logging components <em>are</em>, since changing the name of a component or removing a
 component altogether has the potential to break user logging configuration and cause users to silently miss log
@@ -25694,13 +26628,13 @@ components except in major version releases.</p>
 for configuring logging. If such APIs are incompatible with the logging specification requirements (for example, the
 driver defines its own set of log levels in a public type, which do not match the spec-defined levels), changes to match
 the specification should be staged in via semantic versioning.</p>
-<h2 id="reference-implementation-22"><a class="header" href="#reference-implementation-22">Reference Implementation</a></h2>
+<h2 id="reference-implementation-23"><a class="header" href="#reference-implementation-23">Reference Implementation</a></h2>
 <p>Links to be added once Rust and C# implementations have been merged.</p>
-<h2 id="security-implication-3"><a class="header" href="#security-implication-3">Security Implication</a></h2>
+<h2 id="security-implication-4"><a class="header" href="#security-implication-4">Security Implication</a></h2>
 <p>Drivers must take care to avoid exposing sensitive information (e.g. authentication credentials) in log messages. It
 will be up to each individual specification that defines log messages to define which information should be redacted and
 add tests confirming its redaction.</p>
-<h2 id="future-work-16"><a class="header" href="#future-work-16">Future work</a></h2>
+<h2 id="future-work-17"><a class="header" href="#future-work-17">Future work</a></h2>
 <h3 id="additional-log-components"><a class="header" href="#additional-log-components">Additional Log Components</a></h3>
 <p>Additional log components may be added as logging is added to more specifications.</p>
 <h3 id="preventing-recursion-when-using-mongodb-as-a-log-sink"><a class="header" href="#preventing-recursion-when-using-mongodb-as-a-log-sink">Preventing Recursion When Using MongoDB as a Log Sink</a></h3>
@@ -25709,7 +26643,7 @@ infinitely if each write to store a log message generates additional log message
 issue in drivers that already produce log messages, or with the command monitoring API, but if users start to run into
 this issue, we could try to address it at the specification level by e.g. requiring drivers to support disabling logging
 on individual clients or for particular namespaces.</p>
-<h2 id="changelog-42"><a class="header" href="#changelog-42">Changelog</a></h2>
+<h2 id="changelog-45"><a class="header" href="#changelog-45">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-03-06: Migrated from reStructuredText to Markdown.</p>
@@ -25741,16 +26675,16 @@ environment variables.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-41"><a class="header" href="#abstract-41">Abstract</a></h2>
+<h2 id="abstract-43"><a class="header" href="#abstract-43">Abstract</a></h2>
 <p>Drivers currently support a variety of options that allow users to configure connection pooling behavior. Users are
 confused by drivers supporting different subsets of these options. Additionally, drivers implement their connection
 pools differently, making it difficult to design cross-driver pool functionality. By unifying and codifying pooling
 options and behavior across all drivers, we will increase user comprehension and code base maintainability.</p>
 <p>This specification does not apply to drivers that do not support multitasking.</p>
-<h2 id="meta-41"><a class="header" href="#meta-41">META</a></h2>
+<h2 id="meta-44"><a class="header" href="#meta-44">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="definitions-11"><a class="header" href="#definitions-11">Definitions</a></h2>
+<h2 id="definitions-12"><a class="header" href="#definitions-12">Definitions</a></h2>
 <h3 id="connection-2"><a class="header" href="#connection-2">Connection</a></h3>
 <p>A Connection (when linked) refers to the <code>Connection</code> type defined in the
 <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-members">Connection Pool Members</a> section of this specification. It does not refer to an actual TCP
@@ -26632,7 +27566,7 @@ logging support via an event subscriber if it is convenient to do so.</p>
 <p>The types used in the structured message definitions below are demonstrative, and drivers MAY use similar types instead
 so long as the information is present (e.g. a double instead of an integer, or a string instead of an integer if the
 structured logging framework does not support numeric types).</p>
-<h4 id="common-fields-3"><a class="header" href="#common-fields-3">Common Fields</a></h4>
+<h4 id="common-fields-4"><a class="header" href="#common-fields-4">Common Fields</a></h4>
 <p>All connection log messages MUST contain the following key-value pairs:</p>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
 <tr><td>serverHost</td><td>String</td><td>the hostname, IP address, or Unix domain socket path for the endpoint the pool is for.</td></tr>
@@ -26816,9 +27750,9 @@ interface WaitQueueTimeoutError {
   address: &lt;pool address&gt;;
 }
 </code></pre>
-<h2 id="test-plan-32"><a class="header" href="#test-plan-32">Test Plan</a></h2>
+<h2 id="test-plan-33"><a class="header" href="#test-plan-33">Test Plan</a></h2>
 <p>See <a href="connection-monitoring-and-pooling/tests/README.html">tests/README</a></p>
-<h2 id="design-rationale-26"><a class="header" href="#design-rationale-26">Design Rationale</a></h2>
+<h2 id="design-rationale-28"><a class="header" href="#design-rationale-28">Design Rationale</a></h2>
 <h3 id="why-do-we-set-minpoolsize-across-all-members-of-a-replicaset-when-most-traffic-will-be-against-a-primary-1"><a class="header" href="#why-do-we-set-minpoolsize-across-all-members-of-a-replicaset-when-most-traffic-will-be-against-a-primary-1">Why do we set minPoolSize across all members of a replicaSet, when most traffic will be against a Primary?</a></h3>
 <p>Currently, we are attempting to codify our current pooling behavior with minimal changes, and minPoolSize is currently
 uniform across all members of a replicaSet. This has the benefit of offsetting connection swarming during a Primary
@@ -26903,7 +27837,7 @@ higher or equal to .net 5.0. On macOS, there is no straight equivalent for this 
 some equivalent configuration, but this configuration will also require target frameworks higher than or equal to .net
 5.0. The advantage of using Background Thread to manage perished connections is that it will work regardless of
 environment setup.</p>
-<h2 id="backwards-compatibility-26"><a class="header" href="#backwards-compatibility-26">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-27"><a class="header" href="#backwards-compatibility-27">Backwards Compatibility</a></h2>
 <p>As mentioned in <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#deprecated-options">Deprecated Options</a>, some drivers currently implement the options <code>waitQueueSize</code>
 and/or <code>waitQueueMultiple</code>. These options will need to be deprecated and phased out of the drivers that have implemented
 them.</p>
@@ -26929,7 +27863,7 @@ Connection.</li>
 <h3 id="add-support-for-op_msg-exhaustallowed-1"><a class="header" href="#add-support-for-op_msg-exhaustallowed-1">Add support for OP_MSG exhaustAllowed</a></h3>
 <p>Exhaust Cursors may require changes to how we close <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> in the future, specifically to add a way
 to close and remove from its pool a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> which has unread exhaust messages.</p>
-<h2 id="changelog-43"><a class="header" href="#changelog-43">Changelog</a></h2>
+<h2 id="changelog-46"><a class="header" href="#changelog-46">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-01-23: Migrated from reStructuredText to Markdown.</p>
@@ -26989,12 +27923,12 @@ tests to ensure ConnectionReadyEvents are fired after ConnectionCreatedEvents.</
 <li>Current Schema Version: 1.19.0</li>
 </ul>
 <hr />
-<h2 id="abstract-42"><a class="header" href="#abstract-42">Abstract</a></h2>
+<h2 id="abstract-44"><a class="header" href="#abstract-44">Abstract</a></h2>
 <p>This project defines a unified schema for YAML and JSON specification tests, which run operations against a MongoDB
 deployment. By conforming various spec tests to a single schema, drivers can implement a single test runner to execute
 acceptance tests for multiple specifications, thereby reducing maintenance of existing specs and implementation time for
 new specifications.</p>
-<h2 id="meta-42"><a class="header" href="#meta-42">META</a></h2>
+<h2 id="meta-45"><a class="header" href="#meta-45">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <p>This document tends to use "SHOULD" more frequently than other specifications, but mainly in the context of providing
@@ -27003,20 +27937,20 @@ guidance on writing test files. This is discussed in more detail in <a href="uni
 <p>This test format can be used to define tests for the following specifications:</p>
 <ul>
 <li><a href="unified-test-format/../change-streams/change-streams.html">Change Streams</a></li>
-<li><a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.rst">Command Logging and Monitoring</a></li>
+<li><a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a></li>
 <li><a href="unified-test-format/../crud/crud.html">CRUD</a></li>
 <li><a href="unified-test-format/../gridfs/gridfs-spec.html">GridFS</a></li>
 <li><a href="unified-test-format/../retryable-reads/retryable-reads.html">Retryable Reads</a></li>
 <li><a href="unified-test-format/../retryable-writes/retryable-writes.html">Retryable Writes</a></li>
 <li><a href="unified-test-format/../sessions/driver-sessions.html">Sessions</a></li>
 <li><a href="unified-test-format/../transactions/transactions.html">Transactions</a></li>
-<li><a href="unified-test-format/../transactions-convenient-api/transactions-convenient-api.rst">Convenient API for Transactions</a></li>
+<li><a href="unified-test-format/../transactions-convenient-api/transactions-convenient-api.html">Convenient API for Transactions</a></li>
 <li><a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a></li>
 </ul>
 <p>This is not an exhaustive list. Specifications that are known to not be supported by this format may be discussed under
 <a href="unified-test-format/unified-test-format.html#future-work">Future Work</a>.</p>
-<h2 id="specification-38"><a class="header" href="#specification-38">Specification</a></h2>
-<h3 id="terms-28"><a class="header" href="#terms-28">Terms</a></h3>
+<h2 id="specification-41"><a class="header" href="#specification-41">Specification</a></h2>
+<h3 id="terms-30"><a class="header" href="#terms-30">Terms</a></h3>
 <p><strong>Entity</strong> Any object or value that is indexed by a unique name and stored in the <a href="unified-test-format/unified-test-format.html#entity-map">Entity Map</a>. This will
 typically be a driver object (e.g. client, session) defined in <a href="unified-test-format/unified-test-format.html#createentities">createEntities</a> but may also be a
 <a href="unified-test-format/unified-test-format.html#operation_saveResultAsEntity">saved operation result</a>. A exhaustive list of supported types is presented in
@@ -27435,11 +28369,11 @@ and any commands containing sensitive information (per the
 <p><span id="entity_client_observeSensitiveCommands"></span></p>
 <ul>
 <li><code>observeSensitiveCommands</code>: Optional boolean. If true, events associated with sensitive commands (per the
-<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.rst#security">Command Logging and Monitoring</a>
-spec) will be observed for this client. Note that the command and replies for such events will already have been
-redacted by the driver. If false or not specified, events for commands containing sensitive information MUST be
-ignored. Authentication SHOULD be disabled when this property is true, i.e. <a href="unified-test-format/unified-test-format.html#runOnRequirement_auth">auth</a> should be
-false for each <code>runOnRequirement</code>. See <a href="unified-test-format/unified-test-format.html#rationale_observeSensitiveCommands">rationale_observeSensitiveCommands</a>.</li>
+<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#security">Command Logging and Monitoring</a> spec)
+will be observed for this client. Note that the command and replies for such events will already have been redacted
+by the driver. If false or not specified, events for commands containing sensitive information MUST be ignored.
+Authentication SHOULD be disabled when this property is true, i.e. <a href="unified-test-format/unified-test-format.html#runOnRequirement_auth">auth</a> should be false
+for each <code>runOnRequirement</code>. See <a href="unified-test-format/unified-test-format.html#rationale_observeSensitiveCommands">rationale_observeSensitiveCommands</a>.</li>
 </ul>
 <p><span id="entity_client_storeEventsAsEntities"></span></p>
 <ul>
@@ -27624,7 +28558,7 @@ used within <a href="unified-test-format/unified-test-format.html#entity_client_
 <li><code>id</code>: Required string. Unique name for this entity.</li>
 <li><code>events</code>: Required array of one or more strings, which denote the events to be collected. Currently, only the
 following <a href="unified-test-format/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">CMAP</a> and
-<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.rst">command monitoring</a> events MUST be supported:
+<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html">command monitoring</a> events MUST be supported:
 <ul>
 <li>PoolCreatedEvent</li>
 <li>PoolReadyEvent</li>
@@ -27677,7 +28611,7 @@ documents even if the respective field name is different in the driver's event o
 <p><code>deprecationErrors</code>: Optional boolean.</p>
 </li>
 </ul>
-<p>See the <a href="unified-test-format/../versioned-api/versioned-api.rst">Stable API</a> spec for more details on these fields.</p>
+<p>See the <a href="unified-test-format/../versioned-api/versioned-api.html">Stable API</a> spec for more details on these fields.</p>
 <h4 id="collectiondata"><a class="header" href="#collectiondata">collectionData</a></h4>
 <p>List of documents corresponding to the contents of a collection. This structure is used by both
 <a href="unified-test-format/unified-test-format.html#initialData">initialData</a> and <a href="unified-test-format/unified-test-format.html#test_outcome">test.outcome</a>, which insert and read documents, respectively.</p>
@@ -27922,7 +28856,7 @@ BulkWriteException), this assertion SHOULD utilize the <a href="unified-test-for
 <li><code>client</code>: Required string. Client entity on which the events are expected to be observed. See
 <a href="unified-test-format/unified-test-format.html#commonOptions_client">commonOptions_client</a>.</li>
 <li><code>eventType</code>: Optional string. Specifies the type of the monitor which captured the events. Valid values are <code>command</code>
-for <a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.rst#events-api">Command Monitoring</a> events,
+for <a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#events-api">Command Monitoring</a> events,
 <code>cmap</code> for <a href="unified-test-format/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#events">CMAP</a> events, and <code>sdam</code>
 for <a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events">SDAM</a>
 events. Defaults to <code>command</code> if omitted.</li>
@@ -27953,7 +28887,7 @@ monitoring events as an example, <code>requestId</code> and <code>operationId</c
 <ul>
 <li>
 <p><code>commandStartedEvent</code>: Optional object. Assertions for one or more
-<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.rst#api">CommandStartedEvent</a> fields.</p>
+<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#api">CommandStartedEvent</a> fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>command</code>: Optional document. A value corresponding to the expected command document. Test runners MUST follow the
@@ -27971,7 +28905,7 @@ SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node
 <ul>
 <li>
 <p><code>commandSucceededEvent</code>: Optional object. Assertions for one or more
-<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.rst#api">CommandSucceededEvent</a> fields.</p>
+<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#api">CommandSucceededEvent</a> fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>reply</code>: Optional document. A value corresponding to the expected reply document. Test runners MUST follow the rules
@@ -27989,7 +28923,7 @@ SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node
 <ul>
 <li>
 <p><code>commandFailedEvent</code>: Optional object. Assertions for one or more
-<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.rst#api">CommandFailedEvent</a> fields.</p>
+<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#api">CommandFailedEvent</a> fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>commandName</code>: Optional string. Test runners MUST assert that the command name matches this value.</li>
@@ -28224,7 +29158,7 @@ language-specific component name. Test runners MUST assert that the actual compo
 contain a <code>failure</code> value.</p>
 <p>When <code>failureIsRedacted</code> is present and its value is <code>true</code>, the test runner MUST assert that a failure is present and
 that the failure has been redacted according to the rules defined for error redaction in the
-<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.rst#security">command logging and monitoring specification</a>.</p>
+<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#security">command logging and monitoring specification</a>.</p>
 <p>When <code>false</code>, the test runner MUST assert that a failure is present and that the failure has NOT been redacted.</p>
 <p>The exact form of these assertions and how thorough they are will vary based on the driver's chosen error
 representation in logs; e.g. drivers that use strings may only be able to assert on the presence/absence of
@@ -28648,7 +29582,7 @@ and any optional fields within, as in the following examples:</p>
 <h3 id="session-operations"><a class="header" href="#session-operations">Session Operations</a></h3>
 <p>These operations and their arguments may be documented in the following specifications:</p>
 <ul>
-<li><a href="unified-test-format/../transactions-convenient-api/transactions-convenient-api.rst">Convenient API for Transactions</a></li>
+<li><a href="unified-test-format/../transactions-convenient-api/transactions-convenient-api.html">Convenient API for Transactions</a></li>
 <li><a href="unified-test-format/../sessions/driver-sessions.html">Driver Sessions</a></li>
 </ul>
 <p>Session operations that require special handling or are not documented by an existing specification are described below.</p>
@@ -29630,7 +30564,7 @@ special operations such as <a href="unified-test-format/unified-test-format.html
 <li>Any <code>configureFailPoint</code> commands executed for <a href="unified-test-format/unified-test-format.html#failpoint">failPoint</a> and <a href="unified-test-format/unified-test-format.html#targetedfailpoint">targetedFailPoint</a>
 operations.</li>
 <li>Any commands containing sensitive information (per the
-<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.rst#security">Command Logging and Monitoring</a> spec)
+<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#security">Command Logging and Monitoring</a> spec)
 unless <a href="unified-test-format/unified-test-format.html#entity_client_observeSensitiveCommands">observeSensitiveCommands</a> is true. Note that drivers will redact
 commands and replies for sensitive commands. For <code>hello</code> and legacy hello, which are conditionally sensitive based on
 the presence of a <code>speculativeAuthenticate</code> field, the test runner may need to infer that the events are sensitive
@@ -29872,7 +30806,7 @@ Each shard in the cluster is represented by a document in this collection. If th
 the <code>host</code> field will contain a single host. If the shard is backed by a replica set, the <code>host</code> field contain the name
 of the replica followed by a forward slash and a comma-delimited list of hosts.</p>
 <p>Note: MongoDB 3.6+ requires that all shard servers be replica sets.</p>
-<h2 id="design-rationale-27"><a class="header" href="#design-rationale-27">Design Rationale</a></h2>
+<h2 id="design-rationale-29"><a class="header" href="#design-rationale-29">Design Rationale</a></h2>
 <p>This specification was primarily derived from the test formats used by the
 <a href="unified-test-format/../transactions/transactions.html">Transactions</a> and <a href="unified-test-format/../crud/crud.html">CRUD</a> specs, which have served models or other
 specs.</p>
@@ -29894,7 +30828,7 @@ explicitly test sensitive commands via the <code>runCommand</code> helper.</p>
 <h2 id="breaking-changes"><a class="header" href="#breaking-changes">Breaking Changes</a></h2>
 <p>This section is reserved for future use. Any breaking changes to the test format SHOULD be described here in detail for
 historical reference, in addition to any shorter description that may be added to the <a href="unified-test-format/unified-test-format.html#changelog">Changelog</a>.</p>
-<h2 id="future-work-17"><a class="header" href="#future-work-17">Future Work</a></h2>
+<h2 id="future-work-18"><a class="header" href="#future-work-18">Future Work</a></h2>
 <h3 id="assert-expected-log-messages"><a class="header" href="#assert-expected-log-messages">Assert expected log messages</a></h3>
 <p>When drivers support standardized logging, the test format may need to support assertions for messages expected to be
 logged while executing operations. Since log messages are strings, this may require an operator to match regex patterns
@@ -29935,7 +30869,7 @@ CRUD spec and this spec and its schema.</p>
 <p>As discussed in <a href="unified-test-format/unified-test-format.html#executing-an-operation">Executing an Operation</a>, test runners MUST raise errors for unsupported
 operations and arguments. This is a concession until such time that better processes can be established for versioning
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
-<h2 id="changelog-44"><a class="header" href="#changelog-44">Changelog</a></h2>
+<h2 id="changelog-47"><a class="header" href="#changelog-47">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-05-08: <strong>Schema version 1.21.</strong></p>
@@ -30195,7 +31129,7 @@ MongoClient using a valid connection string without auth credentials and execute
 <p>Test that the driver can establish a connection with Atlas Data Lake with authentication. For these tests, create a
 MongoClient using a valid connection string with SCRAM-SHA-1 and credentials from the drivers-evergreen-tools ADL
 configuration and execute a ping command. Repeat this test using SCRAM-SHA-256.</p>
-<h2 id="changelog-45"><a class="header" href="#changelog-45">Changelog</a></h2>
+<h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-03-08: Convert legacy ADL tests to unified format. Convert test README from reStructuredText to Markdown.</p>
@@ -30213,7 +31147,7 @@ each test.</p>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-43"><a class="header" href="#abstract-43">Abstract</a></h2>
+<h2 id="abstract-45"><a class="header" href="#abstract-45">Abstract</a></h2>
 <p>This document describes a standard benchmarking suite for MongoDB drivers.</p>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <h3 id="name-and-purpose"><a class="header" href="#name-and-purpose">Name and purpose</a></h3>
@@ -30685,7 +31619,7 @@ minimize disk I/O impact?); same AWS zone as client</p>
 <p>TBD: spec system to hold scores over time</p>
 <h3 id="datasets"><a class="header" href="#datasets">Datasets</a></h3>
 <p>TBD: generated datasets should be park in S3 or somewhere for retrieval by URL</p>
-<h2 id="changelog-46"><a class="header" href="#changelog-46">Changelog</a></h2>
+<h2 id="changelog-49"><a class="header" href="#changelog-49">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-01-22: Migrated from reStructuredText to Markdown.</p>
@@ -30734,14 +31668,14 @@ iterations in a reasonable time (e.g. file sizes and number of documents in cert
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-44"><a class="header" href="#abstract-44">Abstract</a></h2>
+<h2 id="abstract-46"><a class="header" href="#abstract-46">Abstract</a></h2>
 <p>The official BSON specification does not include test data, so this pseudo-specification describes tests for BSON
 encoding and decoding. It also includes tests for MongoDB's "Extended JSON" specification (hereafter abbreviated as
 <code>extjson</code>).</p>
-<h2 id="meta-43"><a class="header" href="#meta-43">Meta</a></h2>
+<h2 id="meta-46"><a class="header" href="#meta-46">Meta</a></h2>
 <p>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="motivation-for-change-17"><a class="header" href="#motivation-for-change-17">Motivation for Change</a></h2>
+<h2 id="motivation-for-change-18"><a class="header" href="#motivation-for-change-18">Motivation for Change</a></h2>
 <p>To ensure correct operation, we want drivers to implement identical tests for important features. BSON (and <code>extjson</code>)
 are critical for correct operation and data exchange, but historically had no common test corpus. This
 pseudo-specification provides such tests.</p>
@@ -30762,10 +31696,10 @@ pseudo-specification provides such tests.</p>
 <li>Replace or extend the official BSON spec at <a href="http://bsonspec.org">http://bsonspec.org</a>.</li>
 <li>Provide a formal specification for <code>extjson</code>.</li>
 </ul>
-<h2 id="specification-39"><a class="header" href="#specification-39">Specification</a></h2>
+<h2 id="specification-42"><a class="header" href="#specification-42">Specification</a></h2>
 <p>The specification for BSON lives at <a href="http://bsonspec.org">http://bsonspec.org</a>. The <code>extjson</code> format specification is
 <a href="bson-corpus/../extended-json.html">here</a>.</p>
-<h2 id="test-plan-33"><a class="header" href="#test-plan-33">Test Plan</a></h2>
+<h2 id="test-plan-34"><a class="header" href="#test-plan-34">Test Plan</a></h2>
 <p>This test plan describes a general approach for BSON testing. Future BSON specifications (such as for new types like
 Decimal128) may specialize or alter the approach described below.</p>
 <h3 id="description-of-the-bson-corpus"><a class="header" href="#description-of-the-bson-corpus">Description of the BSON Corpus</a></h3>
@@ -30968,7 +31902,7 @@ creating raw BSON bytes or constructing BSON-specific type classes):</p>
 <p>Depending on how drivers implement BSON encoding, they MAY expect an error when constructing a type class (e.g. BSON
 Document or Regex class) or when encoding a language representation to BSON (e.g. converting a dictionary, which might
 allow null bytes in its keys, to raw BSON bytes).</p>
-<h2 id="implementation-notes-5"><a class="header" href="#implementation-notes-5">Implementation Notes</a></h2>
+<h2 id="implementation-notes-6"><a class="header" href="#implementation-notes-6">Implementation Notes</a></h2>
 <h3 id="a-tool-for-visualizing-bson"><a class="header" href="#a-tool-for-visualizing-bson">A tool for visualizing BSON</a></h3>
 <p>The test directory includes a Perl script <code>bsonview</code>, which will decompose and highlight elements of a BSON document. It
 may be used like this:</p>
@@ -31003,9 +31937,9 @@ of this spec.</p>
 <h4 id="undefined"><a class="header" href="#undefined">Undefined</a></h4>
 <p>This type is deprecated. The provided converted form converts these to Null, but such conversion is outside the scope of
 this spec.</p>
-<h2 id="reference-implementation-23"><a class="header" href="#reference-implementation-23">Reference Implementation</a></h2>
+<h2 id="reference-implementation-24"><a class="header" href="#reference-implementation-24">Reference Implementation</a></h2>
 <p>The Java, C# and Perl drivers.</p>
-<h2 id="design-rationale-28"><a class="header" href="#design-rationale-28">Design Rationale</a></h2>
+<h2 id="design-rationale-30"><a class="header" href="#design-rationale-30">Design Rationale</a></h2>
 <h3 id="use-of-extjson"><a class="header" href="#use-of-extjson">Use of extjson</a></h3>
 <p>Testing conversion requires an "input" and an "output". With a BSON string as both input and output, we can only test
 that it roundtrips correctly --we can't test that the decoded value visible to the language is correct.</p>
@@ -31019,7 +31953,7 @@ to the Extended JSON Specification.</p>
 different in different cases, but the <code>canonical_bson</code> field is the same. This is by design so that each case stands
 alone and can be confirmed to be internally consistent via the assertions. This makes for easier and safer test case
 development.</p>
-<h2 id="changelog-47"><a class="header" href="#changelog-47">Changelog</a></h2>
+<h2 id="changelog-50"><a class="header" href="#changelog-50">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-01-22: Migrated from reStructuredText to Markdown.</p>
@@ -31190,14 +32124,14 @@ communication.</p>
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-45"><a class="header" href="#abstract-45">Abstract</a></h2>
+<h2 id="abstract-47"><a class="header" href="#abstract-47">Abstract</a></h2>
 <p>This specification is about the ability for drivers to automate tests for "Functions as a Service" from continuous
 integration.</p>
-<h2 id="meta-44"><a class="header" href="#meta-44">META</a></h2>
+<h2 id="meta-47"><a class="header" href="#meta-47">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-40"><a class="header" href="#specification-40">Specification</a></h2>
-<h3 id="terms-29"><a class="header" href="#terms-29">Terms</a></h3>
+<h2 id="specification-43"><a class="header" href="#specification-43">Specification</a></h2>
+<h3 id="terms-31"><a class="header" href="#terms-31">Terms</a></h3>
 <h4 id="faas-2"><a class="header" href="#faas-2">FaaS</a></h4>
 <p>"Function as a Service", such as AWS Lambda.</p>
 <h3 id="implementing-automated-faas-tests"><a class="header" href="#implementing-automated-faas-tests">Implementing Automated FaaS Tests</a></h3>
@@ -31442,7 +32376,7 @@ limit. The variant itself MUST have the SAM CLI installed.</p>
 <li>Calls the frozen lambda function again.</li>
 <li>Deletes the Lambda function.</li>
 </ul>
-<h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
+<h2 id="changelog-51"><a class="header" href="#changelog-51">Changelog</a></h2>
 <ul>
 <li>2024-02-27: Migrated from reStructuredText to Markdown.</li>
 <li>2023-08-21: Drivers MUST assert that the streaming protocol is disabled in the Lambda function.</li>
@@ -31540,7 +32474,7 @@ Serverless testing.</p>
 <p>Any other existing tests for cursor behavior that a driver may have implemented independently of any spec requirements
 SHOULD also be included in the driver's Atlas Serverless testing suite. Note that change streams are not supported by
 the proxy, so their spec and prose tests MUST be skipped.</p>
-<h2 id="changelog-49"><a class="header" href="#changelog-49">Changelog</a></h2>
+<h2 id="changelog-52"><a class="header" href="#changelog-52">Changelog</a></h2>
 <ul>
 <li>2024-09-02: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Add spec front matter</li>

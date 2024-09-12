@@ -543,7 +543,7 @@ function executeRetryableRead(command, session) {
 retry attempts for read operations. This specification does not define a format for such log messages.</p>
 <h3 id="command-monitoring"><a class="header" href="#command-monitoring">Command Monitoring</a></h3>
 <p><a href="../retryable-writes/retryable-writes.html#command-monitoring">As with retryable writes</a>, in accordance with the
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.rst">Command Logging and Monitoring</a> specification,
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a> specification,
 drivers MUST guarantee that each <code>CommandStartedEvent</code> has either a correlating <code>CommandSucceededEvent</code> or
 <code>CommandFailedEvent</code> and that every "command started" log message has either a correlating "command succeeded" log
 message or "command failed" log message. If the first attempt of a retryable read operation encounters a retryable

@@ -207,7 +207,7 @@ redact, or otherwise treat specially.</p>
 <p>MongoDB uses the <code>hello</code> or <code>isMaster</code> commands for handshakes and topology monitoring. <code>hello</code> is the modern and
 preferred command. <code>hello</code> must always be sent using the <code>OP_MSG</code> protocol. <code>isMaster</code> is referred to as "legacy hello"
 and is maintained for backwards compatibility with servers that do not support the <code>hello</code> command.</p>
-<p>If a <a href="../versioned-api/versioned-api.rst">server API version</a> is requested or <code>loadBalanced: True</code>, drivers MUST use the
+<p>If a <a href="../versioned-api/versioned-api.html">server API version</a> is requested or <code>loadBalanced: True</code>, drivers MUST use the
 <code>hello</code> command for the initial handshake and use the <code>OP_MSG</code> protocol. If server API version is not requested and
 <code>loadBalanced: False</code>, drivers MUST use legacy hello for the first message of the initial handshake with the <code>OP_QUERY</code>
 protocol (before switching to <code>OP_MSG</code> if the <code>maxWireVersion</code> indicates compatibility), and include <code>helloOk:true</code> in
