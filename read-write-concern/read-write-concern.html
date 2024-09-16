@@ -188,7 +188,7 @@ the API drivers must implement as well as how that API is translated into messag
 <h2 id="terminology"><a class="header" href="#terminology">Terminology</a></h2>
 <p>MaxWireVersion The <code>maxWireVersion</code> value reported by the <code>hello</code> command.</p>
 <p>Server Selection The process of selecting a server to read or write from. See
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-selection">the server selection specification</a>.</p>
+<a href="../server-selection/server-selection.html">the server selection specification</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <p>This specification includes guidance for implementing <a href="#read-concern">Read Concern</a> and <a href="#write-concern">Write Concern</a>
 in a driver. It does not define how read and write concern behave or are implemented on the server.</p>
@@ -274,6 +274,7 @@ when sending the command.</li>
 driver MUST include the command's <code>ReadConcern</code> when sending the command. This includes if the command specifies the
 server default <code>ReadConcern</code>, so that the command can override the <code>Client</code>, <code>Database</code>, or <code>Collection</code>'s <code>ReadConcern</code>
 to use the server default instead.</p>
+<p><span id="generic-command-method"></span></p>
 <h5 id="generic-command-method"><a class="header" href="#generic-command-method">Generic Command Method</a></h5>
 <p>If your driver offers a generic <code>RunCommand</code> method on your <code>database</code> object, <code>ReadConcern</code> MUST NOT be applied
 automatically to any command. A user wishing to use a <code>ReadConcern</code> in a generic command must supply it manually.</p>
@@ -580,7 +581,7 @@ mongodb://server:27017/db?w=majority&amp;wtimeoutMS=1000
 <p>There should be no backwards compatibility concerns. This specification merely deals with how to specify read and write
 concerns.</p>
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
-<p>Yaml tests are located here: <a href="https://github.com/mongodb/specifications/tree/master/source/read-write-concern/tests">https://github.com/mongodb/specifications/tree/master/source/read-write-concern/tests</a></p>
+<p>Yaml tests are located <a href="../read-write-concern/tests/README.html">here</a></p>
 <p>Below are English descriptions of other items that should be tested:</p>
 <h3 id="readconcern"><a class="header" href="#readconcern">ReadConcern</a></h3>
 <ol>

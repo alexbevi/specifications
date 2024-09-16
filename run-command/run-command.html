@@ -226,7 +226,7 @@ interface RunCommandOptions {
    * An optional timeout option to govern the amount of time that a single operation can execute before control is returned to the user.
    * This timeout applies to all of the work done to execute the operation, including but not limited to server selection, connection checkout, and server-side execution.
    *
-   * @ see https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.rst
+   * @ see https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.md
    */
   timeoutMS?: number;
 }
@@ -305,7 +305,7 @@ as-is.</p>
 <li>See Read Concern's section on
 <a href="../read-write-concern/read-write-concern.html#generic-command-method">Generic Command Method</a></li>
 <li>See Write Concern's section on
-<a href="../read-write-concern/read-write-concern.html#generic-command-method-1">Generic Command Method</a></li>
+<a href="../read-write-concern/read-write-concern.html#generic-command-method">Generic Command Method</a></li>
 </ul>
 <h5 id="retryability"><a class="header" href="#retryability">Retryability</a></h5>
 <p>All commands executed via RunCommand are non-retryable operations. Drivers MUST NOT inspect the command to determine if
@@ -349,7 +349,7 @@ interface RunCursorCommandOptions extends RunCommandOptions {
    *
    * @defaultValue CURSOR_LIFETIME
    *
-   * @see https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.rst
+   * @see https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.md
    */
   timeoutMode?: ITERATION | CURSOR_LIFETIME;
 

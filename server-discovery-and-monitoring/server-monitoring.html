@@ -211,11 +211,12 @@ changes but they may in the future.</p>
 <p>The hello or legacy hello command feature which allows the server to stream multiple replies back to the client.</p>
 <h4 id="rtt"><a class="header" href="#rtt">RTT</a></h4>
 <p>Round trip time. The client's measurement of the duration of one hello or legacy hello call. The RTT is used to support
-<a href="../server-selection/server-selection.html#localThresholdMS">localThresholdMS</a> from the Server Selection spec and
-<a href="../client-side-operations-timeout/client-side-operations-timeout.html#timeoutMS">timeoutMS</a> from the
+<a href="../server-selection/server-selection.html#localthresholdms">localThresholdMS</a> from the Server Selection spec and
+<a href="../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a> from the
 <a href="../client-side-operations-timeout/client-side-operations-timeout.html">Client Side Operations Timeout Spec</a>.</p>
 <h4 id="faas"><a class="header" href="#faas">FaaS</a></h4>
 <p>A Function-as-a-Service (FaaS) environment like AWS Lambda.</p>
+<p><span id="servermonitoringmode"></span></p>
 <h4 id="servermonitoringmode"><a class="header" href="#servermonitoringmode">serverMonitoringMode</a></h4>
 <p>The serverMonitoringMode option configures which server monitoring protocol to use. Valid modes are "stream", "poll", or
 "auto". The default value MUST be "auto":</p>
@@ -291,11 +292,13 @@ server Unknown and update its TopologyDescription, the same as a failed server c
 <p>When a monitor discovers that the server supports the streamable hello or legacy hello command and the client does not
 have <a href="#streaming-disabled">streaming disabled</a>, it MUST use the <a href="#streaming-protocol">streaming protocol</a>.</p>
 <h4 id="single-threaded-monitoring"><a class="header" href="#single-threaded-monitoring">Single-threaded monitoring</a></h4>
+<p><span id="cooldownms"></span></p>
 <h5 id="cooldownms"><a class="header" href="#cooldownms">cooldownMS</a></h5>
 <p>After a single-threaded client gets a network error trying to <a href="#check">check</a> a server, the client skips re-checking the
 server until cooldownMS has passed.</p>
 <p>This avoids spending connectTimeoutMS on each unavailable server during each scan.</p>
 <p>This value MUST be 5000 ms, and it MUST NOT be configurable.</p>
+<p><span id="scanning"></span></p>
 <h5 id="scanning"><a class="header" href="#scanning">Scanning</a></h5>
 <p>Single-threaded clients MUST <a href="#scan">scan</a> all servers synchronously, inline with regular application operations. Before
 each operation, the client checks if <a href="#heartbeatfrequencyms">heartbeatFrequencyMS</a> has passed since the previous scan
@@ -526,7 +529,7 @@ another check.</p>
 <p>When a monitor completes a successful check against a server, it MUST mark the connection pool for that server as
 "ready", and doing so MUST be synchronized with the update to the topology (e.g. by marking the pool as ready in
 onServerDescriptionChanged). This is required to ensure a server does not get selected while its pool is still paused.
-See the <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#Connection-Pool">Connection Pool</a>
+See the <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool">Connection Pool</a>
 definition in the CMAP specification for more details on marking the pool as "ready".</p>
 <h3 id="error-handling"><a class="header" href="#error-handling">Error handling</a></h3>
 <h4 id="network-or-command-error-during-server-check"><a class="header" href="#network-or-command-error-during-server-check">Network or command error during server check</a></h4>
@@ -538,9 +541,9 @@ the client MUST follow these steps:</p>
 <li>Clear the connection pool for the server (See
 <a href="#clear-the-connection-pool-on-both-network-and-command-errors">Clear the connection pool on both network and command errors</a>).
 For CMAP compliant drivers, clearing the pool MUST be synchronized with marking the server as Unknown (see
-<a href="server-discovery-and-monitoring.html#why-synchronize-clearing-a-server-s-pool-with-updating-the-topology?">Why synchronize clearing a server's pool with updating the topology?</a>).
+<a href="server-discovery-and-monitoring.html#why-synchronize-clearing-a-servers-pool-with-updating-the-topology">Why synchronize clearing a server's pool with updating the topology?</a>).
 If this was a network timeout error, then the pool MUST be cleared with interruptInUseConnections = true (see
-<a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#Why-does-the-pool-need-to-support-closing-in-use-connections-as-part-of-its-clear-logic?">Why does the pool need to support closing in use connections as part of its clear logic?</a>)</li>
+<a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#why-does-the-pool-need-to-support-interrupting-in-use-connections-as-part-of-its-clear-logic">Why does the pool need to support closing in use connections as part of its clear logic?</a>)</li>
 <li>If this was a network error and the server was in a known state before the error, the client MUST NOT sleep and MUST
 begin the next check immediately. (See
 <a href="#retry-hello-or-legacy-hello-calls-once">retry hello or legacy hello calls once</a> and
@@ -839,7 +842,7 @@ more complex than it is worth. (A lesson learned from PyMongo 2.6's pool, which 
 the same rule for the sake of consistency.</p>
 <h3 id="monitors-must-use-a-dedicated-connection-for-rtt-commands"><a class="header" href="#monitors-must-use-a-dedicated-connection-for-rtt-commands">Monitors MUST use a dedicated connection for RTT commands</a></h3>
 <p>When using the streaming protocol, a monitor needs to maintain an extra dedicated connection to periodically update its
-average round trip time in order to support <a href="../server-selection/server-selection.html#localThresholdMS">localThresholdMS</a>
+average round trip time in order to support <a href="../server-selection/server-selection.html#localthresholdms">localThresholdMS</a>
 from the Server Selection spec.</p>
 <p>It could pop a connection from its regular pool, but we rejected this option for a few reasons:</p>
 <ul>
@@ -872,7 +875,7 @@ ticking clock, since it will seem like it spends the least time on the wire.</p>
 <p>Additionally, systems using NTP will experience clock "slew". ntpd "slews" time by up to 500 parts-per-million to have
 the local time gradually approach the "true" time without big jumps - over a 10 second window that means a 5ms
 difference. If both sides are slewing in opposite directions, that can result in an effective difference of 10ms. Both
-of these times are close enough to <a href="../server-selection/server-selection.html#localThresholdMS">localThresholdMS</a> to
+of these times are close enough to <a href="../server-selection/server-selection.html#localthresholdms">localThresholdMS</a> to
 significantly affect which servers are viable in NEAREST calculations.</p>
 <p>Ensuring that all measurements use the same clock obviates the need for a more complicated solution, and mitigates the
 above mentioned concerns.</p>
@@ -907,12 +910,12 @@ restart, the monitor immediately runs the next check without waiting.</p>
 with a network error it is likely that all connections to that server are also closed. (See
 <a href="https://jira.mongodb.org/browse/JAVA-1252">JAVA-1252</a>). When the check fails with a network timeout error, a monitor
 MUST set interruptInUseConnections to true. See,
-<a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#Why-does-the-pool-need-to-support-closing-in-use-connections-as-part-of-its-clear-logic?">Why does the pool need to support closing in use connections as part of its clear logic?</a>.</p>
+<a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#why-does-the-pool-need-to-support-interrupting-in-use-connections-as-part-of-its-clear-logic">Why does the pool need to support closing in use connections as part of its clear logic?</a>.</p>
 <p>When the server is shutting down, it may respond to hello or legacy hello commands with ShutdownInProgress errors before
 closing connections. In this case, the monitor clears the connection pool because all connections will be closed soon.
 Other command errors are unexpected but are handled identically.</p>
 <h3 id="why-must-streaming-hello-or-legacy-hello-clients-publish-serverheartbeatstartedevents"><a class="header" href="#why-must-streaming-hello-or-legacy-hello-clients-publish-serverheartbeatstartedevents">Why must streaming hello or legacy hello clients publish ServerHeartbeatStartedEvents?</a></h3>
-<p>The <a href="server-discovery-and-monitoring-logging-and-monitoring.rst#heartbeats">SDAM Monitoring spec</a> guarantees that every
+<p>The <a href="server-discovery-and-monitoring-logging-and-monitoring.html#heartbeats">SDAM Monitoring spec</a> guarantees that every
 ServerHeartbeatStartedEvent has either a correlating ServerHeartbeatSucceededEvent or ServerHeartbeatFailedEvent. This
 is consistent with Command Monitoring on exhaust cursors where the driver publishes a fake CommandStartedEvent before
 reading the next getMore response.</p>

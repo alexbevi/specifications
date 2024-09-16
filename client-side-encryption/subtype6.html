@@ -183,7 +183,7 @@
 <p>Client side encryption requires a new binary subtype to store (1) encrypted ciphertext with metadata, and (2) binary
 markings indicating what values must be encrypted in a document. (1) is stored in the server, but (2) is only used in
 the communication protocol between libmongocrypt and mongocryptd described in
-<a href="https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/client-side-encryption.rst">Driver Spec: Client Side Encryption Encryption</a>.</p>
+<a href="../client-side-encryption/client-side-encryption.html">Driver Spec: Client Side Encryption Encryption</a>.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
@@ -240,8 +240,7 @@ intent-to-encrypt markings which are only used between libmongocrypt and mongocr
 </tbody></table>
 </div>
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
-<p>Covered in
-<a href="https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/client-side-encryption.rst">Driver Spec: Client Side Encryption Encryption</a>.</p>
+<p>Covered in <a href="../client-side-encryption/client-side-encryption.html">Driver Spec: Client Side Encryption Encryption</a>.</p>
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
 <h3 id="why-not-use-a-new-bson-type"><a class="header" href="#why-not-use-a-new-bson-type">Why not use a new BSON type?</a></h3>
 <p>An alternative to using a new binary subtype would be introducing a new BSON type. This would be a needless backwards

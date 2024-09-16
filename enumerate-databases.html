@@ -336,9 +336,9 @@ primary node in replica set topology, unless directly connected to a secondary n
 enumeration. MongoDB 3.6 introduced a <code>nameOnly</code> option to the <code>listDatabases</code> database command. The driver API should
 to be expanded to support this option.</p>
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
-<p>The design of this specification is inspired by the <a href="./enumerate-collections.rst">Collection Enumeration</a> and
-<a href="./enumerate-indexes.rst">Index Enumeration</a> specifications. Since most drivers already implement a <code>listDatabases</code>
-command helper in some fashion, this spec is flexible when it comes to existing APIs.</p>
+<p>The design of this specification is inspired by the <a href="./enumerate-collections.html">Collection Enumeration</a> and
+<a href="./index-management/index-management.html">Index Management</a> specifications. Since most drivers already implement a
+<code>listDatabases</code> command helper in some fashion, this spec is flexible when it comes to existing APIs.</p>
 <h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns. This specification merely deals with how to enumerate databases in
 future versions of MongoDB and allows flexibility for existing driver APIs.</p>

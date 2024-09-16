@@ -781,7 +781,7 @@ BSON/Extended JSON Decimal128.</p>
 <li><a href="https://github.com/mongodb/mongo-java-driver/blob/master/bson/src/main/org/bson/BsonDecimal128.java">Java</a></li>
 </ul>
 <h2 id="tests"><a class="header" href="#tests">Tests</a></h2>
-<p>See the <a href="https://github.com/mongodb/specifications/tree/master/source/bson-corpus">BSON Corpus</a> for tests.</p>
+<p>See the <a href="bson-decimal128/../bson-corpus/bson-corpus.html">BSON Corpus</a> for tests.</p>
 <p>Most of the tests are converted from the
 <a href="http://speleotrove.com/decimal/dectest.html">General Decimal Arithmetic Testcases</a>.</p>
 <h2 id="qa"><a class="header" href="#qa">Q&amp;A</a></h2>
@@ -2115,6 +2115,7 @@ and the <code>responseTo</code> field of every follow-up response will be the <c
 <p>The client MUST be prepared to receive a response without <code>moreToCome</code> set prior to completing iteration of a cursor,
 even if an earlier response for the same cursor had the <code>moreToCome</code> flag set. To continue iterating such a cursor, the
 client MUST issue an explicit <code>getMore</code> request.</p>
+<p><span id="exhaustAllowed"></span></p>
 <h5 id="exhaustallowed"><a class="header" href="#exhaustallowed">exhaustAllowed</a></h5>
 <p>Setting this flag on a request indicates to the recipient that the sender is prepared to handle multiple replies (using
 the <code>moreToCome</code> bit) to this request. The server will never produce replies with the <code>moreToCome</code> bit set unless the
@@ -2397,7 +2398,7 @@ interface RunCommandOptions {
    * An optional timeout option to govern the amount of time that a single operation can execute before control is returned to the user.
    * This timeout applies to all of the work done to execute the operation, including but not limited to server selection, connection checkout, and server-side execution.
    *
-   * @ see https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.rst
+   * @ see https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.md
    */
   timeoutMS?: number;
 }
@@ -2476,7 +2477,7 @@ as-is.</p>
 <li>See Read Concern's section on
 <a href="run-command/../read-write-concern/read-write-concern.html#generic-command-method">Generic Command Method</a></li>
 <li>See Write Concern's section on
-<a href="run-command/../read-write-concern/read-write-concern.html#generic-command-method-1">Generic Command Method</a></li>
+<a href="run-command/../read-write-concern/read-write-concern.html#generic-command-method">Generic Command Method</a></li>
 </ul>
 <h5 id="retryability"><a class="header" href="#retryability">Retryability</a></h5>
 <p>All commands executed via RunCommand are non-retryable operations. Drivers MUST NOT inspect the command to determine if
@@ -2520,7 +2521,7 @@ interface RunCursorCommandOptions extends RunCommandOptions {
    *
    * @defaultValue CURSOR_LIFETIME
    *
-   * @see https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.rst
+   * @see https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.md
    */
   timeoutMode?: ITERATION | CURSOR_LIFETIME;
 
@@ -3094,16 +3095,16 @@ to URI options apply here.</p>
 <tr><td>authSource</td><td>any string</td><td>None; default values for authentication exist for constructing authentication credentials per the <a href="uri-options/../auth/auth.html#supported-authentication-methods">auth spec</a>, but there is no default for the URI option itself.</td><td>no</td><td>The database that connections should authenticate against</td></tr>
 <tr><td>compressors</td><td>comma separated list of strings, e.g. "snappy,zlib"</td><td>defined in <a href="uri-options/../compression/OP_COMPRESSED.html#compressors">compression spec</a></td><td>no</td><td>The list of allowed compression types for wire protocol messages sent or received from the server</td></tr>
 <tr><td>connectTimeoutMS</td><td>non-negative integer; 0 means "no timeout"</td><td>10,000 ms (unless a driver already has a different default)</td><td>no</td><td>Amount of time to wait for a single TCP socket connection to the server to be established before erroring; note that this applies to <a href="uri-options/../mongodb-handshake/handshake.html">SDAM hello and legacy hello operations</a></td></tr>
-<tr><td>directConnection</td><td>"true" or "false"</td><td>defined in <a href="uri-options/../server-discovery-and-monitoring/server-discovery-and-monitoring.rst#initial-topology-type">SDAM spec</a></td><td>no</td><td>Whether to connect to the deployment in Single topology.</td></tr>
-<tr><td>heartbeatFrequencyMS</td><td>integer greater than or equal to 500</td><td>defined in <a href="uri-options/../server-discovery-and-monitoring/server-discovery-and-monitoring.rst#heartbeatfrequencyms">SDAM spec</a></td><td>no</td><td>the interval between regular server monitoring checks</td></tr>
+<tr><td>directConnection</td><td>"true" or "false"</td><td>defined in <a href="uri-options/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#initial-topologytype">SDAM spec</a></td><td>no</td><td>Whether to connect to the deployment in Single topology.</td></tr>
+<tr><td>heartbeatFrequencyMS</td><td>integer greater than or equal to 500</td><td>defined in <a href="uri-options/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#heartbeatfrequencyms">SDAM spec</a></td><td>no</td><td>the interval between regular server monitoring checks</td></tr>
 <tr><td>journal</td><td>"true" or "false"</td><td>no "j" field specified</td><td>no</td><td>Default write concern "j" field for the client</td></tr>
 <tr><td>loadBalanced</td><td>"true" or "false"</td><td>defined in <a href="uri-options/../load-balancers/load-balancers.html#loadbalanced">Load Balancer spec</a></td><td>no</td><td>Whether the driver is connecting to a load balancer.</td></tr>
 <tr><td>localThresholdMS</td><td>non-negative integer; 0 means 0 ms (i.e. the fastest eligible server must be selected)</td><td>defined in the <a href="uri-options/../server-selection/server-selection.html#localthresholdms">server selection spec</a></td><td>no</td><td>The amount of time beyond the fastest round trip time that a given server’s round trip time can take and still be eligible for server selection</td></tr>
-<tr><td>maxIdleTimeMS</td><td>non-negative integer; 0 means no minimum</td><td>defined in the <a href="uri-options/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options-1">Connection Pooling spec</a></td><td>required for drivers with connection pools</td><td>The amount of time a connection can be idle before it's closed</td></tr>
-<tr><td>maxPoolSize</td><td>non-negative integer; 0 means no maximum</td><td>defined in the <a href="uri-options/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options-1">Connection Pooling spec</a></td><td>required for drivers with connection pools</td><td>The maximum number of clients or connections able to be created by a pool at a given time. This count includes connections which are currently checked out.</td></tr>
-<tr><td>maxConnecting</td><td>positive integer</td><td>defined in the <a href="uri-options/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options-1">Connection Pooling spec</a></td><td>required for drivers with connection pools</td><td>The maximum number of Connections a Pool may be establishing concurrently.</td></tr>
+<tr><td>maxIdleTimeMS</td><td>non-negative integer; 0 means no minimum</td><td>defined in the <a href="uri-options/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">Connection Pooling spec</a></td><td>required for drivers with connection pools</td><td>The amount of time a connection can be idle before it's closed</td></tr>
+<tr><td>maxPoolSize</td><td>non-negative integer; 0 means no maximum</td><td>defined in the <a href="uri-options/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">Connection Pooling spec</a></td><td>required for drivers with connection pools</td><td>The maximum number of clients or connections able to be created by a pool at a given time. This count includes connections which are currently checked out.</td></tr>
+<tr><td>maxConnecting</td><td>positive integer</td><td>defined in the <a href="uri-options/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">Connection Pooling spec</a></td><td>required for drivers with connection pools</td><td>The maximum number of Connections a Pool may be establishing concurrently.</td></tr>
 <tr><td>maxStalenessSeconds</td><td>-1 (no max staleness check) or integer &gt;= 90</td><td>defined in <a href="uri-options/../max-staleness/max-staleness.html#api">max staleness spec</a></td><td>no</td><td>The maximum replication lag, in wall clock time, that a secondary can suffer and still be eligible for server selection</td></tr>
-<tr><td>minPoolSize</td><td>non-negative integer</td><td>defined in the <a href="uri-options/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options-1">Connection Pooling spec</a></td><td>required for drivers with connection pools</td><td>The number of connections the driver should create and maintain in the pool even when no operations are occurring. This count includes connections which are currently checked out.</td></tr>
+<tr><td>minPoolSize</td><td>non-negative integer</td><td>defined in the <a href="uri-options/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">Connection Pooling spec</a></td><td>required for drivers with connection pools</td><td>The number of connections the driver should create and maintain in the pool even when no operations are occurring. This count includes connections which are currently checked out.</td></tr>
 <tr><td>proxyHost</td><td>any string</td><td>defined in the <a href="uri-options/../socks5-support/socks5.html#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The IPv4/IPv6 address or domain name of a SOCKS5 proxy server used for connecting to MongoDB services.</td></tr>
 <tr><td>proxyPort</td><td>non-negative integer</td><td>defined in the <a href="uri-options/../socks5-support/socks5.html#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The port of the SOCKS5 proxy server specified in <code>proxyHost</code>.</td></tr>
 <tr><td>proxyUsername</td><td>any string</td><td>defined in the <a href="uri-options/../socks5-support/socks5.html#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The username for username/password authentication to the SOCKS5 proxy server specified in <code>proxyHost</code>.</td></tr>
@@ -3114,7 +3115,7 @@ to URI options apply here.</p>
 <tr><td>replicaSet</td><td>any string</td><td>no replica set name provided</td><td>no</td><td>The name of the replica set to connect to</td></tr>
 <tr><td>retryReads</td><td>"true" or "false"</td><td>defined in <a href="uri-options/../retryable-reads/retryable-reads.html#retryreads">retryable reads spec</a></td><td>no</td><td>Enables retryable reads on server 3.6+</td></tr>
 <tr><td>retryWrites</td><td>"true" or "false"</td><td>defined in <a href="uri-options/../retryable-writes/retryable-writes.html#retrywrites">retryable writes spec</a></td><td>no</td><td>Enables retryable writes on server 3.6+</td></tr>
-<tr><td>serverMonitoringMode</td><td>"stream", "poll", or "auto"</td><td>defined in <a href="uri-options/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#servermonitoringmode">SDAM spec</a></td><td>required for multi-threaded or asynchronous drivers</td><td>Configures which server monitoring protocol to use.</td></tr>
+<tr><td>serverMonitoringMode</td><td>"stream", "poll", or "auto"</td><td>defined in <a href="uri-options/../server-discovery-and-monitoring/server-monitoring.html#servermonitoringmode">SDAM spec</a></td><td>required for multi-threaded or asynchronous drivers</td><td>Configures which server monitoring protocol to use.</td></tr>
 <tr><td>serverSelectionTimeoutMS</td><td>positive integer; a driver may also accept 0 to be used for a special case, provided that it documents the meaning</td><td>defined in <a href="uri-options/../server-selection/server-selection.html#serverselectiontimeoutms">server selection spec</a></td><td>no</td><td>A timeout in milliseconds to block for server selection before raising an error</td></tr>
 <tr><td>serverSelectionTryOnce</td><td>"true" or "false"</td><td>defined in <a href="uri-options/../server-selection/server-selection.html#serverselectiontryonce">server selection spec</a></td><td>required for single-threaded drivers</td><td>Scan the topology only once after a server selection failure instead of repeatedly until the server selection times out</td></tr>
 <tr><td>socketTimeoutMS</td><td>non-negative integer; 0 means no timeout</td><td>no timeout</td><td>no</td><td>NOTE: This option is deprecated in favor of <a href="uri-options/../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a><br><br>Amount of time spent attempting to send or receive on a socket before timing out; note that this only applies to application operations, not SDAM.</td></tr>
@@ -3128,11 +3129,11 @@ to URI options apply here.</p>
 <tr><td>tlsCAFile</td><td>any string</td><td>no certificate authorities specified</td><td>required if the driver's language/runtime allows non-global configuration</td><td>Path to file with either a single or bundle of certificate authorities to be considered trusted when making a TLS connection</td></tr>
 <tr><td>tlsCertificateKeyFile</td><td>any string</td><td>no client certificate specified</td><td>required if the driver's language/runtime allows non-global configuration</td><td>Path to the client certificate file or the client private key file; in the case that they both are needed, the files should be concatenated</td></tr>
 <tr><td>tlsCertificateKeyFilePassword</td><td>any string</td><td>no password specified</td><td>required if the driver's language/runtime allows non-global configuration</td><td>Password to decrypt the client private key to be used for TLS connections</td></tr>
-<tr><td>tlsDisableCertificateRevocationCheck</td><td>"true" or "false"</td><td>false i.e. driver will reach check a certificate's revocation status</td><td>Yes</td><td>Controls whether or not the driver will check a certificate's revocation status via CRLs or OCSP. See the <a href="uri-options/../ocsp-support/ocsp-support.html#tlsDisableCertificateRevocationCheck">OCSP Support Spec</a> for additional information.</td></tr>
-<tr><td>tlsDisableOCSPEndpointCheck</td><td>"true" or "false"</td><td>false i.e. driver will reach out to OCSP endpoints <a href="uri-options/../ocsp-support/ocsp-support.html#id1">if needed</a>.</td><td>Yes</td><td>Controls whether or not the driver will reach out to OCSP endpoints if needed. See the <a href="uri-options/../ocsp-support/ocsp-support.html#tlsDisableOCSPEndpointCheck">OCSP Support Spec</a> for additional information.</td></tr>
+<tr><td>tlsDisableCertificateRevocationCheck</td><td>"true" or "false"</td><td>false i.e. driver will reach check a certificate's revocation status</td><td>Yes</td><td>Controls whether or not the driver will check a certificate's revocation status via CRLs or OCSP. See the <a href="uri-options/../ocsp-support/ocsp-support.html#tlsdisablecertificaterevocationcheck">OCSP Support Spec</a> for additional information.</td></tr>
+<tr><td>tlsDisableOCSPEndpointCheck</td><td>"true" or "false"</td><td>false i.e. driver will reach out to OCSP endpoints <a href="uri-options/../ocsp-support/ocsp-support.html#tlsdisableocspendpointcheck">if needed</a>.</td><td>Yes</td><td>Controls whether or not the driver will reach out to OCSP endpoints if needed. See the <a href="uri-options/../ocsp-support/ocsp-support.html#tlsdisableocspendpointcheck">OCSP Support Spec</a> for additional information.</td></tr>
 <tr><td>tlsInsecure</td><td>"true" or "false"</td><td>No TLS constraints are relaxed</td><td>no</td><td>Relax TLS constraints as much as possible (e.g. allowing invalid certificates or hostname mismatches); drivers must document the exact constraints which are relaxed by this option being true</td></tr>
 <tr><td>w</td><td>non-negative integer or string</td><td>no "w" value specified</td><td>no</td><td>Default write concern "w" field for the client</td></tr>
-<tr><td>waitQueueTimeoutMS</td><td>positive number</td><td>defined in the <a href="uri-options/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options-1">Connection Pooling spec</a></td><td>required for drivers with connection pools, with exceptions described in the <a href="uri-options/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options-1">Connection Pooling spec</a></td><td>NOTE: This option is deprecated in favor of <a href="uri-options/../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a><br><br>Amount of time spent attempting to check out a connection from a server's connection pool before timing out</td></tr>
+<tr><td>waitQueueTimeoutMS</td><td>positive number</td><td>defined in the <a href="uri-options/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">Connection Pooling spec</a></td><td>required for drivers with connection pools, with exceptions described in the <a href="uri-options/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">Connection Pooling spec</a></td><td>NOTE: This option is deprecated in favor of <a href="uri-options/../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a><br><br>Amount of time spent attempting to check out a connection from a server's connection pool before timing out</td></tr>
 <tr><td>wTimeoutMS</td><td>non-negative 64-bit integer; 0 means no timeout</td><td>no timeout</td><td>no</td><td>NOTE: This option is deprecated in favor of <a href="uri-options/../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a><br><br>Default write concern "wtimeout" field for the client</td></tr>
 <tr><td>zlibCompressionLevel</td><td>integer between -1 and 9 (inclusive)</td><td>-1 (default compression level of the driver)</td><td>no</td><td>Specifies the level of compression when using zlib to compress wire protocol messages; -1 signifies the default level, 0 signifies no compression, 1 signifies the fastest speed, and 9 signifies the best compression</td></tr>
 </tbody></table>
@@ -3332,7 +3333,7 @@ this option.</p>
 <p>This boolean option determines whether a MongoClient should refrain from reaching out to an OCSP endpoint i.e. whether
 non-stapled OCSP should be disabled. When set to true, a driver MUST NOT reach out to OCSP endpoints. When set to false,
 a driver MUST reach out to OCSP endpoints if needed (as described in
-<a href="ocsp-support/ocsp-support.html#suggested-ocsp-behavior-1">Specification: Suggested OCSP Behavior</a>).</p>
+<a href="ocsp-support/ocsp-support.html#suggested-ocsp-behavior">Specification: Suggested OCSP Behavior</a>).</p>
 <p>For drivers that pass the <a href="ocsp-support/tests/README.html#integration-tests-permutations-to-be-tested">"Soft Fail Test"</a>, this option
 MUST default to false.</p>
 <p>For drivers that fail the "Soft Fail Test" because their TLS library exhibits hard-fail behavior when a responder is
@@ -3346,7 +3347,7 @@ available (i.e. no methods are defined or the CRL distribution points/OCSP endpo
 <p>This boolean option determines whether a MongoClient should refrain checking certificate revocation status. When set to
 true, a driver MUST NOT check certificate revocation status via CRLs or OCSP. When set to false, a driver MUST check
 certificate revocation status, reach out to OCSP endpoints if needed (as described in
-<a href="ocsp-support/ocsp-support.html#suggested-ocsp-behavior-1">Specification: Suggested OCSP Behavior</a>).</p>
+<a href="ocsp-support/ocsp-support.html#suggested-ocsp-behavior">Specification: Suggested OCSP Behavior</a>).</p>
 <p>For drivers that pass the <a href="ocsp-support/tests/README.html#integration-tests-permutations-to-be-tested">"Soft Fail Test"</a> , this option
 MUST default to false.</p>
 <p>If a driver does not support <code>tlsDisableOCSPEndpointCheck</code> and that driver fails the "Soft Fail Test" because their TLS
@@ -3466,10 +3467,9 @@ provides signal about the soft/hard fail behavior in a driver's TLS library so t
 (provided that one of the non-free tier clusters is upgraded ≥ 3.6).</p>
 <h3 id="suggested-ocsp-behavior-1"><a class="header" href="#suggested-ocsp-behavior-1">Suggested OCSP Behavior</a></h3>
 <p>For drivers with finer-grain control over their OCSP behavior, the suggested OCSP behavior was chosen as a balance
-between security and availability, erring on availability while minimizing network round trips. Therefore, in the
-<a href="ocsp-support/ocsp-support.html#suggested-ocsp-behavior-1">Specification: Suggested OCSP Behavior</a> section, in order to minimize network round trips,
-drivers are advised not to reach out to OCSP endpoints and CRL distribution points in order to verify the revocation
-status of intermediate certificates.</p>
+between security and availability, erring on availability while minimizing network round trips. Therefore, in order to
+minimize network round trips, drivers are advised not to reach out to OCSP endpoints and CRL distribution points in
+order to verify the revocation status of intermediate certificates.</p>
 <h2 id="backwards-compatibility-4"><a class="header" href="#backwards-compatibility-4">Backwards Compatibility</a></h2>
 <p>An application behind a firewall with an outbound allowList that upgrades to a driver implementing this specification
 may experience connectivity issues when OCSP is enabled. This is because the driver may need to contact OCSP endpoints
@@ -3554,9 +3554,9 @@ allows for the configuration of a tolerance period for the acceptance of OCSP re
 not adhering to that RFC.</p>
 <h3 id="why-was-the-decision-made-to-allow-ocsp-endpoint-checking-to-be-enableddisabled-via-a-uri-option"><a class="header" href="#why-was-the-decision-made-to-allow-ocsp-endpoint-checking-to-be-enableddisabled-via-a-uri-option">Why was the decision made to allow OCSP endpoint checking to be enabled/disabled via a URI option?</a></h3>
 <p>We initially hoped that we would be able to not expose any options specifically related to OCSP to the user, in
-accordance with the "No Knobs" <a href="ocsp-support/../../README.html#driver-mantras">drivers mantra</a> However, we later decided that users may
-benefit from having the ability to disable OCSP endpoint checking when applications are deployed behind restrictive
-firewall with outbound allowLists, and this benefit is worth adding another URI option.</p>
+accordance with the "No Knobs" <a href="ocsp-support/../driver-mantras.html">drivers mantra</a> However, we later decided that users may benefit
+from having the ability to disable OCSP endpoint checking when applications are deployed behind restrictive firewall
+with outbound allowLists, and this benefit is worth adding another URI option.</p>
 <h2 id="appendix"><a class="header" href="#appendix">Appendix</a></h2>
 <h3 id="os-level-ocsp-cache-manipulation"><a class="header" href="#os-level-ocsp-cache-manipulation">OS-Level OCSP Cache Manipulation</a></h3>
 <h4 id="windows"><a class="header" href="#windows">Windows</a></h4>
@@ -3813,6 +3813,7 @@ the following structure:</p>
         }
     }
 </code></pre>
+<p><span id="client-application-name"></span></p>
 <h4 id="clientapplicationname"><a class="header" href="#clientapplicationname">client.application.name</a></h4>
 <p>This value is application configurable.</p>
 <p>The application name is printed to the mongod logs upon establishing the connection. It is also recorded in the slow
@@ -3888,6 +3889,7 @@ typically <code>PRETTY_NAME</code> of <code>os-release(5)</code> (<code>/etc/os-
 <pre><code>- clang 3.8.0 CFLAGS="-mcpu=power8 -mtune=power8 -mcmodel=medium"
 - "Oracle JVM EE 9.1.1"
 </code></pre>
+<p><span id="client-env"></span></p>
 <h4 id="clientenv"><a class="header" href="#clientenv">client.env</a></h4>
 <p>This value is optional and is not application configurable.</p>
 <p>Information about the execution environment, including Function-as-a-Service (FaaS) identification and container
@@ -4810,9 +4812,9 @@ Client MUST treat the host information as if the following URI was used instead:
 <pre><code>mongodb://mongodb1.mongodb.com:27317,mongodb2.mongodb.com:27107/?ssl=true&amp;replicaSet=replProduction&amp;authSource=otherDB
 </code></pre>
 <h2 id="test-plan-10"><a class="header" href="#test-plan-10">Test Plan</a></h2>
-<p>See README.md in the accompanying <a href="initial-dns-seedlist-discovery/tests">test directory</a>.</p>
+<p>See README.md in the accompanying <a href="initial-dns-seedlist-discovery/tests/README.html">test directory</a>.</p>
 <p>Additionally, see the <code>mongodb+srv</code> test <code>invalid-uris.yml</code> in the
-<a href="initial-dns-seedlist-discovery/../connection-string/tests">Connection String Spec tests</a>.</p>
+<a href="initial-dns-seedlist-discovery/../connection-string/tests/README.html">Connection String Spec tests</a>.</p>
 <h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
 <p>Several of our users have asked for this through tickets:</p>
 <ul>
@@ -4997,7 +4999,7 @@ requires a standalone, primary, or mongos. Suitability is fully specified in the
 <h4 id="network-timeout"><a class="header" href="#network-timeout">network timeout</a></h4>
 <p>A timeout that occurs while reading from or writing to a network socket.</p>
 <h4 id="minheartbeatfrequencyms"><a class="header" href="#minheartbeatfrequencyms">minHeartbeatFrequencyMS</a></h4>
-<p>Defined in the <a href="server-discovery-and-monitoring/server-monitoring.rst">Server Monitoring spec</a>. This value MUST be 500 ms, and it MUST NOT be
+<p>Defined in the <a href="server-discovery-and-monitoring/server-monitoring.html">Server Monitoring spec</a>. This value MUST be 500 ms, and it MUST NOT be
 configurable.</p>
 <h4 id="pool-generation-number"><a class="header" href="#pool-generation-number">pool generation number</a></h4>
 <p>The pool's generation number which starts at 0 and is incremented each time the pool is cleared. Defined in the
@@ -5029,9 +5031,10 @@ to describe driver <strong>behavior</strong>, not to mandate how a driver repres
 <blockquote>
 <p>[!NOTE]
 Single-threaded clients use the PossiblePrimary type to maintain proper
-<a href="server-discovery-and-monitoring/server-monitoring.rst#scanning-order">scanning order</a>. Multi-threaded and asynchronous clients do not need this
+<a href="server-discovery-and-monitoring/server-monitoring.html#scanning-order">scanning order</a>. Multi-threaded and asynchronous clients do not need this
 ServerType; it is synonymous with Unknown.</p>
 </blockquote>
+<p><span id="TopologyDescription"></span></p>
 <h4 id="topologydescription"><a class="header" href="#topologydescription">TopologyDescription</a></h4>
 <p>The client's representation of everything it knows about the deployment's topology.</p>
 <p>Fields:</p>
@@ -5150,6 +5153,7 @@ discover the replica set name as it connects.</p>
 option is not specified, the driver MUST start in Unknown topology, and follow the rules in the
 <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#topologytype-table">TopologyType table</a> for transitioning to other topologies. In particular, the driver MUST NOT use
 the number of hosts from the initial SRV lookup to decide what topology to start in.</p>
+<p><span id="heartbeatFrequencyMS"></span></p>
 <h4 id="heartbeatfrequencyms"><a class="header" href="#heartbeatfrequencyms">heartbeatFrequencyMS</a></h4>
 <p>The interval between server <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#check">checks</a>, counted from the end of the previous check until the beginning of the next
 one.</p>
@@ -5181,7 +5185,7 @@ operation is attempted.</p>
 servers from its <code>TopologyDescription</code> and set its <code>TopologyType</code> to <code>Unknown</code>, emitting the corresponding
 <code>TopologyDescriptionChangedEvent</code>.</p>
 <h3 id="monitoring"><a class="header" href="#monitoring">Monitoring</a></h3>
-<p>See the <a href="server-discovery-and-monitoring/server-monitoring.rst">Server Monitoring spec</a> for how a driver monitors each server. In summary, the client
+<p>See the <a href="server-discovery-and-monitoring/server-monitoring.html">Server Monitoring spec</a> for how a driver monitors each server. In summary, the client
 monitors each server in the topology. The scope of server monitoring is to provide the topology with updated
 ServerDescriptions based on hello or legacy hello command responses.</p>
 <h3 id="parsing-a-hello-or-legacy-hello-response"><a class="header" href="#parsing-a-hello-or-legacy-hello-response">Parsing a hello or legacy hello response</a></h3>
@@ -5248,7 +5252,7 @@ field.</p>
 <h4 id="roundtriptime"><a class="header" href="#roundtriptime">roundTripTime</a></h4>
 <p>Drivers MUST record the server's <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#round-trip-time">round trip time</a> (RTT) after each successful call to hello or legacy
 hello. The Server Selection Spec describes how RTT is averaged and how it is used in server selection. Drivers MUST also
-record the server's minimum RTT per <a href="server-discovery-and-monitoring/server-monitoring.rst#measuring-rtt">Server Monitoring (Measuring RTT)</a>.</p>
+record the server's minimum RTT per <a href="server-discovery-and-monitoring/server-monitoring.html#measuring-rtt">Server Monitoring (Measuring RTT)</a>.</p>
 <p>If a hello or legacy hello call fails, the RTT is not updated. Furthermore, while a server's type is Unknown its RTT is
 null, and if it changes from a known type to Unknown its RTT is set to null. However, if it changes from one known type
 to another (e.g. from RSPrimary to RSSecondary) its RTT is updated normally, not set to null nor restarted from scratch.</p>
@@ -5451,6 +5455,7 @@ else:
 </code></pre>
 <p>See
 <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#topologytype-remains-unknown-when-one-of-the-seeds-is-a-standalone">TopologyType remains Unknown when one of the seeds is a Standalone</a>.</p>
+<p><span id="updateRSWithoutPrimary"></span></p>
 <h5 id="updaterswithoutprimary"><a class="header" href="#updaterswithoutprimary">updateRSWithoutPrimary</a></h5>
 <p>This subroutine is executed with the ServerDescription from an RSSecondary, RSArbiter, or RSOther when the TopologyType
 is ReplicaSetNoPrimary:</p>
@@ -5516,6 +5521,7 @@ if there is no primary in topologyDescription.servers:
 </code></pre>
 <p>The special handling of description.primary ensures that a single-threaded client <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#scan">scans</a> the possible primary
 before other members.</p>
+<p><span id="updateRSFromPrimary"></span></p>
 <h5 id="updatersfromprimary"><a class="header" href="#updatersfromprimary">updateRSFromPrimary</a></h5>
 <p>This subroutine is executed with a ServerDescription of type RSPrimary:</p>
 <pre><code class="language-python">if serverDescription.address not in topologyDescription.servers:
@@ -5595,7 +5601,7 @@ checkIfHasPrimary()
 </code></pre>
 <p>A note on invalidating the old primary: when a new primary is discovered, the client finds the previous primary (there
 should be none or one) and replaces its description with a default ServerDescription of type "Unknown." A multi-threaded
-client MUST <a href="server-discovery-and-monitoring/server-monitoring.rst#requesting-an-immediate-check">request an immediate check</a> for that server as soon as
+client MUST <a href="server-discovery-and-monitoring/server-monitoring.html#requesting-an-immediate-check">request an immediate check</a> for that server as soon as
 possible.</p>
 <p>If the old primary server version is 4.0 or earlier, the client MUST clear its connection pool for the old primary, too:
 the connections are all bad because the old primary has closed its sockets. If the old primary server version is 4.2 or
@@ -5633,7 +5639,7 @@ to be <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.h
 <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#general-requirements">direct connection</a> to the server is requested, and does not
 already have a connection pool, the driver MUST create the connection pool for the server. Additionally, if a driver
 implements a CMAP compliant connection pool, the server's pool (even if it already existed) MUST be marked as "ready".
-See the <a href="server-discovery-and-monitoring/server-monitoring.rst">Server Monitoring spec</a> for more information.</p>
+See the <a href="server-discovery-and-monitoring/server-monitoring.html">Server Monitoring spec</a> for more information.</p>
 <p>Clearing the connection pool for a server MUST be synchronized with the update to the corresponding ServerDescription
 (e.g. by holding the lock on the TopologyDescription when clearing the pool). This prevents a possible race between the
 monitors and application threads. See
@@ -5641,7 +5647,7 @@ monitors and application threads. See
 for more information.</p>
 <h3 id="error-handling"><a class="header" href="#error-handling">Error handling</a></h3>
 <h4 id="network-error-during-server-check"><a class="header" href="#network-error-during-server-check">Network error during server check</a></h4>
-<p>See error handling in the <a href="server-discovery-and-monitoring/server-monitoring.rst">Server Monitoring spec</a>.</p>
+<p>See error handling in the <a href="server-discovery-and-monitoring/server-monitoring.html">Server Monitoring spec</a>.</p>
 <h4 id="application-errors"><a class="header" href="#application-errors">Application errors</a></h4>
 <p>When processing a network or command error, clients MUST first check the error's generation number. If the error's
 generation number is equal to the pool's generation number then error handling MUST continue according to
@@ -5840,7 +5846,7 @@ new ServerDescription's error field, including the error message from the server
 <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#topologyversion">topologyVersion</a> field in the new ServerDescription if present. (See
 <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#what-is-the-purpose-of-topologyversion">What is the purpose of topologyVersion?</a>)</p>
 <p>Multi-threaded and asynchronous clients MUST
-<a href="server-discovery-and-monitoring/server-monitoring.rst#requesting-an-immediate-check">request an immediate check</a> of the server. Unlike in the "network
+<a href="server-discovery-and-monitoring/server-monitoring.html#requesting-an-immediate-check">request an immediate check</a> of the server. Unlike in the "network
 error" scenario above, a "not writable primary" or "node is recovering" error means the server is available but the
 client is wrong about its type, thus an immediate re-check is likely to provide useful information.</p>
 <p>For single-threaded clients, in the case of a "not writable primary" or "node is shutting down" error, the client MUST
@@ -5866,17 +5872,17 @@ connection pool if the TopologyType is not LoadBalanced. (See
 <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#why-mark-a-server-unknown-after-an-auth-error">Why mark a server Unknown after an auth error?</a>)</p>
 <h3 id="monitoring-sdam-events"><a class="header" href="#monitoring-sdam-events">Monitoring SDAM events</a></h3>
 <p>The required driver specification for providing lifecycle hooks into server discovery and monitoring for applications to
-consume can be found in the <a href="server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.rst">SDAM Monitoring Specification</a>.</p>
+consume can be found in the <a href="server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html">SDAM Monitoring Specification</a>.</p>
 <h3 id="implementation-notes-2"><a class="header" href="#implementation-notes-2">Implementation notes</a></h3>
 <p>This section intends to provide generous guidance to driver authors. It is complementary to the reference
 implementations. Words like "should", "may", and so on are used more casually here.</p>
-<p>See also, the implementation notes in the <a href="server-discovery-and-monitoring/server-monitoring.rst">Server Monitoring spec</a>.</p>
+<p>See also, the implementation notes in the <a href="server-discovery-and-monitoring/server-monitoring.html">Server Monitoring spec</a>.</p>
 <h4 id="multi-threaded-or-asynchronous-server-selection"><a class="header" href="#multi-threaded-or-asynchronous-server-selection">Multi-threaded or asynchronous server selection</a></h4>
 <p>While no suitable server is available for an operation,
 <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#the-client-must-re-check-all-servers-every-minheartbeatfrequencyms">the client MUST re-check all servers every minHeartbeatFrequencyMS</a>.
-(See <a href="server-discovery-and-monitoring/server-monitoring.rst#requesting-an-immediate-check">requesting an immediate check</a>.)</p>
+(See <a href="server-discovery-and-monitoring/server-monitoring.html#requesting-an-immediate-check">requesting an immediate check</a>.)</p>
 <h4 id="single-threaded-server-selection"><a class="header" href="#single-threaded-server-selection">Single-threaded server selection</a></h4>
-<p>When a client that uses <a href="server-discovery-and-monitoring/server-monitoring.rst#single-threaded-monitoring">single-threaded monitoring</a> fails to select a
+<p>When a client that uses <a href="server-discovery-and-monitoring/server-monitoring.html#single-threaded-monitoring">single-threaded monitoring</a> fails to select a
 suitable server for any operation, it <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#scan">scans</a> the servers, then attempts selection again, to see if the scan
 discovered suitable servers. It repeats, waiting <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#minheartbeatfrequencyms">minHeartbeatFrequencyMS</a> after each scan,
 until a timeout.</p>
@@ -6674,29 +6680,29 @@ in a driver, and they SHOULD be deprecated and removed from drivers that impleme
 </code></pre>
 <h3 id="connection-pool-members"><a class="header" href="#connection-pool-members">Connection Pool Members</a></h3>
 <h4 id="connection-1"><a class="header" href="#connection-1">Connection</a></h4>
-<p>A driver-defined wrapper around a single TCP connection to an Endpoint. A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> has the following
+<p>A driver-defined wrapper around a single TCP connection to an Endpoint. A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> has the following
 properties:</p>
 <ul>
-<li><strong>Single Endpoint:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST be associated with a single Endpoint. A
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST NOT be associated with multiple Endpoints.</li>
-<li><strong>Single Lifetime:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST NOT be used after it is closed.</li>
-<li><strong>Single Owner:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST belong to exactly one Pool, and MUST NOT be shared across
-multiple pools</li>
-<li><strong>Single Track:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST limit itself to one request / response at a time. A
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST NOT multiplex/pipeline requests to an Endpoint.</li>
-<li><strong>Monotonically Increasing ID:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST have an ID number associated with it.
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> IDs within a Pool MUST be assigned in order of creation, starting at 1 and increasing by 1
+<li><strong>Single Endpoint:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST be associated with a single Endpoint. A
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST NOT be associated with multiple Endpoints.</li>
+<li><strong>Single Lifetime:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST NOT be used after it is closed.</li>
+<li><strong>Single Owner:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST belong to exactly one Pool, and MUST NOT be shared across multiple
+pools</li>
+<li><strong>Single Track:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST limit itself to one request / response at a time. A
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST NOT multiplex/pipeline requests to an Endpoint.</li>
+<li><strong>Monotonically Increasing ID:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST have an ID number associated with it.
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> IDs within a Pool MUST be assigned in order of creation, starting at 1 and increasing by 1
 for each new Connection.</li>
 <li><strong>Valid Connection:</strong> A connection MUST NOT be checked out of the pool until it has successfully and fully completed a
 MongoDB Handshake and Authentication as specified in the <a href="connection-monitoring-and-pooling/../mongodb-handshake/handshake.html">Handshake</a>,
 <a href="connection-monitoring-and-pooling/../compression/OP_COMPRESSED.html">OP_COMPRESSED</a>, and <a href="connection-monitoring-and-pooling/../auth/auth.html">Authentication</a> specifications.</li>
-<li><strong>Perishable</strong>: it is possible for a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> to become <strong>Perished</strong>. A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a>
-is considered perished if any of the following are true:
+<li><strong>Perishable</strong>: it is possible for a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> to become <strong>Perished</strong>. A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> is
+considered perished if any of the following are true:
 <ul>
-<li><strong>Stale:</strong> The <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> 's generation does not match the generation of the parent pool</li>
-<li><strong>Idle:</strong> The <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> is currently "available" (as defined below) and has been for longer than
+<li><strong>Stale:</strong> The <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> 's generation does not match the generation of the parent pool</li>
+<li><strong>Idle:</strong> The <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> is currently "available" (as defined below) and has been for longer than
 <strong>maxIdleTimeMS</strong>.</li>
-<li><strong>Errored:</strong> The <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> has experienced an error that indicates it is no longer recommended for
+<li><strong>Errored:</strong> The <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> has experienced an error that indicates it is no longer recommended for
 use. Examples include, but are not limited to:
 <ul>
 <li>Network Error</li>
@@ -6797,7 +6803,7 @@ can be resumed by being marked as "ready". While the Pool is paused, it exhibits
 of <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> (including available and in use) MUST NOT exceed <strong>maxPoolSize</strong></li>
 <li><strong>Rate-limited:</strong> A Pool MUST limit the number of <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> being
 <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#establishing-a-connection-internal-implementation">established</a> concurrently via the <strong>maxConnecting</strong>
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options-1">pool option</a>.</li>
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">pool option</a>.</li>
 </ul>
 <pre><code class="language-typescript">interface ConnectionPool {
   /**
@@ -6891,8 +6897,8 @@ of <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.
 <p>This specification does not define how a pool is to be created, leaving it up to the driver. Creation of a connection
 pool is generally an implementation detail of the driver, i.e., is not a part of the public API of the driver. The SDAM
 specification defines
-<a href="connection-monitoring-and-pooling/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#connection-pool-creation">when</a> the driver should
-create connection pools.</p>
+<a href="connection-monitoring-and-pooling/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#connection-pool-management">when</a> the driver
+should create connection pools.</p>
 <p>When a pool is created, its state MUST initially be set to "paused". Even if minPoolSize is set, the pool MUST NOT begin
 being <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#populating-the-pool-with-a-connection-internal-implementation">populated</a> with <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> until
 it has been marked as "ready". SDAM will mark the pool as "ready" on each successful check. See
@@ -6993,14 +6999,14 @@ in the SDAM specification.</p>
 <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a>. This MUST occur only while the pool is "ready". If the pool implements a background thread,
 it can be used for this. If the pool does not implement a background thread, the checkOut method is responsible for
 ensuring this requirement is met.</p>
-<p>When populating the Pool, pendingConnectionCount has to be decremented after establishing a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a>
+<p>When populating the Pool, pendingConnectionCount has to be decremented after establishing a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a>
 similarly to how it is done in <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#checking-out-a-connection">Checking Out a Connection</a> to signal that another
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> is allowed to be established. Such a signal MUST become observable to any <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#thread">Thread</a>
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> is allowed to be established. Such a signal MUST become observable to any <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#thread">Thread</a>
 after the action that
 <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#marking-a-connection-as-available-internal-implementation">marks the established Connection as "available"</a> becomes
 observable to the <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#thread">Thread</a>. Informally, this order guarantees that no <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#thread">Thread</a> tries to start
-establishing a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> when there is an "available" <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> established as a
-result of populating the Pool.</p>
+establishing a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> when there is an "available" <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> established as a result
+of populating the Pool.</p>
 <pre><code>wait until pendingConnectionCount &lt; maxConnecting and pool is "ready"
 create connection
 try:
@@ -7011,21 +7017,21 @@ except error:
   topology.handle_pre_handshake_error(error)
 </code></pre>
 <h4 id="checking-out-a-connection"><a class="header" href="#checking-out-a-connection">Checking Out a Connection</a></h4>
-<p>A Pool MUST have a method that allows the driver to check out a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a>. Checking out a
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> involves submitting a request to the WaitQueue and, once that request reaches the front of
-the queue, having the Pool find or create a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> to fulfill that request. Requests MUST be
-subject to a timeout which is computed per the rules in
+<p>A Pool MUST have a method that allows the driver to check out a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a>. Checking out a
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> involves submitting a request to the WaitQueue and, once that request reaches the front of the
+queue, having the Pool find or create a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> to fulfill that request. Requests MUST be subject to a
+timeout which is computed per the rules in
 <a href="connection-monitoring-and-pooling/../client-side-operations-timeout/client-side-operations-timeout.html#server-selection">Client Side Operations Timeout: Server Selection</a>.</p>
-<p>To service a request for a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a>, the Pool MUST first iterate over the list of available
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a>, searching for a non-perished one to be returned. If a perished <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a>
-is encountered, such a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST be closed (as described in
+<p>To service a request for a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a>, the Pool MUST first iterate over the list of available
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a>, searching for a non-perished one to be returned. If a perished <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> is
+encountered, such a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST be closed (as described in
 <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#closing-a-connection-internal-implementation">Closing a Connection</a>) and the iteration of available
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> MUST continue until either a non-perished available <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> is found or
-the list of available <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> is exhausted.</p>
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> MUST continue until either a non-perished available <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> is found or the
+list of available <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> is exhausted.</p>
 <p>If the list is exhausted, the total number of <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> is less than maxPoolSize, and
-pendingConnectionCount &lt; maxConnecting, the pool MUST create a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a>, establish it, mark it as
-"in use" and return it. If totalConnectionCount == maxPoolSize or pendingConnectionCount == maxConnecting, then the pool
-MUST wait to service the request until neither of those two conditions are met or until a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a>
+pendingConnectionCount &lt; maxConnecting, the pool MUST create a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a>, establish it, mark it as "in
+use" and return it. If totalConnectionCount == maxPoolSize or pendingConnectionCount == maxConnecting, then the pool
+MUST wait to service the request until neither of those two conditions are met or until a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a>
 becomes available, re-entering the checkOut loop in either case. This waiting MUST NOT prevent
 <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> from being checked into the pool. Additionally, the Pool MUST NOT service any newer checkOut
 requests before fulfilling the original one which could not be fulfilled. For drivers that implement the WaitQueue via a
@@ -7195,8 +7201,8 @@ work as readily available and then end instead of waiting for more work. For exa
 pendingConnectionCount to become less than maxConnecting when satisfying minPoolSize, a Run MUST either proceed with the
 rest of its duties, e.g., closing available perished connections, or end.</p>
 <p>The duration of intervals between the end of one Run and the beginning of the next Run is not specified, but the
-<a href="https://github.com/mongodb/specifications/tree/master/source/connection-monitoring-and-pooling/tests">Test Format and Runner Specification</a>
-may restrict this duration, or introduce other restrictions to facilitate testing.</p>
+<a href="connection-monitoring-and-pooling/../connection-monitoring-and-pooling/tests/README.html">Test Format and Runner Specification</a> may restrict this duration,
+or introduce other restrictions to facilitate testing.</p>
 <h5 id="withconnection"><a class="header" href="#withconnection">withConnection</a></h5>
 <p>A Pool SHOULD implement a scoped resource management mechanism idiomatic to their language to prevent
 <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> from not being checked in. Examples include
@@ -7209,6 +7215,7 @@ implemented, drivers SHOULD use this method as the default method of checking ou
 the pool. If a user subscribes to Connection Monitoring events, these events MUST be emitted when specified in
 "Connection Pool Behaviors". Events SHOULD be created and subscribed to in a manner idiomatic to their language and
 driver.</p>
+<p><span id="events"></span></p>
 <h4 id="events-1"><a class="header" href="#events-1">Events</a></h4>
 <p>See the <a href="connection-monitoring-and-pooling/../load-balancers/load-balancers.html#events">Load Balancer Specification</a> for details on the <code>serviceId</code> field.</p>
 <pre><code class="language-typescript">/**
@@ -8071,11 +8078,12 @@ changes but they may in the future.</p>
 <p>The hello or legacy hello command feature which allows the server to stream multiple replies back to the client.</p>
 <h4 id="rtt"><a class="header" href="#rtt">RTT</a></h4>
 <p>Round trip time. The client's measurement of the duration of one hello or legacy hello call. The RTT is used to support
-<a href="server-discovery-and-monitoring/../server-selection/server-selection.html#localThresholdMS">localThresholdMS</a> from the Server Selection spec and
-<a href="server-discovery-and-monitoring/../client-side-operations-timeout/client-side-operations-timeout.html#timeoutMS">timeoutMS</a> from the
+<a href="server-discovery-and-monitoring/../server-selection/server-selection.html#localthresholdms">localThresholdMS</a> from the Server Selection spec and
+<a href="server-discovery-and-monitoring/../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a> from the
 <a href="server-discovery-and-monitoring/../client-side-operations-timeout/client-side-operations-timeout.html">Client Side Operations Timeout Spec</a>.</p>
 <h4 id="faas-1"><a class="header" href="#faas-1">FaaS</a></h4>
 <p>A Function-as-a-Service (FaaS) environment like AWS Lambda.</p>
+<p><span id="servermonitoringmode"></span></p>
 <h4 id="servermonitoringmode"><a class="header" href="#servermonitoringmode">serverMonitoringMode</a></h4>
 <p>The serverMonitoringMode option configures which server monitoring protocol to use. Valid modes are "stream", "poll", or
 "auto". The default value MUST be "auto":</p>
@@ -8151,11 +8159,13 @@ server Unknown and update its TopologyDescription, the same as a failed server c
 <p>When a monitor discovers that the server supports the streamable hello or legacy hello command and the client does not
 have <a href="server-discovery-and-monitoring/server-monitoring.html#streaming-disabled">streaming disabled</a>, it MUST use the <a href="server-discovery-and-monitoring/server-monitoring.html#streaming-protocol">streaming protocol</a>.</p>
 <h4 id="single-threaded-monitoring"><a class="header" href="#single-threaded-monitoring">Single-threaded monitoring</a></h4>
+<p><span id="cooldownms"></span></p>
 <h5 id="cooldownms"><a class="header" href="#cooldownms">cooldownMS</a></h5>
 <p>After a single-threaded client gets a network error trying to <a href="server-discovery-and-monitoring/server-monitoring.html#check">check</a> a server, the client skips re-checking the
 server until cooldownMS has passed.</p>
 <p>This avoids spending connectTimeoutMS on each unavailable server during each scan.</p>
 <p>This value MUST be 5000 ms, and it MUST NOT be configurable.</p>
+<p><span id="scanning"></span></p>
 <h5 id="scanning"><a class="header" href="#scanning">Scanning</a></h5>
 <p>Single-threaded clients MUST <a href="server-discovery-and-monitoring/server-monitoring.html#scan">scan</a> all servers synchronously, inline with regular application operations. Before
 each operation, the client checks if <a href="server-discovery-and-monitoring/server-monitoring.html#heartbeatfrequencyms">heartbeatFrequencyMS</a> has passed since the previous scan
@@ -8386,7 +8396,7 @@ another check.</p>
 <p>When a monitor completes a successful check against a server, it MUST mark the connection pool for that server as
 "ready", and doing so MUST be synchronized with the update to the topology (e.g. by marking the pool as ready in
 onServerDescriptionChanged). This is required to ensure a server does not get selected while its pool is still paused.
-See the <a href="server-discovery-and-monitoring/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#Connection-Pool">Connection Pool</a>
+See the <a href="server-discovery-and-monitoring/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool">Connection Pool</a>
 definition in the CMAP specification for more details on marking the pool as "ready".</p>
 <h3 id="error-handling-2"><a class="header" href="#error-handling-2">Error handling</a></h3>
 <h4 id="network-or-command-error-during-server-check"><a class="header" href="#network-or-command-error-during-server-check">Network or command error during server check</a></h4>
@@ -8398,9 +8408,9 @@ the client MUST follow these steps:</p>
 <li>Clear the connection pool for the server (See
 <a href="server-discovery-and-monitoring/server-monitoring.html#clear-the-connection-pool-on-both-network-and-command-errors">Clear the connection pool on both network and command errors</a>).
 For CMAP compliant drivers, clearing the pool MUST be synchronized with marking the server as Unknown (see
-<a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#why-synchronize-clearing-a-server-s-pool-with-updating-the-topology?">Why synchronize clearing a server's pool with updating the topology?</a>).
+<a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#why-synchronize-clearing-a-servers-pool-with-updating-the-topology">Why synchronize clearing a server's pool with updating the topology?</a>).
 If this was a network timeout error, then the pool MUST be cleared with interruptInUseConnections = true (see
-<a href="server-discovery-and-monitoring/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#Why-does-the-pool-need-to-support-closing-in-use-connections-as-part-of-its-clear-logic?">Why does the pool need to support closing in use connections as part of its clear logic?</a>)</li>
+<a href="server-discovery-and-monitoring/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#why-does-the-pool-need-to-support-interrupting-in-use-connections-as-part-of-its-clear-logic">Why does the pool need to support closing in use connections as part of its clear logic?</a>)</li>
 <li>If this was a network error and the server was in a known state before the error, the client MUST NOT sleep and MUST
 begin the next check immediately. (See
 <a href="server-discovery-and-monitoring/server-monitoring.html#retry-hello-or-legacy-hello-calls-once">retry hello or legacy hello calls once</a> and
@@ -8699,7 +8709,7 @@ more complex than it is worth. (A lesson learned from PyMongo 2.6's pool, which 
 the same rule for the sake of consistency.</p>
 <h3 id="monitors-must-use-a-dedicated-connection-for-rtt-commands"><a class="header" href="#monitors-must-use-a-dedicated-connection-for-rtt-commands">Monitors MUST use a dedicated connection for RTT commands</a></h3>
 <p>When using the streaming protocol, a monitor needs to maintain an extra dedicated connection to periodically update its
-average round trip time in order to support <a href="server-discovery-and-monitoring/../server-selection/server-selection.html#localThresholdMS">localThresholdMS</a>
+average round trip time in order to support <a href="server-discovery-and-monitoring/../server-selection/server-selection.html#localthresholdms">localThresholdMS</a>
 from the Server Selection spec.</p>
 <p>It could pop a connection from its regular pool, but we rejected this option for a few reasons:</p>
 <ul>
@@ -8732,7 +8742,7 @@ ticking clock, since it will seem like it spends the least time on the wire.</p>
 <p>Additionally, systems using NTP will experience clock "slew". ntpd "slews" time by up to 500 parts-per-million to have
 the local time gradually approach the "true" time without big jumps - over a 10 second window that means a 5ms
 difference. If both sides are slewing in opposite directions, that can result in an effective difference of 10ms. Both
-of these times are close enough to <a href="server-discovery-and-monitoring/../server-selection/server-selection.html#localThresholdMS">localThresholdMS</a> to
+of these times are close enough to <a href="server-discovery-and-monitoring/../server-selection/server-selection.html#localthresholdms">localThresholdMS</a> to
 significantly affect which servers are viable in NEAREST calculations.</p>
 <p>Ensuring that all measurements use the same clock obviates the need for a more complicated solution, and mitigates the
 above mentioned concerns.</p>
@@ -8767,12 +8777,12 @@ restart, the monitor immediately runs the next check without waiting.</p>
 with a network error it is likely that all connections to that server are also closed. (See
 <a href="https://jira.mongodb.org/browse/JAVA-1252">JAVA-1252</a>). When the check fails with a network timeout error, a monitor
 MUST set interruptInUseConnections to true. See,
-<a href="server-discovery-and-monitoring/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#Why-does-the-pool-need-to-support-closing-in-use-connections-as-part-of-its-clear-logic?">Why does the pool need to support closing in use connections as part of its clear logic?</a>.</p>
+<a href="server-discovery-and-monitoring/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#why-does-the-pool-need-to-support-interrupting-in-use-connections-as-part-of-its-clear-logic">Why does the pool need to support closing in use connections as part of its clear logic?</a>.</p>
 <p>When the server is shutting down, it may respond to hello or legacy hello commands with ShutdownInProgress errors before
 closing connections. In this case, the monitor clears the connection pool because all connections will be closed soon.
 Other command errors are unexpected but are handled identically.</p>
 <h3 id="why-must-streaming-hello-or-legacy-hello-clients-publish-serverheartbeatstartedevents"><a class="header" href="#why-must-streaming-hello-or-legacy-hello-clients-publish-serverheartbeatstartedevents">Why must streaming hello or legacy hello clients publish ServerHeartbeatStartedEvents?</a></h3>
-<p>The <a href="server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.rst#heartbeats">SDAM Monitoring spec</a> guarantees that every
+<p>The <a href="server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#heartbeats">SDAM Monitoring spec</a> guarantees that every
 ServerHeartbeatStartedEvent has either a correlating ServerHeartbeatSucceededEvent or ServerHeartbeatFailedEvent. This
 is consistent with Command Monitoring on exhaust cursors where the driver publishes a fake CommandStartedEvent before
 reading the next getMore response.</p>
@@ -8939,10 +8949,10 @@ DNS seedlist discovery scan).</p>
 other operations.</p>
 <h3 id="single-threaded-drivers"><a class="header" href="#single-threaded-drivers">Single-Threaded Drivers</a></h3>
 <p>The rescan MUST happen <strong>before</strong> scanning all servers as part of the normal
-<a href="polling-srv-records-for-mongos-discovery/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#scanning">scanning</a> functionality, but only if
+<a href="polling-srv-records-for-mongos-discovery/../server-discovery-and-monitoring/server-monitoring.html#scanning">scanning</a> functionality, but only if
 <em>rescanSRVIntervalMS</em> has passed.</p>
 <h2 id="test-plan-12"><a class="header" href="#test-plan-12">Test Plan</a></h2>
-<p>See README.rst in the accompanying <a href="polling-srv-records-for-mongos-discovery/tests">test directory</a>.</p>
+<p>See README.md in the accompanying <a href="polling-srv-records-for-mongos-discovery/tests/README.html">test directory</a>.</p>
 <h2 id="motivation-for-change-8"><a class="header" href="#motivation-for-change-8">Motivation for Change</a></h2>
 <p>The original <a href="polling-srv-records-for-mongos-discovery/../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html">Initial DNS Seedlist Discovery</a>
 specification only regulates the initial list of mongos hosts to be used instead of a single hostname from a connection
@@ -9103,8 +9113,8 @@ several such commands.</p>
 <p><strong>Server type</strong></p>
 <p>An enumerated type indicating whether a server is up or down, whether it is a mongod or mongos, whether it belongs to a
 replica set and, if so, what role it serves in the replica set. See the
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec for more details.</p>
+<a href="server-selection/../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec for more
+details.</p>
 <p><strong>Suitable</strong></p>
 <p>Describes a server that meets all specified criteria for a read or write operation.</p>
 <p><strong>Tag</strong></p>
@@ -9119,9 +9129,8 @@ arbitrary user choices.</p>
 <p>The state of a deployment, including its type, which servers are members, and the server types of members.</p>
 <p><strong>Topology type</strong></p>
 <p>An enumerated type indicating the semantics for monitoring servers and selecting servers for database operations. See
-the
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec for more details.</p>
+the <a href="server-selection/../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec for
+more details.</p>
 <h3 id="assumptions"><a class="header" href="#assumptions">Assumptions</a></h3>
 <ol>
 <li>Unless they explicitly override these priorities, we assume our users prefer their applications to be, in order:
@@ -9134,8 +9143,7 @@ reconfiguration.</li>
 </ul>
 </li>
 <li>Clients know the state of a deployment based on some form of ongoing monitoring, following the rules defined in the
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec.
+<a href="server-selection/../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec.
 <ul>
 <li>They know which members are up or down, what their tag sets are, and their types.</li>
 <li>They know average round trip times to each available member.</li>
@@ -9179,8 +9187,7 @@ once after server selection fails, then either selects a server or raises an err
 an appropriate server until the selection process times out (pausing
 <a href="server-selection/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#minheartbeatfrequencyms">minHeartbeatFrequencyMS</a>
 between attempts, as required by the
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec).</p>
+<a href="server-selection/../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec).</p>
 <p>Users of single-threaded drivers MUST be able to control this mode in one or both of these ways:</p>
 <ul>
 <li>In code, pass true or false for an option called serverSelectionTryOnce, spelled idiomatically for the language, to
@@ -9195,9 +9202,8 @@ for a <a href="server-selection/server-selection.html#try-once-mode">"try once" 
 <h4 id="heartbeatfrequencyms-2"><a class="header" href="#heartbeatfrequencyms-2">heartbeatFrequencyMS</a></h4>
 <p>This controls when topology updates are scheduled. See
 <a href="server-selection/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#heartbeatfrequencyms">heartbeatFrequencyMS</a> in
-the
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec for details.</p>
+the <a href="server-selection/../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec for
+details.</p>
 <h4 id="socketcheckintervalms"><a class="header" href="#socketcheckintervalms">socketCheckIntervalMS</a></h4>
 <p>Only for single-threaded drivers.</p>
 <p>The default socketCheckIntervalMS MUST be 5000 (5 seconds), and it MAY be configurable. If socket has been idle for at
@@ -9207,7 +9213,7 @@ least this long, it must be checked before being used again.</p>
 <h4 id="idlewriteperiodms"><a class="header" href="#idlewriteperiodms">idleWritePeriodMS</a></h4>
 <p>A constant, how often an idle primary writes a no-op to the oplog. See
 <a href="server-selection/../max-staleness/max-staleness.html#idlewriteperiodms">idleWritePeriodMS</a> in the
-<a href="https://github.com/mongodb/specifications/tree/master/source/max-staleness">Max Staleness</a> spec for details.</p>
+<a href="server-selection/../max-staleness/max-staleness.html">Max Staleness</a> spec for details.</p>
 <h4 id="smallestmaxstalenessseconds"><a class="header" href="#smallestmaxstalenessseconds">smallestMaxStalenessSeconds</a></h4>
 <p>A constant, 90 seconds. See "Smallest allowed value for maxStalenessSeconds" in the Max Staleness Spec.</p>
 <h4 id="serverselector"><a class="header" href="#serverselector">serverSelector</a></h4>
@@ -9246,9 +9252,8 @@ Otherwise, when there are no eligible secondaries, the primary is suitable.</p>
 <p><strong>nearest</strong></p>
 <p>The primary and all secondaries are candidates, but only eligible candidates are suitable.</p>
 <p><em>Note on other server types</em>: The
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec defines several other server types that could appear in a replica set. Such types are never candidates, eligible or
-suitable.</p>
+<a href="server-selection/../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec defines
+several other server types that could appear in a replica set. Such types are never candidates, eligible or suitable.</p>
 <p><span id="algorithm-for-filtering-by-staleness"></span></p>
 <h5 id="maxstalenessseconds"><a class="header" href="#maxstalenessseconds">maxStalenessSeconds</a></h5>
 <p>The maximum replication lag, in wall clock time, that a secondary can suffer and still be eligible.</p>
@@ -9262,9 +9267,8 @@ conditions is false:</p>
 maxStalenessSeconds &gt;= smallestMaxStalenessSeconds
 </code></pre>
 <p><code>heartbeatFrequencyMS</code> is defined in the
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec, and <code>idleWritePeriodMS</code> is defined to be 10 seconds in the
-<a href="https://github.com/mongodb/specifications/tree/master/source/max-staleness">Max Staleness</a> spec.</p>
+<a href="server-selection/../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec, and
+<code>idleWritePeriodMS</code> is defined to be 10 seconds in the <a href="server-selection/../max-staleness/max-staleness.html">Max Staleness</a> spec.</p>
 <p>See "Smallest allowed value for maxStalenessSeconds" in the Max Staleness Spec.</p>
 <p>mongos MUST reject a read with <code>maxStalenessSeconds</code> provided and a <code>mode</code> of 'primary'.</p>
 <p>mongos MUST reject a read with <code>maxStalenessSeconds</code> that is not a positive integer.</p>
@@ -9346,6 +9350,7 @@ db.collection.find(
     maxStalenessSeconds=120,
     hedge={'enabled': true})
 </code></pre>
+<p><span id="passing-read-preference-to-mongos"></span></p>
 <h4 id="passing-read-preference-to-mongos-and-load-balancers"><a class="header" href="#passing-read-preference-to-mongos-and-load-balancers">Passing read preference to mongos and load balancers</a></h4>
 <p>If a server of type Mongos or LoadBalancer is selected for a read operation, the read preference is passed to the
 selected mongos through the use of <code>$readPreference</code> (as a
@@ -10033,8 +10038,8 @@ fixed.</p>
 <h2 id="design-rationale-12"><a class="header" href="#design-rationale-12">Design Rationale</a></h2>
 <h3 id="use-of-topology-types"><a class="header" href="#use-of-topology-types">Use of topology types</a></h3>
 <p>The prior version of the read preference spec had only a loose definition of server or topology types. The
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec defines these terms explicitly and they are used here for consistency and clarity.</p>
+<a href="server-selection/../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec defines
+these terms explicitly and they are used here for consistency and clarity.</p>
 <h3 id="consistency-with-mongos"><a class="header" href="#consistency-with-mongos">Consistency with mongos</a></h3>
 <p>In order to ensure that behavior is consistent regardless of topology type, read preference behaviors are limited to
 those that mongos can proxy.</p>
@@ -10280,9 +10285,8 @@ filter it out because it is too stale, and be left with no eligible servers.</p>
 maxStalenessSeconds first, then tag_sets, and select Node 2.</p>
 <h2 id="references"><a class="header" href="#references">References</a></h2>
 <ul>
-<li><a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-specification</li>
-<li><a href="https://github.com/mongodb/specifications/blob/master/source/auth">Driver Authentication</a> specification</li>
+<li><a href="server-selection/../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> specification</li>
+<li><a href="server-selection/../auth/auth.html">Driver Authentication</a> specification</li>
 <li><a href="server-selection/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">Connection Monitoring and Pooling</a>
 specification</li>
 </ul>
@@ -11190,8 +11194,9 @@ killsession is running are batched together and run simultaneously after the cur
 <ol>
 <li>A later specification may allow operations (including read) to be retried any number of times during a singular
 timeout period.</li>
-<li>Any future changes to the the applicable parts of <a href="retryable-reads/../retryable-writes/">retryable writes specification</a> may also
-need to be reflected in the retryable reads specification, and vice versa.</li>
+<li>Any future changes to the the applicable parts of
+<a href="retryable-reads/../retryable-writes/retryable-writes.html">retryable writes specification</a> may also need to be reflected in the
+retryable reads specification, and vice versa.</li>
 <li>We may revisit the decision not retry <code>Cursor.getMore()</code> (see <a href="retryable-reads/retryable-reads.html#qa">Q&amp;A</a>).</li>
 <li>Once <a href="https://jira.mongodb.org/browse/DRIVERS-560">DRIVERS-560</a> is resolved, tests will be added to allow testing
 Retryable Reads on MongoDB 3.6. See the <a href="retryable-reads/./tests/README.html">test plan</a> for additional information.</li>
@@ -11221,7 +11226,7 @@ attempt, we can reasonably assume that there is a persistent outage. In the case
 attempts are fruitless and would waste time. See
 <a href="https://emptysqua.re/blog/how-to-write-resilient-mongodb-applications/">How To Write Resilient MongoDB Applications</a>
 for additional discussion on this strategy.</p>
-<p>However when <a href="retryable-reads/../client-side-operations-timeout/client-side-operations-timeout.rst">Client Side Operations Timeout</a> is
+<p>However when <a href="retryable-reads/../client-side-operations-timeout/client-side-operations-timeout.html">Client Side Operations Timeout</a> is
 enabled, the driver will retry multiple times until the operation succeeds, a non-retryable error is encountered, or the
 timeout expires. Retrying multiple times provides greater resilience to cascading failures such as rolling server
 restarts during planned maintenance events.</p>
@@ -11770,7 +11775,7 @@ default). If server selection times out during this retry attempt, we can reason
 outage. In the case of a persistent outage, multiple retry attempts are fruitless and would waste time. See
 <a href="https://emptysqua.re/blog/how-to-write-resilient-mongodb-applications/">How To Write Resilient MongoDB Applications</a>
 for additional discussion on this strategy.</p>
-<p>However when <a href="retryable-writes/../client-side-operations-timeout/client-side-operations-timeout.rst">Client Side Operations Timeout</a> is
+<p>However when <a href="retryable-writes/../client-side-operations-timeout/client-side-operations-timeout.html">Client Side Operations Timeout</a> is
 enabled, the driver will retry multiple times until the operation succeeds, a non-retryable error is encountered, or the
 timeout expires. Retrying multiple times provides greater resilience to cascading failures such as rolling server
 restarts during planned maintenance events.</p>
@@ -12329,8 +12334,19 @@ for GridFS API operations MUST internally set the <code>timeoutMode</code> optio
 <code>timeoutMS</code> option is set. Drivers MUST document the behavior of <code>runCommand</code> for this case and MUST NOT attempt to
 check the command document for the presence of a <code>maxTimeMS</code> field.</p>
 <p>See <a href="client-side-operations-timeout/client-side-operations-timeout.html#runcommand-behavior">runCommand behavior</a>.</p>
+<h3 id="explain"><a class="header" href="#explain">Explain</a></h3>
+<blockquote>
+<p>[!NOTE]
+This portion of the specification is only relevant for drivers that provide <code>explain</code> helpers.</p>
+</blockquote>
+<p>When <code>timeoutMS</code> is specified, drivers MUST provide a way to specify timeoutMS that results in maxTimeMS being set on
+the <code>explain</code> command. For example, Node's implementation might look like:</p>
+<pre><code class="language-typescript">collection.find({}).explain({ timeoutMS: 1000 });
+// sends:
+{ explain: { find: ... }, maxTimeMS: &lt;remaining timeoutMS - min rtt&gt;}
+</code></pre>
 <h2 id="test-plan-17"><a class="header" href="#test-plan-17">Test Plan</a></h2>
-<p>See the <a href="client-side-operations-timeout/tests/README.html">README.rst</a> in the tests directory.</p>
+<p>See the <a href="client-side-operations-timeout/tests/README.html">README.md</a> in the tests directory.</p>
 <h2 id="motivation-for-change-13"><a class="header" href="#motivation-for-change-13">Motivation for Change</a></h2>
 <p>Users have many options to set timeouts for various parts of operation execution including, but not limited to,
 <code>serverSelectionTimeoutMS</code>, <code>socketTimeoutMS</code>, <code>connectTimeoutMS</code>, <code>maxTimeMS</code>, and <code>wTimeoutMS</code>. As a result, users are
@@ -12501,6 +12517,7 @@ changes, the default would continue to cap the stream lifetime but there could b
 timeout for each database operation. This would mimic using <code>timeoutMode=ITERATION</code> for cursors.</p>
 <h2 id="changelog-23"><a class="header" href="#changelog-23">Changelog</a></h2>
 <ul>
+<li>2024-09-12: Specify that explain helpers support support timeoutMS.</li>
 <li>2023-12-07: Migrated from reStructuredText to Markdown.</li>
 <li>2022-11-17: Use minimum RTT for maxTimeMS calculation instead of 90th percentile RTT.</li>
 <li>2022-10-05: Remove spec front matter.</li>
@@ -13368,7 +13385,7 @@ standalone node are causally consistent automatically because there is only one 
 }
 </code></pre>
 <p>For the lists of commands that support causally consistent reads, see
-<a href="causal-consistency/../read-write-concern/read-write-concern.html#read-concern/">ReadConcern</a> spec.</p>
+<a href="causal-consistency/../read-write-concern/read-write-concern.html#read-concern">ReadConcern</a> spec.</p>
 <p>The driver MUST merge the <code>ReadConcern</code> specified for the operation with the <code>operationTime</code> from the <code>ClientSession</code>
 (which goes in the <code>afterClusterTime</code> field) to generate the combined <code>readConcern</code> to send to the server. If the level
 property of the read concern for the operation is null then the driver MUST NOT include a <code>level</code> field alongside the
@@ -13972,7 +13989,7 @@ containing the message "Transaction already in progress" without modifying any s
 <p>startTransaction SHOULD report an error if the driver can detect that transactions are not supported by the deployment.
 A deployment does not support transactions when the deployment does not support sessions, or maxWireVersion &lt; 7, or the
 maxWireVersion &lt; 8 and the topology type is Sharded, see
-<a href="transactions/../sessions/driver-sessions.html#how-to-check-whether-a-deployment-supports-sessions">How to Check Whether a Deployment Supports Sessions</a>.
+<a href="transactions/../sessions/driver-sessions.html#how-to-tell-whether-a-connection-supports-sessions">How to Tell Whether a Connection Supports Sessions</a>.
 Note that checking the maxWireVersion does not guarantee that the deployment supports transactions, for example a
 MongoDB 4.0 replica set using MMAPv1 will report maxWireVersion 7 but does not support transactions. In this case,
 Drivers rely on the deployment to report an error when a transaction is started.</p>
@@ -15113,9 +15130,9 @@ primary node in replica set topology, unless directly connected to a secondary n
 enumeration. MongoDB 3.6 introduced a <code>nameOnly</code> option to the <code>listDatabases</code> database command. The driver API should
 to be expanded to support this option.</p>
 <h2 id="design-rationale-22"><a class="header" href="#design-rationale-22">Design Rationale</a></h2>
-<p>The design of this specification is inspired by the <a href="./enumerate-collections.rst">Collection Enumeration</a> and
-<a href="./enumerate-indexes.rst">Index Enumeration</a> specifications. Since most drivers already implement a <code>listDatabases</code>
-command helper in some fashion, this spec is flexible when it comes to existing APIs.</p>
+<p>The design of this specification is inspired by the <a href="./enumerate-collections.html">Collection Enumeration</a> and
+<a href="./index-management/index-management.html">Index Management</a> specifications. Since most drivers already implement a
+<code>listDatabases</code> command helper in some fashion, this spec is flexible when it comes to existing APIs.</p>
 <h2 id="backwards-compatibility-19"><a class="header" href="#backwards-compatibility-19">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns. This specification merely deals with how to enumerate databases in
 future versions of MongoDB and allows flexibility for existing driver APIs.</p>
@@ -15724,7 +15741,7 @@ interface IndexView extends Iterable&lt;Document&gt; {
    * requirement is dropped in favor of the driver language standard for handling iteration
    * over a sequence of objects.
    *
-   * @see https://github.com/mongodb/specifications/blob/master/source/enumerate-indexes.rst
+   * @see https://github.com/mongodb/specifications/blob/master/source/enumerate-indexes.md
    *
    * @note For drivers that cannot make the IndexView iterable, they MUST implement a list
    *   method. See below.
@@ -16099,6 +16116,7 @@ mention of the <code>ns</code> field is necessary.</li>
 populate the <code>ns</code> field of the models with the appropriate namespace if the server does not report it in the
 <code>listIndexes</code> command response. The <code>ns</code> field is not required to be a part of the models, however.</li>
 </ul>
+<p><span id="enumerate-indexes"></span></p>
 <h4 id="getting-index-names"><a class="header" href="#getting-index-names">Getting Index Names</a></h4>
 <p>Drivers MAY implement a method to enumerate all indexes, and return only the index names. The helper operates the same
 as the following example:</p>
@@ -16513,7 +16531,10 @@ acceptable.</li>
 <p>Drivers MUST enforce timeouts for all operations per the
 <a href="crud/../client-side-operations-timeout/client-side-operations-timeout.html">Client Side Operations Timeout</a> specification. All
 operations that return cursors MUST support the timeout options documented in the
-<a href="crud/../client-side-operations-timeout/client-side-operations-timeout.html#cursors">Cursors</a> section of that specification.</p>
+<a href="crud/../client-side-operations-timeout/client-side-operations-timeout.html#cursors">Cursors</a> section of that specification.
+All explain helpers MUST support the timeout options documented in the
+<a href="crud/../client-side-operations-timeout/client-side-operations-timeout.html#explain">Explain Helpers</a> section of that
+specification.</p>
 <h3 id="api-1"><a class="header" href="#api-1">API</a></h3>
 <h4 id="read"><a class="header" href="#read">Read</a></h4>
 <blockquote>
@@ -16584,9 +16605,6 @@ drivers will have different requirements, types, and idioms.</p>
    * contain other meta operators like $maxScan. However, do not validate this document
    * as it would be impossible to be forwards and backwards compatible. Let the server
    * handle the validation.
-   *
-   * Note: If $explain is specified in the modifiers, the return value is a single
-   * document. This could cause problems for static languages using strongly typed entities.
    *
    * Note: result iteration should be backed by a cursor. Depending on the implementation,
    * the cursor may back the returned Iterable instance or an iterator that it produces.
@@ -18160,6 +18178,7 @@ class BulkWriteException {
 
 }
 </code></pre>
+<p><span id="find"></span></p>
 <h5 id="find-and-modify"><a class="header" href="#find-and-modify">Find And Modify</a></h5>
 <pre><code class="language-typescript">interface Collection {
 
@@ -18544,6 +18563,41 @@ can be enforced within a single server selection attempt.</p>
 the <a href="crud/../message/OP_MSG.html#global-command-arguments">$readPreference global command argument</a> and
 <a href="crud/../server-selection/server-selection.html#passing-read-preference-to-mongos-and-load-balancers">passing read preference to mongos and load balancers</a>
 (if applicable).</p>
+<h3 id="explain-1"><a class="header" href="#explain-1">Explain</a></h3>
+<blockquote>
+<p>[!NOTE]
+Explain helpers are optional. Drivers that do not provide explain helpers may ignore this section.</p>
+</blockquote>
+<pre><code class="language-typescript">interface ExplainOptions {
+  /**
+   * The maximum amount of time to allow the explain to run.
+   *
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
+   *
+   * NOTE: This option is deprecated in favor of timeoutMS.
+   */
+  maxTimeMS: Optional&lt;Int64&gt;;
+}
+</code></pre>
+<p>Drivers MUST ensure that its helper permits users to specify a timeout (maxTimeMS or timeoutMS) for the explain command
+specifically. An example, using Node, might look like:</p>
+<pre><code class="language-typescript">collection.find({ name: 'john doe' }).explain({ maxTimeMS: 1000 });
+
+// sends:
+{ 
+  explain: { find: &lt;collection&gt;, query: { name: 'john doe' } },
+  maxTimeMS: 1000
+}
+
+collection.find({ name: 'john doe' }).explain({ timeoutMS: 1000 });
+
+// sends:
+{ 
+  explain: { find: &lt;collection&gt;, query: { name: 'john doe' } },
+  maxTimeMS: &lt;1000 - min rtt&gt;
+}
+</code></pre>
+<p>Drivers MUST document how users can specify options on their explain helpers.</p>
 <h2 id="test-plan-24"><a class="header" href="#test-plan-24">Test Plan</a></h2>
 <p>See the <a href="crud/tests/README.html">README</a> for tests.</p>
 <h2 id="motivation-4"><a class="header" href="#motivation-4">Motivation</a></h2>
@@ -18622,6 +18676,12 @@ with this backwards breaking change. Alternatively, it might be decided that ano
 api be consistent with the rest of the methods in the CRUD family of operations. However, the fluent-bulk-api is still
 able to be used as this change is non-backwards breaking. Any driver which implemented the fluent bulk API should
 deprecate it and drivers that have not built it should not do so.</p>
+<p>Q: Should drivers offer explain helpers?<br />
+Originally, it was determined that explain should not be exposed via
+specialized APIs in drivers because it it was deemed to be an unusual use-case for a driver. We'd like users to use the
+shell for this purpose. However, explain is still possible from a driver. Some drivers have historically provided
+explain helpers and continue to do so. Drivers that do not offer explain helpers can run explain commands using the
+runCommand API.</p>
 <p>Q: What about explain?</p>
 <p>Explain has been determined to be not a normal use-case for a driver. We'd like users to use the shell for this purpose.
 However, explain is still possible from a driver. For find, it can be passed as a modifier. Aggregate can be run using a
@@ -18677,6 +18737,9 @@ the Stable API, it was decided that this change was acceptable to make in minor 
 aforementioned allowance in the SemVer spec.</p>
 <h2 id="changelog-32"><a class="header" href="#changelog-32">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-09-12: Specify that explain helpers support maxTimeMS.</p>
+</li>
 <li>
 <p>2024-02-20: Migrated from reStructuredText to Markdown.</p>
 </li>
@@ -19454,7 +19517,7 @@ paragraphs; re-ordered the response field sections.</p>
 in this specification allows users to perform insert, update, and delete operations against mixed namespaces in a
 minimized number of round trips, and to receive detailed results for each operation performed. This API is distinct from
 the <a href="crud/../crud/crud.html#insert-update-replace-delete-and-bulk-writes">collection-level bulkWrite method</a> defined in the
-CRUD specification and the <a href="crud/../driver-bulk-update.rst">deprecated bulk write specification</a>.</p>
+CRUD specification.</p>
 <h2 id="specification-32"><a class="header" href="#specification-32">Specification</a></h2>
 <blockquote>
 <p>[!NOTE]
@@ -19892,8 +19955,7 @@ the ones defined here exactly.</p>
     ...additional operation-agnostic fields
 }
 </code></pre>
-<p>Drivers MUST use document sequences (<a href="crud/../message/OP_MSG.rst"><code>OP_MSG</code></a> payload type 1) for the <code>ops</code> and <code>nsInfo</code>
-fields.</p>
+<p>Drivers MUST use document sequences (<a href="crud/../message/OP_MSG.html"><code>OP_MSG</code></a> payload type 1) for the <code>ops</code> and <code>nsInfo</code> fields.</p>
 <p>The <code>bulkWrite</code> command is executed on the "admin" database.</p>
 <h3 id="operations-3"><a class="header" href="#operations-3">Operations</a></h3>
 <p>The <code>ops</code> field is a list of write operation documents. The first entry in each document has the name of the operation
@@ -20112,8 +20174,7 @@ immediately throw the exception. Otherwise, drivers MUST continue to iterate the
 <code>bulkWrite</code> batches.</p>
 <h2 id="test-plan-26"><a class="header" href="#test-plan-26">Test Plan</a></h2>
 <p>The majority of tests for <code>MongoClient.bulkWrite</code> are written in the
-<a href="crud/../unified-test-format/unified-test-format.html">Unified Test Format</a> and reside in the
-<a href="crud/../crud/tests/unified/">CRUD unified tests directory</a>.</p>
+<a href="crud/../unified-test-format/unified-test-format.html">Unified Test Format</a> and reside in the CRUD unified tests directory.</p>
 <p>Additional prose tests are specified <a href="crud/../crud/tests/README.html">here</a>. These tests require constructing very large
 documents to test batch splitting, which is not feasible in the unified test format at the time of writing this
 specification.</p>
@@ -20201,7 +20262,7 @@ the API drivers must implement as well as how that API is translated into messag
 <h2 id="terminology-1"><a class="header" href="#terminology-1">Terminology</a></h2>
 <p>MaxWireVersion The <code>maxWireVersion</code> value reported by the <code>hello</code> command.</p>
 <p>Server Selection The process of selecting a server to read or write from. See
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-selection">the server selection specification</a>.</p>
+<a href="read-write-concern/../server-selection/server-selection.html">the server selection specification</a>.</p>
 <h2 id="specification-33"><a class="header" href="#specification-33">Specification</a></h2>
 <p>This specification includes guidance for implementing <a href="read-write-concern/read-write-concern.html#read-concern">Read Concern</a> and <a href="read-write-concern/read-write-concern.html#write-concern">Write Concern</a>
 in a driver. It does not define how read and write concern behave or are implemented on the server.</p>
@@ -20287,6 +20348,7 @@ when sending the command.</li>
 driver MUST include the command's <code>ReadConcern</code> when sending the command. This includes if the command specifies the
 server default <code>ReadConcern</code>, so that the command can override the <code>Client</code>, <code>Database</code>, or <code>Collection</code>'s <code>ReadConcern</code>
 to use the server default instead.</p>
+<p><span id="generic-command-method"></span></p>
 <h5 id="generic-command-method-1"><a class="header" href="#generic-command-method-1">Generic Command Method</a></h5>
 <p>If your driver offers a generic <code>RunCommand</code> method on your <code>database</code> object, <code>ReadConcern</code> MUST NOT be applied
 automatically to any command. A user wishing to use a <code>ReadConcern</code> in a generic command must supply it manually.</p>
@@ -20593,7 +20655,7 @@ mongodb://server:27017/db?w=majority&amp;wtimeoutMS=1000
 <p>There should be no backwards compatibility concerns. This specification merely deals with how to specify read and write
 concerns.</p>
 <h2 id="test-plan-27"><a class="header" href="#test-plan-27">Test Plan</a></h2>
-<p>Yaml tests are located here: <a href="https://github.com/mongodb/specifications/tree/master/source/read-write-concern/tests">https://github.com/mongodb/specifications/tree/master/source/read-write-concern/tests</a></p>
+<p>Yaml tests are located <a href="read-write-concern/../read-write-concern/tests/README.html">here</a></p>
 <p>Below are English descriptions of other items that should be tested:</p>
 <h3 id="readconcern-1"><a class="header" href="#readconcern-1">ReadConcern</a></h3>
 <ol>
@@ -23185,7 +23247,7 @@ This is a JSON Schema based on draft 4 of the JSON Schema specification,
 <p><strong><a href="client-side-encryption/client-side-encryption.html#crypt_shared">crypt_shared</a></strong></p>
 <p>This term, spelled in all-lowercase with an underscore, refers to the client-side field-level-encryption dynamic library
 provided as part of a MongoDB Enterprise distribution. It replaces <a href="client-side-encryption/client-side-encryption.html#mongocryptd">mongocryptd</a> as the method of
-<code>marking-up a database command for encryption &lt;subtype6.intent-to-encrypt&gt;</code>.</p>
+<a href="client-side-encryption/./subtype6.html#intent-to-encrypt">marking-up a database command for encryption</a>.</p>
 <p>See also:</p>
 <blockquote>
 <ul>
@@ -23194,9 +23256,8 @@ provided as part of a MongoDB Enterprise distribution. It replaces <a href="clie
 </ul>
 </blockquote>
 <p><strong>ciphertext</strong></p>
-<p>One of the data formats of
-<a href="https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/subtype6.rst">BSON binary subtype 6</a>,
-representing an encoded BSON document containing encrypted ciphertext and metadata.</p>
+<p>One of the data formats of <a href="client-side-encryption/./subtype6.html">BSON binary subtype 6</a>, representing an encoded BSON document containing
+encrypted ciphertext and metadata.</p>
 <p><strong>FLE</strong></p>
 <p>FLE is the first version of Client-Side Field Level Encryption. FLE is almost entirely client-side with the exception of
 server-side JSON schema.</p>
@@ -23315,7 +23376,7 @@ connect to <a href="client-side-encryption/client-side-encryption.html#mongocryp
 <h3 id="crypt_shared"><a class="header" href="#crypt_shared">crypt_shared</a></h3>
 <p><a href="client-side-encryption/client-side-encryption.html#crypt_shared">crypt_shared</a> is a dynamically-loaded C++ library providing query analysis for auto-encryption. It
 replaces <a href="client-side-encryption/client-side-encryption.html#mongocryptd">mongocryptd</a> for performing query analysis to -
-<a href="client-side-encryption/./subtype6#intent-to-encrypt">mark-up sensitive fields within a command</a>.</p>
+<a href="client-side-encryption/./subtype6.html#intent-to-encrypt">mark-up sensitive fields within a command</a>.</p>
 <p>Drivers are not required to load and interact with <a href="client-side-encryption/client-side-encryption.html#crypt_shared">crypt_shared</a> directly. Instead, they inform
 <a href="client-side-encryption/client-side-encryption.html#libmongocrypt">libmongocrypt</a> where to find <a href="client-side-encryption/client-side-encryption.html#crypt_shared">crypt_shared</a> and <a href="client-side-encryption/client-side-encryption.html#libmongocrypt">libmongocrypt</a> will
 handle <a href="client-side-encryption/client-side-encryption.html#crypt_shared">crypt_shared</a> communication automatically.</p>
@@ -23552,6 +23613,7 @@ interface KMIPKMSOptions {
    "aws:name2": { "accessKeyId": "foo2", "secretAccessKey": "bar2" }
 }
 </code></pre>
+<p><span id="automatic-credentials"></span></p>
 <h5 id="automatic-credentials"><a class="header" href="#automatic-credentials">Automatic Credentials</a></h5>
 <p>Certain values of <a href="client-side-encryption/client-side-encryption.html#kmsproviders">KMSProviders</a> indicate a request by the user that the associated KMS providers should
 be populated lazily on-demand. The driver MUST be able to populate the respective options object on-demand
@@ -23834,6 +23896,7 @@ $EF$ is $L$ <code>["options"]["encryptedFields"]</code>.</li>
 </li>
 <li>Otherwise, $EF$ is considered <em>not-found</em>.</li>
 </ol>
+<p><span id="create-collection-helper"></span></p>
 <h4 id="create-collection-helper"><a class="header" href="#create-collection-helper">Create Collection Helper</a></h4>
 <p>Drivers MUST support a BSON document option named <code>encryptedFields</code> for any
 <a href="https://www.mongodb.com/docs/manual/reference/command/create">create</a> command helpers (e.g.
@@ -23874,7 +23937,7 @@ is in the <code>AutoEncryptionOpts.encryptedFieldsMap</code>.</li>
 </ul>
 <h4 id="create-encrypted-collection-helper"><a class="header" href="#create-encrypted-collection-helper">Create Encrypted Collection Helper</a></h4>
 <p>To support automatic generation of encryption data keys, a helper $CreateEncryptedCollection(CE, database, collName,
-collOpts, kmsProvider, masterKey)$ is defined, where $CE$ is a <a href="client-side-encryption/client-side-encryption.html#clientencryption-1">ClientEncryption</a> object,
+collOpts, kmsProvider, masterKey)$ is defined, where $CE$ is a <a href="client-side-encryption/client-side-encryption.html#clientencryption">ClientEncryption</a> object,
 $kmsProvider$ is a <a href="client-side-encryption/client-side-encryption.html#KMSProvider">KMSProvider</a> and $masterKey$ is equivalent to the $masterKey$ defined in
 <a href="client-side-encryption/client-side-encryption.html#datakeyopts">DataKeyOpts</a>. It has the following behavior:</p>
 <ul>
@@ -24113,7 +24176,7 @@ generated from a cryptographically secure random device.</p>
    bulkWriteResult: Optional&lt;BulkWriteResult&gt;;
 }
 </code></pre>
-<p><code>bulkWriteResult</code> is the <a href="client-side-encryption/../crud/crud.html##write-results">result of the bulk write operation</a> used to update the key
+<p><code>bulkWriteResult</code> is the <a href="client-side-encryption/../crud/crud.html#write-results">result of the bulk write operation</a> used to update the key
 vault collection with one or more rewrapped data keys. If <code>rewrapManyDataKey()</code> does not find any matching keys to
 rewrap, no bulk write operation will be executed and this field will be unset. This field may also be unset if the bulk
 write operation is unacknowledged as permitted by the <a href="client-side-encryption/../crud/crud.html#write-results">CRUD API Spec</a>.</p>
@@ -24467,8 +24530,7 @@ fails. If the MongoClient fails to connect after spawning, the server selection 
 <p>Single-threaded drivers MUST connect with
 <a href="client-side-encryption/../server-selection/server-selection.html#serverselectiontryonce">serverSelectionTryOnce=false</a>,
 <code>connectTimeoutMS=10000</code>, and MUST bypass
-<a href="client-side-encryption/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#cooldownms">cooldownMS</a> when connecting to
-mongocryptd. See
+<a href="client-side-encryption/../server-discovery-and-monitoring/server-monitoring.html#cooldownms">cooldownMS</a> when connecting to mongocryptd. See
 <a href="client-side-encryption/client-side-encryption.html#why-are-serverselectiontryonce-and-cooldownms-disabled-for-single-threaded-drivers-connecting-to-mongocryptd">Why are serverSelectionTryOnce and cooldownMS disabled for single-threaded drivers connecting to mongocryptd?</a></p>
 <p>If the ClientEncryption is configured with <code>mongocryptdBypassSpawn=true</code>, then the driver is not responsible for
 spawning mongocryptd. If server selection ever fails when connecting to mongocryptd, the server selection error is
@@ -24524,10 +24586,8 @@ However, errors are only raised for automatic encryption/decryption against olde
 CommandStartedEvent, and decryption MUST occur after generating a CommandSucceededEvent.</p>
 <h2 id="size-limits-for-write-commands"><a class="header" href="#size-limits-for-write-commands">Size limits for Write Commands</a></h2>
 <p>Automatic encryption requires the driver to serialize write commands as a single BSON document before automatically
-encrypting with libmongocrypt (analogous to constructing
-<a href="https://github.com/mongodb/specifications/blob/70628e30c96361346f7b6872571c0ec4d54846cb/source/message/OP_MSG.rst#sections">OP_MSG payload type 0</a>,
-not a document sequence). Automatic encryption returns a single (possibly modified) BSON document as the command to
-send.</p>
+encrypting with libmongocrypt (analogous to constructing <a href="client-side-encryption/../message/OP_MSG.html#sections">OP_MSG payload type 0</a>, not a
+document sequence). Automatic encryption returns a single (possibly modified) BSON document as the command to send.</p>
 <p>Because automatic encryption increases the size of commands, the driver MUST split bulk writes at a reduced size limit
 before undergoing automatic encryption. The write payload MUST be split at 2MiB (2097152). Where batch splitting occurs
 relative to automatic encryption is implementation-dependent.</p>
@@ -24637,9 +24697,7 @@ Data keys may be retrieved by querying the "_id" with a UUID or by querying the 
    uint8 ciphertext[ciphertext_length];
 }
 </code></pre>
-<p>See
-<a href="https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/subtype6.rst">Driver Spec: BSON Binary Subtype 6</a>
-for more information.</p>
+<p>See <a href="client-side-encryption/./subtype6.html">Driver Spec: BSON Binary Subtype 6</a> for more information.</p>
 <h3 id="jsonschema-encrypt"><a class="header" href="#jsonschema-encrypt">JSONSchema "encrypt"</a></h3>
 <p>The additional support for encryption in JSONSchema will be documented in the MongoDB manual. But the following is an
 example:</p>
@@ -24883,7 +24941,7 @@ server before making another attempt. Meaning if the first attempt to mongocrypt
 observe a 5 second delay. This is not configurable in the URI, so this must be overridden internally. Since mongocryptd
 is a local process, there should only be a very short delay after spawning mongocryptd for it to start listening on
 sockets. See the SDAM spec description of
-<a href="client-side-encryption/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#cooldownms">cooldownMS</a>.</p>
+<a href="client-side-encryption/../server-discovery-and-monitoring/server-monitoring.html#cooldownms">cooldownMS</a>.</p>
 <p>Because single threaded drivers may exceed <code>serverSelectionTimeoutMS</code> by the duration of the topology scan,
 <code>connectTimeoutMS</code> is also reduced.</p>
 <h3 id="whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client"><a class="header" href="#whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client">What's the deal with metadataClient, keyVaultClient, and the internal client?</a></h3>
@@ -25248,7 +25306,7 @@ queryable encrypted fields in a new collection.</p>
 <p>Client side encryption requires a new binary subtype to store (1) encrypted ciphertext with metadata, and (2) binary
 markings indicating what values must be encrypted in a document. (1) is stored in the server, but (2) is only used in
 the communication protocol between libmongocrypt and mongocryptd described in
-<a href="https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/client-side-encryption.rst">Driver Spec: Client Side Encryption Encryption</a>.</p>
+<a href="client-side-encryption/../client-side-encryption/client-side-encryption.html">Driver Spec: Client Side Encryption Encryption</a>.</p>
 <h2 id="meta-40"><a class="header" href="#meta-40">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
@@ -25305,8 +25363,7 @@ intent-to-encrypt markings which are only used between libmongocrypt and mongocr
 </tbody></table>
 </div>
 <h2 id="test-plan-31"><a class="header" href="#test-plan-31">Test Plan</a></h2>
-<p>Covered in
-<a href="https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/client-side-encryption.rst">Driver Spec: Client Side Encryption Encryption</a>.</p>
+<p>Covered in <a href="client-side-encryption/../client-side-encryption/client-side-encryption.html">Driver Spec: Client Side Encryption Encryption</a>.</p>
 <h2 id="design-rationale-26"><a class="header" href="#design-rationale-26">Design Rationale</a></h2>
 <h3 id="why-not-use-a-new-bson-type"><a class="header" href="#why-not-use-a-new-bson-type">Why not use a new BSON type?</a></h3>
 <p>An alternative to using a new binary subtype would be introducing a new BSON type. This would be a needless backwards
@@ -26468,7 +26525,7 @@ convert structured output to traditional unstructured messages for users who wan
 support both types of logging.</p>
 <p>Note that drivers implementing unstructured logging MUST still support some internal way to intercept the data contained
 in messages in a structured form, as this is required to implement the unified tests for logging conformance. See the
-<a href="logging/../unified-test-format/unified-test-format.html#expectedLogMessage">unified test format specification</a> for details.</p>
+<a href="logging/../unified-test-format/unified-test-format.html#expectedlogmessage">unified test format specification</a> for details.</p>
 <h4 id="representing-documents-in-log-messages"><a class="header" href="#representing-documents-in-log-messages">Representing Documents in Log Messages</a></h4>
 <p>BSON documents MUST be represented in relaxed extended JSON when they appear in log messages to improve readability.</p>
 <h4 id="representing-errors-in-log-messages"><a class="header" href="#representing-errors-in-log-messages">Representing Errors in Log Messages</a></h4>
@@ -26802,29 +26859,29 @@ in a driver, and they SHOULD be deprecated and removed from drivers that impleme
 </code></pre>
 <h3 id="connection-pool-members-1"><a class="header" href="#connection-pool-members-1">Connection Pool Members</a></h3>
 <h4 id="connection-3"><a class="header" href="#connection-3">Connection</a></h4>
-<p>A driver-defined wrapper around a single TCP connection to an Endpoint. A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> has the following
+<p>A driver-defined wrapper around a single TCP connection to an Endpoint. A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> has the following
 properties:</p>
 <ul>
-<li><strong>Single Endpoint:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST be associated with a single Endpoint. A
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST NOT be associated with multiple Endpoints.</li>
-<li><strong>Single Lifetime:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST NOT be used after it is closed.</li>
-<li><strong>Single Owner:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST belong to exactly one Pool, and MUST NOT be shared across
-multiple pools</li>
-<li><strong>Single Track:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST limit itself to one request / response at a time. A
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST NOT multiplex/pipeline requests to an Endpoint.</li>
-<li><strong>Monotonically Increasing ID:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST have an ID number associated with it.
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> IDs within a Pool MUST be assigned in order of creation, starting at 1 and increasing by 1
+<li><strong>Single Endpoint:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST be associated with a single Endpoint. A
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST NOT be associated with multiple Endpoints.</li>
+<li><strong>Single Lifetime:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST NOT be used after it is closed.</li>
+<li><strong>Single Owner:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST belong to exactly one Pool, and MUST NOT be shared across multiple
+pools</li>
+<li><strong>Single Track:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST limit itself to one request / response at a time. A
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST NOT multiplex/pipeline requests to an Endpoint.</li>
+<li><strong>Monotonically Increasing ID:</strong> A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST have an ID number associated with it.
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> IDs within a Pool MUST be assigned in order of creation, starting at 1 and increasing by 1
 for each new Connection.</li>
 <li><strong>Valid Connection:</strong> A connection MUST NOT be checked out of the pool until it has successfully and fully completed a
 MongoDB Handshake and Authentication as specified in the <a href="connection-monitoring-and-pooling/../mongodb-handshake/handshake.html">Handshake</a>,
 <a href="connection-monitoring-and-pooling/../compression/OP_COMPRESSED.html">OP_COMPRESSED</a>, and <a href="connection-monitoring-and-pooling/../auth/auth.html">Authentication</a> specifications.</li>
-<li><strong>Perishable</strong>: it is possible for a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> to become <strong>Perished</strong>. A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a>
-is considered perished if any of the following are true:
+<li><strong>Perishable</strong>: it is possible for a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> to become <strong>Perished</strong>. A <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> is
+considered perished if any of the following are true:
 <ul>
-<li><strong>Stale:</strong> The <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> 's generation does not match the generation of the parent pool</li>
-<li><strong>Idle:</strong> The <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> is currently "available" (as defined below) and has been for longer than
+<li><strong>Stale:</strong> The <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> 's generation does not match the generation of the parent pool</li>
+<li><strong>Idle:</strong> The <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> is currently "available" (as defined below) and has been for longer than
 <strong>maxIdleTimeMS</strong>.</li>
-<li><strong>Errored:</strong> The <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> has experienced an error that indicates it is no longer recommended for
+<li><strong>Errored:</strong> The <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> has experienced an error that indicates it is no longer recommended for
 use. Examples include, but are not limited to:
 <ul>
 <li>Network Error</li>
@@ -26925,7 +26982,7 @@ can be resumed by being marked as "ready". While the Pool is paused, it exhibits
 of <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> (including available and in use) MUST NOT exceed <strong>maxPoolSize</strong></li>
 <li><strong>Rate-limited:</strong> A Pool MUST limit the number of <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> being
 <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#establishing-a-connection-internal-implementation">established</a> concurrently via the <strong>maxConnecting</strong>
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options-1">pool option</a>.</li>
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">pool option</a>.</li>
 </ul>
 <pre><code class="language-typescript">interface ConnectionPool {
   /**
@@ -27019,8 +27076,8 @@ of <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.
 <p>This specification does not define how a pool is to be created, leaving it up to the driver. Creation of a connection
 pool is generally an implementation detail of the driver, i.e., is not a part of the public API of the driver. The SDAM
 specification defines
-<a href="connection-monitoring-and-pooling/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#connection-pool-creation">when</a> the driver should
-create connection pools.</p>
+<a href="connection-monitoring-and-pooling/../server-discovery-and-monitoring/server-discovery-and-monitoring.html#connection-pool-management">when</a> the driver
+should create connection pools.</p>
 <p>When a pool is created, its state MUST initially be set to "paused". Even if minPoolSize is set, the pool MUST NOT begin
 being <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#populating-the-pool-with-a-connection-internal-implementation">populated</a> with <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> until
 it has been marked as "ready". SDAM will mark the pool as "ready" on each successful check. See
@@ -27121,14 +27178,14 @@ in the SDAM specification.</p>
 <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a>. This MUST occur only while the pool is "ready". If the pool implements a background thread,
 it can be used for this. If the pool does not implement a background thread, the checkOut method is responsible for
 ensuring this requirement is met.</p>
-<p>When populating the Pool, pendingConnectionCount has to be decremented after establishing a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a>
+<p>When populating the Pool, pendingConnectionCount has to be decremented after establishing a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a>
 similarly to how it is done in <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#checking-out-a-connection">Checking Out a Connection</a> to signal that another
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> is allowed to be established. Such a signal MUST become observable to any <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#thread">Thread</a>
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> is allowed to be established. Such a signal MUST become observable to any <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#thread">Thread</a>
 after the action that
 <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#marking-a-connection-as-available-internal-implementation">marks the established Connection as "available"</a> becomes
 observable to the <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#thread">Thread</a>. Informally, this order guarantees that no <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#thread">Thread</a> tries to start
-establishing a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> when there is an "available" <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> established as a
-result of populating the Pool.</p>
+establishing a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> when there is an "available" <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> established as a result
+of populating the Pool.</p>
 <pre><code>wait until pendingConnectionCount &lt; maxConnecting and pool is "ready"
 create connection
 try:
@@ -27139,21 +27196,21 @@ except error:
   topology.handle_pre_handshake_error(error)
 </code></pre>
 <h4 id="checking-out-a-connection-1"><a class="header" href="#checking-out-a-connection-1">Checking Out a Connection</a></h4>
-<p>A Pool MUST have a method that allows the driver to check out a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a>. Checking out a
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> involves submitting a request to the WaitQueue and, once that request reaches the front of
-the queue, having the Pool find or create a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> to fulfill that request. Requests MUST be
-subject to a timeout which is computed per the rules in
+<p>A Pool MUST have a method that allows the driver to check out a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a>. Checking out a
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> involves submitting a request to the WaitQueue and, once that request reaches the front of the
+queue, having the Pool find or create a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> to fulfill that request. Requests MUST be subject to a
+timeout which is computed per the rules in
 <a href="connection-monitoring-and-pooling/../client-side-operations-timeout/client-side-operations-timeout.html#server-selection">Client Side Operations Timeout: Server Selection</a>.</p>
-<p>To service a request for a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a>, the Pool MUST first iterate over the list of available
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a>, searching for a non-perished one to be returned. If a perished <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a>
-is encountered, such a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> MUST be closed (as described in
+<p>To service a request for a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a>, the Pool MUST first iterate over the list of available
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a>, searching for a non-perished one to be returned. If a perished <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> is
+encountered, such a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> MUST be closed (as described in
 <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#closing-a-connection-internal-implementation">Closing a Connection</a>) and the iteration of available
-<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> MUST continue until either a non-perished available <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a> is found or
-the list of available <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> is exhausted.</p>
+<a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> MUST continue until either a non-perished available <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> is found or the
+list of available <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> is exhausted.</p>
 <p>If the list is exhausted, the total number of <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> is less than maxPoolSize, and
-pendingConnectionCount &lt; maxConnecting, the pool MUST create a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a>, establish it, mark it as
-"in use" and return it. If totalConnectionCount == maxPoolSize or pendingConnectionCount == maxConnecting, then the pool
-MUST wait to service the request until neither of those two conditions are met or until a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-1">Connection</a>
+pendingConnectionCount &lt; maxConnecting, the pool MUST create a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a>, establish it, mark it as "in
+use" and return it. If totalConnectionCount == maxPoolSize or pendingConnectionCount == maxConnecting, then the pool
+MUST wait to service the request until neither of those two conditions are met or until a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a>
 becomes available, re-entering the checkOut loop in either case. This waiting MUST NOT prevent
 <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> from being checked into the pool. Additionally, the Pool MUST NOT service any newer checkOut
 requests before fulfilling the original one which could not be fulfilled. For drivers that implement the WaitQueue via a
@@ -27323,8 +27380,8 @@ work as readily available and then end instead of waiting for more work. For exa
 pendingConnectionCount to become less than maxConnecting when satisfying minPoolSize, a Run MUST either proceed with the
 rest of its duties, e.g., closing available perished connections, or end.</p>
 <p>The duration of intervals between the end of one Run and the beginning of the next Run is not specified, but the
-<a href="https://github.com/mongodb/specifications/tree/master/source/connection-monitoring-and-pooling/tests">Test Format and Runner Specification</a>
-may restrict this duration, or introduce other restrictions to facilitate testing.</p>
+<a href="connection-monitoring-and-pooling/../connection-monitoring-and-pooling/tests/README.html">Test Format and Runner Specification</a> may restrict this duration,
+or introduce other restrictions to facilitate testing.</p>
 <h5 id="withconnection-1"><a class="header" href="#withconnection-1">withConnection</a></h5>
 <p>A Pool SHOULD implement a scoped resource management mechanism idiomatic to their language to prevent
 <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> from not being checked in. Examples include
@@ -27337,6 +27394,7 @@ implemented, drivers SHOULD use this method as the default method of checking ou
 the pool. If a user subscribes to Connection Monitoring events, these events MUST be emitted when specified in
 "Connection Pool Behaviors". Events SHOULD be created and subscribed to in a manner idiomatic to their language and
 driver.</p>
+<p><span id="events"></span></p>
 <h4 id="events-3"><a class="header" href="#events-3">Events</a></h4>
 <p>See the <a href="connection-monitoring-and-pooling/../load-balancers/load-balancers.html#events">Load Balancer Specification</a> for details on the <code>serviceId</code> field.</p>
 <pre><code class="language-typescript">/**
@@ -28360,8 +28418,8 @@ follows:</p>
 <p><code>ignoreCommandMonitoringEvents</code>: Optional array of one or more strings. Command names for which the test runner MUST
 ignore any observed command monitoring events. The command(s) will be ignored in addition to <code>configureFailPoint</code>
 and any commands containing sensitive information (per the
-<a href="unified-test-format/../command-logging-and-monitoring/command-monitoring.rst#security">Command Logging and Monitoring</a> spec) unless
-<code>observeSensitiveCommands</code> is true.</p>
+<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#security">Command Logging and Monitoring</a> spec)
+unless <code>observeSensitiveCommands</code> is true.</p>
 <p>Test files SHOULD NOT use this option unless one or more command monitoring events are specified in
 <a href="unified-test-format/unified-test-format.html#entity_client_observeEvents">observeEvents</a>.</p>
 </li>
@@ -28858,7 +28916,7 @@ BulkWriteException), this assertion SHOULD utilize the <a href="unified-test-for
 <li><code>eventType</code>: Optional string. Specifies the type of the monitor which captured the events. Valid values are <code>command</code>
 for <a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#events-api">Command Monitoring</a> events,
 <code>cmap</code> for <a href="unified-test-format/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#events">CMAP</a> events, and <code>sdam</code>
-for <a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events">SDAM</a>
+for <a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events-api">SDAM</a>
 events. Defaults to <code>command</code> if omitted.</li>
 <li><code>events</code>: Required array of <a href="unified-test-format/unified-test-format.html#expectedevent">expectedEvent</a> objects. List of events, which are expected to be observed
 (in this order) on the corresponding client while executing <a href="unified-test-format/unified-test-format.html#test_operations">operations</a>. If the array is empty, the
@@ -28887,7 +28945,7 @@ monitoring events as an example, <code>requestId</code> and <code>operationId</c
 <ul>
 <li>
 <p><code>commandStartedEvent</code>: Optional object. Assertions for one or more
-<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#api">CommandStartedEvent</a> fields.</p>
+<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#events-api">CommandStartedEvent</a> fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>command</code>: Optional document. A value corresponding to the expected command document. Test runners MUST follow the
@@ -28905,7 +28963,7 @@ SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node
 <ul>
 <li>
 <p><code>commandSucceededEvent</code>: Optional object. Assertions for one or more
-<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#api">CommandSucceededEvent</a> fields.</p>
+<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#events-api">CommandSucceededEvent</a> fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>reply</code>: Optional document. A value corresponding to the expected reply document. Test runners MUST follow the rules
@@ -28923,7 +28981,7 @@ SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node
 <ul>
 <li>
 <p><code>commandFailedEvent</code>: Optional object. Assertions for one or more
-<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#api">CommandFailedEvent</a> fields.</p>
+<a href="unified-test-format/../command-logging-and-monitoring/command-logging-and-monitoring.html#events-api">CommandFailedEvent</a> fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>commandName</code>: Optional string. Test runners MUST assert that the command name matches this value.</li>
@@ -29020,7 +29078,7 @@ event are non-deterministic.</li>
 <ul>
 <li>
 <p><code>serverDescriptionChangedEvent</code>: Optional object. Assertions for one or more
-<a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events">ServerDescriptionChangedEvent</a>
+<a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events-api">ServerDescriptionChangedEvent</a>
 fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
@@ -29043,7 +29101,7 @@ valid values.</li>
 <ul>
 <li>
 <p><code>serverHeartbeatStartedEvent</code>: Optional object. Assertions for one or more
-<a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events">ServerHeartbeatStartedEvent</a>
+<a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events-api">ServerHeartbeatStartedEvent</a>
 fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
@@ -29055,7 +29113,7 @@ fields.</p>
 <ul>
 <li>
 <p><code>serverHeartbeatSucceededEvent</code>: Optional object. Assertions for one or more
-<a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events">ServerHeartbeatSucceededEvent</a>
+<a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events-api">ServerHeartbeatSucceededEvent</a>
 fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
@@ -29067,7 +29125,7 @@ fields.</p>
 <ul>
 <li>
 <p><code>serverHeartbeatFailedEvent</code>: Optional object. Assertions for one or more
-<a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events">ServerHeartbeatFailedEvent</a>
+<a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events-api">ServerHeartbeatFailedEvent</a>
 fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
@@ -29079,7 +29137,7 @@ fields.</p>
 <ul>
 <li>
 <p><code>topologyDescriptionChangedEvent</code>: Optional object. Assertions for one
-<a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events">TopologyDescriptionChangedEvent</a>
+<a href="unified-test-format/../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events-api">TopologyDescriptionChangedEvent</a>
 object.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
@@ -29136,16 +29194,17 @@ exclude all log messages from observed messages that match any of the messages i
 <code>false</code>, observed logs after all specified logs have matched MUST cause a test failure; if <code>true</code>, observed logs after
 all specified logs have been matched MUST NOT cause a test failure. Defaults to <code>false</code>.</li>
 </ul>
+<p><span id="expectedLogMessage"></span></p>
 <h4 id="expectedlogmessage"><a class="header" href="#expectedlogmessage">expectedLogMessage</a></h4>
 <p>A log message which is expected to be observed while executing the test's operations.</p>
 <p>The structure of each object is as follows:</p>
 <ul>
 <li>
 <p><code>level</code>: Required string. This MUST be one of the level names listed in
-<a href="unified-test-format/logging/logging.rst#log-severity-levels">log severity levels</a>. This specifies the expected level for the log message
-and corresponds to the level used for the message in the specification that defines it. Note that since not all
-drivers will necessarily support all log levels, some driver may need to map the specified level to the corresponding
-driver-supported level. Test runners MUST assert that the actual level matches this value.</p>
+<a href="unified-test-format/../logging/logging.html#log-severity-levels">log severity levels</a>. This specifies the expected level for the log
+message and corresponds to the level used for the message in the specification that defines it. Note that since not
+all drivers will necessarily support all log levels, some driver may need to map the specified level to the
+corresponding driver-supported level. Test runners MUST assert that the actual level matches this value.</p>
 </li>
 <li>
 <p><code>component</code>: Required string. This MUST be one of the component names listed in
@@ -29642,10 +29701,11 @@ first position (e.g. <code>rewind</code> in PHP).</p>
 <h4 id="iterateuntildocumentorerror"><a class="header" href="#iterateuntildocumentorerror">iterateUntilDocumentOrError</a></h4>
 <p>Iterates the cursor until either a single document is returned or an error is raised. This operation takes no arguments.
 If <a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a> is specified, it SHOULD be a single document.</p>
-<p>Some specification sections (e.g. <a href="unified-test-format/../change-streams/tests#iterating-the-change-stream">Iterating the Change Stream</a>)
-caution drivers that implement a blocking mode of iteration (e.g. asynchronous drivers) not to iterate the cursor
-unnecessarily, as doing so could cause the test runner to block indefinitely. This should not be a concern for
-<code>iterateUntilDocumentOrError</code> as iteration only continues until either a document or error is encountered.</p>
+<p>Some specification sections (e.g.
+<a href="unified-test-format/../change-streams/tests/README.html#iterating-the-change-stream">Iterating the Change Stream</a>) caution drivers that
+implement a blocking mode of iteration (e.g. asynchronous drivers) not to iterate the cursor unnecessarily, as doing so
+could cause the test runner to block indefinitely. This should not be a concern for <code>iterateUntilDocumentOrError</code> as
+iteration only continues until either a document or error is encountered.</p>
 <h4 id="iterateonce"><a class="header" href="#iterateonce">iterateOnce</a></h4>
 <p>Performs a single iteration of the cursor. If the cursor's current batch is empty, one <code>getMore</code> MUST be attempted to
 get more results. This operation takes no arguments. If <a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a> is specified, it SHOULD
@@ -31994,7 +32054,8 @@ corpus file.</p>
 to handling "not primary" and "node is shutting down" error responses from the server.</p>
 <p>These tests apply only to replica set topologies.</p>
 <h2 id="server-fail-point"><a class="header" href="#server-fail-point">Server Fail Point</a></h2>
-<p>See: <a href="connections-survive-step-down/tests/../../transactions/tests#server-fail-point">Server Fail Point</a> in the Transactions spec test suite.</p>
+<p>See: <a href="connections-survive-step-down/tests/../../transactions/tests/legacy-test-format.html#server-fail-point">Server Fail Point</a> in the Transactions spec test
+suite.</p>
 <h3 id="disabling-fail-point-after-test-execution"><a class="header" href="#disabling-fail-point-after-test-execution">Disabling Fail Point after Test Execution</a></h3>
 <p>After each test that configures a fail point, drivers should disable the <code>failCommand</code> fail point to avoid spurious
 failures in subsequent tests. The fail point may be disabled like so:</p>
@@ -32460,7 +32521,7 @@ individual test leaves a transaction open when it finishes
 <ul>
 <li>Drivers MUST test with a version of the <code>crypt_shared</code> shared library that matches the MongoDB Server version
 running in Serverless. See
-<a href="https://github.com/mongodb/specifications/tree/e761591616849d9b507287811e77f7a359fb9587/source/client-side-encryption/tests#using-crypt-shared">Using crypt_shared</a>.</li>
+<a href="serverless-testing/../client-side-encryption/client-side-encryption.html#enabling-crypt_shared">Using crypt_shared</a>.</li>
 </ul>
 </li>
 </ul>

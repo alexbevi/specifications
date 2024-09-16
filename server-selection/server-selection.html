@@ -277,8 +277,8 @@ several such commands.</p>
 <p><strong>Server type</strong></p>
 <p>An enumerated type indicating whether a server is up or down, whether it is a mongod or mongos, whether it belongs to a
 replica set and, if so, what role it serves in the replica set. See the
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec for more details.</p>
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec for more
+details.</p>
 <p><strong>Suitable</strong></p>
 <p>Describes a server that meets all specified criteria for a read or write operation.</p>
 <p><strong>Tag</strong></p>
@@ -293,9 +293,8 @@ arbitrary user choices.</p>
 <p>The state of a deployment, including its type, which servers are members, and the server types of members.</p>
 <p><strong>Topology type</strong></p>
 <p>An enumerated type indicating the semantics for monitoring servers and selecting servers for database operations. See
-the
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec for more details.</p>
+the <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec for
+more details.</p>
 <h3 id="assumptions"><a class="header" href="#assumptions">Assumptions</a></h3>
 <ol>
 <li>Unless they explicitly override these priorities, we assume our users prefer their applications to be, in order:
@@ -308,8 +307,7 @@ reconfiguration.</li>
 </ul>
 </li>
 <li>Clients know the state of a deployment based on some form of ongoing monitoring, following the rules defined in the
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec.
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec.
 <ul>
 <li>They know which members are up or down, what their tag sets are, and their types.</li>
 <li>They know average round trip times to each available member.</li>
@@ -353,8 +351,7 @@ once after server selection fails, then either selects a server or raises an err
 an appropriate server until the selection process times out (pausing
 <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#minheartbeatfrequencyms">minHeartbeatFrequencyMS</a>
 between attempts, as required by the
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec).</p>
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec).</p>
 <p>Users of single-threaded drivers MUST be able to control this mode in one or both of these ways:</p>
 <ul>
 <li>In code, pass true or false for an option called serverSelectionTryOnce, spelled idiomatically for the language, to
@@ -369,9 +366,8 @@ for a <a href="#try-once-mode">"try once" mode</a>.)</p>
 <h4 id="heartbeatfrequencyms"><a class="header" href="#heartbeatfrequencyms">heartbeatFrequencyMS</a></h4>
 <p>This controls when topology updates are scheduled. See
 <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#heartbeatfrequencyms">heartbeatFrequencyMS</a> in
-the
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec for details.</p>
+the <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec for
+details.</p>
 <h4 id="socketcheckintervalms"><a class="header" href="#socketcheckintervalms">socketCheckIntervalMS</a></h4>
 <p>Only for single-threaded drivers.</p>
 <p>The default socketCheckIntervalMS MUST be 5000 (5 seconds), and it MAY be configurable. If socket has been idle for at
@@ -381,7 +377,7 @@ least this long, it must be checked before being used again.</p>
 <h4 id="idlewriteperiodms"><a class="header" href="#idlewriteperiodms">idleWritePeriodMS</a></h4>
 <p>A constant, how often an idle primary writes a no-op to the oplog. See
 <a href="../max-staleness/max-staleness.html#idlewriteperiodms">idleWritePeriodMS</a> in the
-<a href="https://github.com/mongodb/specifications/tree/master/source/max-staleness">Max Staleness</a> spec for details.</p>
+<a href="../max-staleness/max-staleness.html">Max Staleness</a> spec for details.</p>
 <h4 id="smallestmaxstalenessseconds"><a class="header" href="#smallestmaxstalenessseconds">smallestMaxStalenessSeconds</a></h4>
 <p>A constant, 90 seconds. See "Smallest allowed value for maxStalenessSeconds" in the Max Staleness Spec.</p>
 <h4 id="serverselector"><a class="header" href="#serverselector">serverSelector</a></h4>
@@ -420,9 +416,8 @@ Otherwise, when there are no eligible secondaries, the primary is suitable.</p>
 <p><strong>nearest</strong></p>
 <p>The primary and all secondaries are candidates, but only eligible candidates are suitable.</p>
 <p><em>Note on other server types</em>: The
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec defines several other server types that could appear in a replica set. Such types are never candidates, eligible or
-suitable.</p>
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec defines
+several other server types that could appear in a replica set. Such types are never candidates, eligible or suitable.</p>
 <p><span id="algorithm-for-filtering-by-staleness"></span></p>
 <h5 id="maxstalenessseconds"><a class="header" href="#maxstalenessseconds">maxStalenessSeconds</a></h5>
 <p>The maximum replication lag, in wall clock time, that a secondary can suffer and still be eligible.</p>
@@ -436,9 +431,8 @@ conditions is false:</p>
 maxStalenessSeconds &gt;= smallestMaxStalenessSeconds
 </code></pre>
 <p><code>heartbeatFrequencyMS</code> is defined in the
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec, and <code>idleWritePeriodMS</code> is defined to be 10 seconds in the
-<a href="https://github.com/mongodb/specifications/tree/master/source/max-staleness">Max Staleness</a> spec.</p>
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec, and
+<code>idleWritePeriodMS</code> is defined to be 10 seconds in the <a href="../max-staleness/max-staleness.html">Max Staleness</a> spec.</p>
 <p>See "Smallest allowed value for maxStalenessSeconds" in the Max Staleness Spec.</p>
 <p>mongos MUST reject a read with <code>maxStalenessSeconds</code> provided and a <code>mode</code> of 'primary'.</p>
 <p>mongos MUST reject a read with <code>maxStalenessSeconds</code> that is not a positive integer.</p>
@@ -520,6 +514,7 @@ db.collection.find(
     maxStalenessSeconds=120,
     hedge={'enabled': true})
 </code></pre>
+<p><span id="passing-read-preference-to-mongos"></span></p>
 <h4 id="passing-read-preference-to-mongos-and-load-balancers"><a class="header" href="#passing-read-preference-to-mongos-and-load-balancers">Passing read preference to mongos and load balancers</a></h4>
 <p>If a server of type Mongos or LoadBalancer is selected for a read operation, the read preference is passed to the
 selected mongos through the use of <code>$readPreference</code> (as a
@@ -1207,8 +1202,8 @@ fixed.</p>
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
 <h3 id="use-of-topology-types"><a class="header" href="#use-of-topology-types">Use of topology types</a></h3>
 <p>The prior version of the read preference spec had only a loose definition of server or topology types. The
-<a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-spec defines these terms explicitly and they are used here for consistency and clarity.</p>
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> spec defines
+these terms explicitly and they are used here for consistency and clarity.</p>
 <h3 id="consistency-with-mongos"><a class="header" href="#consistency-with-mongos">Consistency with mongos</a></h3>
 <p>In order to ensure that behavior is consistent regardless of topology type, read preference behaviors are limited to
 those that mongos can proxy.</p>
@@ -1454,9 +1449,8 @@ filter it out because it is too stale, and be left with no eligible servers.</p>
 maxStalenessSeconds first, then tag_sets, and select Node 2.</p>
 <h2 id="references"><a class="header" href="#references">References</a></h2>
 <ul>
-<li><a href="https://github.com/mongodb/specifications/tree/master/source/server-discovery-and-monitoring">Server Discovery and Monitoring</a>
-specification</li>
-<li><a href="https://github.com/mongodb/specifications/blob/master/source/auth">Driver Authentication</a> specification</li>
+<li><a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> specification</li>
+<li><a href="../auth/auth.html">Driver Authentication</a> specification</li>
 <li><a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">Connection Monitoring and Pooling</a>
 specification</li>
 </ul>

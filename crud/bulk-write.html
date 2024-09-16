@@ -183,7 +183,7 @@
 in this specification allows users to perform insert, update, and delete operations against mixed namespaces in a
 minimized number of round trips, and to receive detailed results for each operation performed. This API is distinct from
 the <a href="../crud/crud.html#insert-update-replace-delete-and-bulk-writes">collection-level bulkWrite method</a> defined in the
-CRUD specification and the <a href="../driver-bulk-update.rst">deprecated bulk write specification</a>.</p>
+CRUD specification.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <blockquote>
 <p>[!NOTE]
@@ -621,8 +621,7 @@ the ones defined here exactly.</p>
     ...additional operation-agnostic fields
 }
 </code></pre>
-<p>Drivers MUST use document sequences (<a href="../message/OP_MSG.rst"><code>OP_MSG</code></a> payload type 1) for the <code>ops</code> and <code>nsInfo</code>
-fields.</p>
+<p>Drivers MUST use document sequences (<a href="../message/OP_MSG.html"><code>OP_MSG</code></a> payload type 1) for the <code>ops</code> and <code>nsInfo</code> fields.</p>
 <p>The <code>bulkWrite</code> command is executed on the "admin" database.</p>
 <h3 id="operations"><a class="header" href="#operations">Operations</a></h3>
 <p>The <code>ops</code> field is a list of write operation documents. The first entry in each document has the name of the operation
@@ -841,8 +840,7 @@ immediately throw the exception. Otherwise, drivers MUST continue to iterate the
 <code>bulkWrite</code> batches.</p>
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
 <p>The majority of tests for <code>MongoClient.bulkWrite</code> are written in the
-<a href="../unified-test-format/unified-test-format.html">Unified Test Format</a> and reside in the
-<a href="../crud/tests/unified/">CRUD unified tests directory</a>.</p>
+<a href="../unified-test-format/unified-test-format.html">Unified Test Format</a> and reside in the CRUD unified tests directory.</p>
 <p>Additional prose tests are specified <a href="../crud/tests/README.html">here</a>. These tests require constructing very large
 documents to test batch splitting, which is not feasible in the unified test format at the time of writing this
 specification.</p>

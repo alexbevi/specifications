@@ -272,7 +272,7 @@ this option.</p>
 <p>This boolean option determines whether a MongoClient should refrain from reaching out to an OCSP endpoint i.e. whether
 non-stapled OCSP should be disabled. When set to true, a driver MUST NOT reach out to OCSP endpoints. When set to false,
 a driver MUST reach out to OCSP endpoints if needed (as described in
-<a href="#suggested-ocsp-behavior-1">Specification: Suggested OCSP Behavior</a>).</p>
+<a href="#suggested-ocsp-behavior">Specification: Suggested OCSP Behavior</a>).</p>
 <p>For drivers that pass the <a href="tests/README.html#integration-tests-permutations-to-be-tested">"Soft Fail Test"</a>, this option
 MUST default to false.</p>
 <p>For drivers that fail the "Soft Fail Test" because their TLS library exhibits hard-fail behavior when a responder is
@@ -286,7 +286,7 @@ available (i.e. no methods are defined or the CRL distribution points/OCSP endpo
 <p>This boolean option determines whether a MongoClient should refrain checking certificate revocation status. When set to
 true, a driver MUST NOT check certificate revocation status via CRLs or OCSP. When set to false, a driver MUST check
 certificate revocation status, reach out to OCSP endpoints if needed (as described in
-<a href="#suggested-ocsp-behavior-1">Specification: Suggested OCSP Behavior</a>).</p>
+<a href="#suggested-ocsp-behavior">Specification: Suggested OCSP Behavior</a>).</p>
 <p>For drivers that pass the <a href="tests/README.html#integration-tests-permutations-to-be-tested">"Soft Fail Test"</a> , this option
 MUST default to false.</p>
 <p>If a driver does not support <code>tlsDisableOCSPEndpointCheck</code> and that driver fails the "Soft Fail Test" because their TLS
@@ -406,10 +406,9 @@ provides signal about the soft/hard fail behavior in a driver's TLS library so t
 (provided that one of the non-free tier clusters is upgraded ≥ 3.6).</p>
 <h3 id="suggested-ocsp-behavior-1"><a class="header" href="#suggested-ocsp-behavior-1">Suggested OCSP Behavior</a></h3>
 <p>For drivers with finer-grain control over their OCSP behavior, the suggested OCSP behavior was chosen as a balance
-between security and availability, erring on availability while minimizing network round trips. Therefore, in the
-<a href="#suggested-ocsp-behavior-1">Specification: Suggested OCSP Behavior</a> section, in order to minimize network round trips,
-drivers are advised not to reach out to OCSP endpoints and CRL distribution points in order to verify the revocation
-status of intermediate certificates.</p>
+between security and availability, erring on availability while minimizing network round trips. Therefore, in order to
+minimize network round trips, drivers are advised not to reach out to OCSP endpoints and CRL distribution points in
+order to verify the revocation status of intermediate certificates.</p>
 <h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
 <p>An application behind a firewall with an outbound allowList that upgrades to a driver implementing this specification
 may experience connectivity issues when OCSP is enabled. This is because the driver may need to contact OCSP endpoints
@@ -494,9 +493,9 @@ allows for the configuration of a tolerance period for the acceptance of OCSP re
 not adhering to that RFC.</p>
 <h3 id="why-was-the-decision-made-to-allow-ocsp-endpoint-checking-to-be-enableddisabled-via-a-uri-option"><a class="header" href="#why-was-the-decision-made-to-allow-ocsp-endpoint-checking-to-be-enableddisabled-via-a-uri-option">Why was the decision made to allow OCSP endpoint checking to be enabled/disabled via a URI option?</a></h3>
 <p>We initially hoped that we would be able to not expose any options specifically related to OCSP to the user, in
-accordance with the "No Knobs" <a href="../../README.html#driver-mantras">drivers mantra</a> However, we later decided that users may
-benefit from having the ability to disable OCSP endpoint checking when applications are deployed behind restrictive
-firewall with outbound allowLists, and this benefit is worth adding another URI option.</p>
+accordance with the "No Knobs" <a href="../driver-mantras.html">drivers mantra</a> However, we later decided that users may benefit
+from having the ability to disable OCSP endpoint checking when applications are deployed behind restrictive firewall
+with outbound allowLists, and this benefit is worth adding another URI option.</p>
 <h2 id="appendix"><a class="header" href="#appendix">Appendix</a></h2>
 <h3 id="os-level-ocsp-cache-manipulation"><a class="header" href="#os-level-ocsp-cache-manipulation">OS-Level OCSP Cache Manipulation</a></h3>
 <h4 id="windows"><a class="header" href="#windows">Windows</a></h4>

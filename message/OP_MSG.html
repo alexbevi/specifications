@@ -282,6 +282,7 @@ and the <code>responseTo</code> field of every follow-up response will be the <c
 <p>The client MUST be prepared to receive a response without <code>moreToCome</code> set prior to completing iteration of a cursor,
 even if an earlier response for the same cursor had the <code>moreToCome</code> flag set. To continue iterating such a cursor, the
 client MUST issue an explicit <code>getMore</code> request.</p>
+<p><span id="exhaustAllowed"></span></p>
 <h5 id="exhaustallowed"><a class="header" href="#exhaustallowed">exhaustAllowed</a></h5>
 <p>Setting this flag on a request indicates to the recipient that the sender is prepared to handle multiple replies (using
 the <code>moreToCome</code> bit) to this request. The server will never produce replies with the <code>moreToCome</code> bit set unless the

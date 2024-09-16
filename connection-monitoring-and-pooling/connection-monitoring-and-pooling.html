@@ -305,29 +305,29 @@ in a driver, and they SHOULD be deprecated and removed from drivers that impleme
 </code></pre>
 <h3 id="connection-pool-members"><a class="header" href="#connection-pool-members">Connection Pool Members</a></h3>
 <h4 id="connection-1"><a class="header" href="#connection-1">Connection</a></h4>
-<p>A driver-defined wrapper around a single TCP connection to an Endpoint. A <a href="#connection-1">Connection</a> has the following
+<p>A driver-defined wrapper around a single TCP connection to an Endpoint. A <a href="#connection">Connection</a> has the following
 properties:</p>
 <ul>
-<li><strong>Single Endpoint:</strong> A <a href="#connection-1">Connection</a> MUST be associated with a single Endpoint. A
-<a href="#connection-1">Connection</a> MUST NOT be associated with multiple Endpoints.</li>
-<li><strong>Single Lifetime:</strong> A <a href="#connection-1">Connection</a> MUST NOT be used after it is closed.</li>
-<li><strong>Single Owner:</strong> A <a href="#connection-1">Connection</a> MUST belong to exactly one Pool, and MUST NOT be shared across
-multiple pools</li>
-<li><strong>Single Track:</strong> A <a href="#connection-1">Connection</a> MUST limit itself to one request / response at a time. A
-<a href="#connection-1">Connection</a> MUST NOT multiplex/pipeline requests to an Endpoint.</li>
-<li><strong>Monotonically Increasing ID:</strong> A <a href="#connection-1">Connection</a> MUST have an ID number associated with it.
-<a href="#connection-1">Connection</a> IDs within a Pool MUST be assigned in order of creation, starting at 1 and increasing by 1
+<li><strong>Single Endpoint:</strong> A <a href="#connection">Connection</a> MUST be associated with a single Endpoint. A
+<a href="#connection">Connection</a> MUST NOT be associated with multiple Endpoints.</li>
+<li><strong>Single Lifetime:</strong> A <a href="#connection">Connection</a> MUST NOT be used after it is closed.</li>
+<li><strong>Single Owner:</strong> A <a href="#connection">Connection</a> MUST belong to exactly one Pool, and MUST NOT be shared across multiple
+pools</li>
+<li><strong>Single Track:</strong> A <a href="#connection">Connection</a> MUST limit itself to one request / response at a time. A
+<a href="#connection">Connection</a> MUST NOT multiplex/pipeline requests to an Endpoint.</li>
+<li><strong>Monotonically Increasing ID:</strong> A <a href="#connection">Connection</a> MUST have an ID number associated with it.
+<a href="#connection">Connection</a> IDs within a Pool MUST be assigned in order of creation, starting at 1 and increasing by 1
 for each new Connection.</li>
 <li><strong>Valid Connection:</strong> A connection MUST NOT be checked out of the pool until it has successfully and fully completed a
 MongoDB Handshake and Authentication as specified in the <a href="../mongodb-handshake/handshake.html">Handshake</a>,
 <a href="../compression/OP_COMPRESSED.html">OP_COMPRESSED</a>, and <a href="../auth/auth.html">Authentication</a> specifications.</li>
-<li><strong>Perishable</strong>: it is possible for a <a href="#connection-1">Connection</a> to become <strong>Perished</strong>. A <a href="#connection-1">Connection</a>
-is considered perished if any of the following are true:
+<li><strong>Perishable</strong>: it is possible for a <a href="#connection">Connection</a> to become <strong>Perished</strong>. A <a href="#connection">Connection</a> is
+considered perished if any of the following are true:
 <ul>
-<li><strong>Stale:</strong> The <a href="#connection-1">Connection</a> 's generation does not match the generation of the parent pool</li>
-<li><strong>Idle:</strong> The <a href="#connection-1">Connection</a> is currently "available" (as defined below) and has been for longer than
+<li><strong>Stale:</strong> The <a href="#connection">Connection</a> 's generation does not match the generation of the parent pool</li>
+<li><strong>Idle:</strong> The <a href="#connection">Connection</a> is currently "available" (as defined below) and has been for longer than
 <strong>maxIdleTimeMS</strong>.</li>
-<li><strong>Errored:</strong> The <a href="#connection-1">Connection</a> has experienced an error that indicates it is no longer recommended for
+<li><strong>Errored:</strong> The <a href="#connection">Connection</a> has experienced an error that indicates it is no longer recommended for
 use. Examples include, but are not limited to:
 <ul>
 <li>Network Error</li>
@@ -428,7 +428,7 @@ can be resumed by being marked as "ready". While the Pool is paused, it exhibits
 of <a href="#connection">Connections</a> (including available and in use) MUST NOT exceed <strong>maxPoolSize</strong></li>
 <li><strong>Rate-limited:</strong> A Pool MUST limit the number of <a href="#connection">Connections</a> being
 <a href="#establishing-a-connection-internal-implementation">established</a> concurrently via the <strong>maxConnecting</strong>
-<a href="#connection-pool-options-1">pool option</a>.</li>
+<a href="#connection-pool-options">pool option</a>.</li>
 </ul>
 <pre><code class="language-typescript">interface ConnectionPool {
   /**
@@ -522,8 +522,8 @@ of <a href="#connection">Connections</a> (including available and in use) MUST N
 <p>This specification does not define how a pool is to be created, leaving it up to the driver. Creation of a connection
 pool is generally an implementation detail of the driver, i.e., is not a part of the public API of the driver. The SDAM
 specification defines
-<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#connection-pool-creation">when</a> the driver should
-create connection pools.</p>
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#connection-pool-management">when</a> the driver
+should create connection pools.</p>
 <p>When a pool is created, its state MUST initially be set to "paused". Even if minPoolSize is set, the pool MUST NOT begin
 being <a href="#populating-the-pool-with-a-connection-internal-implementation">populated</a> with <a href="#connection">Connections</a> until
 it has been marked as "ready". SDAM will mark the pool as "ready" on each successful check. See
@@ -624,14 +624,14 @@ in the SDAM specification.</p>
 <a href="#connection">Connections</a>. This MUST occur only while the pool is "ready". If the pool implements a background thread,
 it can be used for this. If the pool does not implement a background thread, the checkOut method is responsible for
 ensuring this requirement is met.</p>
-<p>When populating the Pool, pendingConnectionCount has to be decremented after establishing a <a href="#connection-1">Connection</a>
+<p>When populating the Pool, pendingConnectionCount has to be decremented after establishing a <a href="#connection">Connection</a>
 similarly to how it is done in <a href="#checking-out-a-connection">Checking Out a Connection</a> to signal that another
-<a href="#connection-1">Connection</a> is allowed to be established. Such a signal MUST become observable to any <a href="#thread">Thread</a>
+<a href="#connection">Connection</a> is allowed to be established. Such a signal MUST become observable to any <a href="#thread">Thread</a>
 after the action that
 <a href="#marking-a-connection-as-available-internal-implementation">marks the established Connection as "available"</a> becomes
 observable to the <a href="#thread">Thread</a>. Informally, this order guarantees that no <a href="#thread">Thread</a> tries to start
-establishing a <a href="#connection-1">Connection</a> when there is an "available" <a href="#connection-1">Connection</a> established as a
-result of populating the Pool.</p>
+establishing a <a href="#connection">Connection</a> when there is an "available" <a href="#connection">Connection</a> established as a result
+of populating the Pool.</p>
 <pre><code>wait until pendingConnectionCount &lt; maxConnecting and pool is "ready"
 create connection
 try:
@@ -642,21 +642,21 @@ except error:
   topology.handle_pre_handshake_error(error)
 </code></pre>
 <h4 id="checking-out-a-connection"><a class="header" href="#checking-out-a-connection">Checking Out a Connection</a></h4>
-<p>A Pool MUST have a method that allows the driver to check out a <a href="#connection-1">Connection</a>. Checking out a
-<a href="#connection-1">Connection</a> involves submitting a request to the WaitQueue and, once that request reaches the front of
-the queue, having the Pool find or create a <a href="#connection-1">Connection</a> to fulfill that request. Requests MUST be
-subject to a timeout which is computed per the rules in
+<p>A Pool MUST have a method that allows the driver to check out a <a href="#connection">Connection</a>. Checking out a
+<a href="#connection">Connection</a> involves submitting a request to the WaitQueue and, once that request reaches the front of the
+queue, having the Pool find or create a <a href="#connection">Connection</a> to fulfill that request. Requests MUST be subject to a
+timeout which is computed per the rules in
 <a href="../client-side-operations-timeout/client-side-operations-timeout.html#server-selection">Client Side Operations Timeout: Server Selection</a>.</p>
-<p>To service a request for a <a href="#connection-1">Connection</a>, the Pool MUST first iterate over the list of available
-<a href="#connection">Connections</a>, searching for a non-perished one to be returned. If a perished <a href="#connection-1">Connection</a>
-is encountered, such a <a href="#connection-1">Connection</a> MUST be closed (as described in
+<p>To service a request for a <a href="#connection">Connection</a>, the Pool MUST first iterate over the list of available
+<a href="#connection">Connections</a>, searching for a non-perished one to be returned. If a perished <a href="#connection">Connection</a> is
+encountered, such a <a href="#connection">Connection</a> MUST be closed (as described in
 <a href="#closing-a-connection-internal-implementation">Closing a Connection</a>) and the iteration of available
-<a href="#connection">Connections</a> MUST continue until either a non-perished available <a href="#connection-1">Connection</a> is found or
-the list of available <a href="#connection">Connections</a> is exhausted.</p>
+<a href="#connection">Connections</a> MUST continue until either a non-perished available <a href="#connection">Connection</a> is found or the
+list of available <a href="#connection">Connections</a> is exhausted.</p>
 <p>If the list is exhausted, the total number of <a href="#connection">Connections</a> is less than maxPoolSize, and
-pendingConnectionCount &lt; maxConnecting, the pool MUST create a <a href="#connection-1">Connection</a>, establish it, mark it as
-"in use" and return it. If totalConnectionCount == maxPoolSize or pendingConnectionCount == maxConnecting, then the pool
-MUST wait to service the request until neither of those two conditions are met or until a <a href="#connection-1">Connection</a>
+pendingConnectionCount &lt; maxConnecting, the pool MUST create a <a href="#connection">Connection</a>, establish it, mark it as "in
+use" and return it. If totalConnectionCount == maxPoolSize or pendingConnectionCount == maxConnecting, then the pool
+MUST wait to service the request until neither of those two conditions are met or until a <a href="#connection">Connection</a>
 becomes available, re-entering the checkOut loop in either case. This waiting MUST NOT prevent
 <a href="#connection">Connections</a> from being checked into the pool. Additionally, the Pool MUST NOT service any newer checkOut
 requests before fulfilling the original one which could not be fulfilled. For drivers that implement the WaitQueue via a
@@ -826,8 +826,8 @@ work as readily available and then end instead of waiting for more work. For exa
 pendingConnectionCount to become less than maxConnecting when satisfying minPoolSize, a Run MUST either proceed with the
 rest of its duties, e.g., closing available perished connections, or end.</p>
 <p>The duration of intervals between the end of one Run and the beginning of the next Run is not specified, but the
-<a href="https://github.com/mongodb/specifications/tree/master/source/connection-monitoring-and-pooling/tests">Test Format and Runner Specification</a>
-may restrict this duration, or introduce other restrictions to facilitate testing.</p>
+<a href="../connection-monitoring-and-pooling/tests/README.html">Test Format and Runner Specification</a> may restrict this duration,
+or introduce other restrictions to facilitate testing.</p>
 <h5 id="withconnection"><a class="header" href="#withconnection">withConnection</a></h5>
 <p>A Pool SHOULD implement a scoped resource management mechanism idiomatic to their language to prevent
 <a href="#connection">Connections</a> from not being checked in. Examples include
@@ -840,6 +840,7 @@ implemented, drivers SHOULD use this method as the default method of checking ou
 the pool. If a user subscribes to Connection Monitoring events, these events MUST be emitted when specified in
 "Connection Pool Behaviors". Events SHOULD be created and subscribed to in a manner idiomatic to their language and
 driver.</p>
+<p><span id="events"></span></p>
 <h4 id="events"><a class="header" href="#events">Events</a></h4>
 <p>See the <a href="../load-balancers/load-balancers.html#events">Load Balancer Specification</a> for details on the <code>serviceId</code> field.</p>
 <pre><code class="language-typescript">/**

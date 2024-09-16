@@ -617,8 +617,8 @@ follows:</p>
 <p><code>ignoreCommandMonitoringEvents</code>: Optional array of one or more strings. Command names for which the test runner MUST
 ignore any observed command monitoring events. The command(s) will be ignored in addition to <code>configureFailPoint</code>
 and any commands containing sensitive information (per the
-<a href="../command-logging-and-monitoring/command-monitoring.rst#security">Command Logging and Monitoring</a> spec) unless
-<code>observeSensitiveCommands</code> is true.</p>
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#security">Command Logging and Monitoring</a> spec)
+unless <code>observeSensitiveCommands</code> is true.</p>
 <p>Test files SHOULD NOT use this option unless one or more command monitoring events are specified in
 <a href="#entity_client_observeEvents">observeEvents</a>.</p>
 </li>
@@ -1115,7 +1115,7 @@ BulkWriteException), this assertion SHOULD utilize the <a href="#unsetormatches"
 <li><code>eventType</code>: Optional string. Specifies the type of the monitor which captured the events. Valid values are <code>command</code>
 for <a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#events-api">Command Monitoring</a> events,
 <code>cmap</code> for <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#events">CMAP</a> events, and <code>sdam</code>
-for <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events">SDAM</a>
+for <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events-api">SDAM</a>
 events. Defaults to <code>command</code> if omitted.</li>
 <li><code>events</code>: Required array of <a href="#expectedevent">expectedEvent</a> objects. List of events, which are expected to be observed
 (in this order) on the corresponding client while executing <a href="#test_operations">operations</a>. If the array is empty, the
@@ -1144,7 +1144,7 @@ monitoring events as an example, <code>requestId</code> and <code>operationId</c
 <ul>
 <li>
 <p><code>commandStartedEvent</code>: Optional object. Assertions for one or more
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#api">CommandStartedEvent</a> fields.</p>
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#events-api">CommandStartedEvent</a> fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>command</code>: Optional document. A value corresponding to the expected command document. Test runners MUST follow the
@@ -1162,7 +1162,7 @@ SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node
 <ul>
 <li>
 <p><code>commandSucceededEvent</code>: Optional object. Assertions for one or more
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#api">CommandSucceededEvent</a> fields.</p>
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#events-api">CommandSucceededEvent</a> fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>reply</code>: Optional document. A value corresponding to the expected reply document. Test runners MUST follow the rules
@@ -1180,7 +1180,7 @@ SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node
 <ul>
 <li>
 <p><code>commandFailedEvent</code>: Optional object. Assertions for one or more
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#api">CommandFailedEvent</a> fields.</p>
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#events-api">CommandFailedEvent</a> fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>commandName</code>: Optional string. Test runners MUST assert that the command name matches this value.</li>
@@ -1277,7 +1277,7 @@ event are non-deterministic.</li>
 <ul>
 <li>
 <p><code>serverDescriptionChangedEvent</code>: Optional object. Assertions for one or more
-<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events">ServerDescriptionChangedEvent</a>
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events-api">ServerDescriptionChangedEvent</a>
 fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
@@ -1300,7 +1300,7 @@ valid values.</li>
 <ul>
 <li>
 <p><code>serverHeartbeatStartedEvent</code>: Optional object. Assertions for one or more
-<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events">ServerHeartbeatStartedEvent</a>
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events-api">ServerHeartbeatStartedEvent</a>
 fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
@@ -1312,7 +1312,7 @@ fields.</p>
 <ul>
 <li>
 <p><code>serverHeartbeatSucceededEvent</code>: Optional object. Assertions for one or more
-<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events">ServerHeartbeatSucceededEvent</a>
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events-api">ServerHeartbeatSucceededEvent</a>
 fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
@@ -1324,7 +1324,7 @@ fields.</p>
 <ul>
 <li>
 <p><code>serverHeartbeatFailedEvent</code>: Optional object. Assertions for one or more
-<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events">ServerHeartbeatFailedEvent</a>
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events-api">ServerHeartbeatFailedEvent</a>
 fields.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
@@ -1336,7 +1336,7 @@ fields.</p>
 <ul>
 <li>
 <p><code>topologyDescriptionChangedEvent</code>: Optional object. Assertions for one
-<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events">TopologyDescriptionChangedEvent</a>
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events-api">TopologyDescriptionChangedEvent</a>
 object.</p>
 <p>The structure of this object is as follows:</p>
 <ul>
@@ -1393,16 +1393,17 @@ exclude all log messages from observed messages that match any of the messages i
 <code>false</code>, observed logs after all specified logs have matched MUST cause a test failure; if <code>true</code>, observed logs after
 all specified logs have been matched MUST NOT cause a test failure. Defaults to <code>false</code>.</li>
 </ul>
+<p><span id="expectedLogMessage"></span></p>
 <h4 id="expectedlogmessage"><a class="header" href="#expectedlogmessage">expectedLogMessage</a></h4>
 <p>A log message which is expected to be observed while executing the test's operations.</p>
 <p>The structure of each object is as follows:</p>
 <ul>
 <li>
 <p><code>level</code>: Required string. This MUST be one of the level names listed in
-<a href="logging/logging.rst#log-severity-levels">log severity levels</a>. This specifies the expected level for the log message
-and corresponds to the level used for the message in the specification that defines it. Note that since not all
-drivers will necessarily support all log levels, some driver may need to map the specified level to the corresponding
-driver-supported level. Test runners MUST assert that the actual level matches this value.</p>
+<a href="../logging/logging.html#log-severity-levels">log severity levels</a>. This specifies the expected level for the log
+message and corresponds to the level used for the message in the specification that defines it. Note that since not
+all drivers will necessarily support all log levels, some driver may need to map the specified level to the
+corresponding driver-supported level. Test runners MUST assert that the actual level matches this value.</p>
 </li>
 <li>
 <p><code>component</code>: Required string. This MUST be one of the component names listed in
@@ -1899,10 +1900,11 @@ first position (e.g. <code>rewind</code> in PHP).</p>
 <h4 id="iterateuntildocumentorerror"><a class="header" href="#iterateuntildocumentorerror">iterateUntilDocumentOrError</a></h4>
 <p>Iterates the cursor until either a single document is returned or an error is raised. This operation takes no arguments.
 If <a href="#operation_expectResult">expectResult</a> is specified, it SHOULD be a single document.</p>
-<p>Some specification sections (e.g. <a href="../change-streams/tests#iterating-the-change-stream">Iterating the Change Stream</a>)
-caution drivers that implement a blocking mode of iteration (e.g. asynchronous drivers) not to iterate the cursor
-unnecessarily, as doing so could cause the test runner to block indefinitely. This should not be a concern for
-<code>iterateUntilDocumentOrError</code> as iteration only continues until either a document or error is encountered.</p>
+<p>Some specification sections (e.g.
+<a href="../change-streams/tests/README.html#iterating-the-change-stream">Iterating the Change Stream</a>) caution drivers that
+implement a blocking mode of iteration (e.g. asynchronous drivers) not to iterate the cursor unnecessarily, as doing so
+could cause the test runner to block indefinitely. This should not be a concern for <code>iterateUntilDocumentOrError</code> as
+iteration only continues until either a document or error is encountered.</p>
 <h4 id="iterateonce"><a class="header" href="#iterateonce">iterateOnce</a></h4>
 <p>Performs a single iteration of the cursor. If the cursor's current batch is empty, one <code>getMore</code> MUST be attempted to
 get more results. This operation takes no arguments. If <a href="#operation_expectResult">expectResult</a> is specified, it SHOULD

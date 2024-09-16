@@ -606,8 +606,9 @@ killsession is running are batched together and run simultaneously after the cur
 <ol>
 <li>A later specification may allow operations (including read) to be retried any number of times during a singular
 timeout period.</li>
-<li>Any future changes to the the applicable parts of <a href="../retryable-writes/">retryable writes specification</a> may also
-need to be reflected in the retryable reads specification, and vice versa.</li>
+<li>Any future changes to the the applicable parts of
+<a href="../retryable-writes/retryable-writes.html">retryable writes specification</a> may also need to be reflected in the
+retryable reads specification, and vice versa.</li>
 <li>We may revisit the decision not retry <code>Cursor.getMore()</code> (see <a href="#qa">Q&amp;A</a>).</li>
 <li>Once <a href="https://jira.mongodb.org/browse/DRIVERS-560">DRIVERS-560</a> is resolved, tests will be added to allow testing
 Retryable Reads on MongoDB 3.6. See the <a href="./tests/README.html">test plan</a> for additional information.</li>
@@ -637,7 +638,7 @@ attempt, we can reasonably assume that there is a persistent outage. In the case
 attempts are fruitless and would waste time. See
 <a href="https://emptysqua.re/blog/how-to-write-resilient-mongodb-applications/">How To Write Resilient MongoDB Applications</a>
 for additional discussion on this strategy.</p>
-<p>However when <a href="../client-side-operations-timeout/client-side-operations-timeout.rst">Client Side Operations Timeout</a> is
+<p>However when <a href="../client-side-operations-timeout/client-side-operations-timeout.html">Client Side Operations Timeout</a> is
 enabled, the driver will retry multiple times until the operation succeeds, a non-retryable error is encountered, or the
 timeout expires. Retrying multiple times provides greater resilience to cascading failures such as rolling server
 restarts during planned maintenance events.</p>

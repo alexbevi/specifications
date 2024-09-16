@@ -178,7 +178,8 @@
 to handling "not primary" and "node is shutting down" error responses from the server.</p>
 <p>These tests apply only to replica set topologies.</p>
 <h2 id="server-fail-point"><a class="header" href="#server-fail-point">Server Fail Point</a></h2>
-<p>See: <a href="../../transactions/tests#server-fail-point">Server Fail Point</a> in the Transactions spec test suite.</p>
+<p>See: <a href="../../transactions/tests/legacy-test-format.html#server-fail-point">Server Fail Point</a> in the Transactions spec test
+suite.</p>
 <h3 id="disabling-fail-point-after-test-execution"><a class="header" href="#disabling-fail-point-after-test-execution">Disabling Fail Point after Test Execution</a></h3>
 <p>After each test that configures a fail point, drivers should disable the <code>failCommand</code> fail point to avoid spurious
 failures in subsequent tests. The fail point may be disabled like so:</p>

@@ -251,7 +251,10 @@ acceptable.</li>
 <p>Drivers MUST enforce timeouts for all operations per the
 <a href="../client-side-operations-timeout/client-side-operations-timeout.html">Client Side Operations Timeout</a> specification. All
 operations that return cursors MUST support the timeout options documented in the
-<a href="../client-side-operations-timeout/client-side-operations-timeout.html#cursors">Cursors</a> section of that specification.</p>
+<a href="../client-side-operations-timeout/client-side-operations-timeout.html#cursors">Cursors</a> section of that specification.
+All explain helpers MUST support the timeout options documented in the
+<a href="../client-side-operations-timeout/client-side-operations-timeout.html#explain">Explain Helpers</a> section of that
+specification.</p>
 <h3 id="api"><a class="header" href="#api">API</a></h3>
 <h4 id="read"><a class="header" href="#read">Read</a></h4>
 <blockquote>
@@ -322,9 +325,6 @@ drivers will have different requirements, types, and idioms.</p>
    * contain other meta operators like $maxScan. However, do not validate this document
    * as it would be impossible to be forwards and backwards compatible. Let the server
    * handle the validation.
-   *
-   * Note: If $explain is specified in the modifiers, the return value is a single
-   * document. This could cause problems for static languages using strongly typed entities.
    *
    * Note: result iteration should be backed by a cursor. Depending on the implementation,
    * the cursor may back the returned Iterable instance or an iterator that it produces.
@@ -1898,6 +1898,7 @@ class BulkWriteException {
 
 }
 </code></pre>
+<p><span id="find"></span></p>
 <h5 id="find-and-modify"><a class="header" href="#find-and-modify">Find And Modify</a></h5>
 <pre><code class="language-typescript">interface Collection {
 
@@ -2282,6 +2283,41 @@ can be enforced within a single server selection attempt.</p>
 the <a href="../message/OP_MSG.html#global-command-arguments">$readPreference global command argument</a> and
 <a href="../server-selection/server-selection.html#passing-read-preference-to-mongos-and-load-balancers">passing read preference to mongos and load balancers</a>
 (if applicable).</p>
+<h3 id="explain"><a class="header" href="#explain">Explain</a></h3>
+<blockquote>
+<p>[!NOTE]
+Explain helpers are optional. Drivers that do not provide explain helpers may ignore this section.</p>
+</blockquote>
+<pre><code class="language-typescript">interface ExplainOptions {
+  /**
+   * The maximum amount of time to allow the explain to run.
+   *
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
+   *
+   * NOTE: This option is deprecated in favor of timeoutMS.
+   */
+  maxTimeMS: Optional&lt;Int64&gt;;
+}
+</code></pre>
+<p>Drivers MUST ensure that its helper permits users to specify a timeout (maxTimeMS or timeoutMS) for the explain command
+specifically. An example, using Node, might look like:</p>
+<pre><code class="language-typescript">collection.find({ name: 'john doe' }).explain({ maxTimeMS: 1000 });
+
+// sends:
+{ 
+  explain: { find: &lt;collection&gt;, query: { name: 'john doe' } },
+  maxTimeMS: 1000
+}
+
+collection.find({ name: 'john doe' }).explain({ timeoutMS: 1000 });
+
+// sends:
+{ 
+  explain: { find: &lt;collection&gt;, query: { name: 'john doe' } },
+  maxTimeMS: &lt;1000 - min rtt&gt;
+}
+</code></pre>
+<p>Drivers MUST document how users can specify options on their explain helpers.</p>
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
 <p>See the <a href="tests/README.html">README</a> for tests.</p>
 <h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
@@ -2360,6 +2396,12 @@ with this backwards breaking change. Alternatively, it might be decided that ano
 api be consistent with the rest of the methods in the CRUD family of operations. However, the fluent-bulk-api is still
 able to be used as this change is non-backwards breaking. Any driver which implemented the fluent bulk API should
 deprecate it and drivers that have not built it should not do so.</p>
+<p>Q: Should drivers offer explain helpers?<br />
+Originally, it was determined that explain should not be exposed via
+specialized APIs in drivers because it it was deemed to be an unusual use-case for a driver. We'd like users to use the
+shell for this purpose. However, explain is still possible from a driver. Some drivers have historically provided
+explain helpers and continue to do so. Drivers that do not offer explain helpers can run explain commands using the
+runCommand API.</p>
 <p>Q: What about explain?</p>
 <p>Explain has been determined to be not a normal use-case for a driver. We'd like users to use the shell for this purpose.
 However, explain is still possible from a driver. For find, it can be passed as a modifier. Aggregate can be run using a
@@ -2415,6 +2457,9 @@ the Stable API, it was decided that this change was acceptable to make in minor 
 aforementioned allowance in the SemVer spec.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-09-12: Specify that explain helpers support maxTimeMS.</p>
+</li>
 <li>
 <p>2024-02-20: Migrated from reStructuredText to Markdown.</p>
 </li>
