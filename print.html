@@ -19842,17 +19842,17 @@ to return an error if any other entries in the replacement document are atomic m
     /**
      * The results of each individual insert operation that was successfully performed.
      */
-    insertResults: Map&lt;Int64, InsertOneResult&gt;;
+    insertResults: Map&lt;Index, InsertOneResult&gt;;
 
     /**
      * The results of each individual update operation that was successfully performed.
      */
-    updateResults: Map&lt;Int64, UpdateResult&gt;;
+    updateResults: Map&lt;Index, UpdateResult&gt;;
 
     /**
      * The results of each individual delete operation that was successfully performed.
      */
-    deleteResults: Map&lt;Int64, DeleteResult&gt;;
+    deleteResults: Map&lt;Index, DeleteResult&gt;;
 }
 
 class InsertOneResult {
@@ -19932,7 +19932,7 @@ the ones defined here exactly.</p>
      * Errors that occurred during the execution of individual write operations. This map will
      * contain at most one entry if the bulk write was ordered.
      */
-    writeErrors: Map&lt;Int64, WriteError&gt;;
+    writeErrors: Map&lt;Index, WriteError&gt;;
 
     /**
      * The results of any successful operations that were performed before the error was
@@ -19941,6 +19941,11 @@ the ones defined here exactly.</p>
     partialResult: Optional&lt;BulkWriteResult&gt;;
 }
 </code></pre>
+<h3 id="index-types"><a class="header" href="#index-types">Index Types</a></h3>
+<p>The <code>insertResults</code>, <code>updateResults</code>, and <code>deleteResults</code> maps in <code>BulkWriteResult</code> and the <code>writeErrors</code> map in
+<code>BulkWriteException</code> specify <code>Index</code> as their key type. This value corresponds to the index of the operation in the
+<code>writeModels</code> list that was provided to <code>MongoClient.bulkWrite</code>. Drivers SHOULD use their language's standard numeric
+type for indexes for this type (e.g. <code>usize</code> in Rust). If no standard index type exists, drivers MUST use <code>Int64</code>.</p>
 <h2 id="building-a-bulkwrite-command"><a class="header" href="#building-a-bulkwrite-command">Building a <code>bulkWrite</code> Command</a></h2>
 <p>The <code>bulkWrite</code> server command has the following format:</p>
 <pre><code class="language-javascript">{
@@ -20237,6 +20242,9 @@ number was determined by constructing <code>OP_MSG</code> messages with various 
 batch-splitting to standardize implementations across drivers and simplify batch-splitting testing.</p>
 <h2 id="changelog-35"><a class="header" href="#changelog-35"><strong>Changelog</strong></a></h2>
 <ul>
+<li>
+<p>2024-09-18: Relax numeric type requirements for indexes.</p>
+</li>
 <li>
 <p>2024-05-17: Update specification status to "Accepted".</p>
 </li>
