@@ -30843,7 +30843,7 @@ command error code will be returned as a command error.</li>
 labels. An empty array may be used to suppress the server from adding error labels to the response. New in server
 4.3.1 (<a href="https://jira.mongodb.org/browse/SERVER-43941">SERVER-43941</a>).</li>
 <li><code>appName</code>: Optional string, which is unset by default. If set, the fail point will only apply to connections for
-MongoClients created with this <code>appname</code>. New in server 4.4.0-rc2
+MongoClients created with this <code>appname</code>. New in server 4.4.0-rc2 and backported to 4.2.9
 (<a href="https://jira.mongodb.org/browse/SERVER-47195">SERVER-47195</a>).</li>
 <li><code>blockConnection</code>: Optional boolean, which defaults to <code>false</code>. If <code>true</code>, the server should block the affected
 commands for <code>blockTimeMS</code>. New in server 4.3.4 and backported to 4.2.9
@@ -30939,6 +30939,9 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog-47"><a class="header" href="#changelog-47">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-09-18: Note that <code>failCommand</code> <code>appName</code> option was backported</p>
+</li>
 <li>
 <p>2024-05-08: <strong>Schema version 1.21.</strong></p>
 <p>Add <code>writeErrors</code> and <code>writeConcernErrors</code> field to <code>expectedError</code> for the client-level bulk write API.</p>
