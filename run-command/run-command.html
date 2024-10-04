@@ -430,12 +430,13 @@ permit users to change <code>getMore</code> field settings at any time during th
 commands MUST be constructed with the changes to those fields. If that API is offered drivers MUST write tests asserting
 <code>getMore</code> commands are constructed with any updated fields.</p>
 <ul>
-<li>See Find, getMore and killCursors commands' section on <a href="../find_getmore_killcursors_commands.html#getmore">GetMore</a></li>
+<li>See Find, getMore and killCursors commands' section on
+<a href="../find_getmore_killcursors_commands/find_getmore_killcursors_commands.html#getmore">GetMore</a></li>
 </ul>
 <h5 id="tailable-and-tailableawait"><a class="header" href="#tailable-and-tailableawait">Tailable and TailableAwait</a></h5>
 <ul>
 <li><strong>See first:</strong> Find, getMore and killCursors commands's section on
-<a href="../find_getmore_killcursors_commands.html#tailable-cursors">Tailable cursors</a></li>
+<a href="../find_getmore_killcursors_commands/find_getmore_killcursors_commands.html#tailable-cursors">Tailable cursors</a></li>
 </ul>
 <p>It is the responsibility of the caller to construct their initial command with <code>awaitData</code> and <code>tailable</code> flags <strong>as
 well as</strong> inform RunCursorCommand of the <code>cursorType</code> that should be constructed. Requesting a <code>cursorType</code> that does
@@ -448,7 +449,7 @@ ClientSession associated with the cursor MUST be ended and the ServerSession ret
 <li>See Driver Sessions' section on
 <a href="../sessions/driver-sessions.html#when-sending-a-killcursors-command">When sending a killCursors command</a></li>
 <li>See Find, getMore and killCursors commands' section on
-<a href="../find_getmore_killcursors_commands.html#killcursors">killCursors</a></li>
+<a href="../find_getmore_killcursors_commands/find_getmore_killcursors_commands.html#killcursors">killCursors</a></li>
 </ul>
 <h5 id="client-side-operations-timeout-1"><a class="header" href="#client-side-operations-timeout-1">Client Side Operations Timeout</a></h5>
 <p>RunCursorCommand MUST provide an optional <code>timeoutMS</code> option to support client side operations timeout. Drivers MUST NOT
