@@ -173,7 +173,255 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="dbref"><a class="header" href="#dbref">DBRef</a></h1>
+                        <h1 id="handling-of-dbrefs"><a class="header" href="#handling-of-dbrefs">Handling of DBRefs</a></h1>
+<ul>
+<li>Status: Accepted</li>
+<li>Minimum Server Version: N/A</li>
+</ul>
+<hr />
+<h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
+<p>DBRefs are a convention for expressing a reference to another document as an embedded document (i.e. BSON type 0x03).
+Several drivers provide a model class for encoding and/or decoding DBRef documents. This specification will both define
+the structure of a DBRef and provide guidance for implementing model classes in drivers that choose to do so.</p>
+<h2 id="meta"><a class="header" href="#meta">META</a></h2>
+<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>This specification presents documents as Extended JSON for readability and expressing special types (e.g. ObjectId).
+Although JSON fields are unordered, the order of fields presented herein should be considered pertinent. This is
+especially relevant for the <a href="#test-plan">Test Plan</a>.</p>
+<h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
+<h3 id="dbref-structure"><a class="header" href="#dbref-structure">DBRef Structure</a></h3>
+<p>A DBRef is an embedded document with the following fields:</p>
+<ul>
+<li><code>$ref</code>: required string field. Contains the name of the collection where the referenced document resides. This MUST be
+the first field in the DBRef.</li>
+<li><code>$id</code>: required field. Contains the value of the <code>_id</code> field of the referenced document. This MUST be the second field
+in the DBRef.</li>
+<li><code>$db</code>: optional string field. Contains the name of the database where the referenced document resides. If specified,
+this MUST be the third field in the DBRef. If omitted, the referenced document is assumed to reside in the same
+database as the DBRef.</li>
+<li>Extra, optional fields may follow after <code>$id</code> or <code>$db</code> (if specified). There are no inherent restrictions on extra
+field names; however, older server versions may impose their own restrictions (e.g. no dots or dollars).</li>
+</ul>
+<p>DBRefs have no relation to the deprecated DBPointer BSON type (i.e. type 0x0C).</p>
+<h4 id="examples-of-valid-dbrefs"><a class="header" href="#examples-of-valid-dbrefs">Examples of Valid DBRefs</a></h4>
+<p>The following examples are all valid DBRefs:</p>
+<pre><code class="language-typescript">// Basic DBRef with only $ref and $id fields
+{ "$ref": "coll0", "$id": { "$oid": "60a6fe9a54f4180c86309efa" } }
+
+// DBRef $id is not necessarily an ObjectId
+{ "$ref": "coll0", "$id": 1 }
+
+// DBRef with optional $db field
+{ "$ref": "coll0", "$id": 1, "$db": "db0" }
+
+// DBRef with extra, optional fields (with or without $db)
+{ "$ref": "coll0", "$id": 1, "$db": "db0", "foo": "bar" }
+{ "$ref": "coll0", "$id": 1, "foo": true }
+
+// Extra field names have no inherent restrictions
+{ "$ref": "coll0", "$id": 1, "$foo": "bar" }
+{ "$ref": "coll0", "$id": 1, "foo.bar": 0 }
+</code></pre>
+<h4 id="examples-of-invalid-dbrefs"><a class="header" href="#examples-of-invalid-dbrefs">Examples of Invalid DBRefs</a></h4>
+<p>The following examples are all invalid DBRefs:</p>
+<pre><code class="language-typescript">// Required fields are omitted
+{ "$ref": "coll0" }
+{ "$id": { "$oid": "60a6fe9a54f4180c86309efa" } }
+
+// Invalid types for $ref or $db
+{ "$ref": true, "$id": 1 }
+{ "$ref": "coll0", "$id": 1, "$db": 1 }
+
+// Fields are out of order
+{ "$id": 1, "$ref": "coll0" }
+</code></pre>
+<h3 id="implementing-a-dbref-model"><a class="header" href="#implementing-a-dbref-model">Implementing a DBRef Model</a></h3>
+<p>Drivers MAY provide a model class for encoding and/or decoding DBRef documents. For those drivers that do, this section
+defines expected behavior of that class. This section does not prohibit drivers from implementing additional
+functionality, provided it does not conflict with any of these guidelines.</p>
+<h4 id="constructing-a-dbref-model"><a class="header" href="#constructing-a-dbref-model">Constructing a DBRef model</a></h4>
+<p>Drivers MAY provide an API for constructing a DBRef model directly from its constituent parts. If so:</p>
+<ul>
+<li>Drivers MUST solicit a string value for <code>$ref</code>.</li>
+<li>Drivers MUST solicit an arbitrary value for <code>$id</code>. Drivers SHOULD NOT enforce any restrictions on this value; however,
+this may be necessary if the driver is unable to differentiate between certain BSON types (e.g. <code>null</code>, <code>undefined</code>)
+and the parameter being unspecified.</li>
+<li>Drivers SHOULD solicit an optional string value for <code>$db</code>.</li>
+<li>Drivers MUST require <code>$ref</code> and <code>$db</code> (if specified) to be strings but MUST NOT enforce any
+<a href="https://www.mongodb.com/docs/manual/reference/limits/#naming-restrictions">naming restrictions</a> on the string values.</li>
+<li>Drivers MAY solicit extra, optional fields.</li>
+</ul>
+<h4 id="decoding-a-bson-document-to-a-dbref-model"><a class="header" href="#decoding-a-bson-document-to-a-dbref-model">Decoding a BSON document to a DBRef model</a></h4>
+<p>Drivers MAY support explicit and/or implicit decoding. An example of explicit decoding might be a DBRef model
+constructor that takes a BSON document. An example of implicit decoding might be configuring the driver's BSON codec to
+automatically convert embedded documents that comply with the <a href="#dbref-structure">DBRef Structure</a> into a DBRef model.</p>
+<p>Drivers that provide implicit decoding SHOULD provide some way for applications to opt out and allow DBRefs to be
+decoded like any other embedded document.</p>
+<p>When decoding a BSON document to a DBRef model:</p>
+<ul>
+<li>Drivers MUST require <code>$ref</code> and <code>$id</code> to be present.</li>
+<li>Drivers MUST require <code>$ref</code> and <code>$db</code> (if present) to be strings but MUST NOT enforce any
+<a href="https://www.mongodb.com/docs/manual/reference/limits/#naming-restrictions">naming restrictions</a> on the string values.</li>
+<li>Drivers MUST accept any BSON type for <code>$id</code> and MUST NOT enforce any restrictions on its value.</li>
+<li>Drivers MUST preserve extra, optional fields (beyond <code>$ref</code>, <code>$id</code>, and <code>$db</code>) and MUST provide some way to access
+those fields via the DBRef model. For example, an accessor method that returns the original BSON document (including
+<code>$ref</code>, etc.) would fulfill this requirement.</li>
+</ul>
+<p>If a BSON document cannot be implicitly decoded to a DBRef model, it MUST be left as-is (like any other embedded
+document). If a BSON document cannot be explicitly decoded to a DBRef model, the driver MUST raise an error.</p>
+<p>Since DBRefs are a special type of embedded document, a DBRef model class used for decoding SHOULD inherit the class
+used to represent an embedded document (e.g. Hash in Ruby). This will allow applications to always expect an instance of
+a common class when decoding an embedded document (if desired) and should also support the requirement for DBRef models
+to provide access to any extra, optional fields.</p>
+<h4 id="encoding-a-dbref-model-to-a-bson-document"><a class="header" href="#encoding-a-dbref-model-to-a-bson-document">Encoding a DBRef model to a BSON document</a></h4>
+<p>Drivers MAY support explicit and/or implicit encoding. An example of explicit encoding might be a DBRef method that
+returns its corresponding representation as a BSON document. An example of implicit encoding might be configuring the
+driver's BSON codec to automatically convert DBRef models to the corresponding BSON document representation as needed.</p>
+<p>If a driver supports implicit decoding of BSON to a DBRef model, it SHOULD also support implicit encoding. Doing so will
+allow applications to more easily round-trip DBRefs through the driver.</p>
+<p>When encoding a DBRef model to BSON document:</p>
+<ul>
+<li>Drivers MUST encode all fields in the order defined in <a href="#dbref-structure">DBRef Structure</a>.</li>
+<li>Drivers MUST encode <code>$ref</code> and <code>$id</code>. If <code>$db</code> was specified, it MUST be encoded after <code>$id</code>. If any extra, optional
+fields were specified, they MUST be encoded after <code>$id</code> or <code>$db</code>.</li>
+<li>If the DBRef includes any extra, optional fields after <code>$id</code> or <code>$db</code>, drivers SHOULD attempt to preserve the original
+order of those fields relative to one another.</li>
+</ul>
+<h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
+<p>The test plan consists of a series of prose tests. These tests are only relevant to drivers that provide a DBRef model
+class.</p>
+<p>The documents in these tests are presented as Extended JSON for readability; however, readers should consider the field
+order pertinent when translating to BSON (or their language equivalent). These tests are not intended to exercise a
+driver's Extended JSON parser. Implementations SHOULD construct the documents directly using native BSON types (e.g.
+Document, ObjectId).</p>
+<h3 id="decoding"><a class="header" href="#decoding">Decoding</a></h3>
+<p>These tests are only relevant to drivers that allow decoding into a DBRef model. Drivers SHOULD implement these tests
+for both explicit and implicit decoding code paths as needed.</p>
+<ol>
+<li>
+<p>Valid documents MUST be decoded to a DBRef model. For each of the following:</p>
+<ol>
+<li><code>{ "$ref": "coll0", "$id": { "$oid": "60a6fe9a54f4180c86309efa" } }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1 }</code></li>
+<li><code>{ "$ref": "coll0", "$id": null }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "$db": "db0" }</code></li>
+</ol>
+<p>Assert that each document is successfully decoded to a DBRef model. Assert that the <code>$ref</code>, <code>$id</code>, and <code>$db</code> (if
+applicable) fields have their expected value.</p>
+</li>
+<li>
+<p>Valid documents with extra fields MUST be decoded to a DBRef model and the model MUST provide some way to access
+those extra fields. For each of the following:</p>
+<ol>
+<li><code>{ "$ref": "coll0", "$id": 1, "$db": "db0", "foo": "bar" }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "foo": true, "bar": false }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "meta": { "foo": 1, "bar": 2 } }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "$foo": "bar" }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "foo.bar": 0 }</code></li>
+</ol>
+<p>Assert that each document is successfully decoded to a DBRef model. Assert that the <code>$ref</code>, <code>$id</code>, and <code>$db</code> (if
+applicable) fields have their expected value. Assert that it is possible to access all extra fields and that those
+fields have their expected value.</p>
+</li>
+<li>
+<p>Documents with out of order fields that are otherwise valid MUST be decoded to a DBRef model. For each of the
+following:</p>
+<ol>
+<li><code>{ "$id": 1, "$ref": "coll0" }</code></li>
+<li><code>{ "$db": "db0", "$ref": "coll0", "$id": 1 }</code></li>
+<li><code>{ "foo": 1, "$id": 1, "$ref": "coll0" }</code></li>
+<li><code>{ "foo": 1, "$ref": "coll0", "$id": 1, "$db": "db0" }</code></li>
+<li><code>{ "foo": 1, "$ref": "coll0", "$id": 1, "$db": "db0", "bar": 1 }</code></li>
+</ol>
+<p>Assert that each document is successfully decoded to a DBRef model. Assert that the <code>$ref</code>, <code>$id</code>, <code>$db</code> (if
+applicable), and any extra fields (if applicable) have their expected value.</p>
+</li>
+<li>
+<p>Documents missing required fields MUST NOT be decoded to a DBRef model. For each of the following:</p>
+<ol>
+<li><code>{ "$ref": "coll0" }</code></li>
+<li><code>{ "$id": { "$oid": "60a6fe9a54f4180c86309efa" } }</code></li>
+<li><code>{ "$db": "db0" }</code></li>
+</ol>
+<p>Assert that each document is not decoded to a DBRef model. In the context of implicit decoding, the document MUST be
+decoded like any other embedded document. In the context of explicit decoding, the DBRef decoding method MUST raise
+an error.</p>
+</li>
+<li>
+<p>Documents with invalid types for <code>$ref</code> or <code>$db</code> MUST NOT be decoded to a DBRef model. For each of the following:</p>
+<ol>
+<li><code>{ "$ref": true, "$id": 1 }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "$db": 1 }</code></li>
+</ol>
+<p>Assert that each document is not decoded to a DBRef model. In the context of implicit decoding, the document MUST be
+decoded like any other embedded document. In the context of explicit decoding, the DBRef decoding method MUST raise
+an error.</p>
+</li>
+</ol>
+<h3 id="encoding"><a class="header" href="#encoding">Encoding</a></h3>
+<p>These tests are only relevant to drivers that allow encoding a DBRef model. Drivers SHOULD implement these tests for
+both explicit and implicit encoding code paths as needed.</p>
+<p>Drivers MAY use any method to create the DBRef model for each test (e.g. constructor, explicit decoding method).</p>
+<p>Drivers MAY skip tests that cannot be implemented as written (e.g. DBRef model constructor does not support extra,
+optional fields and the driver also does not support explicit/implicit decoding).</p>
+<ol>
+<li>
+<p>Encoding DBRefs with basic fields. For each of the following:</p>
+<ol>
+<li><code>{ "$ref": "coll0", "$id": { "$oid": "60a6fe9a54f4180c86309efa" } }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1 }</code></li>
+<li><code>{ "$ref": "coll0", "$id": null }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "$db": "db0" }</code></li>
+</ol>
+<p>Assert that each DBRef model is successfully encoded to a BSON document. Assert that the <code>$ref</code>, <code>$id</code>, and <code>$db</code> (if
+applicable) fields appear in the correct order and have their expected values.</p>
+</li>
+<li>
+<p>Encoding DBRefs with extra, optional fields. For each of the following:</p>
+<ol>
+<li><code>{ "$ref": "coll0", "$id": 1, "$db": "db0", "foo": "bar" }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "foo": true, "bar": false }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "meta": { "foo": 1, "bar": 2 } }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "$foo": "bar" }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "foo.bar": 0 }</code></li>
+</ol>
+<p>Assert that each DBRef model is successfully encoded to a BSON document. Assert that the <code>$ref</code>, <code>$id</code>, <code>$db</code> (if
+applicable), and any extra fields appear in the correct order and have their expected values.</p>
+</li>
+<li>
+<p>Encoding DBRefs re-orders any out of order fields during decoding. This test MUST NOT use a constructor that solicits
+fields individually. For each of the following:</p>
+<ol>
+<li><code>{ "$id": 1, "$ref": "coll0" }</code></li>
+<li><code>{ "$db": "db0", "$ref": "coll0", "$id": 1 }</code></li>
+<li><code>{ "foo": 1, "$id": 1, "$ref": "coll0" }</code></li>
+<li><code>{ "foo": 1, "$ref": "coll0", "$id": 1, "$db": "db0" }</code></li>
+<li><code>{ "foo": 1, "$ref": "coll0", "$id": 1, "$db": "db0", "bar": 1 }</code></li>
+</ol>
+<p>Assert that each document is successfully decoded to a DBRef model and then successfully encoded back to a BSON
+document. Assert that the order of fields in each encoded BSON document matches the following, respectively:</p>
+<ol>
+<li><code>{ "$ref": "coll0", "$id": 1 }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "$db": "db0" }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "foo": 1 }</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "$db": "db0", "foo": 1}</code></li>
+<li><code>{ "$ref": "coll0", "$id": 1, "$db": "db0", "foo": 1, "bar": 1 }</code></li>
+</ol>
+</li>
+</ol>
+<h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
+<p>In contrast to always encoding DBRefs with the correct field order, decoding permits fields to be out of order (provided
+the document is otherwise valid). This follows the
+<a href="https://en.wikipedia.org/wiki/Robustness_principle">robustness principle</a> in having the driver be liberal in what it
+accepts and conservative in what it emits. This does mean that round-tripping an out of order DBRef through a driver
+could result in its field order being changed; however, this behavior is consistent with existing behavior in drivers
+that model DBRefs (e.g. C#, Java, Node, Python, Ruby) and applications can opt out of implicit decoding if desired.</p>
+<h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
+<ul>
+<li>2024-02-26: Migrated from reStructuredText to Markdown.</li>
+<li>2022-10-05: Remove spec front matter.</li>
+</ul>
 
                     </main>
 

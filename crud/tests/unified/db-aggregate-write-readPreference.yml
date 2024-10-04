@@ -43,6 +43,11 @@ createEntities:
       database: *database0
       collectionName: &collection0Name coll0
 
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents: []
+
 tests:
   - description: "Database-level aggregate with $out includes read preference for 5.0+ server"
     runOnRequirements:
@@ -68,6 +73,11 @@ tests:
                 $readPreference: *readPreference
                 readConcern: *readConcern
                 writeConcern: *writeConcern
+    outcome: &outcome
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
 
   - description: "Database-level aggregate with $out omits read preference for pre-5.0 server"
     runOnRequirements:
@@ -92,6 +102,7 @@ tests:
                 $readPreference: { $$exists: false }
                 readConcern: *readConcern
                 writeConcern: *writeConcern
+    outcome: *outcome
 
   - description: "Database-level aggregate with $merge includes read preference for 5.0+ server"
     runOnRequirements:
@@ -116,6 +127,7 @@ tests:
                 $readPreference: *readPreference
                 readConcern: *readConcern
                 writeConcern: *writeConcern
+    outcome: *outcome
 
   - description: "Database-level aggregate with $merge omits read preference for pre-5.0 server"
     runOnRequirements:
@@ -136,3 +148,4 @@ tests:
                 $readPreference: { $$exists: false }
                 readConcern: *readConcern
                 writeConcern: *writeConcern
+    outcome: *outcome

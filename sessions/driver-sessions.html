@@ -513,9 +513,8 @@ an implicit session for unacknowledged writes without an explicit session, the d
 <p>Drivers MUST document the behavior of unacknowledged writes for both explicit and implicit sessions.</p>
 <h3 id="when-wrapping-commands-in-a-query-field"><a class="header" href="#when-wrapping-commands-in-a-query-field">When wrapping commands in a <code>$query</code> field</a></h3>
 <p>If the driver is wrapping the command in a <code>$query</code> field for non-OP_MSG messages in order to pass a readPreference to a
-mongos (see
-<a href="../find_getmore_killcursors_commands/find_getmore_killcursors_commands.html#readpreference-and-mongos">ReadPreference and Mongos</a>),
-the driver SHOULD NOT add the <code>lsid</code> as a top-level field, and MUST add the <code>lsid</code> as a field of the <code>$query</code></p>
+mongos (see <a href="../find_getmore_killcursors_commands.html#readpreference-and-mongos">ReadPreference and Mongos</a>), the driver
+SHOULD NOT add the <code>lsid</code> as a top-level field, and MUST add the <code>lsid</code> as a field of the <code>$query</code></p>
 <pre><code class="language-typescript">// Wrapped command:
 interface WrappedCommandExample {
   $query: {

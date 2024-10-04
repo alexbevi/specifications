@@ -1563,7 +1563,7 @@ evaluated consistently.</p>
 <p>These operations and their arguments may be documented in the following specifications:</p>
 <ul>
 <li><a href="../change-streams/change-streams.html">Change Streams</a></li>
-<li><a href="../enumerate-databases/enumerate-databases.html">Enumerating Databases</a></li>
+<li><a href="../enumerate-databases.html">Enumerating Databases</a></li>
 </ul>
 <p>Client operations that require special handling or are not documented by an existing specification are described below.</p>
 <h4 id="close"><a class="header" href="#close">close</a></h4>
@@ -1652,7 +1652,7 @@ test currently attempts to create a data key with an existing keyAltName or add 
 <ul>
 <li><a href="../change-streams/change-streams.html">Change Streams</a></li>
 <li><a href="../crud/crud.html">CRUD</a></li>
-<li><a href="../enumerate-collections/enumerate-collections.html">Enumerating Collections</a></li>
+<li><a href="../enumerate-collections.html">Enumerating Collections</a></li>
 </ul>
 <p>Database operations that require special handling or are not documented by an existing specification are described
 below.</p>
@@ -2492,7 +2492,7 @@ runner MUST raise an error if a placeholder value is used in an unexpected conte
 <p>Note: the test runner is not required to validate the type or value of a <code>$$placeholder</code> field.</p>
 <h3 id="evaluating-matches"><a class="header" href="#evaluating-matches">Evaluating Matches</a></h3>
 <p>Expected values in tests (e.g. <a href="#operation_expectResult">operation.expectResult</a>) are expressed as either relaxed or
-canonical <a href="../extended-json/extended-json.html">Extended JSON</a>.</p>
+canonical <a href="../extended-json.html">Extended JSON</a>.</p>
 <p>The algorithm for matching expected and actual values is specified with the following pseudo-code:</p>
 <pre><code>function match (expected, actual):
   if expected is a document:
@@ -2534,7 +2534,7 @@ canonical <a href="../extended-json/extended-json.html">Extended JSON</a>.</p>
 <em>other</em> than documents and arrays, test runners MAY adopt any of the following approaches to compare expected and actual
 values, as long as they are consistent:</p>
 <ul>
-<li>Convert both values to relaxed or canonical <a href="../extended-json/extended-json.html">Extended JSON</a> and compare strings</li>
+<li>Convert both values to relaxed or canonical <a href="../extended-json.html">Extended JSON</a> and compare strings</li>
 <li>Convert both values to BSON, and compare bytes</li>
 <li>Convert both values to native representations, and compare accordingly</li>
 </ul>
@@ -2764,9 +2764,9 @@ NOT be provided and MUST be ignored if provided.</p>
 tests.</p>
 <h4 id="executing-a-test-file"><a class="header" href="#executing-a-test-file">Executing a Test File</a></h4>
 <p>The instructions in this section apply for each test file loaded by the test runner.</p>
-<p>Test files, which may be YAML or JSON files, MUST be interpreted using an
-<a href="../extended-json/extended-json.html">Extended JSON</a> parser. The parser MUST accept relaxed and canonical Extended JSON
-(per <a href="../extended-json/extended-json.html#parsers">Extended JSON: Parsers</a>), as test files may use either.</p>
+<p>Test files, which may be YAML or JSON files, MUST be interpreted using an <a href="../extended-json.html">Extended JSON</a> parser.
+The parser MUST accept relaxed and canonical Extended JSON (per <a href="../extended-json.html#parsers">Extended JSON: Parsers</a>),
+as test files may use either.</p>
 <p>Upon loading a file, the test runner MUST read the <a href="#schemaVersion">schemaVersion</a> field and determine if the test file
 can be processed further. Test runners MAY support multiple versions and MUST NOT process incompatible files (as
 discussed in <a href="#test-runner-support">Test Runner Support</a>). If a test file is incompatible, test runners MUST raise an
@@ -3034,7 +3034,7 @@ command error code will be returned as a command error.</li>
 labels. An empty array may be used to suppress the server from adding error labels to the response. New in server
 4.3.1 (<a href="https://jira.mongodb.org/browse/SERVER-43941">SERVER-43941</a>).</li>
 <li><code>appName</code>: Optional string, which is unset by default. If set, the fail point will only apply to connections for
-MongoClients created with this <code>appname</code>. New in server 4.4.0-rc2 and backported to 4.2.9
+MongoClients created with this <code>appname</code>. New in server 4.4.0-rc2
 (<a href="https://jira.mongodb.org/browse/SERVER-47195">SERVER-47195</a>).</li>
 <li><code>blockConnection</code>: Optional boolean, which defaults to <code>false</code>. If <code>true</code>, the server should block the affected
 commands for <code>blockTimeMS</code>. New in server 4.3.4 and backported to 4.2.9
@@ -3130,9 +3130,6 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
-<li>
-<p>2024-09-18: Note that <code>failCommand</code> <code>appName</code> option was backported</p>
-</li>
 <li>
 <p>2024-05-08: <strong>Schema version 1.21.</strong></p>
 <p>Add <code>writeErrors</code> and <code>writeConcernErrors</code> field to <code>expectedError</code> for the client-level bulk write API.</p>

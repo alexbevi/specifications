@@ -1,4 +1,4 @@
 
 .. note::
   This specification has been converted to Markdown and renamed to
-  `dbref.md <bson-dbref/dbref.md>`_.  
+  `dbref.md <dbref.md>`_.  

@@ -243,7 +243,7 @@ This is a JSON Schema based on draft 4 of the JSON Schema specification,
 <p><strong><a href="#crypt_shared">crypt_shared</a></strong></p>
 <p>This term, spelled in all-lowercase with an underscore, refers to the client-side field-level-encryption dynamic library
 provided as part of a MongoDB Enterprise distribution. It replaces <a href="#mongocryptd">mongocryptd</a> as the method of
-<a href="../bson-binary-encrypted/binary-encrypted.html#intent-to-encrypt">marking-up a database command for encryption</a>.</p>
+<a href="./subtype6.html#intent-to-encrypt">marking-up a database command for encryption</a>.</p>
 <p>See also:</p>
 <blockquote>
 <ul>
@@ -252,8 +252,8 @@ provided as part of a MongoDB Enterprise distribution. It replaces <a href="#mon
 </ul>
 </blockquote>
 <p><strong>ciphertext</strong></p>
-<p>One of the data formats of <a href="../bson-binary-encrypted/binary-encrypted.html">BSON binary encrypted</a>, representing an
-encoded BSON document containing encrypted ciphertext and metadata.</p>
+<p>One of the data formats of <a href="./subtype6.html">BSON binary subtype 6</a>, representing an encoded BSON document containing
+encrypted ciphertext and metadata.</p>
 <p><strong>FLE</strong></p>
 <p>FLE is the first version of Client-Side Field Level Encryption. FLE is almost entirely client-side with the exception of
 server-side JSON schema.</p>
@@ -372,7 +372,7 @@ connect to <a href="#mongocryptd">mongocryptd</a> and instead rely on <a href="#
 <h3 id="crypt_shared"><a class="header" href="#crypt_shared">crypt_shared</a></h3>
 <p><a href="#crypt_shared">crypt_shared</a> is a dynamically-loaded C++ library providing query analysis for auto-encryption. It
 replaces <a href="#mongocryptd">mongocryptd</a> for performing query analysis to -
-<a href="../bson-binary-encrypted/binary-encrypted.html#intent-to-encrypt">mark-up sensitive fields within a command</a>.</p>
+<a href="./subtype6.html#intent-to-encrypt">mark-up sensitive fields within a command</a>.</p>
 <p>Drivers are not required to load and interact with <a href="#crypt_shared">crypt_shared</a> directly. Instead, they inform
 <a href="#libmongocrypt">libmongocrypt</a> where to find <a href="#crypt_shared">crypt_shared</a> and <a href="#libmongocrypt">libmongocrypt</a> will
 handle <a href="#crypt_shared">crypt_shared</a> communication automatically.</p>
@@ -415,7 +415,7 @@ implementation.</p>
 <p>Drivers MAY deviate the spelling of option names to conform to their language's naming conventions and implement options
 in an idiomatic way (e.g. keyword arguments, builder classes, etc.).</p>
 <p>Drivers MAY use a native UUID type in place of a parameter or return type specified as a BSON binary with subtype 0x04
-as described in <a href="../bson-binary-uuid/uuid.html">Handling of Native UUID Types</a>.</p>
+as described in <a href="../uuid.html">Handling of Native UUID Types</a>.</p>
 <h3 id="mongoclient-changes"><a class="header" href="#mongoclient-changes">MongoClient Changes</a></h3>
 <p><span id="MongoClient"></span></p>
 <pre><code class="language-typescript">class MongoClient {
@@ -1693,7 +1693,7 @@ Data keys may be retrieved by querying the "_id" with a UUID or by querying the 
    uint8 ciphertext[ciphertext_length];
 }
 </code></pre>
-<p>See <a href="../bson-binary-encrypted/binary-encrypted.html">Driver Spec: BSON Binary Encrypted</a> for more information.</p>
+<p>See <a href="./subtype6.html">Driver Spec: BSON Binary Subtype 6</a> for more information.</p>
 <h3 id="jsonschema-encrypt"><a class="header" href="#jsonschema-encrypt">JSONSchema "encrypt"</a></h3>
 <p>The additional support for encryption in JSONSchema will be documented in the MongoDB manual. But the following is an
 example:</p>
