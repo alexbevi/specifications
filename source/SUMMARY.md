@@ -36,6 +36,10 @@
 
 ---
 
+- [Authentication](auth/auth.md)
+
+---
+
 - [Availability]()
   - [Server Monitoring](server-discovery-and-monitoring/server-monitoring.md)
   - [`SRV` Polling for mongos Discovery](polling-srv-records-for-mongos-discovery/polling-srv-records-for-mongos-discovery.md)
