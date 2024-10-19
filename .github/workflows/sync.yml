@@ -1,5 +1,8 @@
 name: 'Scheduled Upstream Sync'
 on:
+  push:
+    branches:
+      - mkbook
   schedule:
     - cron:  '0 8 * * *'
 
@@ -55,19 +58,16 @@ jobs:
     - name: Show value of 'has_new_commits'
       run: echo ${{ steps.sync.outputs.has_new_commits }}
 
-    - name: Install latest mdbook
-      run: |
-        tag=$(curl 'https://api.github.com/repos/rust-lang/mdbook/releases/latest' | jq -r '.tag_name')
-        url="https://github.com/rust-lang/mdbook/releases/download/${tag}/mdbook-${tag}-x86_64-unknown-linux-gnu.tar.gz"
-        mkdir mdbook
-        curl -sSL $url | tar -xz --directory=./mdbook
-        echo `pwd`/mdbook >> $GITHUB_PATH
-    - name: Build Book
-      run: |
-        # This assumes your book is in the root of your repository.
-        # Just add a `cd` here if you need to change to another directory.
-        mdbook build
-    - uses: JamesIves/github-pages-deploy-action@4.1.7
+    - name: Setup mdBook
+      uses: peaceiris/actions-mdbook@v2
       with:
-        branch: gh-pages # The branch the action should deploy to.
-        folder: book # The folder the action should deploy.
+        mdbook-version: 'latest'
+
+    - run: mdbook build
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      if: ${{ github.ref == 'refs/heads/main' }}
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./book
