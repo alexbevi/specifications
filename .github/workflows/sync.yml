@@ -16,6 +16,8 @@ on:
 jobs:
   sync_latest_from_upstream:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
     name: Sync latest commits from upstream repo
 
     steps:
@@ -67,7 +69,7 @@ jobs:
 
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
-      if: ${{ github.ref == 'refs/heads/main' }}
+      if: ${{ github.ref == 'refs/heads/mkbook' }}
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./book
