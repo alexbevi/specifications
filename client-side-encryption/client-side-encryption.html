@@ -176,7 +176,7 @@
                         <h1 id="client-side-encryption"><a class="header" href="#client-side-encryption">Client Side Encryption</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 4.2 (CSFLE), 6.0 (Queryable Encryption)</li>
+<li>Minimum Server Version: 4.2 (CSFLE), 7.0 (QE)</li>
 <li>Version: 1.14.0</li>
 </ul>
 <hr />
@@ -184,10 +184,33 @@
 <p>MongoDB 4.2 introduced support for client side encryption, guaranteeing that sensitive data can only be encrypted and
 decrypted with access to both MongoDB and a separate key management provider (supporting AWS, Azure, GCP, a local
 provider, and KMIP). Once enabled, data can be seamlessly encrypted and decrypted with minimal application code changes.
-6.0 introduced the next generation of client side encryption based on a Structured Encryption framework which allows
+7.0 introduced the next generation of client side encryption based on a Structured Encryption framework which allows
 expressive encrypted search operations. This spec covers both capabilities - 1st generation, "Client Side Field Level
 Encryption" and generation 2, "Queryable Encryption" - as the associated core cryptographic library and supporting
 drivers share a common codebase.</p>
+<h3 id="naming"><a class="header" href="#naming">Naming</a></h3>
+<p>The public name of this feature is
+<a href="https://www.mongodb.com/docs/manual/core/security-in-use-encryption/">In-Use Encryption</a> and consists of:</p>
+<ul>
+<li>Client-Side Field Level Encryption (CSFLE).</li>
+<li>Queryable Encryption (QE).</li>
+</ul>
+<p>Internally, In-Use Encryption is sometimes called Field Level Encryption (FLE). Internally, CSFLE is sometimes called
+Client Side Encryption (like this specification). Internally, CSFLE and QE are sometimes called FLE1 and FLE2,
+respectively.</p>
+<h3 id="server-support-history"><a class="header" href="#server-support-history">Server support history</a></h3>
+<p>MongoDB 4.2 added support for CSFLE. This includes <code>encrypt</code> in JSON Schema
+(<a href="https://jira.mongodb.org/browse/SERVER-38900">SERVER-38900</a>) and <a href="#mongocryptd">mongocryptd</a>
+(<a href="https://jira.mongodb.org/browse/SPM-1258">SPM-1258</a>).</p>
+<p>MongoDB 5.3 added the <a href="#crypt_shared">crypt_shared</a> library (<a href="https://jira.mongodb.org/browse/SPM-2403">SPM-2403</a>).</p>
+<p>MongoDB 6.0 added unstable support for QE (QEv1) (<a href="https://jira.mongodb.org/browse/SPM-2463">SPM-2463</a>). This includes
+<code>queryType=equality</code>.</p>
+<p>MongoDB 6.2 added unstable support for QE range queries (<a href="https://jira.mongodb.org/browse/SPM-2719">SPM-2719</a>). This
+includes <code>queryType=rangePreview</code>.</p>
+<p>MongoDB 7.0 dropped QEv1 and added stable support of QE (QEv2) (<a href="https://jira.mongodb.org/browse/SPM-2972">SPM-2972</a>).
+QEv1 and QEv2 are incompatible.</p>
+<p>MongoDB 8.0 dropped <code>queryType=rangePreview</code> and added <code>queryType=range</code>
+(<a href="https://jira.mongodb.org/browse/SPM-3583">SPM-3583</a>).</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
@@ -205,7 +228,6 @@ a separate external MongoDB cluster.</p>
 <p><strong>Key Management Service (KMS)</strong></p>
 <p>An external service providing fixed-size encryption/decryption. Only data keys are encrypted and decrypted with KMS.</p>
 <p><strong>KMS providers</strong></p>
-<blockquote>
 <p>A map of KMS providers to credentials. Configured client-side. Example:</p>
 <pre><code class="language-python">kms_providers = {
    "aws": {
@@ -217,7 +239,6 @@ a separate external MongoDB cluster.</p>
    },
 }
 </code></pre>
-</blockquote>
 <p><strong>KMS provider</strong></p>
 <p>A configured KMS. Identified by a key in the KMS providers map. The key has the form "<KMS provider type>" or
 "<KMS provider type>:<KMS
@@ -245,12 +266,10 @@ This is a JSON Schema based on draft 4 of the JSON Schema specification,
 provided as part of a MongoDB Enterprise distribution. It replaces <a href="#mongocryptd">mongocryptd</a> as the method of
 <a href="../bson-binary-encrypted/binary-encrypted.html#intent-to-encrypt">marking-up a database command for encryption</a>.</p>
 <p>See also:</p>
-<blockquote>
 <ul>
 <li><a href="#crypt_shared">Introduction on crypt_shared</a></li>
 <li><a href="#enabling-crypt_shared">Enabling crypt_shared</a></li>
 </ul>
-</blockquote>
 <p><strong>ciphertext</strong></p>
 <p>One of the data formats of <a href="../bson-binary-encrypted/binary-encrypted.html">BSON binary encrypted</a>, representing an
 encoded BSON document containing encrypted ciphertext and metadata.</p>
