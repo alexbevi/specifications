@@ -310,7 +310,7 @@ query logs and profile collections.</p>
 <p>The recommended way for applications to provide this value is through the connection URI. The connection string key is
 <code>appname</code>.</p>
 <p>Example connection string:</p>
-<pre><code>    mongodb://server:27017/db?appname=mongodump
+<pre><code class="language-text">mongodb://server:27017/db?appname=mongodump
 </code></pre>
 <p>This option MAY also be provided on the MongoClient itself, if normal for the driver. It is only valid to set this
 attribute before any connection has been made to a server. Any attempt to set <code>client.application.name</code> MUST result in
@@ -322,7 +322,7 @@ values.</p>
 <p>The internal driver name. For drivers written on-top of other core drivers, the underlying driver will typically expose
 a function to append additional name to this field.</p>
 <p>Example:</p>
-<pre><code>- "pymongo"
+<pre><code class="language-text">- "pymongo"
 - "mongoc / phongo"
 </code></pre>
 <h4 id="clientdriverversion"><a class="header" href="#clientdriverversion">client.driver.version</a></h4>
@@ -330,7 +330,7 @@ a function to append additional name to this field.</p>
 <p>The internal driver version. The version formatting is not defined. For drivers written on-top of other core drivers,
 the underlying driver will typically expose a function to append additional name to this field.</p>
 <p>Example:</p>
-<pre><code>- "1.1.2-beta0"
+<pre><code class="language-text">- "1.1.2-beta0"
 - "1.4.1 / 1.2.0"
 </code></pre>
 <h4 id="clientostype"><a class="header" href="#clientostype">client.os.type</a></h4>
@@ -338,7 +338,7 @@ the underlying driver will typically expose a function to append additional name
 <p>The Operating System primary identification type the client is running on. Equivalent to <code>uname -s</code> on POSIX systems.
 This field is REQUIRED and clients must default to <code>unknown</code> when an appropriate value cannot be determined.</p>
 <p>Example:</p>
-<pre><code>- "Linux"
+<pre><code class="language-text">- "Linux"
 - "Darwin"
 - "Windows"
 - "BSD"
@@ -350,7 +350,7 @@ This field is REQUIRED and clients must default to <code>unknown</code> when an 
 typically <code>PRETTY_NAME</code> of <code>os-release(5)</code> (<code>/etc/os-release</code>) or the <code>DISTRIB_DESCRIPTION</code> (<code>/etc/lsb-release</code>,
 <code>lsb_release(1) --description</code>) on LSB systems. The exact value and method to determine this value is undefined.</p>
 <p>Example:</p>
-<pre><code>- "Ubuntu 16.04 LTS"
+<pre><code class="language-text">- "Ubuntu 16.04 LTS"
 - "macOS"
 - "CygWin"
 - "FreeBSD"
@@ -360,14 +360,14 @@ typically <code>PRETTY_NAME</code> of <code>os-release(5)</code> (<code>/etc/os-
 <p>This value is optional, but RECOMMENDED, it is not application configurable. The machine hardware name. Equivalent to
 <code>uname -m</code> on POSIX systems.</p>
 <p>Example:</p>
-<pre><code>- "x86_64"
+<pre><code class="language-text">- "x86_64"
 - "ppc64le"
 </code></pre>
 <h4 id="clientosversion"><a class="header" href="#clientosversion">client.os.version</a></h4>
 <p>This value is optional and is not application configurable.</p>
 <p>The Operating System version.</p>
 <p>Example:</p>
-<pre><code>- "10"
+<pre><code class="language-text">- "10"
 - "8.1"
 - "16.04.1"
 </code></pre>
@@ -375,7 +375,7 @@ typically <code>PRETTY_NAME</code> of <code>os-release(5)</code> (<code>/etc/os-
 <p>This value is optional and is not application configurable.</p>
 <p>Driver specific platform details.</p>
 <p>Example:</p>
-<pre><code>- clang 3.8.0 CFLAGS="-mcpu=power8 -mtune=power8 -mcmodel=medium"
+<pre><code class="language-text">- clang 3.8.0 CFLAGS="-mcpu=power8 -mtune=power8 -mcmodel=medium"
 - "Oracle JVM EE 9.1.1"
 </code></pre>
 <p><span id="client-env"></span></p>
@@ -513,81 +513,74 @@ in order to avoid possible truncating of those details.</p>
 <p>Drivers that capture values for <code>client.env</code> should test that a connection and hello command succeeds in the presence of
 the following sets of environment variables:</p>
 <ol>
-<li>Valid AWS</li>
-</ol>
+<li>
+<p>Valid AWS</p>
 <div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
 <tr><td><code>AWS_EXECUTION_ENV</code></td><td><code>AWS_Lambda_java8</code></td></tr>
 <tr><td><code>AWS_REGION</code></td><td><code>us-east-2</code></td></tr>
 <tr><td><code>AWS_LAMBDA_FUNCTION_MEMORY_SIZE</code></td><td><code>1024</code></td></tr>
 </tbody></table>
-</div>
-<ol start="2">
-<li>Valid Azure</li>
-</ol>
+</div></li>
+<li>
+<p>Valid Azure</p>
 <div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
 <tr><td><code>FUNCTIONS_WORKER_RUNTIME</code></td><td><code>node</code></td></tr>
 </tbody></table>
-</div>
-<ol start="3">
-<li>Valid GCP</li>
-</ol>
+</div></li>
+<li>
+<p>Valid GCP</p>
 <div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
 <tr><td><code>K_SERVICE</code></td><td><code>servicename</code></td></tr>
 <tr><td><code>FUNCTION_MEMORY_MB</code></td><td><code>1024</code></td></tr>
 <tr><td><code>FUNCTION_TIMEOUT_SEC</code></td><td><code>60</code></td></tr>
 <tr><td><code>FUNCTION_REGION</code></td><td><code>us-central1</code></td></tr>
 </tbody></table>
-</div>
-<ol start="4">
-<li>Valid Vercel</li>
-</ol>
+</div></li>
+<li>
+<p>Valid Vercel</p>
 <div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
 <tr><td><code>VERCEL</code></td><td><code>1</code></td></tr>
 <tr><td><code>VERCEL_REGION</code></td><td><code>cdg1</code></td></tr>
 </tbody></table>
-</div>
-<ol start="5">
-<li>Invalid - multiple providers</li>
-</ol>
+</div></li>
+<li>
+<p>Invalid - multiple providers</p>
 <div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
 <tr><td><code>AWS_EXECUTION_ENV</code></td><td><code>AWS_Lambda_java8</code></td></tr>
 <tr><td><code>FUNCTIONS_WORKER_RUNTIME</code></td><td><code>node</code></td></tr>
 </tbody></table>
-</div>
-<ol start="6">
-<li>Invalid - long string</li>
-</ol>
+</div></li>
+<li>
+<p>Invalid - long string</p>
 <div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
 <tr><td><code>AWS_EXECUTION_ENV</code></td><td><code>AWS_Lambda_java8</code></td></tr>
 <tr><td><code>AWS_REGION</code></td><td><code>a</code> repeated 512 times</td></tr>
 </tbody></table>
-</div>
-<ol start="7">
-<li>Invalid - wrong types</li>
-</ol>
+</div></li>
+<li>
+<p>Invalid - wrong types</p>
 <div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
 <tr><td><code>AWS_EXECUTION_ENV</code></td><td><code>AWS_Lambda_java8</code></td></tr>
 <tr><td><code>AWS_LAMBDA_FUNCTION_MEMORY_SIZE</code></td><td><code>big</code></td></tr>
 </tbody></table>
-</div>
-<ol start="8">
-<li>Invalid - <code>AWS_EXECUTION_ENV</code> does not start with <code>"AWS_Lambda_"</code></li>
-</ol>
+</div></li>
+<li>
+<p>Invalid - <code>AWS_EXECUTION_ENV</code> does not start with <code>"AWS_Lambda_"</code></p>
 <div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
 <tr><td><code>AWS_EXECUTION_ENV</code></td><td><code>EC2</code></td></tr>
 </tbody></table>
-</div>
-<ol start="9">
-<li>Valid container and FaaS provider. This test MUST verify that both the container metadata and the AWS Lambda metadata
-is present in <code>client.env</code>.</li>
-</ol>
+</div></li>
+<li>
+<p>Valid container and FaaS provider. This test MUST verify that both the container metadata and the AWS Lambda metadata
+is present in <code>client.env</code>.</p>
 <div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
 <tr><td><code>AWS_EXECUTION_ENV</code></td><td><code>AWS_Lambda_java8</code></td></tr>
 <tr><td><code>AWS_REGION</code></td><td><code>us-east-2</code></td></tr>
 <tr><td><code>AWS_LAMBDA_FUNCTION_MEMORY_SIZE</code></td><td><code>1024</code></td></tr>
 <tr><td><code>KUBERNETES_SERVICE_HOST</code></td><td><code>1</code></td></tr>
 </tbody></table>
-</div>
+</div></li>
+</ol>
 <h2 id="motivation-for-change"><a class="header" href="#motivation-for-change">Motivation For Change</a></h2>
 <p>Being able to annotate individual connections with custom data will allow users and sysadmins to easily correlate events
 happening on their MongoDB deployment to a specific application. For support engineers, it furthermore helps identify
@@ -665,8 +658,8 @@ way and have no effect one way or another.</li>
 <ul>
 <li>The SDAM monitoring cannot be launched until the user has had the ability to set the application name because the
 application name has to be sent in the initial handshake. This means that the connection pool cannot be
-established until the first user initiated command, or else some connections will have the application name while
-other won't</li>
+established until the first user initiated command, or else some connections will have the application name
+while other won't</li>
 <li>The initial handshake must be called on all sockets, including administrative background sockets to MongoDB</li>
 </ul>
 </li>

@@ -225,8 +225,9 @@ changes but they may in the future.</p>
 protocol otherwise.</li>
 <li>With "poll" mode, the client MUST use the polling protocol.</li>
 <li>With "auto" mode, the client MUST behave the same as "poll" mode when running on a FaaS platform or the same as
-"stream" mode otherwise. The client detects that it's running on a FaaS platform via the same rules for generating the
-<code>client.env</code> handshake metadata field in the <a href="../mongodb-handshake/handshake.html#client-env">MongoDB Handshake spec</a>.</li>
+"stream" mode otherwise. The client detects that it's running on a FaaS platform via the same rules for generating
+the <code>client.env</code> handshake metadata field in the
+<a href="../mongodb-handshake/handshake.html#client-env">MongoDB Handshake spec</a>.</li>
 </ul>
 <p>Multi-threaded or asynchronous drivers MUST implement this option. See
 <a href="#why-disable-the-streaming-protocol-on-faas-platforms-like-aws-lambda">Why disable the streaming protocol on FaaS platforms like AWS Lambda?</a>
@@ -316,7 +317,7 @@ the most-recently checked.</p>
 before the scan is complete. Sometimes servers are removed during a scan so they are not checked, depending on the order
 of events.</p>
 <p>The scanning order is expressed in this pseudocode:</p>
-<pre><code>scanStartTime = now()
+<pre><code class="language-text">scanStartTime = now()
 # You'll likely need to convert units here.
 beforeCoolDown = scanStartTime - cooldownMS
 
@@ -536,20 +537,29 @@ definition in the CMAP specification for more details on marking the pool as "re
 <p>When a server <a href="#check">check</a> fails due to a network error (including a network timeout) or a command error (<code>ok: 0</code>),
 the client MUST follow these steps:</p>
 <ol>
-<li>Close the current monitoring connection.</li>
-<li>Mark the server Unknown.</li>
-<li>Clear the connection pool for the server (See
+<li>
+<p>Close the current monitoring connection.</p>
+</li>
+<li>
+<p>Mark the server Unknown.</p>
+</li>
+<li>
+<p>Clear the connection pool for the server (See
 <a href="#clear-the-connection-pool-on-both-network-and-command-errors">Clear the connection pool on both network and command errors</a>).
 For CMAP compliant drivers, clearing the pool MUST be synchronized with marking the server as Unknown (see
 <a href="server-discovery-and-monitoring.html#why-synchronize-clearing-a-servers-pool-with-updating-the-topology">Why synchronize clearing a server's pool with updating the topology?</a>).
 If this was a network timeout error, then the pool MUST be cleared with interruptInUseConnections = true (see
-<a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#why-does-the-pool-need-to-support-interrupting-in-use-connections-as-part-of-its-clear-logic">Why does the pool need to support closing in use connections as part of its clear logic?</a>)</li>
-<li>If this was a network error and the server was in a known state before the error, the client MUST NOT sleep and MUST
+<a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#why-does-the-pool-need-to-support-interrupting-in-use-connections-as-part-of-its-clear-logic">Why does the pool need to support closing in use connections as part of its clear logic?</a>)</p>
+</li>
+<li>
+<p>If this was a network error and the server was in a known state before the error, the client MUST NOT sleep and MUST
 begin the next check immediately. (See
 <a href="#retry-hello-or-legacy-hello-calls-once">retry hello or legacy hello calls once</a> and
-<a href="https://jira.mongodb.org/browse/JAVA-1159">JAVA-1159</a>.)</li>
-<li>Otherwise, wait for heartbeatFrequencyMS (or minHeartbeatFrequencyMS if a check is requested) before restarting the
-monitoring protocol on a new connection.
+<a href="https://jira.mongodb.org/browse/JAVA-1159">JAVA-1159</a>.)</p>
+</li>
+<li>
+<p>Otherwise, wait for heartbeatFrequencyMS (or minHeartbeatFrequencyMS if a check is requested) before restarting the
+monitoring protocol on a new connection.</p>
 <ul>
 <li>Note that even in the streaming protocol, a monitor in this state will wait for an application operation to request
 an immediate check or for the heartbeatFrequencyMS timeout to expire before beginning the next check.</li>

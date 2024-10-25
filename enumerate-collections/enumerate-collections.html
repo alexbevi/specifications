@@ -298,9 +298,9 @@ the <code>res.cursor.firstBatch</code> field, and subsequent retrieved documents
 <code>idIndex</code> field of the collection information will no longer contain an <code>ns</code> field.</p>
 <ul>
 <li>For drivers that report those index specifications in the form of documents or dictionaries, no special handling is
-necessary, but any documentation of the contents of the documents/dictionaries MUST indicate that the <code>ns</code> field will
-no longer be present in MongoDB 4.4+. If the contents of the documents/dictionaries are undocumented, then no special
-mention of the <code>ns</code> field is necessary.</li>
+necessary, but any documentation of the contents of the documents/dictionaries MUST indicate that the <code>ns</code> field
+will no longer be present in MongoDB 4.4+. If the contents of the documents/dictionaries are undocumented, then no
+special mention of the <code>ns</code> field is necessary.</li>
 <li>For drivers that report those index specifications in the form of statically defined models, the driver MUST manually
 populate the <code>ns</code> field of the models with the appropriate namespace if the server does not report it in the
 <code>listCollections</code> command response. The <code>ns</code> field is not required to be a part of the models, however.</li>

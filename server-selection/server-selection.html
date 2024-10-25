@@ -427,7 +427,7 @@ of "no value" to represent "no max staleness".</p>
 <p>Drivers MUST raise an error if <code>maxStalenessSeconds</code> is a positive number and the <code>mode</code> field is 'primary'.</p>
 <p>A driver MUST raise an error if the TopologyType is ReplicaSetWithPrimary or ReplicaSetNoPrimary and either of these
 conditions is false:</p>
-<pre><code>maxStalenessSeconds * 1000 &gt;= heartbeatFrequencyMS + idleWritePeriodMS
+<pre><code class="language-javascript">maxStalenessSeconds * 1000 &gt;= heartbeatFrequencyMS + idleWritePeriodMS
 maxStalenessSeconds &gt;= smallestMaxStalenessSeconds
 </code></pre>
 <p><code>heartbeatFrequencyMS</code> is defined in the
@@ -450,12 +450,12 @@ maxStalenessSeconds &gt;= smallestMaxStalenessSeconds
 <p>Otherwise, calculate staleness. Non-secondary servers (including Mongos servers) have zero staleness. If TopologyType
 is ReplicaSetWithPrimary, a secondary's staleness is calculated using its ServerDescription "S" and the primary's
 ServerDescription "P":</p>
-<pre><code>(S.lastUpdateTime - S.lastWriteDate) - (P.lastUpdateTime - P.lastWriteDate) + heartbeatFrequencyMS
+<pre><code class="language-javascript">(S.lastUpdateTime - S.lastWriteDate) - (P.lastUpdateTime - P.lastWriteDate) + heartbeatFrequencyMS
 </code></pre>
 <p>(All datetime units are in milliseconds.)</p>
 <p>If TopologyType is ReplicaSetNoPrimary, a secondary's staleness is calculated using its ServerDescription "S" and the
 ServerDescription of the secondary with the greatest lastWriteDate, "SMax":</p>
-<pre><code>SMax.lastWriteDate - S.lastWriteDate + heartbeatFrequencyMS
+<pre><code class="language-javascript">SMax.lastWriteDate - S.lastWriteDate + heartbeatFrequencyMS
 </code></pre>
 <p>Servers with staleness less than or equal to <code>maxStalenessSeconds</code> are eligible.</p>
 </li>
@@ -480,7 +480,8 @@ the latency window.</p>
 empty list probably won't often be seen, but if the client does not forbid an empty list, this rule MUST be
 implemented to handle that case.)</li>
 <li>If the <code>tag_sets</code> list is not empty, then tag sets are tried in order until a tag set matches at least one candidate
-server. All candidate servers matching that tag set are eligible servers. Subsequent tag sets in the list are ignored.</li>
+server. All candidate servers matching that tag set are eligible servers. Subsequent tag sets in the list are
+ignored.</li>
 <li>If the <code>tag_sets</code> list is not empty and no tag set in the list matches any candidate server, no servers are eligible
 servers.</li>
 </ul>
@@ -536,8 +537,8 @@ modifier.</p>
 <li>For mode 'secondary', drivers MUST set the <code>SecondaryOk</code> wire protocol flag and MUST also use <code>$readPreference</code></li>
 <li>For mode 'primaryPreferred', drivers MUST set the <code>SecondaryOk</code> wire protocol flag and MUST also use <code>$readPreference</code></li>
 <li>For mode 'secondaryPreferred', drivers MUST set the <code>SecondaryOk</code> wire protocol flag. If the read preference contains
-a non-empty <code>tag_sets</code> parameter, <code>maxStalenessSeconds</code> is a positive integer, or the <code>hedge</code> parameter is non-empty,
-drivers MUST use <code>$readPreference</code>; otherwise, drivers MUST NOT use <code>$readPreference</code></li>
+a non-empty <code>tag_sets</code> parameter, <code>maxStalenessSeconds</code> is a positive integer, or the <code>hedge</code> parameter is
+non-empty, drivers MUST use <code>$readPreference</code>; otherwise, drivers MUST NOT use <code>$readPreference</code></li>
 <li>For mode 'nearest', drivers MUST set the <code>SecondaryOk</code> wire protocol flag and MUST also use <code>$readPreference</code></li>
 </ul>
 <p>The <code>$readPreference</code> query modifier sends the read preference as part of the query. The read preference fields
@@ -597,8 +598,8 @@ preference by a driver depends on the command and how it is invoked:</p>
 any default read preference from client, database or collection configuration. The generic command method SHOULD
 allow an optional read preference argument.</p>
 <p>If an explicit read preference argument is provided as part of the generic command method call, it MUST be used for
-server selection, regardless of the name of the command. It is up to the user to use an appropriate read preference,
-e.g. not calling <code>renameCollection</code> with a <code>mode</code> of 'secondary'.</p>
+server selection, regardless of the name of the command. It is up to the user to use an appropriate read
+preference, e.g. not calling <code>renameCollection</code> with a <code>mode</code> of 'secondary'.</p>
 <p>N.B.: "used for server selection" does not supersede rules for server selection on "Standalone" topologies, which
 ignore any requested read preference.</p>
 </li>
@@ -648,11 +649,12 @@ They are sometimes called "query-like" commands.</p>
 preference from client, database, or collection configuration.</p>
 <p>For pre-5.0 servers, an aggregate command is "must-use-primary" if its pipeline contains a write stage (e.g.
 <code>$out</code>, <code>$merge</code>); otherwise, it is "may-use-secondary". For 5.0+ servers, secondaries can execute an aggregate
-command with a write stage and all aggregate commands are "may-use-secondary". This is discussed in more detail in
-<a href="../crud/crud.html#read-preferences-and-server-selection">Read preferences and server selection</a> in the CRUD spec.</p>
+command with a write stage and all aggregate commands are "may-use-secondary". This is discussed in more detail
+in <a href="../crud/crud.html#read-preferences-and-server-selection">Read preferences and server selection</a> in the CRUD
+spec.</p>
 <p>If a client provides a specific helper for inline mapReduce, then it is "may-use-secondary" and the <em>regular</em>
-mapReduce helper is "must-use-primary". Otherwise, the mapReduce helper is "may-use-secondary" and it is the user's
-responsibility to specify <code>{inline: 1}</code> when running mapReduce on a secondary.</p>
+mapReduce helper is "must-use-primary". Otherwise, the mapReduce helper is "may-use-secondary" and it is the
+user's responsibility to specify <code>{inline: 1}</code> when running mapReduce on a secondary.</p>
 </li>
 </ul>
 <p>New command-specific helpers implemented in the future will be considered "must-use-primary", "should-use-primary" or
@@ -750,8 +752,8 @@ server selection algorithm MUST ignore the deprioritized servers if the topology
 <li>If there are any suitable servers, filter them according to
 <a href="#filtering-suitable-servers-based-on-the-latency-window">Filtering suitable servers based on the latency window</a>
 and return one at random from the filtered servers, and log a
-<a href="#server-selection-succeeded-message">"Server selection succeeded" message</a>.; otherwise, mark the topology stale and
-continue to step #9.</li>
+<a href="#server-selection-succeeded-message">"Server selection succeeded" message</a>.; otherwise, mark the topology stale
+and continue to step #9.</li>
 <li>If <a href="#serverselectiontryonce">serverSelectionTryOnce</a> is true and the last scan time is newer than the selection
 start time, raise a <a href="#server-selection-errors">server selection error</a> and log a
 <a href="#server-selection-failed-message">"Server selection failed" message</a>; otherwise, log a
@@ -786,13 +788,13 @@ differently:</p>
 <li>For all other types, using OP_QUERY: clients MUST always set the <code>SecondaryOk</code> wire protocol flag on reads to ensure
 that any server type can handle the request.</li>
 <li>For all other types, using OP_MSG: If no read preference is configured by the application, or if the application read
-preference is Primary, then $readPreference MUST be set to <code>{ "mode": "primaryPreferred" }</code> to ensure that any server
-type can handle the request. If the application read preference is set otherwise, $readPreference MUST be set
-following <a href="#document-structure">Document structure</a>.</li>
+preference is Primary, then <code>$readPreference</code> MUST be set to <code>{ "mode": "primaryPreferred" }</code> to ensure that any
+server type can handle the request. If the application read preference is set otherwise, <code>$readPreference</code> MUST be
+set following <a href="#document-structure">Document structure</a>.</li>
 </ul>
 <p>The single server is always suitable for write operations if it is available.</p>
 <h4 id="topology-type-loadbalanced"><a class="header" href="#topology-type-loadbalanced">Topology type: LoadBalanced</a></h4>
-<p>During command construction, drivers MUST add a $readPreference field to the command when required by
+<p>During command construction, drivers MUST add a <code>$readPreference</code> field to the command when required by
 <a href="#passing-read-preference-to-mongos-and-load-balancers">Passing read preference to mongos and load balancers</a>; see the
 <a href="../load-balancers/load-balancers.html#server-selection">Load Balancer Specification</a> for details.</p>
 <h4 id="topology-types-replicasetwithprimary-or-replicasetnoprimary"><a class="header" href="#topology-types-replicasetwithprimary-or-replicasetnoprimary">Topology types: ReplicaSetWithPrimary or ReplicaSetNoPrimary</a></h4>
@@ -846,8 +848,8 @@ first <code>hello</code> or legacy hello command after the server becomes availa
 <p>After the first measurement, average RTT MUST be computed using an exponentially-weighted moving average formula, with a
 weighting factor (<code>alpha</code>) of 0.2. If the prior average is denoted <code>old_rtt</code>, then the new average (<code>new_rtt</code>) is
 computed from a new RTT measurement (<code>x</code>) using the following formula:</p>
-<pre><code class="language-javascript">    alpha = 0.2
-    new_rtt = alpha * x + (1 - alpha) * old_rtt
+<pre><code class="language-javascript">alpha = 0.2
+new_rtt = alpha * x + (1 - alpha) * old_rtt
 </code></pre>
 <p>A weighting factor of 0.2 was chosen to put about 85% of the weight of the average RTT on the 9 most recent
 observations.</p>
@@ -871,32 +873,32 @@ server's type to Unknown and update the Topology Description according to the Se
 attempt <strong>once</strong> more to select a server.</p>
 <p>The logic is expressed in this pseudocode. The algorithm for the "getServer" function is suggested below, in
 <a href="#single-threaded-server-selection-implementation">Single-threaded server selection implementation</a>:</p>
-<pre><code class="language-python">    def getConnection(criteria):
-        # Get a server for writes, or a server matching read prefs, by
-        # running the server selection algorithm.
-        server = getServer(criteria)
-        if not server:
-            throw server selection error
+<pre><code class="language-python">def getConnection(criteria):
+    # Get a server for writes, or a server matching read prefs, by
+    # running the server selection algorithm.
+    server = getServer(criteria)
+    if not server:
+        throw server selection error
 
-        connection = server.connection
-        if connection is NULL:
-            # connect to server and return connection
-        else if connection has been idle &lt; socketCheckIntervalMS:
+    connection = server.connection
+    if connection is NULL:
+        # connect to server and return connection
+    else if connection has been idle &lt; socketCheckIntervalMS:
+        return connection
+    else:
+        try:
+            use connection for "ping" command
             return connection
-        else:
-            try:
-                use connection for "ping" command
-                return connection
-            except network error:
-                close connection
-                mark server Unknown and update Topology Description
+        except network error:
+            close connection
+            mark server Unknown and update Topology Description
 
-                # Attempt *once* more to select.
-                server = getServer(criteria)
-                if not server:
-                    throw server selection error
+            # Attempt *once* more to select.
+            server = getServer(criteria)
+            if not server:
+                throw server selection error
 
-                # connect to server and return connection
+            # connect to server and return connection
 </code></pre>
 <p>See <a href="#what-is-the-purpose-of-socketcheckintervalms">What is the purpose of socketCheckIntervalMS?</a>.</p>
 <h3 id="requests-and-pinning-deprecated"><a class="header" href="#requests-and-pinning-deprecated">Requests and Pinning Deprecated</a></h3>
@@ -1034,134 +1036,134 @@ desired.</p>
 suits their design.</p>
 <p>The following is pseudocode for
 <a href="#multi-threaded-or-asynchronous-server-selection">multi-threaded or asynchronous server selection</a>:</p>
-<pre><code class="language-python">    def getServer(criteria):
-        client.lock.acquire()
+<pre><code class="language-python">def getServer(criteria):
+    client.lock.acquire()
 
-        now = gettime()
-        endTime = now + computed server selection timeout
+    now = gettime()
+    endTime = now + computed server selection timeout
 
-        log a "server selection started" message
-        while true:
-            # The topologyDescription keeps track of whether any server has an
-            # an invalid wire version range
-            if not topologyDescription.compatible:
+    log a "server selection started" message
+    while true:
+        # The topologyDescription keeps track of whether any server has an
+        # an invalid wire version range
+        if not topologyDescription.compatible:
+            client.lock.release()
+            log a "server selection failed" message
+            throw invalid wire protocol range error with details
+
+        if maxStalenessSeconds is set:
+            if client minWireVersion &lt; 5 and "&lt;any available server's maxWireVersion &lt; 5"&gt;:
                 client.lock.release()
-                log a "server selection failed" message
-                throw invalid wire protocol range error with details
+                throw error
 
-            if maxStalenessSeconds is set:
-                if client minWireVersion &lt; 5 and "&lt;any available server's maxWireVersion &lt; 5"&gt;:
-                    client.lock.release()
-                    throw error
+            if topologyDescription.type in (ReplicaSetWithPrimary, ReplicaSetNoPrimary):
+                if (maxStalenessSeconds * 1000 &lt; heartbeatFrequencyMS + idleWritePeriodMS or
+                    maxStalenessSeconds &lt; smallestMaxStalenessSeconds):
+                client.lock.release()
+                throw error
 
-                if topologyDescription.type in (ReplicaSetWithPrimary, ReplicaSetNoPrimary):
-                    if (maxStalenessSeconds * 1000 &lt; heartbeatFrequencyMS + idleWritePeriodMS or
-                        maxStalenessSeconds &lt; smallestMaxStalenessSeconds):
-                    client.lock.release()
-                    throw error
+        servers = all servers in topologyDescription matching criteria
 
-            servers = all servers in topologyDescription matching criteria
+        if serverSelector is not null:
+            servers = serverSelector(servers)
 
-            if serverSelector is not null:
-                servers = serverSelector(servers)
-
-            if servers is not empty:
-                in_window = servers within the latency window
-                if len(in_window) == 1:
-                    selected = in_window[0]
+        if servers is not empty:
+            in_window = servers within the latency window
+            if len(in_window) == 1:
+                selected = in_window[0]
+            else:
+                server1, server2 = random two entries from in_window
+                if server1.operation_count &lt;= server2.operation_count:
+                    selected = server1
                 else:
-                    server1, server2 = random two entries from in_window
-                    if server1.operation_count &lt;= server2.operation_count:
-                        selected = server1
-                    else:
-                        selected = server2
-                selected.operation_count += 1
-                client.lock.release()
-                return selected
+                    selected = server2
+            selected.operation_count += 1
+            client.lock.release()
+            return selected
 
-            request that all monitors check immediately
-            if the message was not logged already for this operation: 
-                log a "waiting for suitable server to become available" message
+        request that all monitors check immediately
+        if the message was not logged already for this operation:
+            log a "waiting for suitable server to become available" message
 
-            # Wait for a new TopologyDescription. condition.wait() releases
-            # client.lock while waiting and reacquires it before returning.
-            # While a thread is waiting on client.condition, it is awakened
-            # early whenever a server check completes.
-            timeout_left = endTime - gettime()
-            client.condition.wait(timeout_left)
+        # Wait for a new TopologyDescription. condition.wait() releases
+        # client.lock while waiting and reacquires it before returning.
+        # While a thread is waiting on client.condition, it is awakened
+        # early whenever a server check completes.
+        timeout_left = endTime - gettime()
+        client.condition.wait(timeout_left)
 
-            if now after endTime:
-                client.lock.release()
-                throw server selection error
+        if now after endTime:
+            client.lock.release()
+            throw server selection error
 </code></pre>
 <h3 id="single-threaded-server-selection-implementation"><a class="header" href="#single-threaded-server-selection-implementation">Single-threaded server selection implementation</a></h3>
 <p>The following is pseudocode for <a href="#single-threaded-server-selection">single-threaded server selection</a>:</p>
-<pre><code class="language-python">    def getServer(criteria):
-        startTime = gettime()
-        loopEndTime = startTime
-        maxTime = startTime + computed server selection timeout
-        nextUpdateTime = topologyDescription.lastUpdateTime
-                       + heartbeatFrequencyMS/1000:
+<pre><code class="language-python">def getServer(criteria):
+    startTime = gettime()
+    loopEndTime = startTime
+    maxTime = startTime + computed server selection timeout
+    nextUpdateTime = topologyDescription.lastUpdateTime
+                    + heartbeatFrequencyMS/1000:
 
-        if nextUpdateTime &lt; startTime:
-            topologyDescription.stale = true
+    if nextUpdateTime &lt; startTime:
+        topologyDescription.stale = true
 
-        while true:
+    while true:
 
-            if topologyDescription.stale:
-                scanReadyTime = topologyDescription.lastUpdateTime
-                              + minHeartbeatFrequencyMS/1000
+        if topologyDescription.stale:
+            scanReadyTime = topologyDescription.lastUpdateTime
+                            + minHeartbeatFrequencyMS/1000
 
-                if ((not serverSelectionTryOnce) &amp;&amp; (scanReadyTime &gt; maxTime)):
-                    throw server selection error with details
-
-                # using loopEndTime below is a proxy for "now" but avoids
-                # the overhead of another gettime() call
-                sleepTime = scanReadyTime - loopEndTime
-
-                if sleepTime &gt; 0:
-                    sleep sleepTime
-
-                rescan all servers
-                topologyDescription.lastupdateTime = gettime()
-                topologyDescription.stale = false
-
-            # topologyDescription keeps a record of whether any
-            # server has an incompatible wire version range
-            if not topologyDescription.compatible:
-                topologyDescription.stale = true
-                # throw invalid wire version range error with details
-
-            if maxStalenessSeconds is set:
-                if client minWireVersion &lt; 5 and "&lt;any available server's maxWireVersion &lt; 5&gt;":
-                    # throw error
-
-                if topologyDescription.type in (ReplicaSetWithPrimary, ReplicaSetNoPrimary):
-                    if (maxStalenessSeconds * 1000 &lt; heartbeatFrequencyMS + idleWritePeriodMS or
-                        maxStalenessSeconds &lt; smallestMaxStalenessSeconds):
-                    # throw error
-
-            servers = all servers in topologyDescription matching criteria
-
-            if serverSelector is not null:
-                servers = serverSelector(servers)
-
-            if servers is not empty:
-                in_window = servers within the latency window
-                return random entry from in_window
-            else:
-                topologyDescription.stale = true
-
-            loopEndTime = gettime()
-
-            if serverSelectionTryOnce:
-                if topologyDescription.lastUpdateTime &gt; startTime:
-                    throw server selection error with details
-            else if loopEndTime &gt; maxTime:
+            if ((not serverSelectionTryOnce) and (scanReadyTime &gt; maxTime)):
                 throw server selection error with details
 
-            if the message was not logged already: 
-                log a "waiting for suitable server to become available" message
+            # using loopEndTime below is a proxy for "now" but avoids
+            # the overhead of another gettime() call
+            sleepTime = scanReadyTime - loopEndTime
+
+            if sleepTime &gt; 0:
+                sleep sleepTime
+
+            rescan all servers
+            topologyDescription.lastupdateTime = gettime()
+            topologyDescription.stale = false
+
+        # topologyDescription keeps a record of whether any
+        # server has an incompatible wire version range
+        if not topologyDescription.compatible:
+            topologyDescription.stale = true
+            # throw invalid wire version range error with details
+
+        if maxStalenessSeconds is set:
+            if client minWireVersion &lt; 5 and "&lt;any available server's maxWireVersion &lt; 5&gt;":
+                # throw error
+
+            if topologyDescription.type in (ReplicaSetWithPrimary, ReplicaSetNoPrimary):
+                if (maxStalenessSeconds * 1000 &lt; heartbeatFrequencyMS + idleWritePeriodMS or
+                    maxStalenessSeconds &lt; smallestMaxStalenessSeconds):
+                # throw error
+
+        servers = all servers in topologyDescription matching criteria
+
+        if serverSelector is not null:
+            servers = serverSelector(servers)
+
+        if servers is not empty:
+            in_window = servers within the latency window
+            return random entry from in_window
+        else:
+            topologyDescription.stale = true
+
+        loopEndTime = gettime()
+
+        if serverSelectionTryOnce:
+            if topologyDescription.lastUpdateTime &gt; startTime:
+                throw server selection error with details
+        else if loopEndTime &gt; maxTime:
+            throw server selection error with details
+
+        if the message was not logged already: 
+            log a "waiting for suitable server to become available" message
 </code></pre>
 <h3 id="server-selection-errors"><a class="header" href="#server-selection-errors">Server Selection Errors</a></h3>
 <p>Drivers should use server descriptions and their error attributes (if set) to return useful error messages.</p>
@@ -1177,12 +1179,12 @@ suits their design.</p>
 <li>"Authentication failed: <code>[specific error message]</code>"</li>
 </ul>
 <p>Here is a sketch of some pseudocode for handling error reporting when errors could be different across servers:</p>
-<pre><code class="language-python">    if there are any available servers:
-        error_message = "No servers are suitable for " + criteria
-    else if all ServerDescriptions' errors are the same:
-        error_message = a ServerDescription.error value
-    else:
-        error_message = ', '.join(all ServerDescriptions' errors)
+<pre><code class="language-text">if there are any available servers:
+    error_message = "No servers are suitable for " + criteria
+else if all ServerDescriptions' errors are the same:
+    error_message = a ServerDescription.error value
+else:
+    error_message = ', '.join(all ServerDescriptions' errors)
 </code></pre>
 <h3 id="cursors"><a class="header" href="#cursors">Cursors</a></h3>
 <p>Cursor operations OP_GET_MORE and OP_KILL_CURSOR do not go through the server selection process. Cursor operations must
@@ -1366,8 +1368,9 @@ was changed at the last minute before release with <a href="https://jira.mongodb
 <ol>
 <li>'primaryPreferred' and 'secondaryPreferred' acted surprisingly and unpredictably within requests</li>
 <li>There was no way to specify a common need: read from a secondary if possible with 'secondaryPreferred', then from
-primary if possible with 'primaryPreferred', all within a request. Instead an application developer would have to do
-the second read with 'primary', which would unpin the thread but risk unavailability if only secondaries were up.</li>
+primary if possible with 'primaryPreferred', all within a request. Instead an application developer would have to
+do the second read with 'primary', which would unpin the thread but risk unavailability if only secondaries were
+up.</li>
 </ol>
 <p>Additionally, mongos 2.4 introduced the releaseConnectionsAfterResponse option (RCAR), mongos 2.6 made it the default
 and mongos 2.8 will remove the ability to turn it off. This means that pinning to a mongos offers no guarantee that
@@ -1461,8 +1464,8 @@ specification</li>
 </li>
 <li>
 <p>2015-08-10: Updated single-threaded selection logic to ensure a scan always happens at least once under
-serverSelectionTryOnce if selection fails. Removed the general selection algorithm and put full algorithms for each of
-the single- and multi-threaded sections. Added a requirement that single-threaded drivers document selection time
+serverSelectionTryOnce if selection fails. Removed the general selection algorithm and put full algorithms for each
+of the single- and multi-threaded sections. Added a requirement that single-threaded drivers document selection time
 expectations.</p>
 </li>
 <li>
@@ -1498,14 +1501,14 @@ idle socket and discovering it is broken.</p>
 to secondaries getting "not writable primary" errors by design.</p>
 </li>
 <li>
-<p>2018-01-22: Clarify that $query wrapping is only for OP_QUERY</p>
+<p>2018-01-22: Clarify that <code>$query</code> wrapping is only for OP_QUERY</p>
 </li>
 <li>
-<p>2018-01-22: Clarify that $out on aggregate follows the "$out Aggregation Pipeline Operator" spec and warns if read
+<p>2018-01-22: Clarify that <code>$out</code> on aggregate follows the "<code>$out</code> Aggregation Pipeline Operator" spec and warns if read
 preference is not primary.</p>
 </li>
 <li>
-<p>2018-01-29: Remove reference to '$out Aggregation spec'. Clarify runCommand selection rules.</p>
+<p>2018-01-29: Remove reference to '<code>$out</code> Aggregation spec'. Clarify runCommand selection rules.</p>
 </li>
 <li>
 <p>2018-12-13: Update tag_set example to use only String values</p>
@@ -1532,7 +1535,7 @@ preference is not primary.</p>
 <p>2021-05-13: Updated to use modern terminology.</p>
 </li>
 <li>
-<p>2021-08-05: Updated $readPreference logic to describe OP_MSG behavior.</p>
+<p>2021-08-05: Updated <code>$readPreference</code> logic to describe OP_MSG behavior.</p>
 </li>
 <li>
 <p>2021-09-03: Clarify that wire version check only applies to available servers.</p>

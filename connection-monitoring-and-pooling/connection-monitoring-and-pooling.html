@@ -405,8 +405,8 @@ Endpoint. The pool has the following properties:</p>
 MUST immediately clear itself and update its pid</li>
 <li><strong>Single Owner:</strong> A Pool MUST be associated with exactly one Endpoint, and MUST NOT be shared between Endpoints.</li>
 <li><strong>Emit Events and Log Messages:</strong> A Pool MUST emit pool events and log messages when dictated by this spec (see
-<a href="#connection-pool-monitoring">Connection Pool Monitoring</a>). Users MUST be able to subscribe to emitted events and log
-messages in a manner idiomatic to their language and driver.</li>
+<a href="#connection-pool-monitoring">Connection Pool Monitoring</a>). Users MUST be able to subscribe to emitted events and
+log messages in a manner idiomatic to their language and driver.</li>
 <li><strong>Closeable:</strong> A Pool MUST be able to be manually closed. When a Pool is closed, the following behaviors change:
 <ul>
 <li>Checking in a <a href="#connection">Connection</a> to the Pool automatically closes the <a href="#connection">Connection</a></li>
@@ -529,7 +529,7 @@ being <a href="#populating-the-pool-with-a-connection-internal-implementation">p
 it has been marked as "ready". SDAM will mark the pool as "ready" on each successful check. See
 <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#connection-pool-management">Connection Pool Management</a>
 section in the SDAM specification for more information.</p>
-<pre><code>set generation to 0
+<pre><code class="language-text">set generation to 0
 set state to "paused"
 emit PoolCreatedEvent and equivalent log message
 </code></pre>
@@ -540,7 +540,7 @@ following behavior changes:</p>
 <li>In use <a href="#connection">Connections</a> MUST be closed when they are checked in to the closed pool.</li>
 <li>Attempting to check out a <a href="#connection">Connection</a> MUST result in an error.</li>
 </ul>
-<pre><code>mark pool as "closed"
+<pre><code class="language-text">mark pool as "closed"
 for connection in availableConnections:
   close connection
 emit PoolClosedEvent and equivalent log message
@@ -551,7 +551,7 @@ checks. Once a pool is "ready", it can start checking out <a href="#connection">
 background.</p>
 <p>If the pool is already "ready" when this method is invoked, then this method MUST immediately return and MUST NOT emit a
 PoolReadyEvent.</p>
-<pre><code>mark pool as "ready"
+<pre><code class="language-text">mark pool as "ready"
 emit PoolReadyEvent and equivalent log message
 allow background thread to create connections
 </code></pre>
@@ -561,7 +561,7 @@ connections before observing the PoolReadyEvent event.</p>
 <h4 id="creating-a-connection-internal-implementation"><a class="header" href="#creating-a-connection-internal-implementation">Creating a Connection (Internal Implementation)</a></h4>
 <p>When creating a <a href="#connection">Connection</a>, the initial <a href="#connection">Connection</a> is in a "pending" state. This only
 creates a "virtual" <a href="#connection">Connection</a>, and performs no I/O.</p>
-<pre><code>connection = new Connection()
+<pre><code class="language-text">connection = new Connection()
 increment totalConnectionCount
 increment pendingConnectionCount
 set connection state to "pending"
@@ -572,7 +572,7 @@ return connection
 <h4 id="establishing-a-connection-internal-implementation"><a class="header" href="#establishing-a-connection-internal-implementation">Establishing a Connection (Internal Implementation)</a></h4>
 <p>Before a <a href="#connection">Connection</a> can be marked as either "available" or "in use", it must be established. This process
 involves performing the initial handshake, handling OP_COMPRESSED, and performing authentication.</p>
-<pre><code>try:
+<pre><code class="language-text">try:
   connect connection via TCP / TLS
   perform connection handshake
   handle OP_COMPRESSED
@@ -589,7 +589,7 @@ except error:
 "available" or "in use". Once that is complete, the <a href="#connection">Connection</a> can perform whatever teardown is necessary
 to close its underlying socket. The Driver SHOULD perform this teardown in a non-blocking manner, such as via the use of
 a background thread or async I/O.</p>
-<pre><code>original state = connection state
+<pre><code class="language-text">original state = connection state
 set connection state to "closed"
 
 if original state is "available":
@@ -608,7 +608,7 @@ connection.socket.close()
 <p>A <a href="#connection">Connection</a> is "available" if it is able to be checked out. A <a href="#connection">Connection</a> MUST NOT be
 marked as "available" until it has been established. The pool MUST keep track of the number of currently available
 <a href="#connection">Connections</a>.</p>
-<pre><code>increment availableConnectionCount
+<pre><code class="language-text">increment availableConnectionCount
 set connection state to "available"
 add connection to availableConnections
 </code></pre>
@@ -632,7 +632,7 @@ after the action that
 observable to the <a href="#thread">Thread</a>. Informally, this order guarantees that no <a href="#thread">Thread</a> tries to start
 establishing a <a href="#connection">Connection</a> when there is an "available" <a href="#connection">Connection</a> established as a result
 of populating the Pool.</p>
-<pre><code>wait until pendingConnectionCount &lt; maxConnecting and pool is "ready"
+<pre><code class="language-text">wait until pendingConnectionCount &lt; maxConnecting and pool is "ready"
 create connection
 try:
   establish connection
@@ -672,7 +672,7 @@ the SDAM state unknown.</p>
 other threads from checking out <a href="#connection">Connections</a> while establishing a <a href="#connection">Connection</a>.</p>
 <p>Before a given <a href="#connection">Connection</a> is returned from checkOut, it must be marked as "in use", and the pool's
 availableConnectionCount MUST be decremented.</p>
-<pre><code class="language-python">connection = Null
+<pre><code class="language-text">connection = Null
 tConnectionCheckOutStarted = current instant (use a monotonic clock if possible)
 emit ConnectionCheckOutStartedEvent and equivalent log message
 try:
@@ -751,7 +751,7 @@ any of the following are true:</p>
 <li>The pool has been closed.</li>
 </ul>
 <p>Otherwise, the <a href="#connection">Connection</a> is marked as available.</p>
-<pre><code>emit ConnectionCheckedInEvent and equivalent log message
+<pre><code class="language-text">emit ConnectionCheckedInEvent and equivalent log message
 if connection is perished OR pool is closed:
   close connection
 else:
@@ -1311,14 +1311,14 @@ endpoint it is associated with is available or not. This enables the following b
 <ol>
 <li>The pool can halt the creation of background connection establishments until the endpoint becomes available again.
 Without the "paused" state, the pool would have no way of determining when to begin establishing background
-connections again, so it would just continually attempt, and often fail, to create connections until minPoolSize was
-satisfied, even after repeated failures. This could unnecessarily waste resources both server and driver side.</li>
+connections again, so it would just continually attempt, and often fail, to create connections until minPoolSize
+was satisfied, even after repeated failures. This could unnecessarily waste resources both server and driver side.</li>
 <li>The pool can evict requests that enter the WaitQueue after the pool was cleared but before the server was in a known
 state again. Such requests can occur when a server is selected at the same time as it becomes marked as Unknown in
 highly concurrent workloads. Without the "paused" state, the pool would attempt to service these requests, since it
-would assume they were routed to the pool because its endpoint was available, not because of a race between SDAM and
-Server Selection. These requests would then likely fail with potentially high latency, again wasting resources both
-server and driver side.</li>
+would assume they were routed to the pool because its endpoint was available, not because of a race between SDAM
+and Server Selection. These requests would then likely fail with potentially high latency, again wasting resources
+both server and driver side.</li>
 </ol>
 <h3 id="why-not-emit-poolcleared-events-and-log-messages-when-clearing-a-paused-pool"><a class="header" href="#why-not-emit-poolcleared-events-and-log-messages-when-clearing-a-paused-pool">Why not emit PoolCleared events and log messages when clearing a paused pool?</a></h3>
 <p>If a pool is already paused when it is cleared, that means it was previously cleared and no new connections have been

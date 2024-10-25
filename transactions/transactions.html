@@ -975,8 +975,8 @@ constitute a retryable error. Control is returned to the user.</li>
 durably and the driver can continue. Control is returned to the user.</li>
 <li>Node B replies with a wtimeout error. This does not constitute a retryable error. Control is returned to the user.</li>
 <li>Node B replies with a failure response that includes the TransientTransactionError label, which indicates it is safe
-to retry the entire transaction. Drivers can trust that a server response will not include both a write concern error
-and TransientTransactionError label (see: <a href="https://jira.mongodb.org/browse/SERVER-37179">SERVER-37179</a>).</li>
+to retry the entire transaction. Drivers can trust that a server response will not include both a write concern
+error and TransientTransactionError label (see: <a href="https://jira.mongodb.org/browse/SERVER-37179">SERVER-37179</a>).</li>
 </ul>
 <p>Adding a majority write concern only when retrying commitTransaction provides a good compromise of performance and
 durability. Applications can use <code>w:1</code> for the initial transaction attempt for a performance advantage in the happy

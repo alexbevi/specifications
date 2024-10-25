@@ -241,15 +241,16 @@ appropriate in any roundtrip tests.</li>
 <li><code>relaxed_extjson</code>: (optional) a string containing a Relaxed Extended JSON document. Because this is itself embedded as
 a <em>string</em> inside a JSON document, characters like quote and backslash are escaped.</li>
 <li><code>degenerate_bson</code>: (optional) an (uppercase) big-endian hex representation of a BSON byte string that is technically
-parseable, but not in compliance with the BSON spec. Be sure to mangle the case as appropriate in any roundtrip tests.</li>
+parseable, but not in compliance with the BSON spec. Be sure to mangle the case as appropriate in any roundtrip
+tests.</li>
 <li><code>degenerate_extjson</code>: (optional) a string containing an invalid form of Canonical Extended JSON that is still
 parseable according to type-specific rules. (For example, "1e100" instead of "1E+100".)</li>
 <li><code>converted_bson</code>: (optional) an (uppercase) big-endian hex representation of a BSON byte string. It may be present for
-deprecated types. It represents a possible conversion of the deprecated type to a non-deprecated type, e.g. symbol to
-string.</li>
+deprecated types. It represents a possible conversion of the deprecated type to a non-deprecated type, e.g. symbol
+to string.</li>
 <li><code>converted_extjson</code>: (optional) a string containing a Canonical Extended JSON document. Because this is itself
-embedded as a <em>string</em> inside a JSON document, characters like quote and backslash are escaped. It may be present for
-deprecated types and is the Canonical Extended JSON representation of <code>converted_bson</code>.</li>
+embedded as a <em>string</em> inside a JSON document, characters like quote and backslash are escaped. It may be present
+for deprecated types and is the Canonical Extended JSON representation of <code>converted_bson</code>.</li>
 <li><code>lossy</code> (optional) -- boolean; present (and true) iff <code>canonical_bson</code> can't be represented exactly with extended JSON
 (e.g. NaN with a payload).</li>
 </ul>

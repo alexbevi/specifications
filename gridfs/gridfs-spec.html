@@ -391,8 +391,8 @@ class GridFSBucket {
 <p>GridFSBucket objects MUST allow the following options to be configurable:</p>
 <ul>
 <li><strong>bucketName:</strong> the name of this GridFS bucket. The files and chunks collection for this GridFS bucket are prefixed by
-this name followed by a dot. Defaults to "fs". This allows multiple GridFS buckets, each with a unique name, to exist
-within the same database.</li>
+this name followed by a dot. Defaults to "fs". This allows multiple GridFS buckets, each with a unique name, to
+exist within the same database.</li>
 <li><strong>chunkSizeBytes:</strong> the number of bytes stored in chunks for new user files added through this GridFSBucket object.
 This will not reformat existing files in the system that use a different chunk size. Defaults to 255 KiB.</li>
 </ul>
@@ -409,9 +409,9 @@ write concern).</li>
 <p>The following option is transitional:</p>
 <ul>
 <li><strong>disableMD5:</strong> this allows users to disable MD5 when operating under FIPS restrictions. It is provided to allow a
-transition period as drivers remove MD5 support. Until a driver removes MD5 support, drivers MUST support this option.
-Following a driver's normal feature removal cycle, when MD5 support is removed, this option MUST be removed or
-otherwise made into a no-op option.</li>
+transition period as drivers remove MD5 support. Until a driver removes MD5 support, drivers MUST support this
+option. Following a driver's normal feature removal cycle, when MD5 support is removed, this option MUST be removed
+or otherwise made into a no-op option.</li>
 </ul>
 <p>GridFSBucket instances are immutable. Their properties MUST NOT be changed after the instance has been created. If your
 driver provides a fluent way to provide new values for properties, these fluent methods MUST return new instances of

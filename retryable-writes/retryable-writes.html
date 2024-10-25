@@ -236,7 +236,7 @@ not standalone.</p>
 MMAPv1 storage engine which is available in both MongoDB 3.6 and 4.0. Since <code>retryWrites</code> defaults to <code>true</code>, Drivers
 MUST raise an actionable error message when the server returns code 20 with errmsg starting with "Transaction numbers".
 The replacement error message MUST be:</p>
-<pre><code>This MongoDB deployment does not support retryable writes. Please add
+<pre><code class="language-text">This MongoDB deployment does not support retryable writes. Please add
 retryWrites=false to your connection string.
 </code></pre>
 <p>If the server selected for the first attempt of a retryable write operation does not support retryable writes, drivers
@@ -300,8 +300,8 @@ the error.</p>
 <ul>
 <li>
 <p>When the driver encounters a network error establishing an initial connection to a server, it MUST add a
-RetryableWriteError label to that error if the MongoClient performing the operation has the retryWrites configuration
-option set to true.</p>
+RetryableWriteError label to that error if the MongoClient performing the operation has the retryWrites
+configuration option set to true.</p>
 </li>
 <li>
 <p>When the driver encounters a network error communicating with any server version that supports retryable writes, it
@@ -322,8 +322,8 @@ derived from a 4.4+ server response (i.e. any error that is not a network error)
 </li>
 <li>
 <p>When receiving a command result with an error from a pre-4.4 server that supports retryable writes, the driver MUST
-add a RetryableWriteError label to errors that meet the following criteria if the retryWrites option is set to true on
-the client performing the relevant operation:</p>
+add a RetryableWriteError label to errors that meet the following criteria if the retryWrites option is set to true
+on the client performing the relevant operation:</p>
 <ul>
 <li>
 <p>a mongod or mongos response with any the following error codes in the top-level <code>code</code> field:</p>
@@ -420,11 +420,19 @@ its topology according to the SDAM spec (see:
 original retryable error.</p>
 <p>Drivers MUST then retry the operation as many times as necessary until any one of the following conditions is reached:</p>
 <ul>
-<li>the operation succeeds.</li>
-<li>the operation fails with a non-retryable error.</li>
-<li>CSOT is enabled and the operation times out per
-<a href="../client-side-operations-timeout/client-side-operations-timeout.html#retryability">Client Side Operations Timeout: Retryability</a>.</li>
-<li>CSOT is not enabled and one retry was attempted.</li>
+<li>
+<p>the operation succeeds.</p>
+</li>
+<li>
+<p>the operation fails with a non-retryable error.</p>
+</li>
+<li>
+<p>CSOT is enabled and the operation times out per
+<a href="../client-side-operations-timeout/client-side-operations-timeout.html#retryability">Client Side Operations Timeout: Retryability</a>.</p>
+</li>
+<li>
+<p>CSOT is not enabled and one retry was attempted.</p>
+</li>
 </ul>
 <p>For each retry attempt, drivers MUST select a writable server. In a sharded cluster, the server on which the operation
 failed MUST be provided to the server selection mechanism as a deprioritized server.</p>
@@ -680,13 +688,13 @@ response. This would be a form of feature discovery, for which there is no estab
 complexity to the connection handshake.</li>
 <li>The server could ignore a transaction ID on the first observed attempt of an unsupported write command and only yield
 an error on subsequent attempts. This would require the server to create a transaction record for unsupported writes
-to avoid the risk of applying a write twice and ensuring that retry attempts could be differentiated. It also poses a
-significant problem for sharding if a multi-document write does not reach all shards, since those shards would not
+to avoid the risk of applying a write twice and ensuring that retry attempts could be differentiated. It also poses
+a significant problem for sharding if a multi-document write does not reach all shards, since those shards would not
 know to create a transaction record.</li>
 <li>The driver could allow more fine-grained control retryable write behavior by supporting a <code>retryWrites</code> option on the
 database and collection objects. This would allow users to enable <code>retryWrites</code> on a MongoClient and disable it as
-needed to execute unsupported write operations, or vice versa. Since we expect the <code>retryWrites</code> option to become less
-relevant once transactions are implemented, we would prefer not to add the option throughout the driver API.</li>
+needed to execute unsupported write operations, or vice versa. Since we expect the <code>retryWrites</code> option to become
+less relevant once transactions are implemented, we would prefer not to add the option throughout the driver API.</li>
 </ul>
 <h3 id="how-will-users-know-which-operations-are-supported"><a class="header" href="#how-will-users-know-which-operations-are-supported">How will users know which operations are supported?</a></h3>
 <p>The initial list of supported operations is already quite permissive. Most <a href="../crud/crud.html">CRUD</a> operations are
@@ -825,8 +833,8 @@ engine.</p>
 </li>
 <li>
 <p>2017-11-02: Drivers should not raise errors if selected server does not support retryable writes and instead fall back
-to non-retryable behavior. In addition to wire protocol version, drivers may check for <code>logicalSessionTimeoutMinutes</code>
-to determine if a server supports sessions and retryable writes.</p>
+to non-retryable behavior. In addition to wire protocol version, drivers may check for
+<code>logicalSessionTimeoutMinutes</code> to determine if a server supports sessions and retryable writes.</p>
 </li>
 <li>
 <p>2017-10-26: Errors when retrying may be raised instead of the original error provided they allow the user to infer

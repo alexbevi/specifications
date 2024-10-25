@@ -349,7 +349,7 @@ arguments, compressing it, adding supplemental APM data or any other modificatio
 <h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
 <h4 id="command-arguments-as-payload-examples"><a class="header" href="#command-arguments-as-payload-examples">Command Arguments As Payload Examples</a></h4>
 <p>For example, an insert can be represented like:</p>
-<pre><code>{
+<pre><code class="language-javascript">{
    "insert": "collectionName",
    "documents": [
       {"_id": "Document#1", "example": 1},
@@ -361,14 +361,14 @@ arguments, compressing it, adding supplemental APM data or any other modificatio
 </code></pre>
 <p>Or, pulling out the <code>"documents"</code> argument out of the command document and Into <code>Payload Type 1</code>. The <code>Payload Type 0</code>
 would then be:</p>
-<pre><code>{
+<pre><code class="language-javascript">{
    "insert": "collectionName",
    "$db": "databaseName",
    "writeConcern": { w: "majority" }
 }
 </code></pre>
 <p>And <code>Payload Type 1</code>:</p>
-<pre><code>identifier: "documents"
+<pre><code class="language-yaml">identifier: "documents"
 documents: {"_id": "Document#1", "example": 1}{"_id": "Document#2", "example": 2}{"_id": "Document#3", "example": 3}
 </code></pre>
 <p>Note that the BSON documents are placed immediately after each other, not with any separator. The writeConcern is also
@@ -376,7 +376,7 @@ left intact as a command argument in the <code>Payload Type 0</code> section. Th
 the command arguments in the <code>Payload Type 0</code> section.</p>
 <hr />
 <p>An update can for example be represented like:</p>
-<pre><code>{
+<pre><code class="language-javascript">{
    "update": "collectionName",
    "updates": [
       {
@@ -392,19 +392,19 @@ the command arguments in the <code>Payload Type 0</code> section.</p>
 </code></pre>
 <p>Or, pulling out the <code>"update"</code> argument out of the command document and Into <code>Payload Type 1</code>. The <code>Payload Type 0</code>
 would then be:</p>
-<pre><code>{
+<pre><code class="language-javascript">{
    "update": "collectionName",
    "$db": "databaseName"
 }
 </code></pre>
 <p>And <code>Payload Type 1</code>:</p>
-<pre><code>identifier: updates
+<pre><code class="language-yaml">identifier: updates
 documents: {"q": {"example": 1}, "u": { "$set": { "example": 4}}}{"q": {"example": 2}, "u": { "$set": { "example": 5}}}
 </code></pre>
 <p>Note that the BSON documents are placed immediately after each other, not with any separator.</p>
 <hr />
 <p>A delete can for example be represented like:</p>
-<pre><code>{
+<pre><code class="language-javascript">{
    "delete": "collectionName",
    "deletes": [
       {
@@ -420,13 +420,13 @@ documents: {"q": {"example": 1}, "u": { "$set": { "example": 4}}}{"q": {"example
 </code></pre>
 <p>Or, pulling out the <code>"deletes"</code> argument out of the command document and into <code>Payload Type 1</code>. The <code>Payload Type 0</code>
 would then be:</p>
-<pre><code>{
+<pre><code class="language-javascript">{
    "delete": "collectionName",
    "$db": "databaseName"
 }
 </code></pre>
 <p>And <code>Payload Type 1</code>:</p>
-<pre><code>identifier: delete
+<pre><code class="language-yaml">identifier: delete
 documents: {"q": {"example": 3}, "limit": 1}{"q": {"example": 4}, "limit": 1}
 </code></pre>
 <p>Note that the BSON documents are placed immediately after each other, not with any separator.</p>
@@ -490,8 +490,8 @@ Handshake. It is likely this value will be bumped from 1,000 to 100,000.</li>
 <li>The client sets the <code>moreToCome</code> flag on the request. The server will not send a response to such requests.</li>
 <li>Malformed operation or errors such as duplicate key errors are not discoverable and will be swallowed by the server.</li>
 <li>Write errors due to not-primary will close the connection, which clients will pickup on next time it uses the
-connection. This means at least one unacknowledged write operation will be lost as the client does not discover the
-failover until next time the socket is used.</li>
+connection. This means at least one unacknowledged write operation will be lost as the client does not discover
+the failover until next time the socket is used.</li>
 </ul>
 </li>
 <li>

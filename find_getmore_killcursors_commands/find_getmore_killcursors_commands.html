@@ -304,7 +304,7 @@ OP_QUERY and the CRUD spec.</p>
 used instead of negative values.</p>
 <p>In order to have consistency between old and new applications, the following transformations MUST be performed before
 adding options to the <strong>find</strong> command:</p>
-<pre><code>singleBatch = (limit &lt; 0) || (batchSize &lt; 0)
+<pre><code class="language-text">singleBatch = (limit &lt; 0) || (batchSize &lt; 0)
 limit       = abs(limit)
 if singleBatch:
     batchSize = (limit == 0) ? abs(batchSize) : limit
@@ -417,7 +417,7 @@ secondary. The OP_QUERY namespace MUST be the same as for the <strong>find</stro
 <strong>OP_KILL_CURSORS</strong> wire protocol message. The OP_QUERY namespace MUST be the same as for the <strong>find</strong> and <strong>getMore</strong>
 commands. The <strong>killCursors</strong> command is optional to implement in <strong>MongoDB 3.2</strong>.</p>
 <p>The command response will be as follows:</p>
-<pre><code class="language-javascript">{
+<pre><code class="language-typescript">{
   "cursorsKilled": [
     &lt;cursor id 1&gt;
     &lt;cursor id 2&gt;,
@@ -445,7 +445,7 @@ driver.</p>
 <p>One of the differences with the new <strong>killCursors</strong> command compared to the <strong>OP_KILL_CURSORS</strong> wire protocol message is
 that the <strong>killCursors</strong> command returns a response while the <strong>OP_KILL_CURSORS</strong> wire protocol does not.</p>
 <p>The <strong>OP_REPLY</strong> message has the following general structure.</p>
-<pre><code class="language-javascript">struct {
+<pre><code class="language-c">struct {
     int32     messageLength;  // total message size, including
                               // this
 

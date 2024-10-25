@@ -304,19 +304,20 @@ ServerType; it is synonymous with Unknown.</p>
 <p>The client's representation of everything it knows about the deployment's topology.</p>
 <p>Fields:</p>
 <ul>
-<li>type: a <a href="#topologytype">TopologyType</a> enum value. See <a href="#initial-topologytype">initial TopologyType</a>.</li>
-<li>setName: the replica set name. Default null.</li>
-<li>maxElectionId: an ObjectId or null. The largest electionId ever reported by a primary. Default null. Part of the
+<li><code>type</code>: a <a href="#topologytype">TopologyType</a> enum value. See <a href="#initial-topologytype">initial TopologyType</a>.</li>
+<li><code>setName</code>: the replica set name. Default null.</li>
+<li><code>maxElectionId</code>: an ObjectId or null. The largest electionId ever reported by a primary. Default null. Part of the
 (<code>electionId</code>, <code>setVersion</code>) tuple.</li>
-<li>maxSetVersion: an integer or null. The largest setVersion ever reported by a primary. It may not monotonically
+<li><code>maxSetVersion</code>: an integer or null. The largest setVersion ever reported by a primary. It may not monotonically
 increase, as electionId takes precedence in ordering Default null. Part of the (<code>electionId</code>, <code>setVersion</code>) tuple.</li>
-<li>servers: a set of ServerDescription instances. Default contains one server: "localhost:27017", ServerType Unknown.</li>
-<li>stale: a boolean for single-threaded clients, whether the topology must be re-scanned. (Not related to
+<li><code>servers</code>: a set of ServerDescription instances. Default contains one server: "localhost:27017", ServerType Unknown.</li>
+<li><code>stale</code>: a boolean for single-threaded clients, whether the topology must be re-scanned. (Not related to
 maxStalenessSeconds, nor to stale primaries.)</li>
-<li>compatible: a boolean. False if any server's wire protocol version range is incompatible with the client's. Default
+<li><code>compatible</code>: a boolean. False if any server's wire protocol version range is incompatible with the client's. Default
 true.</li>
-<li>compatibilityError: a string. The error message if "compatible" is false, otherwise null.</li>
-<li>logicalSessionTimeoutMinutes: integer or null. Default null. See <a href="#logical-session-timeout">logical session timeout</a>.</li>
+<li><code>compatibilityError</code>: a string. The error message if "compatible" is false, otherwise null.</li>
+<li><code>logicalSessionTimeoutMinutes</code>: integer or null. Default null. See
+<a href="#logical-session-timeout">logical session timeout</a>.</li>
 </ul>
 <h4 id="serverdescription"><a class="header" href="#serverdescription">ServerDescription</a></h4>
 <p>The client's view of a single server, based on the most recent hello or legacy hello outcome.</p>
@@ -324,39 +325,77 @@ true.</li>
 the monitoring algorithm.</p>
 <p>Fields:</p>
 <ul>
-<li>address: the hostname or IP, and the port number, that the client connects to. Note that this is <strong>not</strong> the "me"
+<li>
+<p><code>address</code>: the hostname or IP, and the port number, that the client connects to. Note that this is <strong>not</strong> the <code>me</code>
 field in the server's hello or legacy hello response, in the case that the server reports an address different from
-the address the client uses.</li>
-<li>(=) error: information about the last error related to this server. Default null.</li>
-<li>roundTripTime: the duration of the hello or legacy hello call. Default null.</li>
-<li>minRoundTripTime: the minimum RTT for the server. Default null.</li>
-<li>lastWriteDate: a 64-bit BSON datetime or null. The "lastWriteDate" from the server's most recent hello or legacy hello
-response.</li>
-<li>opTime: an opTime or null. An opaque value representing the position in the oplog of the most recently seen write.
+the address the client uses.</p>
+</li>
+<li>
+<p>(=) <code>error</code>: information about the last error related to this server. Default null.</p>
+</li>
+<li>
+<p><code>roundTripTime</code>: the duration of the hello or legacy hello call. Default null.</p>
+</li>
+<li>
+<p><code>minRoundTripTime</code>: the minimum RTT for the server. Default null.</p>
+</li>
+<li>
+<p><code>lastWriteDate</code>: a 64-bit BSON datetime or null. The <code>lastWriteDate</code> from the server's most recent hello or legacy
+hello response.</p>
+</li>
+<li>
+<p><code>opTime</code>: an opTime or null. An opaque value representing the position in the oplog of the most recently seen write.
 Default null. (Only mongos and shard servers record this field when monitoring config servers as replica sets, at
 least until
-<a href="../max-staleness/max-staleness.html#future-feature-to-support-readconcern-afteroptime">drivers allow applications to use readConcern "afterOptime".</a>)</li>
-<li>(=) type: a <a href="#servertype">ServerType</a> enum value. Default Unknown.</li>
-<li>(=) minWireVersion, maxWireVersion: the wire protocol version range supported by the server. Both default to 0.
-<a href="#checking-wire-protocol-compatibility">Use min and maxWireVersion only to determine compatibility</a>.</li>
-<li>(=) me: The hostname or IP, and the port number, that this server was configured with in the replica set. Default
-null.</li>
-<li>(=) hosts, passives, arbiters: Sets of addresses. This server's opinion of the replica set's members, if any. These
-<a href="#hostnames-are-normalized-to-lower-case">hostnames are normalized to lower-case</a>. Default empty. The client monitors
-all three types of servers in a replica set.</li>
-<li>(=) tags: map from string to string. Default empty.</li>
-<li>(=) setName: string or null. Default null.</li>
-<li>(=) electionId: an ObjectId, if this is a MongoDB 2.6+ replica set member that believes it is primary. See
+<a href="../max-staleness/max-staleness.html#future-feature-to-support-readconcern-afteroptime">drivers allow applications to use readConcern "afterOptime".</a>)</p>
+</li>
+<li>
+<p>(=) <code>type</code>: a <a href="#servertype">ServerType</a> enum value. Default Unknown.</p>
+</li>
+<li>
+<p>(=) <code>minWireVersion</code>, <code>maxWireVersion</code>: the wire protocol version range supported by the server. Both default to 0.
+<a href="#checking-wire-protocol-compatibility">Use min and maxWireVersion only to determine compatibility</a>.</p>
+</li>
+<li>
+<p>(=) <code>me</code>: The hostname or IP, and the port number, that this server was configured with in the replica set. Default
+null.</p>
+</li>
+<li>
+<p>(=) <code>hosts</code>, <code>passives</code>, <code>arbiters</code>: Sets of addresses. This server's opinion of the replica set's members, if any.
+These <a href="#hostnames-are-normalized-to-lower-case">hostnames are normalized to lower-case</a>. Default empty. The client
+monitors all three types of servers in a replica set.</p>
+</li>
+<li>
+<p>(=) <code>tags</code>: map from string to string. Default empty.</p>
+</li>
+<li>
+<p>(=) <code>setName</code>: string or null. Default null.</p>
+</li>
+<li>
+<p>(=) <code>electionId</code>: an ObjectId, if this is a MongoDB 2.6+ replica set member that believes it is primary. See
 <a href="#using-electionid-and-setversion-to-detect-stale-primaries">using electionId and setVersion to detect stale primaries</a>.
-Default null.</li>
-<li>(=) setVersion: integer or null. Default null.</li>
-<li>(=) primary: an address. This server's opinion of who the primary is. Default null.</li>
-<li>lastUpdateTime: when this server was last checked. Default "infinity ago".</li>
-<li>(=) logicalSessionTimeoutMinutes: integer or null. Default null.</li>
-<li>(=) topologyVersion: A topologyVersion or null. Default null. The "topologyVersion" from the server's most recent
-hello or legacy hello response or <a href="#state-change-error">State Change Error</a>.</li>
-<li>(=) iscryptd: boolean indicating if the server is a
-<a href="../client-side-encryption/client-side-encryption.html#mongocryptd">mongocryptd</a> server. Default null.</li>
+Default null.</p>
+</li>
+<li>
+<p>(=) <code>setVersion</code>: integer or null. Default null.</p>
+</li>
+<li>
+<p>(=) <code>primary</code>: an address. This server's opinion of who the primary is. Default null.</p>
+</li>
+<li>
+<p><code>lastUpdateTime</code>: when this server was last checked. Default "infinity ago".</p>
+</li>
+<li>
+<p>(=) <code>logicalSessionTimeoutMinutes</code>: integer or null. Default null.</p>
+</li>
+<li>
+<p>(=) <code>topologyVersion</code>: A topologyVersion or null. Default null. The "topologyVersion" from the server's most recent
+hello or legacy hello response or <a href="#state-change-error">State Change Error</a>.</p>
+</li>
+<li>
+<p>(=) <code>iscryptd</code>: boolean indicating if the server is a
+<a href="../client-side-encryption/client-side-encryption.html#mongocryptd">mongocryptd</a> server. Default null.</p>
+</li>
 </ul>
 <p>"Passives" are priority-zero replica set members that cannot become primary. The client treats them precisely the same
 as other members.</p>
@@ -595,24 +634,24 @@ ServerDescription in TopologyDescription.servers MUST be replaced with the new S
 <h5 id="checking-wire-protocol-compatibility"><a class="header" href="#checking-wire-protocol-compatibility">Checking wire protocol compatibility</a></h5>
 <p>A ServerDescription which is not Unknown is incompatible if:</p>
 <ul>
-<li>minWireVersion &gt; clientMaxWireVersion, or</li>
-<li>maxWireVersion &lt; clientMinWireVersion</li>
+<li><code>minWireVersion</code> &gt; <code>clientMaxWireVersion</code>, or</li>
+<li><code>maxWireVersion</code> &lt; <code>clientMinWireVersion</code></li>
 </ul>
 <p>If any ServerDescription is incompatible, the client MUST set the TopologyDescription's "compatible" field to false and
 fill out the TopologyDescription's "compatibilityError" field like so:</p>
 <ul>
 <li>
-<p>if ServerDescription.minWireVersion &gt; clientMaxWireVersion:</p>
-<p>"Server at $host:$port requires wire version $minWireVersion, but this version of $driverName only supports up to
-$clientMaxWireVersion."</p>
+<p>if <code>ServerDescription.minWireVersion</code> &gt; <code>clientMaxWireVersion</code>:</p>
+<p>"Server at <code>host</code>:<code>port</code> requires wire version <code>minWireVersion</code>, but this version of <code>driverName</code> only supports up to
+<code>clientMaxWireVersion</code>."</p>
 </li>
 <li>
-<p>if ServerDescription.maxWireVersion &lt; clientMinWireVersion:</p>
-<p>"Server at $host:$port reports wire version $maxWireVersion, but this version of $driverName requires at least
-$clientMinWireVersion (MongoDB $mongoVersion)."</p>
+<p>if <code>ServerDescription.maxWireVersion</code> &lt; <code>clientMinWireVersion</code>:</p>
+<p>"Server at <code>host</code>:<code>port</code> reports wire version <code>maxWireVersion</code>, but this version of <code>driverName</code> requires at least
+<code>clientMinWireVersion</code> (MongoDB <code>mongoVersion</code>)."</p>
 </li>
 </ul>
-<p>Replace $mongoVersion with the appropriate MongoDB minor version, for example if clientMinWireVersion is 2 and it
+<p>Replace <code>mongoVersion</code> with the appropriate MongoDB minor version, for example if <code>clientMinWireVersion</code> is 2 and it
 connects to MongoDB 2.4, format the error like:</p>
 <blockquote>
 <p>"Server at example.com:27017 reports wire version 0, but this version of My Driver requires at least 2 (MongoDB 2.6)."</p>
@@ -1357,8 +1396,8 @@ set, when the client most recently contacted the primary.</p>
 <li>The primary is never on the minority side of a network partition. During a partition it is the primary's list of
 servers the client should use.</li>
 <li>Since reconfigs must be executed on the primary, the primary is the first to know of them. Reconfigs propagate to
-non-primaries eventually, but the client can receive hello or legacy hello responses from non-primaries that reflect
-any past state of the replica set. See the "Replica set discovery" test scenario.</li>
+non-primaries eventually, but the client can receive hello or legacy hello responses from non-primaries that
+reflect any past state of the replica set. See the "Replica set discovery" test scenario.</li>
 </ol>
 <p>If at any time the client believes there is no primary, the TopologyDescription's type is set to ReplicaSetNoPrimary.
 While there is no known primary, the client MUST <strong>add</strong> servers from non-primaries' host lists, but it MUST NOT remove
@@ -1528,8 +1567,9 @@ lock.</li>
 <li>The monitor re-checks the server and marks it Primary and its pool as "ready".</li>
 <li>Several other application threads enter the WaitQueue of the server's pool.</li>
 <li>The application thread clears the server's pool, evicting all those new threads from the WaitQueue, causing them to
-return errors or to retry. Additionally, the pool is now "paused", but the server is considered the Primary, meaning
-future operations will be routed to the server and fail until the next heartbeat marks the pool as "ready" again.</li>
+return errors or to retry. Additionally, the pool is now "paused", but the server is considered the Primary,
+meaning future operations will be routed to the server and fail until the next heartbeat marks the pool as "ready"
+again.</li>
 </ol>
 <p>If marking the server as Unknown and clearing its pool were synchronized, then the monitor marking the server as Primary
 after its check would happen after the pool was cleared and thus avoid putting it an inconsistent state.</p>
@@ -1577,11 +1617,11 @@ server is rediscovered and immediately attempt authentication on a new connectio
 <h3 id="clients-use-the-hostnames-listed-in-the-replica-set-config-not-the-seed-list"><a class="header" href="#clients-use-the-hostnames-listed-in-the-replica-set-config-not-the-seed-list">Clients use the hostnames listed in the replica set config, not the seed list</a></h3>
 <p>Very often users have DNS aliases they use in their <a href="#seed-list">seed list</a> instead of the hostnames in the replica set
 config. For example, the name "host_alias" might refer to a server also known as "host1", and the URI is:</p>
-<pre><code>mongodb://host_alias/?replicaSet=rs
+<pre><code class="language-text">mongodb://host_alias/?replicaSet=rs
 </code></pre>
 <p>When the client connects to "host_alias", its hello or legacy hello response includes the list of hostnames from the
 replica set config, which does not include the seed:</p>
-<pre><code>{
+<pre><code class="language-javascript">{
    hosts: ["host1:27017", "host2:27017"],
    setName: "rs",
    ... other hello or legacy hello response fields ...

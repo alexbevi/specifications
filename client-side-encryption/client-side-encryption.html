@@ -502,7 +502,7 @@ for configuration behavior.</p>
 <a href="#whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client">What's the deal with metadataClient, keyVaultClient, and the internal client?</a></p>
 <h4 id="keyvaultclient-metadataclient-and-the-internal-mongoclient"><a class="header" href="#keyvaultclient-metadataclient-and-the-internal-mongoclient">keyVaultClient, metadataClient, and the internal MongoClient</a></h4>
 <p>The following pseudo-code describes the configuration behavior for the three <code>MongoClient</code> objects:</p>
-<pre><code>def getOrCreateInternalClient (client, clientOpts):
+<pre><code class="language-python">def getOrCreateInternalClient (client, clientOpts):
    if client.internalClient != None:
       return client.internalClient
    internalClientOpts = copy(clientOpts)
@@ -612,19 +612,19 @@ interface KMIPKMSOptions {
 };
 </code></pre>
 <p>The following shows an example object of <code>KMSProviders</code>:</p>
-<pre><code class="language-yaml">{
-   # Pass credentials for AWS:
+<pre><code class="language-javascript">{
+   // Pass credentials for AWS:
    "aws": { "accessKeyId": "foo", "secretAccessKey": "bar" },
-   # Use an empty document to enable "Automatic Credentials" for Azure:
+   // Use an empty document to enable "Automatic Credentials" for Azure:
    "azure": {},
-   # Pass an access token for GCP:
+   // Pass an access token for GCP:
    "gcp": { "accessToken": "foo" },
-   # Pass a 96 byte base64 encoded string for the local KMS provider.
+   // Pass a 96 byte base64 encoded string for the local KMS provider.
    "local": { "key": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk" }
-   # Pass the endpoint for KMIP:
+   // Pass the endpoint for KMIP:
    "kmip": { "endpoint": "localhost:5698" }
-   # Pass credentials for a different AWS account by appending a name.
-   # Note: credentials with a name do not support "Automatic Credentials".
+   // Pass credentials for a different AWS account by appending a name.
+   // Note: credentials with a name do not support "Automatic Credentials".
    "aws:name2": { "accessKeyId": "foo2", "secretAccessKey": "bar2" }
 }
 </code></pre>
@@ -729,8 +729,8 @@ All query parameters on $U$ should be appropriately percent-encoded</p>
 </li>
 <li>
 <p>Issue $Req$ to the Azure IMDS server <code>169.254.169.254:80</code>. Let $Resp$ be the response from the server. If the HTTP
-response is not completely received within ten seconds, consider the request to have timed out, and return an error
-instead of an access token.</p>
+response is not completely received within ten seconds, consider the request to have timed out, and return an
+error instead of an access token.</p>
 </li>
 <li>
 <p>If $Resp_{status} ≠ 200$, obtaining the access token has failed, and the HTTP response body of $Resp$ encodes
@@ -939,8 +939,8 @@ containing the error message: "Driver support of Queryable Encryption is incompa
 use Queryable Encryption."</li>
 <li>Create the collection with name <code>encryptedFields["escCollection"]</code> as a clustered collection using the options
 <code>{clusteredIndex: {key: {_id: 1}, unique: true}}</code>. If <code>encryptedFields["escCollection"]</code> is not set, use the
-collection name <code>enxcol_.&lt;collectionName&gt;.esc</code>. Creating this collection MUST NOT check if the collection namespace is
-in the <code>AutoEncryptionOpts.encryptedFieldsMap</code>. the collection namespace is in the
+collection name <code>enxcol_.&lt;collectionName&gt;.esc</code>. Creating this collection MUST NOT check if the collection namespace
+is in the <code>AutoEncryptionOpts.encryptedFieldsMap</code>. the collection namespace is in the
 <code>AutoEncryptionOpts.encryptedFieldsMap</code>.</li>
 <li>Create the collection with name <code>encryptedFields["ecocCollection"]</code> as a clustered collection using the options
 <code>{clusteredIndex: {key: {_id: 1}, unique: true}}</code>. If <code>encryptedFields["ecocCollection"]</code> is not set, use the
@@ -981,8 +981,8 @@ created by the helper.</li>
 <li>Create a new set of options $collOpts'$ duplicating $collOpts$. Set the <code>"encryptedFields"</code> named element of
 $collOpts'$ to $EF'$.</li>
 <li>Invoke the <code>CreateCollection</code> helper as $CreateCollection(database, collName, collOpts')$. Return the resulting
-collection and the generated $EF'$. If an error occurred, return the resulting $EF$ with the error so that the caller
-may know what datakeys have already been created by the helper.</li>
+collection and the generated $EF'$. If an error occurred, return the resulting $EF$ with the error so that the
+caller may know what datakeys have already been created by the helper.</li>
 </ul>
 <p>Drivers MUST document that $createEncryptedCollection$ does not affect any auto encryption settings on existing
 MongoClients that are already configured with auto encryption. Users must configure auto encryption after creating the
@@ -1424,13 +1424,13 @@ directory of the operating system process.</p>
 <li>
 <p>If an <a href="#override-path">override path</a> was specified and <a href="#libmongocrypt">libmongocrypt</a> fails to load
 <a href="#crypt_shared">crypt_shared</a> from that filepath, <a href="#libmongocrypt">libmongocrypt</a> will fail to initialize with a
-hard-error. <a href="#libmongocrypt">libmongocrypt</a> will not attempt to search for <a href="#crypt_shared">crypt_shared</a> in any other
-locations.</p>
+hard-error. <a href="#libmongocrypt">libmongocrypt</a> will not attempt to search for <a href="#crypt_shared">crypt_shared</a> in any
+other locations.</p>
 </li>
 <li>
 <p>If <a href="#libmongocrypt">libmongocrypt</a> fails to load the <a href="#crypt_shared">crypt_shared</a> library after searching the system
-(and no <a href="#override-path">override path</a> is specified), <a href="#libmongocrypt">libmongocrypt</a> will proceed without error and
-presume that <a href="#crypt_shared">crypt_shared</a> is unavailable.</p>
+(and no <a href="#override-path">override path</a> is specified), <a href="#libmongocrypt">libmongocrypt</a> will proceed without error
+and presume that <a href="#crypt_shared">crypt_shared</a> is unavailable.</p>
 </li>
 </ul>
 <h4 id="search-paths-for-testing"><a class="header" href="#search-paths-for-testing">Search Paths for Testing</a></h4>
@@ -1673,7 +1673,7 @@ metadata.</p>
 Data keys may be retrieved by querying the "_id" with a UUID or by querying the "keyAltName" with a string.</p>
 <p>Note, "status" is unused and is purely informational.</p>
 <h4 id="example-data-key-document"><a class="header" href="#example-data-key-document">Example data key document</a></h4>
-<pre><code>{
+<pre><code class="language-javascript">{
    "_id" : UUID("00000000-0000-0000-0000-000000000000"),
    "status" : 1,
    "masterKey" : {

@@ -299,7 +299,7 @@ ensure driver objects in its entity map are properly freed/destroyed between tes
 thread entities that all need to access the map concurrently. See <a href="#entity_thread">entity_thread</a> for more information
 on test runner threads.</p>
 <p>Consider the following examples:</p>
-<pre><code># Error due to a duplicate name (client0 was already defined)
+<pre><code class="language-yaml"># Error due to a duplicate name (client0 was already defined)
 createEntities:
   - client: { id: client0 }
   - client: { id: client0 }
@@ -331,8 +331,9 @@ createEntities:
 <li>
 <p>ChangeStream. Change stream entities are special in that they are not defined in <a href="#createentities">createEntities</a> but
 are instead created by using <a href="#operation_saveResultAsEntity">operation.saveResultAsEntity</a> with a
-<a href="#client_createChangeStream">client_createChangeStream</a>, <a href="#database_createChangeStream">database_createChangeStream</a>,
-or <a href="#collection_createChangeStream">collection_createChangeStream</a> operation.</p>
+<a href="#client_createChangeStream">client_createChangeStream</a>,
+<a href="#database_createChangeStream">database_createChangeStream</a>, or
+<a href="#collection_createChangeStream">collection_createChangeStream</a> operation.</p>
 <p>Test files SHOULD NOT use a <code>watch</code> operation to create a change stream, as the implementation of that method may vary
 among drivers. For example, some implementations of <code>watch</code> immediately execute <code>aggregate</code> and construct the
 server-side cursor, while others may defer <code>aggregate</code> until the change stream object is iterated.</p>
@@ -352,8 +353,8 @@ operation.</p>
 </li>
 <li>
 <p>Event list. See <a href="#entity_client_storeEventsAsEntities">storeEventsAsEntities</a>. The event list MUST store BSON
-documents. The type of the list itself is not prescribed by this specification. Test runner MAY use a BSON array or a
-thread-safe list data structure to implement the event list.</p>
+documents. The type of the list itself is not prescribed by this specification. Test runner MAY use a BSON array or
+a thread-safe list data structure to implement the event list.</p>
 </li>
 <li>
 <p>All known BSON types and/or equivalent language types for the target driver. For the present version of the spec, the
@@ -365,16 +366,16 @@ could yield runtime errors (e.g. while loading a test file with an Extended JSON
 <p><span id="entity_thread"></span></p>
 <ul>
 <li>Test runner thread. An entity representing a "thread" that can be used to concurrently execute operations. Thread
-entities MUST be able to run concurrently with the main test runner thread and other thread entities, but they do not
-have to be implemented as actual OS threads (e.g. they can be goroutines or async tasks). See
+entities MUST be able to run concurrently with the main test runner thread and other thread entities, but they do
+not have to be implemented as actual OS threads (e.g. they can be goroutines or async tasks). See
 <a href="#entity_thread_object">entity_thread_object</a> for more information on how they are created.</li>
 </ul>
 <p><span id="entity_topologydescription"></span></p>
 <ul>
 <li>TopologyDescription. An entity representing a client's
-<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#topologydescription">TopologyDescription</a> at a
-certain point in time. These entities are not defined in <a href="#createentities">createEntities</a> but are instead created via
-<a href="#recordtopologydescription">recordTopologyDescription</a> test runner operations.</li>
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#topologydescription">TopologyDescription</a> at
+a certain point in time. These entities are not defined in <a href="#createentities">createEntities</a> but are instead created
+via <a href="#recordtopologydescription">recordTopologyDescription</a> test runner operations.</li>
 </ul>
 <p>This is an exhaustive list of supported types for the entity map. Test runners MUST raise an error if an attempt is made
 to store an unsupported type in the entity map.</p>
@@ -403,16 +404,16 @@ may be converted to JSON using a tool such as <a href="https://github.com/nodeca
 <p>Test files SHOULD be conservative when specifying a schema version. For example, if the latest schema version is 1.1
 but the test file complies with schema version 1.0, the test file should specify 1.0.</p>
 <p>Test runners will use this to determine compatibility (i.e. whether and how the test file will be interpreted). The
-format of this string is defined in <a href="#version-string">Version String</a>; however, test files SHOULD NOT need to refer to
-specific patch versions since patch-level changes SHOULD NOT alter the structure of the test format (as previously
-noted in <a href="#schema-version">Schema Version</a>).</p>
+format of this string is defined in <a href="#version-string">Version String</a>; however, test files SHOULD NOT need to refer
+to specific patch versions since patch-level changes SHOULD NOT alter the structure of the test format (as
+previously noted in <a href="#schema-version">Schema Version</a>).</p>
 </li>
 </ul>
 <p><span id="runOnRequirements"></span></p>
 <ul>
 <li><code>runOnRequirements</code>: Optional array of one or more <a href="#runonrequirement">runOnRequirement</a> objects. List of server
-version and/or topology requirements for which the tests in this file can be run. If no requirements are met, the test
-runner MUST skip this test file.</li>
+version and/or topology requirements for which the tests in this file can be run. If no requirements are met, the
+test runner MUST skip this test file.</li>
 </ul>
 <p><span id="createEntities"></span></p>
 <ul>
@@ -444,8 +445,8 @@ than "4.2.0".</p>
 <ul>
 <li>
 <p><code>minServerVersion</code>: Optional string. The minimum server version (inclusive) required to successfully run the tests. If
-this field is omitted, there is no lower bound on the required server version. The format of this string is defined in
-<a href="#version-string">Version String</a>.</p>
+this field is omitted, there is no lower bound on the required server version. The format of this string is defined
+in <a href="#version-string">Version String</a>.</p>
 </li>
 <li>
 <p><code>maxServerVersion</code>: Optional string. The maximum server version (inclusive) against which the tests can be run
@@ -454,37 +455,38 @@ string is defined in <a href="#version-string">Version String</a>.</p>
 </li>
 <li>
 <p><code>topologies</code>: Optional array of one or more strings. Server topologies against which the tests can be run
-successfully. Valid topologies are "single", "replicaset", "sharded", "load-balanced", and "sharded-replicaset" (i.e.
-sharded cluster backed by replica sets). If this field is omitted, there is no topology requirement for the test.</p>
+successfully. Valid topologies are "single", "replicaset", "sharded", "load-balanced", and "sharded-replicaset"
+(i.e. sharded cluster backed by replica sets). If this field is omitted, there is no topology requirement for the
+test.</p>
 <p>When matching a "sharded-replicaset" topology, test runners MUST ensure that all shards are backed by a replica set.
 The process for doing so is described in
 <a href="#determining-if-a-sharded-cluster-uses-replica-sets">Determining if a Sharded Cluster Uses Replica Sets</a>. When
 matching a "sharded" topology, test runners MUST accept any type of sharded cluster (i.e. "sharded" implies
 "sharded-replicaset", but not vice versa).</p>
 <p>The "sharded-replicaset" topology type is deprecated. MongoDB 3.6+ requires that all shard servers be replica sets.
-Therefore, tests SHOULD use "sharded" instead of "sharded-replicaset" when targeting 3.6+ server versions in order to
-avoid unnecessary overhead.</p>
+Therefore, tests SHOULD use "sharded" instead of "sharded-replicaset" when targeting 3.6+ server versions in order
+to avoid unnecessary overhead.</p>
 <p>Note: load balancers were introduced in MongoDB 5.0. Therefore, any sharded cluster behind a load balancer implicitly
 uses replica sets for its shards.</p>
 </li>
 <li>
 <p><code>serverless</code>: Optional string. Whether or not the test should be run on Atlas Serverless instances. Valid values are
-"require", "forbid", and "allow". If "require", the test MUST only be run on Atlas Serverless instances. If "forbid",
-the test MUST NOT be run on Atlas Serverless instances. If omitted or "allow", this option has no effect.</p>
+"require", "forbid", and "allow". If "require", the test MUST only be run on Atlas Serverless instances. If
+"forbid", the test MUST NOT be run on Atlas Serverless instances. If omitted or "allow", this option has no effect.</p>
 <p>The test runner MUST be informed whether or not Atlas Serverless is being used in order to determine if this
 requirement is met (e.g. through an environment variable or configuration option).</p>
 <p>Note: the Atlas Serverless proxy imitates mongos, so the test runner is not capable of determining if Atlas Serverless
-is in use by issuing commands such as <code>buildInfo</code> or <code>hello</code>. Furthermore, connections to Atlas Serverless use a load
-balancer, so the topology will appear as "load-balanced".</p>
+is in use by issuing commands such as <code>buildInfo</code> or <code>hello</code>. Furthermore, connections to Atlas Serverless use a
+load balancer, so the topology will appear as "load-balanced".</p>
 </li>
 <li>
 <p><code>serverParameters</code>: Optional object of server parameters to check against. To check server parameters, drivers send a
-<code>{ getParameter: 1, &lt;parameter&gt;: 1 }</code> command to the server using an internal MongoClient. Drivers MAY also choose to
-send a <code>{ getParameter: '*' }</code> command and fetch all parameters at once. The result SHOULD be cached to avoid repeated
-calls to fetch the same parameter. Test runners MUST apply the rules specified in
+<code>{ getParameter: 1, &lt;parameter&gt;: 1 }</code> command to the server using an internal MongoClient. Drivers MAY also choose
+to send a <code>{ getParameter: '*' }</code> command and fetch all parameters at once. The result SHOULD be cached to avoid
+repeated calls to fetch the same parameter. Test runners MUST apply the rules specified in
 <a href="#flexible-numeric-comparisons">Flexible Numeric Comparisons</a> when comparing values. If a server does not support a
-parameter, test runners MUST treat the comparison as not equal and skip the test. This includes errors that occur when
-fetching a single parameter using <code>getParameter</code>.</p>
+parameter, test runners MUST treat the comparison as not equal and skip the test. This includes errors that occur
+when fetching a single parameter using <code>getParameter</code>.</p>
 </li>
 </ul>
 <p><span id="runOnRequirement_auth"></span></p>
@@ -550,7 +552,7 @@ only have a single seed and MUST NOT specify the <code>replicaSet</code> option.
 more information.</p>
 <p>Any field in <code>uriOptions</code> may be a <a href="#placeholder">$$placeholder</a> document and the test runner MUST support replacing
 the placeholder document with values loaded from the test environment. For example:</p>
-<pre><code>uriOptions:
+<pre><code class="language-yaml">uriOptions:
   authMechanism: "MONGODB-OIDC"
   authMechanismProperties:
     ENVIRONMENT: { $$placeholder: 1 }
@@ -561,22 +563,23 @@ the placeholder document with values loaded from the test environment. For examp
 <ul>
 <li>
 <p><code>useMultipleMongoses</code>: Optional boolean. If true and the topology is a sharded cluster, the test runner MUST assert
-that this MongoClient connects to multiple mongos hosts (e.g. by inspecting the connection string). If false and the
-topology is a sharded cluster, the test runner MUST ensure that this MongoClient connects to only a single mongos
-host (e.g. by modifying the connection string).</p>
+that this MongoClient connects to multiple mongos hosts (e.g. by inspecting the connection string). If false and
+the topology is a sharded cluster, the test runner MUST ensure that this MongoClient connects to only a single
+mongos host (e.g. by modifying the connection string).</p>
 <p>If this option is not specified and the topology is a sharded cluster, the test runner MUST NOT enforce any limit on
 the number of mongos hosts in the connection string and any tests using this client SHOULD NOT depend on a
 particular number of mongos hosts.</p>
 <p>This option SHOULD be set to true in test files if the resulting entity is used to conduct transactions against a
-sharded cluster. This is advised because connecting to multiple mongos servers is necessary to test session pinning.</p>
+sharded cluster. This is advised because connecting to multiple mongos servers is necessary to test session
+pinning.</p>
 <p>If the topology type is <code>LoadBalanced</code> and Atlas Serverless is not being used, the test runner MUST use one of the
 two load balancer URIs described in <a href="#initializing-the-test-runner">Initializing the Test Runner</a> to configure the
 MongoClient. If <code>useMultipleMongoses</code> is true or unset, the test runner MUST use the URI of the load balancer
 fronting multiple servers. Otherwise, the test runner MUST use the URI of the load balancer fronting a single
 server.</p>
 <p>If the topology type is <code>LoadBalanced</code> and Atlas Serverless is being used, this option has no effect. This is
-because provisioning an Atlas Serverless instance yields a single URI (i.e. a load balancer fronting a single Atlas
-Serverless proxy).</p>
+because provisioning an Atlas Serverless instance yields a single URI (i.e. a load balancer fronting a single
+Atlas Serverless proxy).</p>
 <p>This option has no effect for topologies that are not sharded or load balanced.</p>
 </li>
 </ul>
@@ -617,8 +620,8 @@ follows:</p>
 <p><code>ignoreCommandMonitoringEvents</code>: Optional array of one or more strings. Command names for which the test runner MUST
 ignore any observed command monitoring events. The command(s) will be ignored in addition to <code>configureFailPoint</code>
 and any commands containing sensitive information (per the
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#security">Command Logging and Monitoring</a> spec)
-unless <code>observeSensitiveCommands</code> is true.</p>
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#security">Command Logging and Monitoring</a>
+spec) unless <code>observeSensitiveCommands</code> is true.</p>
 <p>Test files SHOULD NOT use this option unless one or more command monitoring events are specified in
 <a href="#entity_client_observeEvents">observeEvents</a>.</p>
 </li>
@@ -626,11 +629,12 @@ unless <code>observeSensitiveCommands</code> is true.</p>
 <p><span id="entity_client_observeSensitiveCommands"></span></p>
 <ul>
 <li><code>observeSensitiveCommands</code>: Optional boolean. If true, events associated with sensitive commands (per the
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#security">Command Logging and Monitoring</a> spec)
-will be observed for this client. Note that the command and replies for such events will already have been redacted
-by the driver. If false or not specified, events for commands containing sensitive information MUST be ignored.
-Authentication SHOULD be disabled when this property is true, i.e. <a href="#runOnRequirement_auth">auth</a> should be false
-for each <code>runOnRequirement</code>. See <a href="#rationale_observeSensitiveCommands">rationale_observeSensitiveCommands</a>.</li>
+<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#security">Command Logging and Monitoring</a>
+spec) will be observed for this client. Note that the command and replies for such events will already have been
+redacted by the driver. If false or not specified, events for commands containing sensitive information MUST be
+ignored. Authentication SHOULD be disabled when this property is true, i.e. <a href="#runOnRequirement_auth">auth</a> should
+be false for each <code>runOnRequirement</code>. See
+<a href="#rationale_observeSensitiveCommands">rationale_observeSensitiveCommands</a>.</li>
 </ul>
 <p><span id="entity_client_storeEventsAsEntities"></span></p>
 <ul>
@@ -641,7 +645,7 @@ object denotes an entity name and one or more events to be collected and stored 
 <p>Note: the implementation of <code>storeEventsAsEntities</code> is wholly independent from <code>observeEvents</code> and
 <code>ignoreCommandMonitoringEvents</code>.</p>
 <p>Example option value:</p>
-<pre><code>storeEventsAsEntities:
+<pre><code class="language-yaml">storeEventsAsEntities:
   - id: client0_events
     events: [PoolCreatedEvent, ConnectionCreatedEvent, CommandStartedEvent]
 </code></pre>
@@ -650,10 +654,11 @@ object denotes an entity name and one or more events to be collected and stored 
 <p><span id="entity_client_observeLogMessages"></span></p>
 <ul>
 <li><code>observeLogMessages</code>: Optional object where the key names are log <a href="../logging/logging.html#components">components</a> and
-the values are minimum <a href="../logging/logging.html#log-severity-levels">log severity levels</a> indicating which components
-to collect log messages for and what the minimum severity level of collected messages should be. Messages for
-unspecified components and/or with lower severity levels than those specified MUST be ignored by this client's log
-collector(s) and SHOULD NOT be included in <a href="#test_expectLogMessages">test.expectLogMessages</a> for this client.</li>
+the values are minimum <a href="../logging/logging.html#log-severity-levels">log severity levels</a> indicating which
+components to collect log messages for and what the minimum severity level of collected messages should be.
+Messages for unspecified components and/or with lower severity levels than those specified MUST be ignored by this
+client's log collector(s) and SHOULD NOT be included in <a href="#test_expectLogMessages">test.expectLogMessages</a> for this
+client.</li>
 <li><code>serverApi</code>: Optional <a href="#serverapi">serverApi</a> object.</li>
 </ul>
 </li>
@@ -689,20 +694,21 @@ clientEncryption. The namespace takes the form <code>database.collection</code> 
 <li>
 <p><code>kmsProviders</code>: Required document. Drivers MUST NOT configure a KMS provider if it is not given. This is to permit
 testing conditions where a required KMS provider is not configured. If a KMS provider is given as an empty
-document (e.g. <code>kmsProviders: { aws: {} }</code>), drivers MUST configure the KMS provider without credentials to permit
-testing conditions where KMS credentials are needed. If a KMS credentials field has a placeholder value (e.g.
-<code>kmsProviders: { aws: { accessKeyId: { $$placeholder: 1 }, secretAccessKey: { $$placeholder: 1 } } }</code>), drivers
-MUST replace the field with credentials that satisfy the operations required by the unified test files. Drivers
-MAY load the credentials from the environment or a configuration file as needed to satisfy the requirements of the
-given KMS provider and tests. If a KMS credentials field is not given (e.g. the required field <code>secretAccessKey</code>
-is omitted in: <code>kmsProviders: { aws: { accessKeyId: { $$placeholder: 1 } }</code>), drivers MUST NOT include the field
-during KMS configuration. This is to permit testing conditions where required KMS credentials fields are not
-provided. Otherwise, drivers MUST configure the KMS provider with the explicit value of KMS credentials field
-given in the test file (e.g. <code>kmsProviders: { aws: { accessKeyId: abc, secretAccessKey: def } }</code>). This is to
-permit testing conditions where invalid KMS credentials are provided.</p>
+document (e.g. <code>kmsProviders: { aws: {} }</code>), drivers MUST configure the KMS provider without credentials to
+permit testing conditions where KMS credentials are needed. If a KMS credentials field has a placeholder value
+(e.g. <code>kmsProviders: { aws: { accessKeyId: { $$placeholder: 1 }, secretAccessKey: { $$placeholder: 1 } } }</code>),
+drivers MUST replace the field with credentials that satisfy the operations required by the unified test files.
+Drivers MAY load the credentials from the environment or a configuration file as needed to satisfy the
+requirements of the given KMS provider and tests. If a KMS credentials field is not given (e.g. the required
+field <code>secretAccessKey</code> is omitted in: <code>kmsProviders: { aws: { accessKeyId: { $$placeholder: 1 } }</code>), drivers
+MUST NOT include the field during KMS configuration. This is to permit testing conditions where required KMS
+credentials fields are not provided. Otherwise, drivers MUST configure the KMS provider with the explicit value
+of KMS credentials field given in the test file (e.g.
+<code>kmsProviders: { aws: { accessKeyId: abc, secretAccessKey: def } }</code>). This is to permit testing conditions where
+invalid KMS credentials are provided.</p>
 <p>Tests may also reference named KMS providers. KMS providers with the name <code>name1</code> are expected to be configured
-exactly as the unnamed KMS providers. The <code>aws:name2</code> KMS provider and <code>aws:name1</code> KMS providers deliberately use
-separate AWS accounts that do not have permission to the other's keys.</p>
+exactly as the unnamed KMS providers. The <code>aws:name2</code> KMS provider and <code>aws:name1</code> KMS providers deliberately
+use separate AWS accounts that do not have permission to the other's keys.</p>
 <p>See the <a href="../client-side-encryption/tests/README.html#credentials">Client-Side Encryption test README</a> for
 instructions to obtain test credentials.</p>
 </li>
@@ -764,8 +770,8 @@ instructions to obtain test credentials.</p>
 </li>
 <li>
 <p><code>sessionOptions</code>: Optional object. Map of parameters to pass to
-<a href="../sessions/driver-sessions.html#startsession">MongoClient.startSession</a> when creating the session. Supported options
-are defined in the following specifications:</p>
+<a href="../sessions/driver-sessions.html#startsession">MongoClient.startSession</a> when creating the session. Supported
+options are defined in the following specifications:</p>
 <ul>
 <li><a href="../causal-consistency/causal-consistency.html#sessionoptions-changes">Causal Consistency</a></li>
 <li><a href="../sessions/snapshot-sessions.html#sessionoptions-changes">Snapshot Reads</a></li>
@@ -790,8 +796,9 @@ are defined in the following specifications:</p>
 <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a> for a database entity's <code>id</code> field (e.g.
 <code>database: *database0</code>).</li>
 <li><code>bucketOptions</code>: Optional object. Additional options used to construct the bucket object. Supported options are
-defined in the <a href="../gridfs/gridfs-spec.html#configurable-gridfsbucket-class">GridFS</a> specification. The <code>readConcern</code>,
-<code>readPreference</code>, and <code>writeConcern</code> options use the same structure as defined in <a href="#common-options">Common Options</a>.</li>
+defined in the <a href="../gridfs/gridfs-spec.html#configurable-gridfsbucket-class">GridFS</a> specification. The
+<code>readConcern</code>, <code>readPreference</code>, and <code>writeConcern</code> options use the same structure as defined in
+<a href="#common-options">Common Options</a>.</li>
 </ul>
 </li>
 </ul>
@@ -900,8 +907,8 @@ version and/or topology requirements for which this test can be run. If specifie
 independently and in addition to any top-level <a href="#runOnRequirements">runOnRequirements</a>. If no requirements in this
 array are met, the test runner MUST skip this test.</p>
 <p>These requirements SHOULD be more restrictive than those specified in the top-level
-<a href="#runOnRequirements">runOnRequirements</a> (if any) and SHOULD NOT be more permissive. This is advised because both sets
-of requirements MUST be satisfied in order for a test to be executed and more permissive requirements at the
+<a href="#runOnRequirements">runOnRequirements</a> (if any) and SHOULD NOT be more permissive. This is advised because both
+sets of requirements MUST be satisfied in order for a test to be executed and more permissive requirements at the
 test-level could be taken out of context on their own.</p>
 </li>
 </ul>
@@ -934,9 +941,9 @@ be redundant (if the <code>events</code> arrays were identical) or likely to fai
 <p><code>expectLogMessages</code>: Optional array of one or more <a href="#expectedlogmessagesforclient">expectedLogMessagesForClient</a>
 objects. For one or more clients, a list of log messages that are expected to be observed in a particular order.</p>
 <p>If a driver only supports configuring log collectors globally (for all clients), the test runner SHOULD associate each
-observed message with a client in order to perform these assertions. One possible implementation is to add a test-only
-option to MongoClient which enables the client to store its entity name and add the entity name to each log message to
-enable filtering messages by client.</p>
+observed message with a client in order to perform these assertions. One possible implementation is to add a
+test-only option to MongoClient which enables the client to store its entity name and add the entity name to each
+log message to enable filtering messages by client.</p>
 <p>Tests SHOULD NOT specify multiple <a href="#expectedlogmessagesforclient">expectedLogMessagesForClient</a> objects for a single
 client entity.</p>
 </li>
@@ -1019,8 +1026,9 @@ is required in this object.</p>
 <ul>
 <li>
 <p><code>isError</code>: Optional boolean. If true, the test runner MUST assert that an error was raised. This is primarily used
-when no other error assertions apply but the test still needs to assert an expected error. Test files MUST NOT specify
-false, as <a href="#expectederror">expectedError</a> is only applicable when an operation is expected to raise an error.</p>
+when no other error assertions apply but the test still needs to assert an expected error. Test files MUST NOT
+specify false, as <a href="#expectederror">expectedError</a> is only applicable when an operation is expected to raise an
+error.</p>
 </li>
 <li>
 <p><code>isClientError</code>: Optional boolean. If true, the test runner MUST assert that the error originates from the client
@@ -1050,8 +1058,8 @@ client errors.</p>
 </li>
 <li>
 <p><code>errorCodeName</code>: Optional string. The expected "codeName" field in the server-generated error response. The test
-runner MUST assert that the error includes a server-generated response whose "codeName" field equals this value using
-a case-insensitive comparison.</p>
+runner MUST assert that the error includes a server-generated response whose "codeName" field equals this value
+using a case-insensitive comparison.</p>
 <p>See <a href="#bulkwrite">bulkWrite</a> for special considerations for BulkWriteExceptions.</p>
 <p>Server error codes are defined in
 <a href="https://github.com/mongodb/mongo/blob/master/src/mongo/base/error_codes.yml">error_codes.yml</a>.</p>
@@ -1070,11 +1078,12 @@ to have. The test runner MUST assert that the error does not contain any of the 
 </li>
 <li>
 <p><code>writeErrors</code>: Optional document. The write errors expected to be present in the error. The <code>writeErrors</code> document
-contains numeric keys representing the index of the write that failed and <code>writeError</code> object values. The test runner
-MUST assert that the error contains a <code>writeError</code> for each index present in <code>writeErrors</code> and MUST assert that the
-<code>writeError</code>s match as root-level documents according to the rules in <a href="#evaluating-matches">Evaluating Matches</a>. The
-test runner MUST assert that the error does not contain any additional <code>writeError</code>s. This field is only intended for
-use with the <a href="#clientbulkwrite">clientBulkWrite</a> operation.</p>
+contains numeric keys representing the index of the write that failed and <code>writeError</code> object values. The test
+runner MUST assert that the error contains a <code>writeError</code> for each index present in <code>writeErrors</code> and MUST assert
+that the <code>writeError</code>s match as root-level documents according to the rules in
+<a href="#evaluating-matches">Evaluating Matches</a>. The test runner MUST assert that the error does not contain any
+additional <code>writeError</code>s. This field is only intended for use with the <a href="#clientbulkwrite">clientBulkWrite</a>
+operation.</p>
 </li>
 <li>
 <p><code>writeConcernErrors</code>: Optional array of one or more objects. An ordered list of write concern errors expected to be
@@ -1092,9 +1101,9 @@ not contain any additional <code>writeConcernErrors</code>s. This field is only 
 that the error includes a server response that matches this value as a root-level document according to the rules in
 <a href="#evaluating-matches">Evaluating Matches</a>.</p>
 <p>Note that some drivers may not be able to evaluate <code>errorResponse</code> for write commands (i.e. insert, update, delete)
-and bulk write operations. For example, a BulkWriteException is derived from potentially multiple server responses and
-may not provide direct access to a single response. Tests SHOULD avoid using <code>errorResponse</code> for such operations if
-possible; otherwise, affected drivers SHOULD skip such tests if necessary.</p>
+and bulk write operations. For example, a BulkWriteException is derived from potentially multiple server responses
+and may not provide direct access to a single response. Tests SHOULD avoid using <code>errorResponse</code> for such operations
+if possible; otherwise, affected drivers SHOULD skip such tests if necessary.</p>
 </li>
 </ul>
 <p><span id="expectedError_expectResult"></span></p>
@@ -1114,15 +1123,16 @@ BulkWriteException), this assertion SHOULD utilize the <a href="#unsetormatches"
 <a href="#commonOptions_client">commonOptions_client</a>.</li>
 <li><code>eventType</code>: Optional string. Specifies the type of the monitor which captured the events. Valid values are <code>command</code>
 for <a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#events-api">Command Monitoring</a> events,
-<code>cmap</code> for <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#events">CMAP</a> events, and <code>sdam</code>
-for <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events-api">SDAM</a>
+<code>cmap</code> for <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#events">CMAP</a> events, and
+<code>sdam</code> for
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html#events-api">SDAM</a>
 events. Defaults to <code>command</code> if omitted.</li>
 <li><code>events</code>: Required array of <a href="#expectedevent">expectedEvent</a> objects. List of events, which are expected to be observed
-(in this order) on the corresponding client while executing <a href="#test_operations">operations</a>. If the array is empty, the
-test runner MUST assert that no events were observed on the client (excluding ignored events).</li>
+(in this order) on the corresponding client while executing <a href="#test_operations">operations</a>. If the array is empty,
+the test runner MUST assert that no events were observed on the client (excluding ignored events).</li>
 <li><code>ignoreExtraEvents</code>: Optional boolean. Specifies how the <code>events</code> array is matched against the observed events. If
-<code>false</code>, observed events after all specified events have matched MUST cause a test failure; if <code>true</code>, observed events
-after all specified events have been matched MUST NOT cause a test failure. Defaults to <code>false</code>.</li>
+<code>false</code>, observed events after all specified events have matched MUST cause a test failure; if <code>true</code>, observed
+events after all specified events have been matched MUST NOT cause a test failure. Defaults to <code>false</code>.</li>
 </ul>
 <h4 id="expectedevent"><a class="header" href="#expectedevent">expectedEvent</a></h4>
 <p>An event (e.g. APM), which is expected to be observed while executing the test's operations.</p>
@@ -1380,18 +1390,18 @@ that <code>serverConnectionId</code> is a nonpositive Int32.</p>
 <a href="#commonOptions_client">commonOptions_client</a>.</li>
 <li><code>messages</code>: Required array of <a href="#expectedlogmessage">expectedLogMessage</a> objects. List of messages, which are expected
 to be observed (in this order) on the corresponding client while executing <a href="#test_operations">operations</a>. If the
-array is empty, the test runner MUST assert that no messages were observed on the client. The driver MUST assert that
-the messages produced are an exact match, i.e. that the expected and actual message counts are the same and that there
-are no extra messages emitted by the client during the test run. Note: <code>ignoreMessages</code> and <code>ignoreExtraMessages</code> may
-exclude log messages from this evaluation.</li>
+array is empty, the test runner MUST assert that no messages were observed on the client. The driver MUST assert
+that the messages produced are an exact match, i.e. that the expected and actual message counts are the same and
+that there are no extra messages emitted by the client during the test run. Note: <code>ignoreMessages</code> and
+<code>ignoreExtraMessages</code> may exclude log messages from this evaluation.</li>
 <li><code>ignoreMessages</code>: Optional array of <a href="#expectedlogmessage">expectedLogMessage</a> objects. Unordered set of messages,
-which MUST be ignored on the corresponding client while executing <a href="#test_operations">operations</a>. The test runner MUST
-exclude all log messages from observed messages that match any of the messages in <code>ignoreMessages</code> array before
-<code>messages</code> evaluation. Matching rules used to match messages in <code>ignoreMessages</code> are identical to match rules used for
-<code>messages</code> matching.</li>
+which MUST be ignored on the corresponding client while executing <a href="#test_operations">operations</a>. The test runner
+MUST exclude all log messages from observed messages that match any of the messages in <code>ignoreMessages</code> array before
+<code>messages</code> evaluation. Matching rules used to match messages in <code>ignoreMessages</code> are identical to match rules used
+for <code>messages</code> matching.</li>
 <li><code>ignoreExtraMessages</code>: Optional boolean. Specifies how the <code>messages</code> array is matched against the observed logs. If
-<code>false</code>, observed logs after all specified logs have matched MUST cause a test failure; if <code>true</code>, observed logs after
-all specified logs have been matched MUST NOT cause a test failure. Defaults to <code>false</code>.</li>
+<code>false</code>, observed logs after all specified logs have matched MUST cause a test failure; if <code>true</code>, observed logs
+after all specified logs have been matched MUST NOT cause a test failure. Defaults to <code>false</code>.</li>
 </ul>
 <p><span id="expectedLogMessage"></span></p>
 <h4 id="expectedlogmessage"><a class="header" href="#expectedlogmessage">expectedLogMessage</a></h4>
@@ -1591,7 +1601,7 @@ implementation (e.g. InsertOneModel) provides important context to the method, b
 expressed in YAML and JSON. To account for this, test files MUST nest each WriteModel object in a single-key object,
 where the key identifies the request type (e.g. "insertOne") and its value is an object expressing the parameters, as in
 the following example:</p>
-<pre><code>arguments:
+<pre><code class="language-yaml">arguments:
   models:
     - insertOne:
         document: { _id: 1, x: 1 }
@@ -1742,7 +1752,7 @@ implementation (e.g. InsertOneModel) provides important context to the method, b
 expressed in YAML and JSON. To account for this, test files MUST nest each WriteModel object in a single-key object,
 where the key identifies the request type (e.g. "insertOne") and its value is an object expressing the parameters, as in
 the following example:</p>
-<pre><code>arguments:
+<pre><code class="language-yaml">arguments:
   requests:
     - insertOne:
         document: { _id: 1, x: 1 }
@@ -1823,7 +1833,7 @@ operator.</p>
 optional drivers are permitted to forgo it entirely and have <code>insertOne</code> return nothing (i.e. void method). Tests
 asserting InsertOneResult SHOULD utilize the <a href="#unsetormatches">$$unsetOrMatches</a> operator for <em>both</em> the result object
 and any optional fields within, as in the following examples:</p>
-<pre><code>- name: insertOne
+<pre><code class="language-yaml">- name: insertOne
   object: *collection0
   arguments:
     document: { _id: 2 }
@@ -1880,7 +1890,7 @@ raised (e.g. missing chunks). Test files SHOULD use <a href="#matcheshexbytes">$
 <p>These operations proxy the bucket's <code>uploadFromStream</code> and <code>uploadFromStreamWithId</code> methods and support the same
 parameters and options with one exception: the <code>source</code> parameter is an object specifying hex bytes from which test
 runners MUST construct a readable stream for the underlying methods. The structure of <code>source</code> is as follows:</p>
-<pre><code>{ $$hexBytes: &lt;string&gt; }
+<pre><code class="language-yaml">{ $$hexBytes: &lt;string&gt; }
 </code></pre>
 <p>The string MUST contain an even number of hexadecimal characters (case-insensitive) and MAY be empty. The test runner
 MUST raise an error if the structure of <code>source</code> or its string is malformed. The test runner MUST convert the string to
@@ -1947,7 +1957,7 @@ subsequent operations.</p>
 test. The test runner MUST also ensure that the <code>configureFailPoint</code> command is excluded from the list of observed
 command monitoring events for this client (if applicable).</p>
 <p>An example of this operation follows:</p>
-<pre><code># Enable the fail point on the server selected with a primary read preference
+<pre><code class="language-yaml"># Enable the fail point on the server selected with a primary read preference
 - name: failPoint
   object: testRunner
   arguments:
@@ -1989,7 +1999,7 @@ balancer will direct the command to the intended mongos.</p>
 <p>When executing this operation, the test runner MUST keep a record of both the fail point and pinned mongos server so
 that the fail point can be disabled on the same mongos server after the test.</p>
 <p>An example of this operation follows:</p>
-<pre><code># Enable the fail point on the mongos to which session0 is pinned
+<pre><code class="language-yaml"># Enable the fail point on the mongos to which session0 is pinned
 - name: targetedFailPoint
   object: testRunner
   arguments:
@@ -2013,7 +2023,7 @@ particular transaction state.</p>
 <code>starting</code>, <code>in_progress</code>, <code>committed</code>, and <code>aborted</code>.</li>
 </ul>
 <p>An example of this operation follows:</p>
-<pre><code>- name: assertSessionTransactionState
+<pre><code class="language-yaml">- name: assertSessionTransactionState
   object: testRunner
   arguments:
     session: *session0
@@ -2027,7 +2037,7 @@ server.</p>
 <li><code>session</code>: Required string. See <a href="#commonOptions_session">commonOptions_session</a>.</li>
 </ul>
 <p>An example of this operation follows:</p>
-<pre><code>- name: assertSessionPinned
+<pre><code class="language-yaml">- name: assertSessionPinned
   object: testRunner
   arguments:
     session: *session0
@@ -2040,7 +2050,7 @@ mongos server.</p>
 <li><code>session</code>: Required string. See <a href="#commonOptions_session">commonOptions_session</a>.</li>
 </ul>
 <p>An example of this operation follows:</p>
-<pre><code>- name: assertSessionUnpinned
+<pre><code class="language-yaml">- name: assertSessionUnpinned
   object: testRunner
   arguments:
     session: *session0
@@ -2059,7 +2069,7 @@ dirty server sessions are discarded from the pool.</p>
 <p>The test runner MUST fail this assertion if fewer than two CommandStartedEvents have been observed on the client or if
 either command does not include an <code>lsid</code> field.</p>
 <p>An example of this operation follows:</p>
-<pre><code>- name: assertDifferentLsidOnLastTwoCommands
+<pre><code class="language-yaml">- name: assertDifferentLsidOnLastTwoCommands
   object: testRunner
   arguments:
     client: *client0
@@ -2078,7 +2088,7 @@ non-dirty server sessions are not discarded from the pool.</p>
 <p>The test runner MUST fail this assertion if fewer than two CommandStartedEvents have been observed on the client or if
 either command does not include an <code>lsid</code> field.</p>
 <p>An example of this operation follows:</p>
-<pre><code>- name: assertSameLsidOnLastTwoCommands
+<pre><code class="language-yaml">- name: assertSameLsidOnLastTwoCommands
   object: testRunner
   arguments:
     client: *client0
@@ -2090,7 +2100,7 @@ either command does not include an <code>lsid</code> field.</p>
 <li><code>session</code>: Required string. See <a href="#commonOptions_session">commonOptions_session</a>.</li>
 </ul>
 <p>An example of this operation follows:</p>
-<pre><code>- name: assertSessionDirty
+<pre><code class="language-yaml">- name: assertSessionDirty
   object: testRunner
   arguments:
     session: *session0
@@ -2102,7 +2112,7 @@ either command does not include an <code>lsid</code> field.</p>
 <li><code>session</code>: Required string. See <a href="#commonOptions_session">commonOptions_session</a>.</li>
 </ul>
 <p>An example of this operation follows:</p>
-<pre><code>- name: assertSessionNotDirty
+<pre><code class="language-yaml">- name: assertSessionNotDirty
   object: testRunner
   arguments:
     session: *session0
@@ -2116,7 +2126,7 @@ database. The test runner MUST use an internal MongoClient for this operation.</
 <li><code>databaseName</code>: Required string. See <a href="#commonOptions_databaseName">commonOptions_databaseName</a>.</li>
 </ul>
 <p>An example of this operation follows:</p>
-<pre><code>- name: assertCollectionExists
+<pre><code class="language-yaml">- name: assertCollectionExists
   object: testRunner
   arguments:
     collectionName: *collection0Name
@@ -2133,7 +2143,7 @@ in the database. The test runner MUST use an internal MongoClient for this opera
 <li><code>databaseName</code>: Required string. See <a href="#commonOptions_databaseName">commonOptions_databaseName</a>.</li>
 </ul>
 <p>An example of this operation follows:</p>
-<pre><code>- name: assertCollectionNotExists
+<pre><code class="language-yaml">- name: assertCollectionNotExists
   object: testRunner
   arguments:
     collectionName: *collection0Name
@@ -2151,7 +2161,7 @@ collection. The test runner MUST use an internal MongoClient for this operation.
 <li><code>indexName</code>: Required string. Index name.</li>
 </ul>
 <p>An example of this operation follows:</p>
-<pre><code>- name: assertIndexExists
+<pre><code class="language-yaml">- name: assertIndexExists
   object: testRunner
   arguments:
     collectionName: *collection0Name
@@ -2170,7 +2180,7 @@ exist on the collection. The test runner MUST use an internal MongoClient for th
 <li><code>indexName</code>: Required string. Index name.</li>
 </ul>
 <p>An example of this operation follows:</p>
-<pre><code>- name: assertIndexNotExists
+<pre><code class="language-yaml">- name: assertIndexNotExists
   object: testRunner
   arguments:
     collectionName: *collection0Name
@@ -2189,7 +2199,7 @@ test's <a href="#entity-map">Entity Map</a>.</p>
 referenced entities are defined before any of their dependent entities.</li>
 </ul>
 <p>An example of this operation follows:</p>
-<pre><code>- name: createEntities
+<pre><code class="language-yaml">- name: createEntities
   object: testRunner
   arguments:
     entities:
@@ -2210,18 +2220,19 @@ sub-operations) to run on each loop iteration. Each sub-operation must be a vali
 <a href="#entity-test-operations">Entity Test Operations</a>.</p>
 <p>Sub-operations SHOULD NOT include the <code>loop</code> operation.</p>
 <p>If, in the course of executing sub-operations, a sub-operation yields an error or failure, the test runner MUST NOT
-execute subsequent sub-operations in the same loop iteration. If <code>storeErrorsAsEntity</code> and/or <code>storeFailuresAsEntity</code>
-options are specified, the loop MUST store the error/failure accordingly and continue to the next iteration (i.e. the
-error/failure will not interrupt the test). If neither <code>storeErrorsAsEntity</code> nor <code>storeFailuresAsEntity</code> are
-specified, the loop MUST terminate and raise the error/failure (i.e. the error/failure will interrupt the test).</p>
+execute subsequent sub-operations in the same loop iteration. If <code>storeErrorsAsEntity</code> and/or
+<code>storeFailuresAsEntity</code> options are specified, the loop MUST store the error/failure accordingly and continue to the
+next iteration (i.e. the error/failure will not interrupt the test). If neither <code>storeErrorsAsEntity</code> nor
+<code>storeFailuresAsEntity</code> are specified, the loop MUST terminate and raise the error/failure (i.e. the error/failure
+will interrupt the test).</p>
 </li>
 <li>
 <p><code>storeErrorsAsEntity</code>: Optional string. If specified, the runner MUST capture errors arising during sub-operation
 execution and append a document with error information to the array stored in the specified entity.</p>
 <p>If this option is specified, the test runner MUST check the existence and the type of the entity with the specified
 name before executing the loop. If the entity does not exist, the test runner MUST create it with the type of BSON
-array. If the entity exists and is of type BSON array, the test runner MUST do nothing. If the entity exists and is of
-a different type, the test runner MUST raise an error.</p>
+array. If the entity exists and is of type BSON array, the test runner MUST do nothing. If the entity exists and is
+of a different type, the test runner MUST raise an error.</p>
 <p>If this option is specified and <code>storeFailuresAsEntity</code> is not, failures MUST also be captured and appended to the
 array.</p>
 <p>Documents appended to the array MUST contain the following fields:</p>
@@ -2235,8 +2246,8 @@ array.</p>
 execution and append a document with failure information to the array stored in the specified entity.</p>
 <p>If this option is specified, the test runner MUST check the existence and the type of the entity with the specified
 name before executing the loop. If the entity does not exist, the test runner MUST create it with the type of BSON
-array. If the entity exists and is of type BSON array, the test runner MUST do nothing. If the entity exists and is of
-a different type, the test runner MUST raise an error.</p>
+array. If the entity exists and is of type BSON array, the test runner MUST do nothing. If the entity exists and is
+of a different type, the test runner MUST raise an error.</p>
 <p>If this option is specified and <code>storeErrorsAsEntity</code> is not, errors MUST also be captured and appended to the array.</p>
 <p>Documents appended to the array MUST contain the following fields:</p>
 <ul>
@@ -2269,8 +2280,8 @@ category, but it MUST report any given condition in at most one category.</p>
 <p>The following termination behavior MUST be implemented by the test runner:</p>
 <ul>
 <li>The test runner MUST provide a way to request termination of loops. This request will be made by the
-<a href="https://mongodb-labs.github.io/drivers-atlas-testing/spec-workload-executor.html">Atlas testing workload executor</a> in
-response to receiving the termination signal from Astrolabe.</li>
+<a href="https://mongodb-labs.github.io/drivers-atlas-testing/spec-workload-executor.html">Atlas testing workload executor</a>
+in response to receiving the termination signal from Astrolabe.</li>
 <li>When the termination request is received, the test runner MUST stop looping. If the test runner is looping when the
 termination request is received, the current loop iteration MUST complete to its natural conclusion (success or
 failure). If the test runner is not looping when the termination request is received, it MUST NOT start any new loop
@@ -2284,7 +2295,7 @@ iterations were performed.</li>
 respective API, is left to the driver.</p>
 <p>Tests SHOULD NOT include multiple loop operations (nested or sequential).</p>
 <p>An example of this operation follows:</p>
-<pre><code>- name: loop
+<pre><code class="language-yaml">- name: loop
   object: testRunner
   arguments:
     storeErrorsAsEntity: errors
@@ -2311,7 +2322,7 @@ implement connection pooling and should be skipped for drivers that do not.</p>
 <li><code>connections</code>: Required integer. The number of connections expected to be checked out.</li>
 </ul>
 <p>An example of this operation follows:</p>
-<pre><code>- name: assertNumberConnectionsCheckedOut
+<pre><code class="language-yaml">- name: assertNumberConnectionsCheckedOut
   object: testRunner
   arguments:
     client: *client0
@@ -2330,7 +2341,7 @@ of the operation's test assertions fail, the entire test case MUST fail as well.
 valid operation as described in <a href="#entity-test-operations">Entity Test Operations</a>.</li>
 </ul>
 <p>An example of this operation follows:</p>
-<pre><code>- name: runOnThread
+<pre><code class="language-yaml">- name: runOnThread
   object: testRunner
   arguments:
     thread: *thread0
@@ -2353,7 +2364,7 @@ forthcoming, wait for it to complete its last operation, and assert that it exit
 <li><code>thread</code>: Required string. Thread entity that should be stopped and awaited for completion.</li>
 </ul>
 <p>An example of this operation follows:</p>
-<pre><code>- name: waitForThread
+<pre><code class="language-yaml">- name: waitForThread
   object: testRunner
   arguments:
     thread: *thread0
@@ -2368,13 +2379,13 @@ started.</p>
 <li><code>client</code>: Required string. Client entity whose events the runner will be waiting for.</li>
 <li><code>event</code>: Required <a href="#expectedevent">expectedEvent</a> object. The event which the test runner is waiting to be observed on
 the provided client. The assertions laid out in <a href="#expectedevent">expectedEvent</a> MUST be used to determine if an
-observed event matches <code>event</code>. <code>event</code> SHOULD have an event type that was included in the <code>client</code>'s <code>observeEvents</code>
-field.</li>
+observed event matches <code>event</code>. <code>event</code> SHOULD have an event type that was included in the <code>client</code>'s
+<code>observeEvents</code> field.</li>
 <li><code>count</code>: Required integer. The number of matching events to wait for before resuming execution of subsequent
 operations.</li>
 </ul>
 <p>For example, the following instructs the test runner to wait for at least one poolClearedEvent to be published:</p>
-<pre><code>- name: waitForEvent
+<pre><code class="language-yaml">- name: waitForEvent
   object: testRunner
   arguments:
     client: *client0
@@ -2394,7 +2405,7 @@ event matches <code>event</code>. <code>event</code> SHOULD have an event type t
 <li><code>count</code>: Required integer. The exact number of matching events that <code>client</code> should have seen so far.</li>
 </ul>
 <p>For example, the following instructs the test runner to assert that a single PoolClearedEvent was published:</p>
-<pre><code>- name: assertEventCount
+<pre><code class="language-yaml">- name: assertEventCount
   object: testRunner
   arguments:
     client: *client0
@@ -2411,7 +2422,7 @@ event matches <code>event</code>. <code>event</code> SHOULD have an event type t
 <li><code>id</code>: Required string. The name with which the TopologyDescription will be stored in the <a href="#entity-map">Entity Map</a>.</li>
 </ul>
 <p>For example:</p>
-<pre><code>- name: recordTopologyDescription
+<pre><code class="language-yaml">- name: recordTopologyDescription
   object: testRunner
   arguments:
     client: *client0
@@ -2424,11 +2435,11 @@ event matches <code>event</code>. <code>event</code> SHOULD have an event type t
 <ul>
 <li><code>topologyDescription</code>: Required string. TopologyDescription entity whose TopologyType will be inspected.</li>
 <li><code>topologyType</code>: Required string. Expected TopologyType for the TopologyDescription. See
-<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#topologytype">SDAM: TopologyType</a> for a list of
-possible values.</li>
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#topologytype">SDAM: TopologyType</a> for a list
+of possible values.</li>
 </ul>
 <p>For example:</p>
-<pre><code>- name: assertTopologyType
+<pre><code class="language-yaml">- name: assertTopologyType
   object: testRunner
   arguments:
     topologyDescription: *postInsertTopology
@@ -2455,7 +2466,7 @@ the test. If unspecified, a default timeout of 10 seconds MUST be used.</p>
 </li>
 </ul>
 <p>For example:</p>
-<pre><code>- name: waitForPrimaryChange
+<pre><code class="language-yaml">- name: waitForPrimaryChange
   object: testRunner
   arguments:
     client: *client0
@@ -2469,7 +2480,7 @@ the test. If unspecified, a default timeout of 10 seconds MUST be used.</p>
 <li><code>ms</code>: Required integer. The number of milliseconds for which the current test runner thread should sleep.</li>
 </ul>
 <p>For example:</p>
-<pre><code>- name: wait
+<pre><code class="language-yaml">- name: wait
   object: testRunner
   arguments:
     ms: 1000
@@ -2477,14 +2488,14 @@ the test. If unspecified, a default timeout of 10 seconds MUST be used.</p>
 <h3 id="special-placeholder-value"><a class="header" href="#special-placeholder-value">Special Placeholder Value</a></h3>
 <h4 id="placeholder"><a class="header" href="#placeholder">$$placeholder</a></h4>
 <p>Syntax:</p>
-<pre><code>{ field: { $$placeholder: 1 } }
+<pre><code class="language-yaml">{ field: { $$placeholder: 1 } }
 </code></pre>
 <p>This special key-value pair can be used anywhere the value for a key might be specified in an test file. It is intended
 to act as a placeholder value in contexts where the test runner cannot provide a definite value or may be expected to
 replace the placeholder with a value that cannot be specified by the test file (e.g. KMS provider credentials). The test
 runner MUST raise an error if a placeholder value is used in an unexpected context or a replacement cannot be made.</p>
 <p>An example of using this placeholder value follows:</p>
-<pre><code>kmsProviders:
+<pre><code class="language-yaml">kmsProviders:
   aws:
     accessKeyId: { $$placeholder: 1 }
     privateAccessKey: { $$placeholder: 1 }
@@ -2494,7 +2505,7 @@ runner MUST raise an error if a placeholder value is used in an unexpected conte
 <p>Expected values in tests (e.g. <a href="#operation_expectResult">operation.expectResult</a>) are expressed as either relaxed or
 canonical <a href="../extended-json/extended-json.html">Extended JSON</a>.</p>
 <p>The algorithm for matching expected and actual values is specified with the following pseudo-code:</p>
-<pre><code>function match (expected, actual):
+<pre><code class="language-c">function match (expected, actual):
   if expected is a document:
     // handle special operators (e.g. $$type)
     if first and only key of expected starts with "$$":
@@ -2558,15 +2569,15 @@ present in the expected document. Examples of root-level documents include, but 
 <a href="#collection_aggregate">collection_aggregate</a> <a href="#collection-operations">Collection Operations</a></li>
 </ul>
 <p>For example, the following documents match:</p>
-<pre><code>expected: { x: 1 }
+<pre><code class="language-yaml">expected: { x: 1 }
 actual: { x: 1, y: 1 }
 </code></pre>
 <p>The inverse is not true. For example, the following documents do not match:</p>
-<pre><code>expected: { x: 1, y: 1 }
+<pre><code class="language-yaml">expected: { x: 1, y: 1 }
 actual: { x: 1 }
 </code></pre>
 <p>Test runners MUST NOT permit additional fields in nested documents. For example, the following documents do not match:</p>
-<pre><code>expected: { x: { y: 1 } }
+<pre><code class="language-yaml">expected: { x: { y: 1 } }
 actual: { x: { y: 1, z: 1 } }
 </code></pre>
 <p>It may be helpful to think of expected documents as a form of query criteria. The intention behind this rule is that it
@@ -2576,19 +2587,19 @@ time in <code>command</code> for <a href="#expectedEvent_commandStartedEvent">Co
 (e.g. <code>distinct</code>) and an array of root-level documents (e.g. <code>find</code>, <code>aggregate</code>). For example, the following array of
 documents would not match if returned by <code>distinct</code>, but would match if returned via <code>find</code> (after iterating the
 cursor):</p>
-<pre><code>expected: [ { x: 1 }, { x: 2 } ]
+<pre><code class="language-yaml">expected: [ { x: 1 }, { x: 2 } ]
 actual: [ { x: 1, y: 1 }, { x: 2, y: 2 } ]
 </code></pre>
 <h4 id="document-key-order-variation"><a class="header" href="#document-key-order-variation">Document Key Order Variation</a></h4>
 <p>When matching documents, test runners MUST NOT require keys in the expected and actual document to appear in the same
 order. For example, the following documents would match:</p>
-<pre><code>expected: { x: 1, y: 1 }
+<pre><code class="language-yaml">expected: { x: 1, y: 1 }
 actual: { y: 1, x: 1 }
 </code></pre>
 <h4 id="arrays-must-contain-the-same-number-of-elements"><a class="header" href="#arrays-must-contain-the-same-number-of-elements">Arrays Must Contain the Same Number of Elements</a></h4>
 <p>When comparing arrays, expected and actual values MUST contain the same number of elements. For example, the following
 arrays corresponding to a <code>distinct</code> operation result would not match:</p>
-<pre><code>expected: [ 1, 2, 3 ]
+<pre><code class="language-yaml">expected: [ 1, 2, 3 ]
 actual: [ 1, 2, 3, 4 ]
 </code></pre>
 <h4 id="special-operators-for-matching-assertions"><a class="header" href="#special-operators-for-matching-assertions">Special Operators for Matching Assertions</a></h4>
@@ -2603,20 +2614,20 @@ behavior (if applicable).</p>
 whose first and only key starts with <code>$$</code> and, if so, defer to the special logic defined in this section.</p>
 <h5 id="exists"><a class="header" href="#exists">$$exists</a></h5>
 <p>Syntax:</p>
-<pre><code>{ field: { $$exists: &lt;boolean&gt; } }
+<pre><code class="language-yaml">{ field: { $$exists: &lt;boolean&gt; } }
 </code></pre>
 <p>This operator can be used anywhere the value for a key might be specified in an expected document. If true, the test
 runner MUST assert that the key exists in the actual document, irrespective of its value (e.g. a key with a <code>null</code> value
 would match). If false, the test runner MUST assert that the key does not exist in the actual document. This operator is
 modeled after the <a href="https://www.mongodb.com/docs/manual/reference/operator/query/exists/">$exists</a> query operator.</p>
 <p>An example of this operator checking for a field's presence follows:</p>
-<pre><code>command:
+<pre><code class="language-yaml">command:
   getMore: { $$exists: true }
   collection: *collectionName,
   batchSize: 5
 </code></pre>
 <p>An example of this operator checking for a field's absence follows:</p>
-<pre><code>command:
+<pre><code class="language-yaml">command:
   update: *collectionName
   updates: [ { q: {}, u: { $set: { x: 1 } } } ]
   ordered: true
@@ -2624,7 +2635,7 @@ modeled after the <a href="https://www.mongodb.com/docs/manual/reference/operato
 </code></pre>
 <h5 id="type"><a class="header" href="#type">$$type</a></h5>
 <p>Syntax:</p>
-<pre><code>{ $$type: &lt;string&gt; }
+<pre><code class="language-yaml">{ $$type: &lt;string&gt; }
 { $$type: [ &lt;string&gt;, &lt;string&gt;, ... ] }
 </code></pre>
 <p>This operator can be used anywhere a matched value is expected (including <a href="#operation_expectResult">expectResult</a>). The
@@ -2632,7 +2643,7 @@ test runner MUST assert that the actual value exists and matches one of the expe
 documented string types for the <a href="https://www.mongodb.com/docs/manual/reference/operator/query/type/">$type</a> query
 operator.</p>
 <p>An example of this operator follows:</p>
-<pre><code>command:
+<pre><code class="language-yaml">command:
   getMore: { $$type: [ "int", "long" ] }
   collection: { $$type: "string" }
 </code></pre>
@@ -2642,7 +2653,7 @@ field SHALL be checked. This is admittedly inconsistent with the behavior of the
 need for this behavior in tests.</p>
 <h5 id="matchesentity"><a class="header" href="#matchesentity">$$matchesEntity</a></h5>
 <p>Syntax, where <code>entityName</code> is a string:</p>
-<pre><code>{ $$matchesEntity: &lt;entityName&gt; }
+<pre><code class="language-yaml">{ $$matchesEntity: &lt;entityName&gt; }
 </code></pre>
 <p>This operator can be used to reference a BSON entity anywhere a matched value is expected (including
 <a href="#operation_expectResult">expectResult</a>). If the BSON entity is defined in the current test's <a href="#entity-map">Entity Map</a>,
@@ -2651,7 +2662,7 @@ the test runner MUST fetch that entity and assert that the actual value matches 
 entity. The YAML file SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a> for the entity name.</p>
 <p>This operator is primarily used to assert identifiers for uploaded GridFS files.</p>
 <p>An example of this operator follows:</p>
-<pre><code>operations:
+<pre><code class="language-yaml">operations:
   -
     object: *bucket0
     name: upload
@@ -2670,7 +2681,7 @@ entity. The YAML file SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html
 </code></pre>
 <h5 id="matcheshexbytes"><a class="header" href="#matcheshexbytes">$$matchesHexBytes</a></h5>
 <p>Syntax, where <code>hexBytes</code> is an even number of hexadecimal characters (case-insensitive) and MAY be empty:</p>
-<pre><code>{ $$matchesHexBytes: &lt;hexBytes&gt; }
+<pre><code class="language-yaml">{ $$matchesHexBytes: &lt;hexBytes&gt; }
 </code></pre>
 <p>This operator can be used anywhere a matched value is expected (including <a href="#operation_expectResult">expectResult</a>) and
 the actual value is a string. The test runner MUST raise an error if the <code>hexBytes</code> string is malformed. This operator
@@ -2678,7 +2689,7 @@ is primarily used to assert the results of <a href="#download">download</a> and 
 stream contents as a string.</p>
 <h5 id="unsetormatches"><a class="header" href="#unsetormatches">$$unsetOrMatches</a></h5>
 <p>Syntax:</p>
-<pre><code>{ $$unsetOrMatches: &lt;anything&gt; }
+<pre><code class="language-yaml">{ $$unsetOrMatches: &lt;anything&gt; }
 </code></pre>
 <p>This operator can be used anywhere a matched value is expected (including <a href="#operation_expectResult">expectResult</a>),
 excluding an array element because
@@ -2688,11 +2699,11 @@ use the standard rules in <a href="#evaluating-matches">Evaluating Matches</a>, 
 <p>This operator is primarily used to assert driver-optional fields from the CRUD spec (e.g. <code>insertedId</code> for
 InsertOneResult, <code>writeResult</code> for BulkWriteException).</p>
 <p>An example of this operator used for a result's field follows:</p>
-<pre><code>expectResult:
+<pre><code class="language-yaml">expectResult:
   insertedId: { $$unsetOrMatches: 2 }
 </code></pre>
 <p>An example of this operator used for an entire result follows:</p>
-<pre><code>expectError:
+<pre><code class="language-yaml">expectError:
   expectResult:
     $$unsetOrMatches:
       deletedCount: 0
@@ -2704,7 +2715,7 @@ InsertOneResult, <code>writeResult</code> for BulkWriteException).</p>
 </code></pre>
 <h5 id="sessionlsid"><a class="header" href="#sessionlsid">$$sessionLsid</a></h5>
 <p>Syntax:</p>
-<pre><code>{ $$sessionLsid: &lt;sessionEntityName&gt; }
+<pre><code class="language-yaml">{ $$sessionLsid: &lt;sessionEntityName&gt; }
 </code></pre>
 <p>This operator can be used anywhere a matched value is expected (including <a href="#operation_expectResult">expectResult</a>). If
 the <a href="#entity_session">session entity</a> is defined in the current test's <a href="#entity-map">Entity Map</a>, the test runner MUST
@@ -2712,13 +2723,13 @@ assert that the actual value equals its logical session ID; otherwise, the test 
 undefined or mistyped entity. The YAML file SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a>
 for a session entity's <code>id</code> field (e.g. <code>session: *session0</code>).</p>
 <p>An example of this operator follows:</p>
-<pre><code>command:
+<pre><code class="language-yaml">command:
   ping: 1
   lsid: { $$sessionLsid: *session0 }
 </code></pre>
 <h5 id="lte"><a class="header" href="#lte">$$lte</a></h5>
 <p>Syntax:</p>
-<pre><code>{ $$lte: 5 }
+<pre><code class="language-yaml">{ $$lte: 5 }
 </code></pre>
 <p>This operator can be used anywhere a matched value is expected (including <a href="#operation_expectResult">expectResult</a>). The
 test runner MUST assert that the actual value is less than or equal to the specified value. Test runners MUST also apply
@@ -2726,7 +2737,7 @@ the rules specified in <a href="#flexible-numeric-comparisons">Flexible Numeric 
 expected value of <code>1</code> would match an actual value of <code>1.0</code> and <code>0.0</code> but would not match <code>1.1</code>.</p>
 <h5 id="matchasdocument"><a class="header" href="#matchasdocument">$$matchAsDocument</a></h5>
 <p>Syntax:</p>
-<pre><code>{ $$matchAsDocument: &lt;anything&gt; }
+<pre><code class="language-yaml">{ $$matchAsDocument: &lt;anything&gt; }
 </code></pre>
 <p>This operator may be used anywhere a matched value is expected (including <a href="#operation_expectResult">expectResult</a>) and
 the actual value is an extended JSON string. The test runner MUST parse the actual value into a BSON document and match
@@ -2825,9 +2836,9 @@ operations.</li>
 <li>Any commands containing sensitive information (per the
 <a href="../command-logging-and-monitoring/command-logging-and-monitoring.html#security">Command Logging and Monitoring</a> spec)
 unless <a href="#entity_client_observeSensitiveCommands">observeSensitiveCommands</a> is true. Note that drivers will redact
-commands and replies for sensitive commands. For <code>hello</code> and legacy hello, which are conditionally sensitive based on
-the presence of a <code>speculativeAuthenticate</code> field, the test runner may need to infer that the events are sensitive
-based on whether or not the command and reply documents are redacted (i.e. empty documents).</li>
+commands and replies for sensitive commands. For <code>hello</code> and legacy hello, which are conditionally sensitive based
+on the presence of a <code>speculativeAuthenticate</code> field, the test runner may need to infer that the events are
+sensitive based on whether or not the command and reply documents are redacted (i.e. empty documents).</li>
 </ul>
 <p>For each element in <a href="#test_operations">test.operations</a>, follow the process in
 <a href="#executing-an-operation">Executing an Operation</a>. If an unexpected error is encountered or an assertion fails, the test
@@ -2905,7 +2916,7 @@ terminate all open transactions at the start of a test suite and after each fail
 cluster. Using the internal MongoClient(s), execute the <code>killAllSessions</code> command on either the primary or, if connected
 to a sharded cluster, each mongos server.</p>
 <p>For example:</p>
-<pre><code>db.adminCommand({
+<pre><code class="language-javascript">db.adminCommand({
   killAllSessions: []
 });
 </code></pre>
@@ -2923,7 +2934,7 @@ Atlas (e.g. by detecting <code>mongodb.net</code> in the hostname or allowing th
 <h5 id="migrationconflict-errors-on-sharded-clusters"><a class="header" href="#migrationconflict-errors-on-sharded-clusters">MigrationConflict Errors on Sharded Clusters</a></h5>
 <p>Following <a href="https://jira.mongodb.org/browse/SERVER-82353">SERVER-82353</a>, drivers may encounter MigrationConflict errors
 when executing transactions on sharded clusters due to an outdated cluster time. For example:</p>
-<pre><code>Transaction fe0b9a7d-4b64-4e38-aad2-4c7dd5ab0c2b - 47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU= -  - :1 was aborted on statement 0 due to: a non-retryable snapshot error :: caused by :: Encountered error from localhost:27217 during a transaction :: caused by :: Database transaction-tests has undergone a catalog change operation at time Timestamp(1708062645, 94) and no longer satisfies the requirements for the current transaction which requires Timestamp(1708062645, 93). Transaction will be aborted.
+<pre><code class="language-text">Transaction fe0b9a7d-4b64-4e38-aad2-4c7dd5ab0c2b - 47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU= -  - :1 was aborted on statement 0 due to: a non-retryable snapshot error :: caused by :: Encountered error from localhost:27217 during a transaction :: caused by :: Database transaction-tests has undergone a catalog change operation at time Timestamp(1708062645, 94) and no longer satisfies the requirements for the current transaction which requires Timestamp(1708062645, 93). Transaction will be aborted.
 </code></pre>
 <p>To work around this issue, a test runner MUST collect the latest cluster time from processing
 <a href="#initialData">initialData</a>, which is executed using the internal MongoClient, and use it to advance the cluster time of
@@ -2944,7 +2955,7 @@ load-balanced). To ease the implementation, test runners MAY apply this logic to
 <p>When a shard receives its first command that contains a <code>databaseVersion</code>, the shard returns a StaleDbVersion error and
 mongos retries the operation. In a sharded transaction, mongos does not retry these operations and instead returns the
 error to the client. For example:</p>
-<pre><code>Command distinct failed: Transaction aa09e296-472a-494f-8334-48d57ab530b6:1 was aborted on statement 0 due to: an error from cluster data placement change :: caused by :: got stale databaseVersion response from shard sh01 at host localhost:27217 :: caused by :: don't know dbVersion.
+<pre><code class="language-text">Command distinct failed: Transaction aa09e296-472a-494f-8334-48d57ab530b6:1 was aborted on statement 0 due to: an error from cluster data placement change :: caused by :: got stale databaseVersion response from shard sh01 at host localhost:27217 :: caused by :: don't know dbVersion.
 </code></pre>
 <p>To work around this limitation, a test runners MUST execute a non-transactional <code>distinct</code> command on each mongos server
 before running any test that might execute <code>distinct</code> within a transaction. To ease the implementation, test runners MAY
@@ -2967,7 +2978,7 @@ documentation for all fail points available for driver testing, but some fail po
 <a href="#fail-points-commonly-used-in-tests">Fail Points Commonly Used in Tests</a>.</p>
 <h4 id="configuring-fail-points"><a class="header" href="#configuring-fail-points">Configuring Fail Points</a></h4>
 <p>The <code>configureFailPoint</code> command is executed on the <code>admin</code> database and has the following structure:</p>
-<pre><code>db.adminCommand({
+<pre><code class="language-javascript">db.adminCommand({
     configureFailPoint: &lt;string&gt;,
     mode: &lt;string|object&gt;,
     data: &lt;object&gt;
@@ -2993,7 +3004,7 @@ should already be enabled for most configuration files in
 <a href="https://github.com/10gen/mongo-orchestration">mongo-orchestration</a>.</p>
 <h4 id="disabling-fail-points"><a class="header" href="#disabling-fail-points">Disabling Fail Points</a></h4>
 <p>A fail point may be disabled like so:</p>
-<pre><code>db.adminCommand({
+<pre><code class="language-javascript">db.adminCommand({
     configureFailPoint: &lt;string&gt;,
     mode: "off"
 });
@@ -3008,7 +3019,7 @@ should already be enabled for most configuration files in
 (<a href="https://jira.mongodb.org/browse/SERVER-35518">SERVER-35518</a>); however, the fail point was not usable for testing on
 mongos until version 4.1.7 (<a href="https://jira.mongodb.org/browse/SERVER-34943">SERVER-34943</a>).</p>
 <p>The <code>failCommand</code> fail point may be configured like so:</p>
-<pre><code>db.adminCommand({
+<pre><code class="language-javascript">db.adminCommand({
     configureFailPoint: "failCommand",
     mode: &lt;string|object&gt;,
     data: {
@@ -3020,6 +3031,7 @@ mongos until version 4.1.7 (<a href="https://jira.mongodb.org/browse/SERVER-3494
       appName: &lt;string&gt;,
       blockConnection: &lt;boolean&gt;,
       blockTimeMS: &lt;integer&gt;,
+      namespace: &lt;string&gt;,
     }
 });
 </code></pre>
@@ -3042,6 +3054,9 @@ commands for <code>blockTimeMS</code>. New in server 4.3.4 and backported to 4.2
 <li><code>blockTimeMS</code>: Optional integer, which is required when <code>blockConnection</code> is <code>true</code>. The number of milliseconds for
 which the affected commands should be blocked. New in server 4.3.4 and backported to 4.2.9
 (<a href="https://jira.mongodb.org/browse/SERVER-41070">SERVER-41070</a>).</li>
+<li><code>namespace</code>: Optional string. If set, the fail point will only trigger for commands on the specified namespace (e.g.
+<code>db.coll</code>). New in server 4.3.1 and backported to 4.2.6
+(<a href="https://jira.mongodb.org/browse/SERVER-43011">SERVER-43011</a>).</li>
 </ul>
 <h5 id="onprimarytransactionalwrite"><a class="header" href="#onprimarytransactionalwrite">onPrimaryTransactionalWrite</a></h5>
 <p>The <code>onPrimaryTransactionalWrite</code> fail point allows the client to force a network error before the server would return a
@@ -3130,6 +3145,9 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-10-24: Document <code>namespace</code> option for <code>failCommand</code> fail point.</p>
+</li>
 <li>
 <p>2024-09-18: Note that <code>failCommand</code> <code>appName</code> option was backported</p>
 </li>

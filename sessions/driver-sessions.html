@@ -459,9 +459,9 @@ implicit session, if sessions are not supported, the driver MUST ignore the sess
 subsequently sends a command to the server:</p>
 <ul>
 <li>The server might have supported sessions at the time the connection was first opened (and reported a value for
-logicalSessionTimeoutMinutes in the initial response to the <a href="../mongodb-handshake/handshake.html">handshake</a>), but have
-subsequently been downgraded to not support sessions. The server does not close the socket in this scenario, so the
-driver will conclude that the server at the other end of this connection supports sessions.</li>
+logicalSessionTimeoutMinutes in the initial response to the <a href="../mongodb-handshake/handshake.html">handshake</a>), but
+have subsequently been downgraded to not support sessions. The server does not close the socket in this scenario, so
+the driver will conclude that the server at the other end of this connection supports sessions.</li>
 </ul>
 <p>There is nothing that the driver can do about this race condition, and the server will just return an error in this
 scenario.</p>

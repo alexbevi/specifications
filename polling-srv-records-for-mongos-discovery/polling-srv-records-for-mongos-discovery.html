@@ -240,9 +240,9 @@ alone and unchanged.</li>
 <li>If <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvmaxhosts">srvMaxHosts</a> is zero or greater
 than or equal to the number of valid hosts, each valid new host MUST be added to the topology as Unknown.</li>
 <li>If <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvmaxhosts">srvMaxHosts</a> is greater than
-zero and less than the number of valid hosts, valid new hosts MUST be randomly selected and added to the topology as
-Unknown until the topology has <code>srvMaxHosts</code> hosts. Drivers MUST use the same randomization algorithm as they do for
-<a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#querying-dns">initial selection</a>.</li>
+zero and less than the number of valid hosts, valid new hosts MUST be randomly selected and added to the topology
+as Unknown until the topology has <code>srvMaxHosts</code> hosts. Drivers MUST use the same randomization algorithm as they
+do for <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#querying-dns">initial selection</a>.</li>
 </ul>
 </li>
 <li>Priorities and weights in SRV records MUST continue to be ignored, and MUST NOT dictate which mongos server is used

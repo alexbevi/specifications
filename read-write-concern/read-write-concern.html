@@ -310,7 +310,7 @@ var col3 = db2.getCollection("col_name", { readConcern: { } });
 <li><code>readConcernLevel</code> - defines the level for the read concern.</li>
 </ul>
 <p>For example:</p>
-<pre><code>mongodb://server:27017/db?readConcernLevel=majority
+<pre><code class="language-text">mongodb://server:27017/db?readConcernLevel=majority
 </code></pre>
 <h4 id="errors-1"><a class="header" href="#errors-1">Errors</a></h4>
 <ul>
@@ -569,7 +569,7 @@ col3.drop({ writeConcern: { w: 3 } });
 <li><code>wtimeoutMS</code> - corresponds to <code>wtimeoutMS</code> in the class definition.</li>
 </ul>
 <p>For example:</p>
-<pre><code>mongodb://server:27017/db?w=3
+<pre><code class="language-text">mongodb://server:27017/db?w=3
 
 mongodb://server:27017/db?journal=true
 
@@ -630,8 +630,8 @@ instance, we send it.</p>
 <li>
 <p>2016-07-15: Command-specific helper methods for commands that write SHOULD check the server's MaxWireVersion and
 decide whether to send writeConcern. Advise drivers to parse server replies for writeConcernError and raise an
-exception if found, only in command-specific helper methods that take a writeConcern parameter, not in generic command
-methods. Don't mention obscure commands with no helpers.</p>
+exception if found, only in command-specific helper methods that take a writeConcern parameter, not in generic
+command methods. Don't mention obscure commands with no helpers.</p>
 </li>
 <li>
 <p>2016-08-06: Further clarify that command-specific helper methods for commands that write take write concern options in

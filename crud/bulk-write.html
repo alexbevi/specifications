@@ -420,11 +420,11 @@ is most idiomatic for its language. For example, drivers may:</p>
 <p>Drivers MUST throw an exception if the list provided for <code>models</code> is empty.</p>
 <h4 id="update-vs-replace-document-validation"><a class="header" href="#update-vs-replace-document-validation">Update vs. replace document validation</a></h4>
 <p>Update documents provided in <code>UpdateOne</code> and <code>UpdateMany</code> write models are required only to contain atomic modifiers
-(i.e. keys that start with "$"). Drivers MUST throw an error if an update document is empty or if the document's first
-key does not start with "$". Drivers MUST rely on the server to return an error if any other entries in the update
+(i.e. keys that start with <code>$</code>). Drivers MUST throw an error if an update document is empty or if the document's first
+key does not start with <code>$</code>. Drivers MUST rely on the server to return an error if any other entries in the update
 document are not atomic modifiers. Drivers are not required to perform validation on update pipelines.</p>
 <p>Replacement documents provided in <code>ReplaceOne</code> write models are required not to contain atomic modifiers. Drivers MUST
-throw an error if a replacement document is nonempty and its first key starts with "$". Drivers MUST rely on the server
+throw an error if a replacement document is nonempty and its first key starts with <code>$</code>. Drivers MUST rely on the server
 to return an error if any other entries in the replacement document are atomic modifiers.</p>
 <h3 id="options"><a class="header" href="#options">Options</a></h3>
 <pre><code class="language-typescript">class BulkWriteOptions {
@@ -588,8 +588,9 @@ verbose results without inspecting the value provided for <code>verboseResults</
 this in a number of ways, including:</p>
 <ul>
 <li>Expose the <code>hasVerboseResults</code> field in <code>BulkWriteResult</code> as defined above. Document what will happen if a user
-attempts to access the <code>insertResults</code>, <code>updateResults</code>, or <code>deleteResults</code> values when <code>hasVerboseResults</code> is false.
-Drivers MAY raise an error if a user attempts to access one of these values when <code>hasVerboseResults</code> is false.</li>
+attempts to access the <code>insertResults</code>, <code>updateResults</code>, or <code>deleteResults</code> values when <code>hasVerboseResults</code> is
+false. Drivers MAY raise an error if a user attempts to access one of these values when <code>hasVerboseResults</code> is
+false.</li>
 <li>Embed the verbose results in an optional type:</li>
 </ul>
 <pre><code class="language-typescript">class BulkWriteResult {
@@ -623,7 +624,8 @@ class VerboseResults {
 <ul>
 <li>Define separate <code>SummaryBulkWriteResult</code> and <code>VerboseBulkWriteResult</code> types. <code>SummaryBulkWriteResult</code> MUST only
 contain the summary result fields, and <code>VerboseBulkWriteResult</code> MUST contain both the summary and verbose result
-fields. Return <code>VerboseBulkWriteResult</code> when <code>verboseResults</code> was set to true and <code>SummaryBulkWriteResult</code> otherwise.</li>
+fields. Return <code>VerboseBulkWriteResult</code> when <code>verboseResults</code> was set to true and <code>SummaryBulkWriteResult</code>
+otherwise.</li>
 </ul>
 <h4 id="individual-results"><a class="header" href="#individual-results">Individual results</a></h4>
 <p>The <code>InsertOneResult</code>, <code>UpdateResult</code>, and <code>DeleteResult</code> classes are the same as or similar to types of the same name
@@ -785,7 +787,7 @@ operation-agnostic command field bytes (e.g. <code>txnNumber</code>, <code>lsid<
 <code>bulkWrite</code> command document (excluding command-agnostic fields), <code>ops</code> document sequence, and <code>nsInfo</code> document
 sequence to <code>maxMessageSizeBytes - 1000</code> to account for this overhead. The following pseudocode demonstrates how to
 apply this limit in batch-splitting logic:</p>
-<pre><code>MESSAGE_OVERHEAD_BYTES = 1000
+<pre><code class="language-javascript">MESSAGE_OVERHEAD_BYTES = 1000
 
 bulkWriteCommand = Document { "bulkWrite": 1 }
 bulkWriteCommand.appendOptions(bulkWriteOptions)

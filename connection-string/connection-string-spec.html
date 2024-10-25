@@ -220,7 +220,7 @@ of the user information.</p>
 <a href="https://tools.ietf.org/html/rfc3986#section-2.2">Section 2.2 ("Reserved Characters")</a>, and
 <a href="https://tools.ietf.org/html/rfc3986#section-3.2.1">Section 3.2.1 ("User Information")</a>.</p>
 <p>Specifically, Section 3.2.1 provides for the following allowed characters:</p>
-<pre><code>userinfo    = *( unreserved / pct-encoded / sub-delims / ":" )
+<pre><code class="language-text">userinfo    = *( unreserved / pct-encoded / sub-delims / ":" )
 </code></pre>
 <p>If the user information contains an at-sign ("@"), more than one colon (":"), or a percent-sign ("%") that does not
 match the rules for "pct-encoded", then an exception MUST be thrown informing the user that the username and password
@@ -241,11 +241,11 @@ in the general syntax diagram above). Multiple host identifiers are delimited by
 socket. For definitions of hostname, IP address and IP Literal formats see
 <a href="http://tools.ietf.org/html/rfc3986#section-3.2.2">RFC 3986 Section 3.2.2</a> .</p>
 <p>UNIX domain sockets MUST end in ".sock" and MUST be URL encoded, for example:</p>
-<pre><code>mongodb://user:pass@%2Ftmp%2Fmongodb-27017.sock/authDB?replicaSet=rs
+<pre><code class="language-text">mongodb://user:pass@%2Ftmp%2Fmongodb-27017.sock/authDB?replicaSet=rs
 </code></pre>
 <p>The host information cannot contain an unescaped slash ("/"), if it does then an exception MUST be thrown informing
 users that paths must be URL encoded. For example:</p>
-<pre><code>Unsupported host '/tmp/mongodb-27017.sock', UNIX socket domain paths must be URL encoded.
+<pre><code class="language-text">Unsupported host '/tmp/mongodb-27017.sock', UNIX socket domain paths must be URL encoded.
 </code></pre>
 <p>Support for UNIX domain sockets and IP Literals is OPTIONAL.</p>
 <p>Unsupported host types MUST throw an exception informing the user they are not supported.</p>
@@ -292,7 +292,7 @@ other characters are left as-is.</p>
 in lowercase, snake_case MUST not be used. Keys that aren't supported by a driver MUST be ignored.</p>
 <p>Keys that aren't supported by a driver MUST be ignored. A WARN level logging message MUST be issued for unsupported
 keys. For example:</p>
-<pre><code>Unsupported option 'connectMS'.
+<pre><code class="language-text">Unsupported option 'connectMS'.
 </code></pre>
 <p>Keys should be descriptive and follow existing conventions:</p>
 <h5 id="time-based-keys"><a class="header" href="#time-based-keys">Time based keys</a></h5>
@@ -321,32 +321,32 @@ keys. For example:</p>
 <p>Alternative values are deprecated and MUST be removed from documentation and examples.</p>
 <p>If any of these alternative values are used, drivers MUST log a deprecation notice or issue a logging message at the
 WARNING level (as appropriate for your language). For example:</p>
-<pre><code>Deprecated boolean value for "journal" : "1", please update to "journal=true"
+<pre><code class="language-text">Deprecated boolean value for "journal" : "1", please update to "journal=true"
 </code></pre>
 </li>
 <li>
 <p>Lists: Repeated keys represent a list in the Connection String consisting of the corresponding values in the same
 order as they appear in the Connection String. For example:</p>
-<pre><code>?readPreferenceTags=dc:ny,rack:1&amp;readPreferenceTags=dc:ny&amp;readPreferenceTags=
+<pre><code class="language-text">?readPreferenceTags=dc:ny,rack:1&amp;readPreferenceTags=dc:ny&amp;readPreferenceTags=
 </code></pre>
 </li>
 <li>
 <p>Key value pairs: A value that represents one or more key and value pairs. Multiple key value pairs are delimited by a
 comma (","). The key is everything up to the first colon sign (":") and the value is everything afterwards.</p>
 <p>For example:</p>
-<pre><code>?readPreferenceTags=dc:ny,rack:1
+<pre><code class="language-text">?readPreferenceTags=dc:ny,rack:1
 </code></pre>
 <p>Drivers MUST handle unencoded colon signs (":") within the value. For example, given the connection string option:</p>
-<pre><code>authMechanismProperties=TOKEN_RESOURCE:mongodb://foo
+<pre><code class="language-text">authMechanismProperties=TOKEN_RESOURCE:mongodb://foo
 </code></pre>
 <p>the driver MUST interpret the key as <code>TOKEN_RESOURCE</code> and the value as <code>mongodb://foo</code>.</p>
 <p>For any option key-value pair that may contain a comma (such as <code>TOKEN_RESOURCE</code>), drivers MUST document that: a value
-containing a comma (",") MUST NOT be provided as part of the connection string. This prevents use of values that would
-interfere with parsing.</p>
+containing a comma (",") MUST NOT be provided as part of the connection string. This prevents use of values that
+would interfere with parsing.</p>
 </li>
 </ul>
 <p>Any invalid Values for a given key MUST be ignored and MUST log a WARN level message. For example:</p>
-<pre><code>Unsupported value for "fsync" : "ifPossible"
+<pre><code class="language-text">Unsupported value for "fsync" : "ifPossible"
 </code></pre>
 <h3 id="repeated-keys"><a class="header" href="#repeated-keys">Repeated Keys</a></h3>
 <p>If a key is repeated and the corresponding data type is not a List then the precedence of which key value pair will be
@@ -357,11 +357,11 @@ used is undefined except where defined otherwise by the <a href="../uri-options/
 to key names.</p>
 <p>If the renamed key is also defined in the connection string the deprecated key MUST NOT be applied and a WARN level
 message MUST be logged. For example:</p>
-<pre><code>Deprecated key "wtimeout" present and ignored as found replacement "wtimeoutms" value.
+<pre><code class="language-text">Deprecated key "wtimeout" present and ignored as found replacement "wtimeoutms" value.
 </code></pre>
 <p>Deprecated keys MUST log a WARN level message informing the user that the option is deprecated and supply the
 alternative key name. For example:</p>
-<pre><code>Deprecated key "wtimeout" has been replaced with "wtimeoutms"
+<pre><code class="language-text">Deprecated key "wtimeout" has been replaced with "wtimeoutms"
 </code></pre>
 <h3 id="legacy-support"><a class="header" href="#legacy-support">Legacy support</a></h3>
 <p>Semi colon (";") query parameter delimiters and alternative string representations of Boolean values MAY be supported
@@ -491,7 +491,7 @@ on the basis of the dot alone, this specification is primarily concerned with br
 <p>Q: Why throw an exception if the userinfo contains a percent sign ("%"), at-sign ("@"), or more than one colon (":")</p>
 <p>This is done to help users format the connection string correctly. Although at-signs ("@") or colons (":") in the
 username must be URL encoded, users may not be aware of that requirement. Take the following example:</p>
-<pre><code>mongodb://anne:bob:pass@localhost:27017
+<pre><code class="language-text">mongodb://anne:bob:pass@localhost:27017
 </code></pre>
 <p>Is the username <code>anne</code> and the password <code>bob:pass</code> or is the username <code>anne:bob</code> and the password <code>pass</code>? Accepting this
 as the userinfo could cause authentication to fail, causing confusion for the user as to why. Allowing unescaped at-sign
@@ -499,7 +499,7 @@ and percent symbols would invite further ambiguity. By throwing an exception use
 connection string so to be explicit about what forms the username and password.</p>
 <p>Q: Why must UNIX domain sockets be URL encoded</p>
 <p>This has been done to reduce ambiguity between the socket name and the database name. Take the following example:</p>
-<pre><code>mongodb:///tmp/mongodb.sock/mongodb.sock
+<pre><code class="language-text">mongodb:///tmp/mongodb.sock/mongodb.sock
 </code></pre>
 <p>Is the host <code>/tmp/mongodb.sock</code> and the auth database <code>mongodb.sock</code> or does the connection string just contain the host
 <code>/tmp/mongodb.sock/mongodb.sock</code> and no auth database? By enforcing URL encoding on UNIX domain sockets it makes users
@@ -508,7 +508,7 @@ be explicit about the host and the auth database. By requiring an exception to b
 <p>Q: Why must the auth database be URL decoded by the parser</p>
 <p>On Linux systems database names can contain a question mark ("?"), in these rare cases the auth database must be URL
 encoded. This disambiguates between the auth database and the connection options. Take the following example:</p>
-<pre><code>mongodb://localhost/admin%3F?w=1
+<pre><code class="language-text">mongodb://localhost/admin%3F?w=1
 </code></pre>
 <p>In this case the auth database would be <code>admin?</code> and the connection options <code>w=1</code>.</p>
 <p>Q: How should the space character be encoded in a connection string</p>

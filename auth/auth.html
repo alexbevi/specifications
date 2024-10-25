@@ -403,22 +403,24 @@ used when talking to servers &gt;= 3.0. Prior to server 3.0, MONGODB-CR MUST be 
 the password using the returned nonce, and then sends an <code>authenticate</code> command.</p>
 <h4 id="conversation"><a class="header" href="#conversation">Conversation</a></h4>
 <ol>
-<li>Send <code>getnonce</code> command</li>
-</ol>
+<li>
+<p>Send <code>getnonce</code> command</p>
 <pre><code class="language-javascript">CMD = { getnonce: 1 }
 RESP = { nonce: &lt;nonce&gt; }
 </code></pre>
-<ol start="2">
-<li>Compute key</li>
-</ol>
+</li>
+<li>
+<p>Compute key</p>
 <pre><code class="language-javascript">passwordDigest = HEX( MD5( UTF8( username + ':mongo:' + password )))
 key = HEX( MD5( UTF8( nonce + username + passwordDigest )))
 </code></pre>
-<ol start="3">
-<li>Send <code>authenticate</code> command</li>
-</ol>
+</li>
+<li>
+<p>Send <code>authenticate</code> command</p>
 <pre><code class="language-javascript">CMD = { authenticate: 1, nonce: nonce, user: username, key: key }
 </code></pre>
+</li>
+</ol>
 <p>As an example, given a username of "user" and a password of "pencil", the conversation would appear as follows:</p>
 <pre><code class="language-javascript">CMD = {getnonce : 1}
 RESP = {nonce: "2375531c32080ae8", ok: 1}
@@ -471,19 +473,21 @@ provided by the application.</li>
 </ul>
 <h4 id="conversation-1"><a class="header" href="#conversation-1">Conversation</a></h4>
 <ol>
-<li>Send <code>authenticate</code> command (MongoDB 3.4+)</li>
-</ol>
+<li>
+<p>Send <code>authenticate</code> command (MongoDB 3.4+)</p>
 <pre><code class="language-javascript">CMD = {"authenticate": 1, "mechanism": "MONGODB-X509"}
 RESP = {"dbname" : "$external", "user" : "C=IS,ST=Reykjavik,L=Reykjavik,O=MongoDB,OU=Drivers,CN=client", "ok" : 1}
 </code></pre>
-<ol start="2">
-<li>Send <code>authenticate</code> command with username:</li>
-</ol>
+</li>
+<li>
+<p>Send <code>authenticate</code> command with username:</p>
 <pre><code class="language-bash">username = $(openssl x509 -subject -nameopt RFC2253 -noout -inform PEM -in my-cert.pem)
 </code></pre>
 <pre><code class="language-javascript">CMD = {authenticate: 1, mechanism: "MONGODB-X509", user: "C=IS,ST=Reykjavik,L=Reykjavik,O=MongoDB,OU=Drivers,CN=client"}
 RESP = {"dbname" : "$external", "user" : "C=IS,ST=Reykjavik,L=Reykjavik,O=MongoDB,OU=Drivers,CN=client", "ok" : 1}
 </code></pre>
+</li>
+</ol>
 <h4 id="mongocredential-properties-1"><a class="header" href="#mongocredential-properties-1"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
 <ul>
 <li>
@@ -515,8 +519,8 @@ RESP = {"dbname" : "$external", "user" : "C=IS,ST=Reykjavik,L=Reykjavik,O=MongoD
 <p>SASL mechanisms are all implemented using the same sasl commands and interpreted as defined by the
 <a href="http://tools.ietf.org/html/rfc4422">SASL specification RFC 4422</a>.</p>
 <ol>
-<li>Send the <code>saslStart</code> command.</li>
-</ol>
+<li>
+<p>Send the <code>saslStart</code> command.</p>
 <pre><code class="language-javascript">CMD = { saslStart: 1, mechanism: &lt;mechanism_name&gt;, payload: BinData(...), autoAuthorize: 1 }
 RESP = { conversationId: &lt;number&gt;, code: &lt;code&gt;, done: &lt;boolean&gt;, payload: &lt;payload&gt; }
 </code></pre>
@@ -528,18 +532,20 @@ conversation.</li>
 <li>payload: a sequence of bytes or a base64 encoded string (depending on input) to pass into the SASL library to
 transition the state machine.</li>
 </ul>
-<ol start="2">
-<li>Continue with the <code>saslContinue</code> command while <code>done</code> is <code>false</code>.</li>
-</ol>
+</li>
+<li>
+<p>Continue with the <code>saslContinue</code> command while <code>done</code> is <code>false</code>.</p>
 <pre><code class="language-javascript">CMD = { saslContinue: 1, conversationId: conversationId, payload: BinData(...) }
 RESP = { conversationId: &lt;number&gt;, code: &lt;code&gt;, done: &lt;boolean&gt;, payload: &lt;payload&gt; }
 </code></pre>
 <p>Many languages will have the ability to utilize 3rd party libraries. The server uses
-<a href="https://www.cyrusimap.org/sasl/">cyrus-sasl</a> and it would make sense for drivers with a choice to also choose cyrus.
-However, it is important to ensure that when utilizing a 3rd party library it does implement the mechanism on all
-supported OS versions and that it interoperates with the server. For instance, the cyrus sasl library offered on RHEL 6
-does not implement SCRAM-SHA-1. As such, if your driver supports RHEL 6, you'll need to implement SCRAM-SHA-1 from
-scratch.</p>
+<a href="https://www.cyrusimap.org/sasl/">cyrus-sasl</a> and it would make sense for drivers with a choice to also choose
+cyrus. However, it is important to ensure that when utilizing a 3rd party library it does implement the mechanism
+on all supported OS versions and that it interoperates with the server. For instance, the cyrus sasl library
+offered on RHEL 6 does not implement SCRAM-SHA-1. As such, if your driver supports RHEL 6, you'll need to implement
+SCRAM-SHA-1 from scratch.</p>
+</li>
+</ol>
 <h3 id="gssapi"><a class="header" href="#gssapi">GSSAPI</a></h3>
 <ul>
 <li>
@@ -581,8 +587,8 @@ the default credentials.</p>
 <p>Drivers MAY allow the user to request canonicalization of the hostname. This might be required when the hosts report
 different hostnames than what is used in the kerberos database. The value is a string of either "none", "forward",
 or "forwardAndReverse". "none" is the default and performs no canonicalization. "forward" performs a forward DNS
-lookup to canonicalize the hostname. "forwardAndReverse" performs a forward DNS lookup and then a reverse lookup on
-that value to canonicalize the hostname. The driver MUST fallback to the provided host if any lookup errors or
+lookup to canonicalize the hostname. "forwardAndReverse" performs a forward DNS lookup and then a reverse lookup
+on that value to canonicalize the hostname. The driver MUST fallback to the provided host if any lookup errors or
 returns no results. Drivers MAY decide to also keep the legacy boolean values where <code>true</code> equals the
 "forwardAndReverse" behaviour and <code>false</code> equals "none".</p>
 </li>
@@ -919,10 +925,10 @@ calculate the signature for the <code>authorization header</code>. The required 
 drivers MUST use for the canonical request (see
 <a href="https://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html">Summary of Signing Steps</a>) are
 specified in the table below. The following pseudocode shows the construction of the Authorization header.</p>
-<pre><code class="language-javascript">Authorization: algorithm Credential=access key ID/credential scope, SignedHeaders=SignedHeaders, Signature=signature
+<pre><code class="language-text">Authorization: algorithm Credential=access key ID/credential scope, SignedHeaders=SignedHeaders, Signature=signature
 </code></pre>
 <p>The following example shows a finished Authorization header.</p>
-<pre><code class="language-javascript">Authorization: AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-amz-date, Signature=5d672d79c15b13162d9279b0855cfba6789a8edb4c82c400e06b5924a6f2b5d7
+<pre><code class="language-text">Authorization: AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-amz-date, Signature=5d672d79c15b13162d9279b0855cfba6789a8edb4c82c400e06b5924a6f2b5d7
 </code></pre>
 <p>The following diagram is a summary of the steps drivers MUST follow to calculate the signature.</p>
 <p><img src="includes/calculating_a_signature.png" alt="image" /></p>
@@ -947,7 +953,7 @@ specified in the table below. The following pseudocode shows the construction of
 </blockquote>
 <h4 id="region-calculation"><a class="header" href="#region-calculation">Region Calculation</a></h4>
 <p>To get the region from the host, the driver MUST follow the algorithm expressed in pseudocode below. :</p>
-<pre><code>if the host is invalid according to the rules described earlier
+<pre><code class="language-text">if the host is invalid according to the rules described earlier
     the region is undefined and the driver must raise an error.
 else if the host is "aws.amazonaws.com"
     the region is "us-east-1"
@@ -1069,7 +1075,7 @@ Kit (SDK) to make STS requests.</p>
 if using an SDK.</p>
 <p>If not using an AWS SDK, the request must be made manually. If making a manual request, the <code>Version</code> should be
 specified as well. An example manual POST request looks like the following:</p>
-<pre><code class="language-html">https://sts.amazonaws.com/
+<pre><code class="language-text">https://sts.amazonaws.com/
 ?Action=AssumeRoleWithWebIdentity
 &amp;RoleSessionName=app1
 &amp;RoleArn=&lt;role_arn&gt;
@@ -1077,7 +1083,7 @@ specified as well. An example manual POST request looks like the following:</p>
 &amp;Version=2011-06-15
 </code></pre>
 <p>with the header:</p>
-<pre><code class="language-html">Accept: application/json
+<pre><code class="language-text">Accept: application/json
 </code></pre>
 <p>The JSON response from the STS endpoint will contain credentials in this format:</p>
 <pre><code class="language-javascript">{
@@ -1109,13 +1115,13 @@ return the JSON response:</p>
 </code></pre>
 <h5 id="ec2-endpoint"><a class="header" href="#ec2-endpoint">EC2 endpoint</a></h5>
 <p>If the environment variable <code>AWS_CONTAINER_CREDENTIALS_RELATIVE_URI</code> is unset, drivers MUST use the EC2 endpoint,</p>
-<pre><code class="language-html">http://169.254.169.254/latest/meta-data/iam/security-credentials/&lt;role-name&gt;
+<pre><code class="language-text">http://169.254.169.254/latest/meta-data/iam/security-credentials/&lt;role-name&gt;
 </code></pre>
 <p>with the required header,</p>
-<pre><code class="language-html">X-aws-ec2-metadata-token: &lt;secret-token&gt;
+<pre><code class="language-text">X-aws-ec2-metadata-token: &lt;secret-token&gt;
 </code></pre>
 <p>to access the EC2 instance's metadata. Drivers MUST obtain the role name from querying the URI</p>
-<pre><code class="language-html">http://169.254.169.254/latest/meta-data/iam/security-credentials/
+<pre><code class="language-text">http://169.254.169.254/latest/meta-data/iam/security-credentials/
 </code></pre>
 <p>The role name request also requires the header <code>X-aws-ec2-metadata-token</code>. Drivers MUST use v2 of the EC2 Instance
 Metadata Service
@@ -1248,10 +1254,10 @@ obtain credentials. If provided, the value MUST be one of <code>["test", "azure"
 <li>
 <p>TOKEN_RESOURCE</p>
 <p>The URI of the target resource. If <code>TOKEN_RESOURCE</code> is provided and <code>ENVIRONMENT</code> is not one of <code>["azure", "gcp"]</code>
-or <code>TOKEN_RESOURCE</code> is not provided and <code>ENVIRONMENT</code> is one of <code>["azure", "gcp"]</code>, the driver MUST raise an error.
-Note: because the <code>TOKEN_RESOURCE</code> is often itself a URL, drivers MUST document that a <code>TOKEN_RESOURCE</code> with a comma
-<code>,</code> must be given as a <code>MongoClient</code> configuration and not as part of the connection string, and that the
-<code>TOKEN_RESOURCE</code> value can contain a colon <code>:</code> character.</p>
+or <code>TOKEN_RESOURCE</code> is not provided and <code>ENVIRONMENT</code> is one of <code>["azure", "gcp"]</code>, the driver MUST raise an
+error. Note: because the <code>TOKEN_RESOURCE</code> is often itself a URL, drivers MUST document that a <code>TOKEN_RESOURCE</code>
+with a comma <code>,</code> must be given as a <code>MongoClient</code> configuration and not as part of the connection string, and that
+the <code>TOKEN_RESOURCE</code> value can contain a colon <code>:</code> character.</p>
 </li>
 <li>
 <p>OIDC_CALLBACK</p>
@@ -1265,9 +1271,9 @@ what is idiomatic for the driver. Drivers MUST NOT support both the <code>OIDC_C
 <p>An <a href="#oidc-human-callback">OIDC Human Callback</a> that returns OIDC credentials. Drivers MAY allow the user to specify
 a <a href="#oidc-human-callback">OIDC Human Callback</a> using a <code>MongoClient</code> configuration instead of a mechanism property,
 depending on what is idiomatic for the driver. Drivers MUST NOT support both the <code>OIDC_HUMAN_CALLBACK</code> mechanism
-property and a <code>MongoClient</code> configuration. Drivers MUST return an error if both an <a href="#oidc-callback">OIDC Callback</a>
-and <code>OIDC Human Callback</code> are provided for the same <code>MongoClient</code>. This property is only required for drivers that
-support the <a href="#human-authentication-flow">Human Authentication Flow</a>.</p>
+property and a <code>MongoClient</code> configuration. Drivers MUST return an error if both an
+<a href="#oidc-callback">OIDC Callback</a> and <code>OIDC Human Callback</code> are provided for the same <code>MongoClient</code>. This property
+is only required for drivers that support the <a href="#human-authentication-flow">Human Authentication Flow</a>.</p>
 </li>
 <li>
 <p>ALLOWED_HOSTS</p>
@@ -1275,11 +1281,11 @@ support the <a href="#human-authentication-flow">Human Authentication Flow</a>.<
 leading "*." wildcard, which allows for matching (potentially nested) subdomains. <code>ALLOWED_HOSTS</code> is a security
 feature and MUST default to
 <code>["*.mongodb.net", "*.mongodb-qa.net", "*.mongodb-dev.net", "*.mongodbgov.net", "localhost", "127.0.0.1", "::1"]</code>.
-When MONGODB-OIDC authentication using a <a href="#oidc-human-callback">OIDC Human Callback</a> is attempted against a hostname
-that does not match any of list of allowed hosts, the driver MUST raise a client-side error without invoking any
-user-provided callbacks. This value MUST NOT be allowed in the URI connection string. The hostname check MUST be
-performed after SRV record resolution, if applicable. This property is only required for drivers that support the
-<a href="#human-authentication-flow">Human Authentication Flow</a>.</p>
+When MONGODB-OIDC authentication using a <a href="#oidc-human-callback">OIDC Human Callback</a> is attempted against a
+hostname that does not match any of list of allowed hosts, the driver MUST raise a client-side error without
+invoking any user-provided callbacks. This value MUST NOT be allowed in the URI connection string. The hostname
+check MUST be performed after SRV record resolution, if applicable. This property is only required for drivers
+that support the <a href="#human-authentication-flow">Human Authentication Flow</a>.</p>
 </li>
 </ul>
 </li>
@@ -1303,10 +1309,10 @@ The driver MUST use the contents of that file as value in the <code>jwt</code> f
 <a href="https://learn.microsoft.com/en-us/azure/virtual-machines/instance-metadata-service">Azure Instance Metadata Service</a>
 and parse the JSON response body, as follows:</p>
 <p>Make an HTTP GET request to</p>
-<pre><code>http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&amp;resource=&lt;resource&gt;&amp;client_id=&lt;client_id&gt;
+<pre><code class="language-text">http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&amp;resource=&lt;resource&gt;&amp;client_id=&lt;client_id&gt;
 </code></pre>
 <p>with headers</p>
-<pre><code>Accept: application/json
+<pre><code class="language-text">Accept: application/json
 Metadata: true
 </code></pre>
 <p>where <code>&lt;resource&gt;</code> is the url-encoded value of the <code>TOKEN_RESOURCE</code> mechanism property and <code>&lt;client_id&gt;</code> is the
@@ -1343,10 +1349,10 @@ callback had been provided by the user.</p>
 <a href="https://cloud.google.com/compute/docs/metadata/overview">Google Cloud VM metadata</a> endpoint and parse the JSON response
 body, as follows:</p>
 <p>Make an HTTP GET request to</p>
-<pre><code>http://metadata/computeMetadata/v1/instance/service-accounts/default/identity?audience=&lt;resource&gt;
+<pre><code class="language-text">http://metadata/computeMetadata/v1/instance/service-accounts/default/identity?audience=&lt;resource&gt;
 </code></pre>
 <p>with headers</p>
-<pre><code>Metadata-Flavor: Google
+<pre><code class="language-text">Metadata-Flavor: Google
 </code></pre>
 <p>where <code>&lt;resource&gt;</code> is the url-encoded value of the <code>TOKEN_RESOURCE</code> mechanism property. The timeout should equal the
 <code>callbackTimeoutMS</code> parameter given to the callback.</p>
@@ -1640,8 +1646,8 @@ refresh token in the <em>Client Cache</em> when a <a href="#oidc-human-callback"
 <li>Check if the the <em>Client Cache</em> has an access token.
 <ul>
 <li>If it does, cache the access token in the <em>Connection Cache</em> and perform a <code>One-Step</code> SASL conversation using the
-access token in the <em>Client Cache</em>. If the server returns a Authentication error (18), invalidate that access token.
-Raise any other errors to the user. On success, exit the algorithm.</li>
+access token in the <em>Client Cache</em>. If the server returns a Authentication error (18), invalidate that access
+token. Raise any other errors to the user. On success, exit the algorithm.</li>
 </ul>
 </li>
 <li>Call the configured built-in provider integration or the OIDC callback to retrieve a new access token. Wait until it
@@ -1678,8 +1684,8 @@ authenticate a new connection when a <a href="#oidc-human-callback">OIDC Human C
 <ul>
 <li>If it does, cache the access token in the <em>Connection Cache</em> and perform a <a href="#one-step">One-Step</a> SASL conversation
 using the access token. If the server returns an Authentication error (18), invalidate the access token token from
-the <em>Client Cache</em>, clear the <em>Connection Cache</em>, and restart the authentication flow. Raise any other errors to the
-user. On success, exit the algorithm.</li>
+the <em>Client Cache</em>, clear the <em>Connection Cache</em>, and restart the authentication flow. Raise any other errors to
+the user. On success, exit the algorithm.</li>
 </ul>
 </li>
 <li>Check if the <em>Client Cache</em> has a refresh token.

@@ -239,8 +239,8 @@ attempt to warn the user about the misconfiguration via a log message or otherwi
 </li>
 <li>
 <p>Output file (path MUST be configurable). For languages that are not relying on a logging interface or framework to
-handle file support, the driver can choose to either support this directly (i.e. the driver allows the user to specify
-a path and itself handles writing to that path), or to instead provide a straightforward, idiomatic way to
+handle file support, the driver can choose to either support this directly (i.e. the driver allows the user to
+specify a path and itself handles writing to that path), or to instead provide a straightforward, idiomatic way to
 programmatically consume the messages and in turn write them to a file, e.g. via a Node.js
 <a href="https://nodejs.org/api/stream.html">stream</a>, along with a documentation example of how to do this.</p>
 <blockquote>
@@ -402,12 +402,12 @@ of drivers for our internal teams, and improve our documentation around troubles
 <li>
 <p>Why have an option?</p>
 <p>We considered a number of approaches for dealing with documents of potentially very large size in log messages, e.g.
-command documents, including 1) always logging the full document, 2) only logging documents with the potential to be
-large when the user opts in, and 3) truncating large documents by default, but allowing the user to adjust the
+command documents, including 1) always logging the full document, 2) only logging documents with the potential to
+be large when the user opts in, and 3) truncating large documents by default, but allowing the user to adjust the
 maximum length logged. We chose the third option as we felt it struck the best balance between concerns around
 readability and usability of log messages. In the case where data is sufficiently small, the default behavior will
-show the user the full data. In the case where data is large, the user will receive a readable message with truncated
-data, but have the option to see more or all of the data.</p>
+show the user the full data. In the case where data is large, the user will receive a readable message with
+truncated data, but have the option to see more or all of the data.</p>
 </li>
 <li>
 <p>Why are the units for max document length flexible?</p>
@@ -419,12 +419,13 @@ all possible unit choices (byte, code point, code unit, or grapheme) we felt 100
 <li>
 <p>Why do we implement naive truncation rather than truncating the JSON so it is still valid?</p>
 <p>Designing and implementing a truncation algorithm for JSON that outputs valid JSON, but fits in as much of the
-original JSON as possible, would be non-trivial. The server team wrote an entire separate truncation design document
-when they implemented this for their log messages. This is more of a necessity for the server where the entire log
-message is JSON, but we don't know if parsing the documents included in log messages is something that users will
-actually need to do. Furthermore, any users who want parseable documents have an escape hatch to do so: they can set
-the max document length to a very large value. If we hear of use cases in the future for parsing the documents in log
-messages, we could make an additive change to this specification to permit a smarter truncation algorithm.</p>
+original JSON as possible, would be non-trivial. The server team wrote an entire separate truncation design
+document when they implemented this for their log messages. This is more of a necessity for the server where the
+entire log message is JSON, but we don't know if parsing the documents included in log messages is something that
+users will actually need to do. Furthermore, any users who want parseable documents have an escape hatch to do so:
+they can set the max document length to a very large value. If we hear of use cases in the future for parsing the
+documents in log messages, we could make an additive change to this specification to permit a smarter truncation
+algorithm.</p>
 </li>
 </ol>
 <h3 id="structured-versus-unstructured-logging-1"><a class="header" href="#structured-versus-unstructured-logging-1">Structured versus Unstructured Logging</a></h3>
@@ -451,16 +452,17 @@ not be by another. Additionally, there is no obvious place to throw an exception
 variables; <code>MongoClient</code> constructors would be one possibility, but not all languages will support per-client
 configuration so throwing there regarding an environment variable might be surprising to users.</p>
 <p>Note that these same concerns do not apply to logging options that are specified via driver API: there is no risk of
-such options propagating to other drivers/driver versions present, and drivers can report exceptions at the point the
-options are specified, either globally or per-client. Therefore, drivers MUST validate programmatic logging options
-in a manner consistent with how they validate all other programmatic options, and if possible SHOULD prefer to throw
-exceptions for invalid configuration.</p>
+such options propagating to other drivers/driver versions present, and drivers can report exceptions at the point
+the options are specified, either globally or per-client. Therefore, drivers MUST validate programmatic logging
+options in a manner consistent with how they validate all other programmatic options, and if possible SHOULD prefer
+to throw exceptions for invalid configuration.</p>
 </li>
 <li>
 <p>Drivers could be required to log a warning if a value is invalid: While drivers MAY do this, requiring it was
 rejected because depending on the language/framework log messages may not be a viable way to communicate a warning:
-if a language's default behavior is to log nothing, or only log messages at a more severe level than <code>warn</code>, the user
-will not actually receive the message unless it is logged at a level and component they have successfully enabled.</p>
+if a language's default behavior is to log nothing, or only log messages at a more severe level than <code>warn</code>, the
+user will not actually receive the message unless it is logged at a level and component they have successfully
+enabled.</p>
 </li>
 </ol>
 <h3 id="programmatic-configuration-taking-precedence"><a class="header" href="#programmatic-configuration-taking-precedence">Programmatic Configuration Taking Precedence</a></h3>
@@ -471,9 +473,9 @@ options for it programmatically.</li>
 <li>This is consistent with how many drivers treat options specified both in a connection string and programmatically:
 programmatic options win out.</li>
 <li>It is straightforward for users to override this behavior (by writing logic to read in environment variables and
-override programmatic defaults), but if we went with the opposite default, it would be more complicated for users to
-override: not all languages will necessarily have an easy way to override/unset an environment variable from within
-application code.</li>
+override programmatic defaults), but if we went with the opposite default, it would be more complicated for users
+to override: not all languages will necessarily have an easy way to override/unset an environment variable from
+within application code.</li>
 </ol>
 <h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
 <p>This specification takes the stance that the contents of log messages (both structured and unstructured) are <em>not</em>

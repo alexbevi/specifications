@@ -275,7 +275,7 @@ not necessary.</p>
 <h4 id="enumerating-database-names"><a class="header" href="#enumerating-database-names">Enumerating Database Names</a></h4>
 <p>MongoDB 3.6 introduced a <code>nameOnly</code> boolean option to the <code>listDatabases</code> database command, which limits the command
 result to only include database names. Consider the following example:</p>
-<pre><code>&gt; db.getSiblingDB("admin").runCommand({listDatabases:1,nameOnly:true})
+<pre><code class="language-javascript">&gt; db.getSiblingDB("admin").runCommand({listDatabases:1,nameOnly:true})
 {
     "databases" : [
         { "name" : "admin" },

@@ -249,7 +249,8 @@ this may be necessary if the driver is unable to differentiate between certain B
 and the parameter being unspecified.</li>
 <li>Drivers SHOULD solicit an optional string value for <code>$db</code>.</li>
 <li>Drivers MUST require <code>$ref</code> and <code>$db</code> (if specified) to be strings but MUST NOT enforce any
-<a href="https://www.mongodb.com/docs/manual/reference/limits/#naming-restrictions">naming restrictions</a> on the string values.</li>
+<a href="https://www.mongodb.com/docs/manual/reference/limits/#naming-restrictions">naming restrictions</a> on the string
+values.</li>
 <li>Drivers MAY solicit extra, optional fields.</li>
 </ul>
 <h4 id="decoding-a-bson-document-to-a-dbref-model"><a class="header" href="#decoding-a-bson-document-to-a-dbref-model">Decoding a BSON document to a DBRef model</a></h4>
@@ -262,7 +263,8 @@ decoded like any other embedded document.</p>
 <ul>
 <li>Drivers MUST require <code>$ref</code> and <code>$id</code> to be present.</li>
 <li>Drivers MUST require <code>$ref</code> and <code>$db</code> (if present) to be strings but MUST NOT enforce any
-<a href="https://www.mongodb.com/docs/manual/reference/limits/#naming-restrictions">naming restrictions</a> on the string values.</li>
+<a href="https://www.mongodb.com/docs/manual/reference/limits/#naming-restrictions">naming restrictions</a> on the string
+values.</li>
 <li>Drivers MUST accept any BSON type for <code>$id</code> and MUST NOT enforce any restrictions on its value.</li>
 <li>Drivers MUST preserve extra, optional fields (beyond <code>$ref</code>, <code>$id</code>, and <code>$db</code>) and MUST provide some way to access
 those fields via the DBRef model. For example, an accessor method that returns the original BSON document (including
@@ -367,18 +369,28 @@ both explicit and implicit encoding code paths as needed.</p>
 optional fields and the driver also does not support explicit/implicit decoding).</p>
 <ol>
 <li>
-<p>Encoding DBRefs with basic fields. For each of the following:</p>
+<p>Encoding DBRefs with basic fields.</p>
+<ul>
+<li>
+<p>For each of the following:</p>
 <ol>
 <li><code>{ "$ref": "coll0", "$id": { "$oid": "60a6fe9a54f4180c86309efa" } }</code></li>
 <li><code>{ "$ref": "coll0", "$id": 1 }</code></li>
 <li><code>{ "$ref": "coll0", "$id": null }</code></li>
 <li><code>{ "$ref": "coll0", "$id": 1, "$db": "db0" }</code></li>
 </ol>
-<p>Assert that each DBRef model is successfully encoded to a BSON document. Assert that the <code>$ref</code>, <code>$id</code>, and <code>$db</code> (if
-applicable) fields appear in the correct order and have their expected values.</p>
 </li>
 <li>
-<p>Encoding DBRefs with extra, optional fields. For each of the following:</p>
+<p>Assert that each DBRef model is successfully encoded to a BSON document. Assert that the <code>$ref</code>, <code>$id</code>, and <code>$db</code>
+(if applicable) fields appear in the correct order and have their expected values.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Encoding DBRefs with extra, optional fields.</p>
+<ul>
+<li>
+<p>For each of the following:</p>
 <ol>
 <li><code>{ "$ref": "coll0", "$id": 1, "$db": "db0", "foo": "bar" }</code></li>
 <li><code>{ "$ref": "coll0", "$id": 1, "foo": true, "bar": false }</code></li>
@@ -386,12 +398,19 @@ applicable) fields appear in the correct order and have their expected values.</
 <li><code>{ "$ref": "coll0", "$id": 1, "$foo": "bar" }</code></li>
 <li><code>{ "$ref": "coll0", "$id": 1, "foo.bar": 0 }</code></li>
 </ol>
+</li>
+<li>
 <p>Assert that each DBRef model is successfully encoded to a BSON document. Assert that the <code>$ref</code>, <code>$id</code>, <code>$db</code> (if
 applicable), and any extra fields appear in the correct order and have their expected values.</p>
 </li>
+</ul>
+</li>
 <li>
 <p>Encoding DBRefs re-orders any out of order fields during decoding. This test MUST NOT use a constructor that solicits
-fields individually. For each of the following:</p>
+fields individually.</p>
+<ul>
+<li>
+<p>For each of the following:</p>
 <ol>
 <li><code>{ "$id": 1, "$ref": "coll0" }</code></li>
 <li><code>{ "$db": "db0", "$ref": "coll0", "$id": 1 }</code></li>
@@ -399,6 +418,8 @@ fields individually. For each of the following:</p>
 <li><code>{ "foo": 1, "$ref": "coll0", "$id": 1, "$db": "db0" }</code></li>
 <li><code>{ "foo": 1, "$ref": "coll0", "$id": 1, "$db": "db0", "bar": 1 }</code></li>
 </ol>
+</li>
+<li>
 <p>Assert that each document is successfully decoded to a DBRef model and then successfully encoded back to a BSON
 document. Assert that the order of fields in each encoded BSON document matches the following, respectively:</p>
 <ol>
@@ -408,6 +429,8 @@ document. Assert that the order of fields in each encoded BSON document matches 
 <li><code>{ "$ref": "coll0", "$id": 1, "$db": "db0", "foo": 1}</code></li>
 <li><code>{ "$ref": "coll0", "$id": 1, "$db": "db0", "foo": 1, "bar": 1 }</code></li>
 </ol>
+</li>
+</ul>
 </li>
 </ol>
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>

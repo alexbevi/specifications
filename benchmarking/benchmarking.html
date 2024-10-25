@@ -225,15 +225,16 @@ problem of benchmarking an operation over many iterations, such as 100,000 docum
 extreme forms of measurement:</p>
 <ul>
 <li>measuring a single insertion 100,000 times -- in this case, the timing code is likely to be a greater proportion of
-executed code, which could routinely evict the insertion code from CPU caches or mislead a JIT optimizer and throw off
-results</li>
+executed code, which could routinely evict the insertion code from CPU caches or mislead a JIT optimizer and throw
+off results</li>
 <li>measuring 100,000 insertions one time -- in this case, the longer the timer runs, the higher the likelihood that an
 external event occurs that affects the time of the run</li>
 </ul>
 <p>Therefore, we choose a middle ground:</p>
 <ul>
 <li>measuring the same 1000 insertions over 100 iterations -- each timing run includes enough operations that insertion
-code dominates timing code; unusual system events are likely to affect only a fraction of the 100 timing measurements</li>
+code dominates timing code; unusual system events are likely to affect only a fraction of the 100 timing
+measurements</li>
 </ul>
 <p>With 100 timings of inserting the same 1000 documents, we build up a statistical distribution of the operation timing,
 allowing a more robust estimate of performance than a single measurement. (In practice, the number of iterations could

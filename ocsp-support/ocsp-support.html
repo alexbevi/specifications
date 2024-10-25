@@ -210,11 +210,11 @@ SHOULD end the connection.</p>
 <li>If a driver's TLS library supports Stapled OCSP, the server has a Must-Staple certificate and the server does not
 present a stapled OCSP response, a driver SHOULD end the connection.</li>
 <li>If a driver's TLS library supports Stapled OCSP and the server staples an OCSP response that does not cover the
-certificate it presents or is invalid per <a href="https://tools.ietf.org/html/rfc6960#section-3.2">RFC 6960 Section 3.2</a>, a
-driver SHOULD end the connection.</li>
+certificate it presents or is invalid per <a href="https://tools.ietf.org/html/rfc6960#section-3.2">RFC 6960 Section 3.2</a>,
+a driver SHOULD end the connection.</li>
 <li>If a driver's TLS library supports Stapled OCSP and the server staples an OCSP response that does cover the
-certificate it presents, a driver SHOULD accept the stapled OCSP response and validate all of the certificates that
-are presented in the response.</li>
+certificate it presents, a driver SHOULD accept the stapled OCSP response and validate all of the certificates
+that are presented in the response.</li>
 <li>If any unvalidated certificates in the chain remain and the client possesses an OCSP cache, the driver SHOULD
 attempt to validate the status of the unvalidated certificates using the cache.</li>
 <li>If any unvalidated certificates in the chain remain and the driver has a user specified CRL, the driver SHOULD
@@ -227,14 +227,15 @@ certificates using the cached CRLs.</li>
 (<a href="#mongoclient-configuration">if the driver supports these options</a>), the driver SHOULD send HTTP requests to the
 responders in parallel. The first valid response that concretely marks the certificate status as good or revoked
 should be used. A timeout should be applied to requests per the
-<a href="../client-side-operations-timeout/client-side-operations-timeout.html">Client Side Operations Timeout</a> specification,
-with a default timeout of five seconds. The status for a response should only be checked if the response is valid
-per <a href="https://tools.ietf.org/html/rfc6960#section-3.2">RFC 6960 Section 3.2</a></li>
+<a href="../client-side-operations-timeout/client-side-operations-timeout.html">Client Side Operations Timeout</a>
+specification, with a default timeout of five seconds. The status for a response should only be checked if the
+response is valid per <a href="https://tools.ietf.org/html/rfc6960#section-3.2">RFC 6960 Section 3.2</a></li>
 <li>If any unvalidated intermediate certificates remain and those certificates have OCSP endpoints, for each
 certificate, the driver SHOULD NOT reach out to the OCSP endpoint specified and attempt to validate that
 certificate.*</li>
 <li>If any unvalidated intermediate certificates remain and those certificates have CRL distribution points, the driver
-SHOULD NOT download those CRLs and attempt to validate the status of all the other certificates using those CRLs.*</li>
+SHOULD NOT download those CRLs and attempt to validate the status of all the other certificates using those
+CRLs.*</li>
 <li>Finally, the driver SHOULD continue the connection, even if the status of all the unvalidated certificates has not
 been confirmed yet. This means that the driver SHOULD default to "soft fail" behavior, connecting as long as there
 are no explicitly invalid certificates—i.e. the driver will connect even if the status of all the unvalidated
@@ -249,7 +250,7 @@ certificates has not been confirmed yet (e.g. because an OCSP responder is down)
 cache SHOULD be the certificate identifier (CertID) of the OCSP request as specified in
 <a href="https://tools.ietf.org/html/rfc6960#section-4.1.1">RFC 6960: 4.1.1</a>. For convenience, the relevant section has been
 duplicated below:</p>
-<pre><code>CertID          ::=     SEQUENCE {
+<pre><code class="language-text">CertID          ::=     SEQUENCE {
     hashAlgorithm       AlgorithmIdentifier,
     issuerNameHash      OCTET STRING, -- Hash of issuer's DN
     issuerKeyHash       OCTET STRING, -- Hash of issuer's public key
@@ -317,8 +318,8 @@ revocation checking on a per MongoClient basis.</p>
 <ol>
 <li>Driver MUST enable OCSP support (with stapling if possible) when certificate revocation checking is enabled
 <strong>unless</strong> their driver exhibits hard-fail behavior (see
-<a href="#tlsdisablecertificaterevocationcheck">tlsDisableCertificateRevocationCheck</a>). In such a case, a driver MUST disable
-OCSP support on the platforms where its TLS library exhibits hard-fail behavior.</li>
+<a href="#tlsdisablecertificaterevocationcheck">tlsDisableCertificateRevocationCheck</a>). In such a case, a driver MUST
+disable OCSP support on the platforms where its TLS library exhibits hard-fail behavior.</li>
 <li>Drivers SHOULD throw an error if any of <code>tlsInsecure=true</code> or <code>tlsAllowInvalidCertificates=true</code> or
 <code>tlsDisableOCSPEndpointCheck=true</code> is specified alongside the option to enable certificate revocation checking.</li>
 <li>If a connection string contains both <code>tlsInsecure</code> and <code>tlsDisableCertificateRevocationCheck</code> then the driver MUST
@@ -568,7 +569,8 @@ the "Optional test to ensure that the driver's TLS library supports OCSP staplin
 library has contacted the OCSP endpoint specified in the server's certificate. Two simple ways of checking this are:</p>
 <ul>
 <li>Use a packet analyzer while the test application is running to ensure that the driver's TLS library contacts the OCSP
-endpoint. When using WireShark, the <code>ocsp</code> and <code>tls</code> (case-sensitive) display filters may be useful in this endeavor.</li>
+endpoint. When using WireShark, the <code>ocsp</code> and <code>tls</code> (case-sensitive) display filters may be useful in this
+endeavor.</li>
 <li>If the TLS library utilizes an OCSP cache and the cache was cleared prior to starting the test application, check the
 OCSP cache for a response from an OCSP endpoint specified in the server's certificate.</li>
 </ul>

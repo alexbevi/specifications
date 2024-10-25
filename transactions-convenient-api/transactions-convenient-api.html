@@ -189,7 +189,7 @@ needed (and when the error permits) to better ensure that the transaction can co
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
-<div id="callback">
+<p><span id="callback"></span></p>
 <p><strong>Callback</strong></p>
 <p>A user-defined function that will be passed to the helper method defined in this specification. Depending on the
 implementing language, this may be a closure, function pointer, or other callable type.</p>
@@ -198,7 +198,7 @@ implementing language, this may be a closure, function pointer, or other callabl
 specification. The name of this object MAY vary across drivers.</p>
 <p><strong>MongoClient</strong></p>
 <p>The root object of a driver's API. The name of this object MAY vary across drivers.</p>
-<div id="TransactionOptions">
+<p><span id="TransactionOptions"></span></p>
 <p><strong>TransactionOptions</strong></p>
 <p>Options for <code>ClientSession.startTransaction</code>, as defined in the <a href="../transactions/transactions.html">Transactions</a>
 specification. The structure of these options MAY vary across drivers (e.g. dictionary, typed class).</p>
@@ -283,13 +283,19 @@ callback intentionally aborted or committed the transaction and return immediate
 <li>Invoke <a href="../transactions/transactions.html#committransaction">commitTransaction</a> on the session.</li>
 <li>If <code>commitTransaction</code> reported an error:
 <ol>
-<li>If the <code>commitTransaction</code> error includes a "UnknownTransactionCommitResult" label and the error is not
-MaxTimeMSExpired and the elapsed time of <code>withTransaction</code> is less than 120 seconds, jump back to step eight. We
-will trust <code>commitTransaction</code> to apply a majority write concern on retry attempts (see:
-<a href="#majority-write-concern-is-used-when-retrying-committransaction">Majority write concern is used when retrying commitTransaction</a>).</li>
-<li>If the <code>commitTransaction</code> error includes a "TransientTransactionError" label and the elapsed time of
-<code>withTransaction</code> is less than 120 seconds, jump back to step two.</li>
-<li>Otherwise, propagate the <code>commitTransaction</code> error to the caller of <code>withTransaction</code> and return immediately.</li>
+<li>
+<p>If the <code>commitTransaction</code> error includes a "UnknownTransactionCommitResult" label and the error is not
+MaxTimeMSExpired and the elapsed time of <code>withTransaction</code> is less than 120 seconds, jump back to step eight.
+We will trust <code>commitTransaction</code> to apply a majority write concern on retry attempts (see:
+<a href="#majority-write-concern-is-used-when-retrying-committransaction">Majority write concern is used when retrying commitTransaction</a>).</p>
+</li>
+<li>
+<p>If the <code>commitTransaction</code> error includes a "TransientTransactionError" label and the elapsed time of
+<code>withTransaction</code> is less than 120 seconds, jump back to step two.</p>
+</li>
+<li>
+<p>Otherwise, propagate the <code>commitTransaction</code> error to the caller of <code>withTransaction</code> and return immediately.</p>
+</li>
 </ol>
 </li>
 <li>The transaction was committed successfully. Return immediately.</li>
