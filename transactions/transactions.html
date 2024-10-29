@@ -215,10 +215,7 @@ command error.</p>
 <p>Starting in MongoDB 4.0, any command error may include a top level "errorLabels" field. The field contains an array of
 string error labels. Drivers may also add error labels to errors that they return.</p>
 <h4 id="transient-transaction-error"><a class="header" href="#transient-transaction-error">Transient Transaction Error</a></h4>
-<p>Any command error that includes the "TransientTransactionError" error label in the "errorLabels" field. Any network
-error encountered running any command other than commitTransaction in a transaction. If a network error occurs while
-running the commitTransaction command then it is not known whether the transaction committed or not, and thus the
-"TransientTransactionError" label MUST NOT be added.</p>
+<p>Any command or network error that includes the "TransientTransactionError" error label in the "errorLabels" field.</p>
 <h3 id="naming-variations"><a class="header" href="#naming-variations"><strong>Naming variations</strong></a></h3>
 <p>This specification defines names for new methods and types. To the extent possible you SHOULD use these names in your
 driver. However, where your driver's and/or language's naming conventions differ you SHOULD continue to use them
@@ -354,7 +351,6 @@ with client.start_session() as s:
         coll.insert_one({}, session=s)
         coll.find_one(session=s)  # Error: "read preference in a transaction must be primary"
 </code></pre>
-<p>In the future, we might relax this restriction and allow any read preference on a transaction.</p>
 <h4 id="maxcommittimems"><a class="header" href="#maxcommittimems">maxCommitTimeMS</a></h4>
 <p>NOTE: This option is deprecated in favor of
 <a href="../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a>.</p>
@@ -671,11 +667,13 @@ contents of the document.</p>
 <h3 id="error-labels"><a class="header" href="#error-labels">Error Labels</a></h3>
 <p>Starting in MongoDB 4.0, any command error may include a top level "errorLabels" field. The field contains an array of
 string error labels.</p>
-<h3 id="transienttransactionerror"><a class="header" href="#transienttransactionerror">TransientTransactionError</a></h3>
+<h3 id="transient-transaction-error-1"><a class="header" href="#transient-transaction-error-1">Transient Transaction Error</a></h3>
 <p>Any command error that includes the "TransientTransactionError" error label in the "errorLabels" field. Any network
 error or server selection error encountered running any command besides commitTransaction in a transaction. In the case
 of command errors, the server adds the label; in the case of network errors or server selection errors where the client
-receives no server reply, the client adds the label.</p>
+receives no server reply, the client MUST add the label. If a network error occurs while running the commitTransaction
+command then it is not known whether the transaction committed or not, and thus the "TransientTransactionError" label
+MUST NOT be added.</p>
 <h4 id="retrying-transactions-that-fail-with-transienttransactionerror"><a class="header" href="#retrying-transactions-that-fail-with-transienttransactionerror">Retrying transactions that fail with TransientTransactionError</a></h4>
 <p>If an exception with the "TransientTransactionError" label is thrown, an application can retry the entire transaction
 from the beginning with a reasonable expectation that it will succeed. For example:</p>
@@ -870,6 +868,9 @@ transactions. There will then be new error scenarios, such as a transaction with
 won't be possible in the future for startTransaction to check that the read preference is correct for all operations the
 application will perform in the transaction. Therefore, we specify now that the readPreference must be checked
 per-operation. (However, we have not completely planned how read preference validation will behave in MongoDB 4.2.)</p>
+<p><em>Update 28.Oct.20214</em></p>
+<p>Note this section is retained in the spec for historical reasons and that the read preference in transactions must
+always be primary.</p>
 <h3 id="users-cannot-pass-readconcern-or-writeconcern-to-operations-in-transactions"><a class="header" href="#users-cannot-pass-readconcern-or-writeconcern-to-operations-in-transactions">Users cannot pass readConcern or writeConcern to operations in transactions</a></h3>
 <p>For drivers that allow readConcern and/or writeConcern to be passed to a particular operation, If the driver did not
 prohibit the readConcern parameter to methods in a transaction, the following code would be ambiguous:</p>
@@ -993,6 +994,12 @@ has been disabled, drivers can readily trust that a majority write concern is du
 objective of avoiding duplicate commits.</p>
 <h2 id="changelog"><a class="header" href="#changelog"><strong>Changelog</strong></a></h2>
 <ul>
+<li>
+<p>2024-10-28: Clarify when drivers must add TransientTransactionError label.</p>
+</li>
+<li>
+<p>2024-10-28: Note read preference must always be primary in a transaction.</p>
+</li>
 <li>
 <p>2024-05-08: Add bulkWrite to the list of commands allowed in transactions.</p>
 </li>

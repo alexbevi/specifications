@@ -1247,8 +1247,8 @@ in the MONGODB-OIDC specification, including sections or blocks that specificall
 <li>
 <p>ENVIRONMENT</p>
 <p>Drivers MUST allow the user to specify the name of a built-in OIDC application environment integration to use to
-obtain credentials. If provided, the value MUST be one of <code>["test", "azure", "gcp"]</code>. If both <code>ENVIRONMENT</code> and an
-<a href="#oidc-callback">OIDC Callback</a> or <a href="#oidc-human-callback">OIDC Human Callback</a> are provided for the same
+obtain credentials. If provided, the value MUST be one of <code>["test", "azure", "gcp", "k8s"]</code>. If both <code>ENVIRONMENT</code>
+and an <a href="#oidc-callback">OIDC Callback</a> or <a href="#oidc-human-callback">OIDC Human Callback</a> are provided for the same
 <code>MongoClient</code>, the driver MUST raise an error.</p>
 </li>
 <li>
@@ -1369,6 +1369,27 @@ status code of 200, the driver MUST raise an error including the HTTP response b
 callback had been provided by the user.</p>
 <p>For details on test environment setup, see the README in
 <a href="https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/auth_oidc/gcp/README.md">Drivers-Evergreen-Tools</a>.</p>
+<p><em><strong>Kubernetes</strong></em></p>
+<p>The Kubernetes integration is enabled by setting auth mechanism property <code>ENVIRONMENT:k8s</code>. In this configuration, the
+driver is expected to be running inside a Kubernetes environment with a configured
+<a href="https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/#bound-service-account-token-volume">ServiceAccount</a>.</p>
+<p>If enabled, drivers MUST read the contents of the token from the local file path found using the following algorithm:</p>
+<pre><code class="language-python">if 'AZURE_FEDERATED_TOKEN_FILE' in os.environ:
+  fname = os.environ['AZURE_FEDERATED_TOKEN_FILE']
+elif 'AWS_WEB_IDENTITY_TOKEN_FILE' in os.environ:
+  fname = os.environ['AWS_WEB_IDENTITY_TOKEN_FILE']
+else:
+  fname = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+</code></pre>
+<p>Where <code>AZURE_FEDERATED_TOKEN_FILE</code> contains the file path on Azure Kubernetes Service (AKS),
+<code>AWS_WEB_IDENTITY_TOKEN_FILE</code> contains the file path on Elastic Kubernetes Service (EKS), and
+<code>/var/run/secrets/kubernetes.io/serviceaccount/token</code> is the default path for a Kubernetes
+<a href="https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/#serviceaccount-admission-controller">ServiceAccount token</a>,
+which is used by Google Kubernetes Engine (GKE).</p>
+<p>The callback itself MUST not perform any caching, and the driver MUST cache its tokens in the same way as if a custom
+callback had been provided by the user.</p>
+<p>For details on test environment setup, see the README in
+<a href="https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/auth_oidc/k8s/README.md">Drivers-Evergreen-Tools</a>.</p>
 <h4 id="oidc-callback"><a class="header" href="#oidc-callback">OIDC Callback</a></h4>
 <p>Drivers MUST allow users to provide a callback that returns an OIDC access token. The purpose of the callback is to
 allow users to integrate with OIDC providers not supported by the
@@ -1949,6 +1970,9 @@ practice to avoid this. (See
 <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html">IAM Roles for Tasks</a>)</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-10-02: Add Kubernetes built-in OIDC provider integration.</p>
+</li>
 <li>
 <p>2024-08-19: Clarify Reauthentication and Speculative Authentication combination behavior.</p>
 </li>
