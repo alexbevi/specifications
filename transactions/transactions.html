@@ -365,8 +365,7 @@ default is to not send a value.</p>
 <p>ClientSession is in one of five states: "no transaction", "starting transaction", "transaction in progress",
 "transaction committed", and "transaction aborted". It transitions among these states according to the following
 diagram:</p>
-<p><img src="client-session-transaction-states.png"
-style="width:6.5in;height:3.68056in" alt="states" />
+<p><img src="client-session-transaction-states.png" alt="ClientSession transaction states" />
 (<a href="client-session-transaction-states.dot">GraphViz source</a>)</p>
 <p>When a ClientSession is created it starts in the "no transaction" state. Starting, committing, and aborting a
 transaction transitions the session between the "starting transaction", "transaction in progress", "transaction
