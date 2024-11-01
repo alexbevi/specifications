@@ -895,6 +895,10 @@ if (limit) {
 }
 pipeline.push({'$group': {'_id': 1, 'n': {'$sum': 1}}})
 </code></pre>
+<p>Due to countDocuments using the <code>$match</code> aggregation pipeline stage, certain query operators cannot be used in
+countDocuments. This includes the <code>$where</code> and <code>$near</code> query operators, among others. Drivers MUST document these
+<a href="https://www.mongodb.com/docs/manual/reference/operator/aggregation/match/#restrictions">restrictions</a> in their
+documentation.</p>
 <p>The count of documents is returned in the <code>n</code> field, similar to the <code>count</code> command. countDocuments options other than
 filter, skip, and limit are added as options to the <code>aggregate</code> command.</p>
 <p>In the event this aggregation is run against an empty collection, an empty array will be returned with no <code>n</code> field.
@@ -937,6 +941,11 @@ database aggregate command requires a collection name of 1 for collection-less s
 database-level aggregation will allow users to receive a cursor from these collection-less aggregation source stages.</p>
 <h4 id="write"><a class="header" href="#write">Write</a></h4>
 <h5 id="insert-update-replace-delete-and-bulk-writes"><a class="header" href="#insert-update-replace-delete-and-bulk-writes">Insert, Update, Replace, Delete, and Bulk Writes</a></h5>
+<h6 id="generated-identifiers"><a class="header" href="#generated-identifiers">Generated identifiers</a></h6>
+<p>The insert and bulk insert operations described below MUST generate identifiers for all documents that do not already
+have them. These identifiers SHOULD be prepended to the document so they are the first field, in order to prevent the
+server from spending time re-ordering the document. If a document already has a user-provided identifier, the driver MAY
+re-order the document so the identifier is the first field.</p>
 <pre><code class="language-typescript">interface Collection {
 
   /**
@@ -2501,6 +2510,12 @@ the Stable API, it was decided that this change was acceptable to make in minor 
 aforementioned allowance in the SemVer spec.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-10-30: Document query limitations in <code>countDocuments</code>.</p>
+</li>
+<li>
+<p>2024-10-28: Clarified that generated identifiers should be prepended to documents.</p>
+</li>
 <li>
 <p>2024-10-01: Add sort option to <code>replaceOne</code> and <code>updateOne</code>.</p>
 </li>

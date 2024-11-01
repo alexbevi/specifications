@@ -1158,7 +1158,8 @@ monitoring events as an example, <code>requestId</code> and <code>operationId</c
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>command</code>: Optional document. A value corresponding to the expected command document. Test runners MUST follow the
-rules in <a href="#evaluating-matches">Evaluating Matches</a> when processing this assertion.</li>
+rules in <a href="#evaluating-matches">Evaluating Matches</a> when processing this assertion and match the value as a
+root-level document.</li>
 <li><code>commandName</code>: Optional string. Test runners MUST assert that the command name matches this value.</li>
 <li><code>databaseName</code>: Optional string. Test runners MUST assert that the database name matches this value. The YAML file
 SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a> for this value (e.g.
@@ -1176,7 +1177,8 @@ SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>reply</code>: Optional document. A value corresponding to the expected reply document. Test runners MUST follow the rules
-in <a href="#evaluating-matches">Evaluating Matches</a> when processing this assertion.</li>
+in <a href="#evaluating-matches">Evaluating Matches</a> when processing this assertion and match the value as a root-level
+document.</li>
 <li><code>commandName</code>: Optional string. Test runners MUST assert that the command name matches this value.</li>
 <li><code>databaseName</code>: Optional string. Test runners MUST assert that the database name matches this value. The YAML file
 SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a> for this value (e.g.
@@ -1744,6 +1746,9 @@ below.</p>
 <h4 id="aggregate-1"><a class="header" href="#aggregate-1">aggregate</a></h4>
 <p>When executing an <code>aggregate</code> operation, the test runner MUST fully iterate the result. This will ensure consistent
 behavior between drivers that eagerly create a server-side cursor and those that do so lazily when iteration begins.</p>
+<p>When evaluating the iterated result for <a href="#operation_expectResult">expectResult</a>, the number of actual and expected
+documents MUST be equal and each document value within the <code>expectResult</code> array MUST be matched as a root-level document
+(for <a href="#evaluating-matches">Evaluating Matches</a>).</p>
 <h4 id="bulkwrite"><a class="header" href="#bulkwrite">bulkWrite</a></h4>
 <p>These considerations only apply to the <code>MongoCollection.bulkWrite</code> method. See <a href="#clientbulkwrite">clientBulkWrite</a> for
 special considerations for <code>MongoClient.bulkWrite</code>.</p>
@@ -1820,10 +1825,15 @@ driver's helper.</p>
 <h4 id="find"><a class="header" href="#find">find</a></h4>
 <p>When executing a <code>find</code> operation, the test runner MUST fully iterate the result. This will ensure consistent behavior
 between drivers that eagerly create a server-side cursor and those that do so lazily when iteration begins.</p>
+<p>When evaluating the iterated result for <a href="#operation_expectResult">expectResult</a>, the number of actual and expected
+documents MUST be equal and each document value within the <code>expectResult</code> array MUST be matched as a root-level document
+(for <a href="#evaluating-matches">Evaluating Matches</a>).</p>
 <h4 id="findoneandreplace-and-findoneandupdate"><a class="header" href="#findoneandreplace-and-findoneandupdate">findOneAndReplace and findOneAndUpdate</a></h4>
 <p>The <code>returnDocument</code> option for <code>findOneAndReplace</code> and <code>findOneAndUpdate</code> is documented as an enum with possible values
 "Before" and "After". Test files SHOULD express <code>returnDocument</code> as a string and test runners MUST raise an error if its
 value does not case-insensitively match either enum value.</p>
+<p>When evaluating the result for <a href="#operation_expectResult">expectResult</a>, the document MUST be matched as a root-level
+document (for <a href="#evaluating-matches">Evaluating Matches</a>).</p>
 <h4 id="insertmany"><a class="header" href="#insertmany">insertMany</a></h4>
 <p>The CRUD spec documents <code>insertMany</code> as returning a BulkWriteResult. Because the <code>insertedIds</code> field of BulkWriteResult
 is optional for drivers to implement, assertions for that field SHOULD utilize the <a href="#unsetormatches">$$unsetOrMatches</a>
@@ -1909,7 +1919,8 @@ non-empty <code>firstBatch</code>. Alternatively, some drivers may use a differe
 first position (e.g. <code>rewind</code> in PHP).</p>
 <h4 id="iterateuntildocumentorerror"><a class="header" href="#iterateuntildocumentorerror">iterateUntilDocumentOrError</a></h4>
 <p>Iterates the cursor until either a single document is returned or an error is raised. This operation takes no arguments.
-If <a href="#operation_expectResult">expectResult</a> is specified, it SHOULD be a single document.</p>
+If <a href="#operation_expectResult">expectResult</a> is specified, it SHOULD be a single document and MUST be matched as a
+root-level document according to the rules in <a href="#evaluating-matches">Evaluating Matches</a>.</p>
 <p>Some specification sections (e.g.
 <a href="../change-streams/tests/README.html#iterating-the-change-stream">Iterating the Change Stream</a>) caution drivers that
 implement a blocking mode of iteration (e.g. asynchronous drivers) not to iterate the cursor unnecessarily, as doing so
@@ -2558,16 +2569,7 @@ numbers to be equal if their values are numerically equivalent. For example, an 
 actual value of <code>1.0</code> (e.g. <code>ok</code> field in a server response) but would not match <code>1.5</code>.</p>
 <h4 id="allowing-extra-fields-in-root-level-documents"><a class="header" href="#allowing-extra-fields-in-root-level-documents">Allowing Extra Fields in Root-level Documents</a></h4>
 <p>When matching root-level documents, test runners MUST permit the actual document to contain additional fields not
-present in the expected document. Examples of root-level documents include, but are not limited to:</p>
-<ul>
-<li><code>command</code> for <a href="#expectedEvent_commandStartedEvent">CommandStartedEvent</a></li>
-<li><code>reply</code> for <a href="#expectedEvent_commandSucceededEvent">CommandSucceededEvent</a></li>
-<li><a href="#operation_expectResult">expectResult</a> for <code>findOneAndUpdate</code> <a href="#collection-operations">Collection Operations</a></li>
-<li><a href="#operation_expectResult">expectResult</a> for <a href="#iterateuntildocumentorerror">iterateUntilDocumentOrError</a></li>
-<li><a href="#expectedError_errorResponse">expectedError_errorResponse</a></li>
-<li>each array element in <a href="#operation_expectResult">expectResult</a> for <a href="#find">find</a> or
-<a href="#collection_aggregate">collection_aggregate</a> <a href="#collection-operations">Collection Operations</a></li>
-</ul>
+present in the expected document.</p>
 <p>For example, the following documents match:</p>
 <pre><code class="language-yaml">expected: { x: 1 }
 actual: { x: 1, y: 1 }
@@ -2584,12 +2586,54 @@ actual: { x: { y: 1, z: 1 } }
 is not always feasible or relevant for a test to exhaustively specify all fields in an expected document (e.g. cluster
 time in <code>command</code> for <a href="#expectedEvent_commandStartedEvent">CommandStartedEvent</a>).</p>
 <p>When the expected value is an array, test runners MUST differentiate between an array of values, which may be documents,
-(e.g. <code>distinct</code>) and an array of root-level documents (e.g. <code>find</code>, <code>aggregate</code>). For example, the following array of
-documents would not match if returned by <code>distinct</code>, but would match if returned via <code>find</code> (after iterating the
-cursor):</p>
+(e.g. <code>distinct</code>) and an array of root-level documents derived from an iterable result (e.g. <code>find</code>, <code>aggregate</code>). For
+example, the following array of documents would not match if returned by <code>distinct</code>, but would match if returned via
+<code>find</code> (after iterating the cursor):</p>
 <pre><code class="language-yaml">expected: [ { x: 1 }, { x: 2 } ]
 actual: [ { x: 1, y: 1 }, { x: 2, y: 2 } ]
 </code></pre>
+<h5 id="examples-of-root-level-documents"><a class="header" href="#examples-of-root-level-documents">Examples of Root-level Documents</a></h5>
+<p>Contexts where one might encounter a root-level document include:</p>
+<ul>
+<li>
+<p><code>command</code> for <a href="#expectedEvent_commandStartedEvent">CommandStartedEvent</a></p>
+</li>
+<li>
+<p><code>reply</code> for <a href="#expectedEvent_commandSucceededEvent">CommandSucceededEvent</a></p>
+</li>
+<li>
+<p><a href="#operation_expectResult">expectResult</a> for operations that return a document. Operations include:</p>
+<ul>
+<li>findOneAndDelete, <a href="#findoneandreplace-and-findoneandupdate">findOneAndReplace</a>, and
+<a href="#findoneandreplace-and-findoneandupdate">findOneAndUpdate</a></li>
+<li><a href="#iterateuntildocumentorerror">iterateUntilDocumentOrError</a></li>
+<li><a href="#iterateonce">iterateOnce</a></li>
+</ul>
+</li>
+<li>
+<p><a href="#operation_expectResult">expectResult</a> array elements for operations that return an iterable of documents. Operations
+include:</p>
+<ul>
+<li><a href="#aggregate">aggregate</a></li>
+<li><a href="#find">find</a>)</li>
+<li><a href="#listcollections">listCollections</a>, listDatabases, and listIndexes</li>
+<li><a href="#listsearchindexes">listSearchIndexes</a></li>
+<li><a href="#runcursorcommand">runCursorCommand</a></li>
+</ul>
+</li>
+<li>
+<p><a href="#expectedError_errorResponse">errorResponse</a> for <a href="#expectederror">expectedError</a></p>
+</li>
+<li>
+<p><code>writeErrors</code> object values for <a href="#expectederror">expectedError</a></p>
+</li>
+<li>
+<p><code>writeConcernErrors</code> array elements for <a href="#expectederror">expectedError</a></p>
+</li>
+<li>
+<p><code>data</code> for <a href="#expectedlogmessage">expectedLogMessage</a></p>
+</li>
+</ul>
 <h4 id="document-key-order-variation"><a class="header" href="#document-key-order-variation">Document Key Order Variation</a></h4>
 <p>When matching documents, test runners MUST NOT require keys in the expected and actual document to appear in the same
 order. For example, the following documents would match:</p>
@@ -2660,6 +2704,7 @@ need for this behavior in tests.</p>
 the test runner MUST fetch that entity and assert that the actual value matches the entity using the standard rules in
 <a href="#evaluating-matches">Evaluating Matches</a>; otherwise, the test runner MUST raise an error for an undefined or mistyped
 entity. The YAML file SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a> for the entity name.</p>
+<p>This operator does not influence whether or not an actual document value is considered a root-level document.</p>
 <p>This operator is primarily used to assert identifiers for uploaded GridFS files.</p>
 <p>An example of this operator follows:</p>
 <pre><code class="language-yaml">operations:
@@ -2696,6 +2741,7 @@ excluding an array element because
 <a href="#arrays-must-contain-the-same-number-of-elements">Arrays Must Contain the Same Number of Elements</a>. The test runner
 MUST assert that the actual value either does not exist or matches the expected value. Matching the expected value MUST
 use the standard rules in <a href="#evaluating-matches">Evaluating Matches</a>, which means that it may contain special operators.</p>
+<p>This operator does not influence whether or not an actual document value is considered a root-level document.</p>
 <p>This operator is primarily used to assert driver-optional fields from the CRUD spec (e.g. <code>insertedId</code> for
 InsertOneResult, <code>writeResult</code> for BulkWriteException).</p>
 <p>An example of this operator used for a result's field follows:</p>
@@ -2741,9 +2787,11 @@ expected value of <code>1</code> would match an actual value of <code>1.0</code>
 </code></pre>
 <p>This operator may be used anywhere a matched value is expected (including <a href="#operation_expectResult">expectResult</a>) and
 the actual value is an extended JSON string. The test runner MUST parse the actual value into a BSON document and match
-it against the expected value. Matching the expected value MUST use the standard rules in
-<a href="#evaluating-matches">Evaluating Matches</a>, which means that it may contain special operators. This operator is primarily
-used to assert on extended JSON commands and command replies included in log messages.</p>
+it against the expected value.</p>
+<p>Matching the expected value MUST use the standard rules in <a href="#evaluating-matches">Evaluating Matches</a>, which means that
+it may contain special operators. The actual value MUST NOT be considered a root-level document (i.e. extra fields are
+not permitted); however, <a href="#matchasroot">$$matchAsRoot</a> may be used to change that behavior.</p>
+<p>This operator is primarily used to assert on extended JSON commands and command replies included in log messages.</p>
 <h5 id="matchasroot"><a class="header" href="#matchasroot">$$matchAsRoot</a></h5>
 <p>This operator may be used anywhere a matched value is expected (including <a href="#operation_expectResult">expectResult</a>) and
 the expected and actual values are documents. The test runner MUST treat the actual value as a root-level document as
@@ -3145,6 +3193,9 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-10-29: List more examples of root-level documents</p>
+</li>
 <li>
 <p>2024-10-24: Document <code>namespace</code> option for <code>failCommand</code> fail point.</p>
 </li>

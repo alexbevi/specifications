@@ -19310,6 +19310,10 @@ if (limit) {
 }
 pipeline.push({'$group': {'_id': 1, 'n': {'$sum': 1}}})
 </code></pre>
+<p>Due to countDocuments using the <code>$match</code> aggregation pipeline stage, certain query operators cannot be used in
+countDocuments. This includes the <code>$where</code> and <code>$near</code> query operators, among others. Drivers MUST document these
+<a href="https://www.mongodb.com/docs/manual/reference/operator/aggregation/match/#restrictions">restrictions</a> in their
+documentation.</p>
 <p>The count of documents is returned in the <code>n</code> field, similar to the <code>count</code> command. countDocuments options other than
 filter, skip, and limit are added as options to the <code>aggregate</code> command.</p>
 <p>In the event this aggregation is run against an empty collection, an empty array will be returned with no <code>n</code> field.
@@ -19352,6 +19356,11 @@ database aggregate command requires a collection name of 1 for collection-less s
 database-level aggregation will allow users to receive a cursor from these collection-less aggregation source stages.</p>
 <h4 id="write"><a class="header" href="#write">Write</a></h4>
 <h5 id="insert-update-replace-delete-and-bulk-writes"><a class="header" href="#insert-update-replace-delete-and-bulk-writes">Insert, Update, Replace, Delete, and Bulk Writes</a></h5>
+<h6 id="generated-identifiers"><a class="header" href="#generated-identifiers">Generated identifiers</a></h6>
+<p>The insert and bulk insert operations described below MUST generate identifiers for all documents that do not already
+have them. These identifiers SHOULD be prepended to the document so they are the first field, in order to prevent the
+server from spending time re-ordering the document. If a document already has a user-provided identifier, the driver MAY
+re-order the document so the identifier is the first field.</p>
 <pre><code class="language-typescript">interface Collection {
 
   /**
@@ -20916,6 +20925,12 @@ the Stable API, it was decided that this change was acceptable to make in minor 
 aforementioned allowance in the SemVer spec.</p>
 <h2 id="changelog-33"><a class="header" href="#changelog-33">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-10-30: Document query limitations in <code>countDocuments</code>.</p>
+</li>
+<li>
+<p>2024-10-28: Clarified that generated identifiers should be prepended to documents.</p>
+</li>
 <li>
 <p>2024-10-01: Add sort option to <code>replaceOne</code> and <code>updateOne</code>.</p>
 </li>
@@ -24474,7 +24489,7 @@ have same behavior as for OP_GET_MORE and OP_KILL_CURSORS.</p>
 </ul>
 <hr />
 <h2 id="abstract-38"><a class="header" href="#abstract-38">Abstract</a></h2>
-<p>GridFS is a convention drivers use to store and retrieve BSON binary data (type "x05") that exceeds MongoDB"s
+<p>GridFS is a convention drivers use to store and retrieve BSON binary data (type "x05") that exceeds MongoDB's
 BSON-document size limit of 16 MiB. When this data, called a <strong>user file</strong>, is written to the system, GridFS divides the
 file into <strong>chunks</strong> that are stored as distinct documents in a <strong>chunks collection</strong>. To retrieve a stored file, GridFS
 locates and returns all of its component chunks. Internally, GridFS creates a <strong>files collection document</strong> for each
@@ -24490,7 +24505,7 @@ unspecified.</p>
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="terms-25"><a class="header" href="#terms-25">Terms</a></h3>
 <p><strong>Bucket name</strong></p>
-<p>A prefix under which a GridFS system"s collections are stored. Collection names for the files and chunks collections are
+<p>A prefix under which a GridFS system's collections are stored. Collection names for the files and chunks collections are
 prefixed with the bucket name. The bucket name MUST be configurable by the user. Multiple buckets may exist within a
 single database. The default bucket name is "fs".</p>
 <p><strong>Chunk</strong></p>
@@ -24956,27 +24971,45 @@ the point at which the application stopped reading won't be detected by the driv
 <pre><code class="language-javascript">class GridFSBucket {
 
   /**
-   * Given a @id, delete this stored file"s files collection document and
+   * Given a @id, delete this stored file's files collection document and
    * associated chunks from a GridFS bucket.
    */
   void delete(TFileId id);
 
 }
 </code></pre>
-<p>Deletes the stored file"s files collection document and associated chunks from the underlying database.</p>
-<p>As noted for download(), drivers that previously used id"s of a different type MAY implement a delete() method that
+<p>Deletes the stored file's files collection document and associated chunks from the underlying database.</p>
+<p>As noted for download(), drivers that previously used id's of a different type MAY implement a delete() method that
 accepts that type, but MUST mark that method as deprecated.</p>
 <p><strong>Implementation details:</strong></p>
 <p>There is an inherent race condition between the chunks and files collections. Without some transaction-like behavior
 between these two collections, it is always possible for one client to delete a stored file while another client is
-attempting a read of the stored file. For example, imagine client A retrieves a stored file"s files collection document,
-client B deletes the stored file, then client A attempts to read the stored file"s chunks. Client A wouldn"t find any
+attempting a read of the stored file. For example, imagine client A retrieves a stored file's files collection document,
+client B deletes the stored file, then client A attempts to read the stored file's chunks. Client A wouldn"t find any
 chunks for the given stored file. To minimize the window of vulnerability of reading a stored file that is the process
 of being deleted, drivers MUST first delete the files collection document for a stored file, then delete its associated
 chunks.</p>
 <p>If there is no such file listed in the files collection, drivers MUST raise an error. Drivers MAY attempt to delete any
 orphaned chunks with files_id equal to id before raising the error.</p>
 <p>If a networking or server error occurs, drivers MUST raise an error.</p>
+<h3 id="file-deletion-by-filename"><a class="header" href="#file-deletion-by-filename">File deletion by filename</a></h3>
+<p>To rename all revisions of a stored file with the specified filename, drivers SHOULD provide the method
+<code>delete_by_name</code>:</p>
+<pre><code class="language-javascript">class GridFSBucket {
+
+  /**
+   * Deletes all stored files with the specified @filename from a GridFS bucket.
+   */
+  void delete_by_name(string filename);
+
+}
+</code></pre>
+<p>This method is an optimisation over deleting each revision of a stored file individually.</p>
+<p><strong>Implementation details:</strong></p>
+<p>Drivers MUST first find the <code>_id</code> field of all files collection documents with the given filename. Drivers MUST then
+delete all files collection documents with the found ids. Drivers MUST then delete all chunks with <code>files_id</code> in the
+found ids that were just deleted.</p>
+<p>If there are no files collection documents with the given filename, drivers MUST raise an error.</p>
 <h3 id="generic-find-on-files-collection"><a class="header" href="#generic-find-on-files-collection">Generic Find on Files Collection</a></h3>
 <pre><code class="language-javascript">class GridFSFindOptions {
 
@@ -25105,7 +25138,7 @@ values represent non-negative byte offsets from the beginning of the file. When 
 return the bytes of the file in <code>[start, end)</code>. If "start" and "end" are equal no data is returned.</p>
 <p>If either "start" or "end" is invalid, drivers MUST raise an error. These values are considered invalid if they are
 negative, greater than the file length, or if "start" is greater than "end".</p>
-<p>When performing partial reads, drivers SHOULD use the file"s "chunkSize" to calculate which chunks contain the desired
+<p>When performing partial reads, drivers SHOULD use the file's "chunkSize" to calculate which chunks contain the desired
 section and avoid reading unneeded documents from the "chunks" collection.</p>
 <h3 id="renaming-stored-files"><a class="header" href="#renaming-stored-files">Renaming stored files</a></h3>
 <pre><code class="language-javascript">class GridFSBucket {
@@ -25117,13 +25150,29 @@ section and avoid reading unneeded documents from the "chunks" collection.</p>
 
 }
 </code></pre>
-<p>Sets the filename field in the stored file"s files collection document to the new filename.</p>
+<p>Sets the filename field in the stored file's files collection document to the new filename.</p>
 <p><strong>Implementation details:</strong></p>
 <p>Drivers construct and execute an update_one command on the files collection using <code>{ _id: @id }</code> as the filter and
 <code>{ $set : { filename : "new_filename" } }</code> as the update parameter.</p>
-<p>To rename multiple revisions of the same filename, users must retrieve the full list of files collection documents for a
-given filename and execute "rename" on each corresponding <code>_id</code>.</p>
+<p>If <code>renameByName</code> is not implemented to rename multiple revisions of the same filename, users must retrieve the full
+list of files collection documents for a given filename and execute "rename" on each corresponding <code>_id</code>.</p>
 <p>If there is no file with the given id, drivers MUST raise an error.</p>
+<h3 id="renaming-stored-files-by-filename"><a class="header" href="#renaming-stored-files-by-filename">Renaming stored files by filename</a></h3>
+<p>To rename all revisions of a stored file with the specified filename, drivers SHOULD provide the method
+<code>rename_by_name</code>:</p>
+<pre><code class="language-javascript">class GridFSBucket {
+
+  /**
+   * Renames all revisions of the stored file with the specified @filename.
+   */
+  void rename_by_name(string filename, string new_filename);
+
+}
+</code></pre>
+<p><strong>Implementation details:</strong></p>
+<p>Drivers construct and execute an update_many command on the files collection using <code>{ filename: @filename }</code> as the
+filter and <code>{ $set : { filename : "new_filename" } }</code> as the update parameter.</p>
+<p>If there is no file with the given filename, drivers MUST raise an error.</p>
 <h3 id="dropping-an-entire-gridfs-bucket"><a class="header" href="#dropping-an-entire-gridfs-bucket">Dropping an entire GridFS bucket</a></h3>
 <pre><code class="language-javascript">class GridFSBucket {
 
@@ -25278,6 +25327,7 @@ system. While this functionality is not in-scope for this spec (see "Why can"t I
 system?") it is a potential area of growth for the future.</p>
 <h2 id="changelog-40"><a class="header" href="#changelog-40">Changelog</a></h2>
 <ul>
+<li>2024-10-30: Add <code>delete_by_name</code> and <code>rename_by_name</code></li>
 <li>2024-10-28: Removed deprecated fields from tests: <code>md5</code>, <code>contentType</code>, <code>aliases</code></li>
 <li>2024-02-27: Migrated from reStructuredText to Markdown.</li>
 <li>2016-05-10: Support custom file ids</li>
@@ -31266,7 +31316,8 @@ monitoring events as an example, <code>requestId</code> and <code>operationId</c
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>command</code>: Optional document. A value corresponding to the expected command document. Test runners MUST follow the
-rules in <a href="unified-test-format/unified-test-format.html#evaluating-matches">Evaluating Matches</a> when processing this assertion.</li>
+rules in <a href="unified-test-format/unified-test-format.html#evaluating-matches">Evaluating Matches</a> when processing this assertion and match the value as a
+root-level document.</li>
 <li><code>commandName</code>: Optional string. Test runners MUST assert that the command name matches this value.</li>
 <li><code>databaseName</code>: Optional string. Test runners MUST assert that the database name matches this value. The YAML file
 SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a> for this value (e.g.
@@ -31284,7 +31335,8 @@ SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node
 <p>The structure of this object is as follows:</p>
 <ul>
 <li><code>reply</code>: Optional document. A value corresponding to the expected reply document. Test runners MUST follow the rules
-in <a href="unified-test-format/unified-test-format.html#evaluating-matches">Evaluating Matches</a> when processing this assertion.</li>
+in <a href="unified-test-format/unified-test-format.html#evaluating-matches">Evaluating Matches</a> when processing this assertion and match the value as a root-level
+document.</li>
 <li><code>commandName</code>: Optional string. Test runners MUST assert that the command name matches this value.</li>
 <li><code>databaseName</code>: Optional string. Test runners MUST assert that the database name matches this value. The YAML file
 SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a> for this value (e.g.
@@ -31852,6 +31904,9 @@ below.</p>
 <h4 id="aggregate-1"><a class="header" href="#aggregate-1">aggregate</a></h4>
 <p>When executing an <code>aggregate</code> operation, the test runner MUST fully iterate the result. This will ensure consistent
 behavior between drivers that eagerly create a server-side cursor and those that do so lazily when iteration begins.</p>
+<p>When evaluating the iterated result for <a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a>, the number of actual and expected
+documents MUST be equal and each document value within the <code>expectResult</code> array MUST be matched as a root-level document
+(for <a href="unified-test-format/unified-test-format.html#evaluating-matches">Evaluating Matches</a>).</p>
 <h4 id="bulkwrite"><a class="header" href="#bulkwrite">bulkWrite</a></h4>
 <p>These considerations only apply to the <code>MongoCollection.bulkWrite</code> method. See <a href="unified-test-format/unified-test-format.html#clientbulkwrite">clientBulkWrite</a> for
 special considerations for <code>MongoClient.bulkWrite</code>.</p>
@@ -31928,10 +31983,15 @@ driver's helper.</p>
 <h4 id="find-1"><a class="header" href="#find-1">find</a></h4>
 <p>When executing a <code>find</code> operation, the test runner MUST fully iterate the result. This will ensure consistent behavior
 between drivers that eagerly create a server-side cursor and those that do so lazily when iteration begins.</p>
+<p>When evaluating the iterated result for <a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a>, the number of actual and expected
+documents MUST be equal and each document value within the <code>expectResult</code> array MUST be matched as a root-level document
+(for <a href="unified-test-format/unified-test-format.html#evaluating-matches">Evaluating Matches</a>).</p>
 <h4 id="findoneandreplace-and-findoneandupdate"><a class="header" href="#findoneandreplace-and-findoneandupdate">findOneAndReplace and findOneAndUpdate</a></h4>
 <p>The <code>returnDocument</code> option for <code>findOneAndReplace</code> and <code>findOneAndUpdate</code> is documented as an enum with possible values
 "Before" and "After". Test files SHOULD express <code>returnDocument</code> as a string and test runners MUST raise an error if its
 value does not case-insensitively match either enum value.</p>
+<p>When evaluating the result for <a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a>, the document MUST be matched as a root-level
+document (for <a href="unified-test-format/unified-test-format.html#evaluating-matches">Evaluating Matches</a>).</p>
 <h4 id="insertmany"><a class="header" href="#insertmany">insertMany</a></h4>
 <p>The CRUD spec documents <code>insertMany</code> as returning a BulkWriteResult. Because the <code>insertedIds</code> field of BulkWriteResult
 is optional for drivers to implement, assertions for that field SHOULD utilize the <a href="unified-test-format/unified-test-format.html#unsetormatches">$$unsetOrMatches</a>
@@ -32017,7 +32077,8 @@ non-empty <code>firstBatch</code>. Alternatively, some drivers may use a differe
 first position (e.g. <code>rewind</code> in PHP).</p>
 <h4 id="iterateuntildocumentorerror"><a class="header" href="#iterateuntildocumentorerror">iterateUntilDocumentOrError</a></h4>
 <p>Iterates the cursor until either a single document is returned or an error is raised. This operation takes no arguments.
-If <a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a> is specified, it SHOULD be a single document.</p>
+If <a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a> is specified, it SHOULD be a single document and MUST be matched as a
+root-level document according to the rules in <a href="unified-test-format/unified-test-format.html#evaluating-matches">Evaluating Matches</a>.</p>
 <p>Some specification sections (e.g.
 <a href="unified-test-format/../change-streams/tests/README.html#iterating-the-change-stream">Iterating the Change Stream</a>) caution drivers that
 implement a blocking mode of iteration (e.g. asynchronous drivers) not to iterate the cursor unnecessarily, as doing so
@@ -32666,16 +32727,7 @@ numbers to be equal if their values are numerically equivalent. For example, an 
 actual value of <code>1.0</code> (e.g. <code>ok</code> field in a server response) but would not match <code>1.5</code>.</p>
 <h4 id="allowing-extra-fields-in-root-level-documents"><a class="header" href="#allowing-extra-fields-in-root-level-documents">Allowing Extra Fields in Root-level Documents</a></h4>
 <p>When matching root-level documents, test runners MUST permit the actual document to contain additional fields not
-present in the expected document. Examples of root-level documents include, but are not limited to:</p>
-<ul>
-<li><code>command</code> for <a href="unified-test-format/unified-test-format.html#expectedEvent_commandStartedEvent">CommandStartedEvent</a></li>
-<li><code>reply</code> for <a href="unified-test-format/unified-test-format.html#expectedEvent_commandSucceededEvent">CommandSucceededEvent</a></li>
-<li><a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a> for <code>findOneAndUpdate</code> <a href="unified-test-format/unified-test-format.html#collection-operations">Collection Operations</a></li>
-<li><a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a> for <a href="unified-test-format/unified-test-format.html#iterateuntildocumentorerror">iterateUntilDocumentOrError</a></li>
-<li><a href="unified-test-format/unified-test-format.html#expectedError_errorResponse">expectedError_errorResponse</a></li>
-<li>each array element in <a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a> for <a href="unified-test-format/unified-test-format.html#find">find</a> or
-<a href="unified-test-format/unified-test-format.html#collection_aggregate">collection_aggregate</a> <a href="unified-test-format/unified-test-format.html#collection-operations">Collection Operations</a></li>
-</ul>
+present in the expected document.</p>
 <p>For example, the following documents match:</p>
 <pre><code class="language-yaml">expected: { x: 1 }
 actual: { x: 1, y: 1 }
@@ -32692,12 +32744,54 @@ actual: { x: { y: 1, z: 1 } }
 is not always feasible or relevant for a test to exhaustively specify all fields in an expected document (e.g. cluster
 time in <code>command</code> for <a href="unified-test-format/unified-test-format.html#expectedEvent_commandStartedEvent">CommandStartedEvent</a>).</p>
 <p>When the expected value is an array, test runners MUST differentiate between an array of values, which may be documents,
-(e.g. <code>distinct</code>) and an array of root-level documents (e.g. <code>find</code>, <code>aggregate</code>). For example, the following array of
-documents would not match if returned by <code>distinct</code>, but would match if returned via <code>find</code> (after iterating the
-cursor):</p>
+(e.g. <code>distinct</code>) and an array of root-level documents derived from an iterable result (e.g. <code>find</code>, <code>aggregate</code>). For
+example, the following array of documents would not match if returned by <code>distinct</code>, but would match if returned via
+<code>find</code> (after iterating the cursor):</p>
 <pre><code class="language-yaml">expected: [ { x: 1 }, { x: 2 } ]
 actual: [ { x: 1, y: 1 }, { x: 2, y: 2 } ]
 </code></pre>
+<h5 id="examples-of-root-level-documents"><a class="header" href="#examples-of-root-level-documents">Examples of Root-level Documents</a></h5>
+<p>Contexts where one might encounter a root-level document include:</p>
+<ul>
+<li>
+<p><code>command</code> for <a href="unified-test-format/unified-test-format.html#expectedEvent_commandStartedEvent">CommandStartedEvent</a></p>
+</li>
+<li>
+<p><code>reply</code> for <a href="unified-test-format/unified-test-format.html#expectedEvent_commandSucceededEvent">CommandSucceededEvent</a></p>
+</li>
+<li>
+<p><a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a> for operations that return a document. Operations include:</p>
+<ul>
+<li>findOneAndDelete, <a href="unified-test-format/unified-test-format.html#findoneandreplace-and-findoneandupdate">findOneAndReplace</a>, and
+<a href="unified-test-format/unified-test-format.html#findoneandreplace-and-findoneandupdate">findOneAndUpdate</a></li>
+<li><a href="unified-test-format/unified-test-format.html#iterateuntildocumentorerror">iterateUntilDocumentOrError</a></li>
+<li><a href="unified-test-format/unified-test-format.html#iterateonce">iterateOnce</a></li>
+</ul>
+</li>
+<li>
+<p><a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a> array elements for operations that return an iterable of documents. Operations
+include:</p>
+<ul>
+<li><a href="unified-test-format/unified-test-format.html#aggregate">aggregate</a></li>
+<li><a href="unified-test-format/unified-test-format.html#find">find</a>)</li>
+<li><a href="unified-test-format/unified-test-format.html#listcollections">listCollections</a>, listDatabases, and listIndexes</li>
+<li><a href="unified-test-format/unified-test-format.html#listsearchindexes">listSearchIndexes</a></li>
+<li><a href="unified-test-format/unified-test-format.html#runcursorcommand">runCursorCommand</a></li>
+</ul>
+</li>
+<li>
+<p><a href="unified-test-format/unified-test-format.html#expectedError_errorResponse">errorResponse</a> for <a href="unified-test-format/unified-test-format.html#expectederror">expectedError</a></p>
+</li>
+<li>
+<p><code>writeErrors</code> object values for <a href="unified-test-format/unified-test-format.html#expectederror">expectedError</a></p>
+</li>
+<li>
+<p><code>writeConcernErrors</code> array elements for <a href="unified-test-format/unified-test-format.html#expectederror">expectedError</a></p>
+</li>
+<li>
+<p><code>data</code> for <a href="unified-test-format/unified-test-format.html#expectedlogmessage">expectedLogMessage</a></p>
+</li>
+</ul>
 <h4 id="document-key-order-variation"><a class="header" href="#document-key-order-variation">Document Key Order Variation</a></h4>
 <p>When matching documents, test runners MUST NOT require keys in the expected and actual document to appear in the same
 order. For example, the following documents would match:</p>
@@ -32768,6 +32862,7 @@ need for this behavior in tests.</p>
 the test runner MUST fetch that entity and assert that the actual value matches the entity using the standard rules in
 <a href="unified-test-format/unified-test-format.html#evaluating-matches">Evaluating Matches</a>; otherwise, the test runner MUST raise an error for an undefined or mistyped
 entity. The YAML file SHOULD use an <a href="https://yaml.org/spec/1.2/spec.html#id2786196">alias node</a> for the entity name.</p>
+<p>This operator does not influence whether or not an actual document value is considered a root-level document.</p>
 <p>This operator is primarily used to assert identifiers for uploaded GridFS files.</p>
 <p>An example of this operator follows:</p>
 <pre><code class="language-yaml">operations:
@@ -32804,6 +32899,7 @@ excluding an array element because
 <a href="unified-test-format/unified-test-format.html#arrays-must-contain-the-same-number-of-elements">Arrays Must Contain the Same Number of Elements</a>. The test runner
 MUST assert that the actual value either does not exist or matches the expected value. Matching the expected value MUST
 use the standard rules in <a href="unified-test-format/unified-test-format.html#evaluating-matches">Evaluating Matches</a>, which means that it may contain special operators.</p>
+<p>This operator does not influence whether or not an actual document value is considered a root-level document.</p>
 <p>This operator is primarily used to assert driver-optional fields from the CRUD spec (e.g. <code>insertedId</code> for
 InsertOneResult, <code>writeResult</code> for BulkWriteException).</p>
 <p>An example of this operator used for a result's field follows:</p>
@@ -32849,9 +32945,11 @@ expected value of <code>1</code> would match an actual value of <code>1.0</code>
 </code></pre>
 <p>This operator may be used anywhere a matched value is expected (including <a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a>) and
 the actual value is an extended JSON string. The test runner MUST parse the actual value into a BSON document and match
-it against the expected value. Matching the expected value MUST use the standard rules in
-<a href="unified-test-format/unified-test-format.html#evaluating-matches">Evaluating Matches</a>, which means that it may contain special operators. This operator is primarily
-used to assert on extended JSON commands and command replies included in log messages.</p>
+it against the expected value.</p>
+<p>Matching the expected value MUST use the standard rules in <a href="unified-test-format/unified-test-format.html#evaluating-matches">Evaluating Matches</a>, which means that
+it may contain special operators. The actual value MUST NOT be considered a root-level document (i.e. extra fields are
+not permitted); however, <a href="unified-test-format/unified-test-format.html#matchasroot">$$matchAsRoot</a> may be used to change that behavior.</p>
+<p>This operator is primarily used to assert on extended JSON commands and command replies included in log messages.</p>
 <h5 id="matchasroot"><a class="header" href="#matchasroot">$$matchAsRoot</a></h5>
 <p>This operator may be used anywhere a matched value is expected (including <a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a>) and
 the expected and actual values are documents. The test runner MUST treat the actual value as a root-level document as
@@ -33253,6 +33351,9 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-10-29: List more examples of root-level documents</p>
+</li>
 <li>
 <p>2024-10-24: Document <code>namespace</code> option for <code>failCommand</code> fail point.</p>
 </li>

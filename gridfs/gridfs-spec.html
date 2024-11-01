@@ -180,7 +180,7 @@
 </ul>
 <hr />
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
-<p>GridFS is a convention drivers use to store and retrieve BSON binary data (type "x05") that exceeds MongoDB"s
+<p>GridFS is a convention drivers use to store and retrieve BSON binary data (type "x05") that exceeds MongoDB's
 BSON-document size limit of 16 MiB. When this data, called a <strong>user file</strong>, is written to the system, GridFS divides the
 file into <strong>chunks</strong> that are stored as distinct documents in a <strong>chunks collection</strong>. To retrieve a stored file, GridFS
 locates and returns all of its component chunks. Internally, GridFS creates a <strong>files collection document</strong> for each
@@ -196,7 +196,7 @@ unspecified.</p>
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <p><strong>Bucket name</strong></p>
-<p>A prefix under which a GridFS system"s collections are stored. Collection names for the files and chunks collections are
+<p>A prefix under which a GridFS system's collections are stored. Collection names for the files and chunks collections are
 prefixed with the bucket name. The bucket name MUST be configurable by the user. Multiple buckets may exist within a
 single database. The default bucket name is "fs".</p>
 <p><strong>Chunk</strong></p>
@@ -662,27 +662,45 @@ the point at which the application stopped reading won't be detected by the driv
 <pre><code class="language-javascript">class GridFSBucket {
 
   /**
-   * Given a @id, delete this stored file"s files collection document and
+   * Given a @id, delete this stored file's files collection document and
    * associated chunks from a GridFS bucket.
    */
   void delete(TFileId id);
 
 }
 </code></pre>
-<p>Deletes the stored file"s files collection document and associated chunks from the underlying database.</p>
-<p>As noted for download(), drivers that previously used id"s of a different type MAY implement a delete() method that
+<p>Deletes the stored file's files collection document and associated chunks from the underlying database.</p>
+<p>As noted for download(), drivers that previously used id's of a different type MAY implement a delete() method that
 accepts that type, but MUST mark that method as deprecated.</p>
 <p><strong>Implementation details:</strong></p>
 <p>There is an inherent race condition between the chunks and files collections. Without some transaction-like behavior
 between these two collections, it is always possible for one client to delete a stored file while another client is
-attempting a read of the stored file. For example, imagine client A retrieves a stored file"s files collection document,
-client B deletes the stored file, then client A attempts to read the stored file"s chunks. Client A wouldn"t find any
+attempting a read of the stored file. For example, imagine client A retrieves a stored file's files collection document,
+client B deletes the stored file, then client A attempts to read the stored file's chunks. Client A wouldn"t find any
 chunks for the given stored file. To minimize the window of vulnerability of reading a stored file that is the process
 of being deleted, drivers MUST first delete the files collection document for a stored file, then delete its associated
 chunks.</p>
 <p>If there is no such file listed in the files collection, drivers MUST raise an error. Drivers MAY attempt to delete any
 orphaned chunks with files_id equal to id before raising the error.</p>
 <p>If a networking or server error occurs, drivers MUST raise an error.</p>
+<h3 id="file-deletion-by-filename"><a class="header" href="#file-deletion-by-filename">File deletion by filename</a></h3>
+<p>To rename all revisions of a stored file with the specified filename, drivers SHOULD provide the method
+<code>delete_by_name</code>:</p>
+<pre><code class="language-javascript">class GridFSBucket {
+
+  /**
+   * Deletes all stored files with the specified @filename from a GridFS bucket.
+   */
+  void delete_by_name(string filename);
+
+}
+</code></pre>
+<p>This method is an optimisation over deleting each revision of a stored file individually.</p>
+<p><strong>Implementation details:</strong></p>
+<p>Drivers MUST first find the <code>_id</code> field of all files collection documents with the given filename. Drivers MUST then
+delete all files collection documents with the found ids. Drivers MUST then delete all chunks with <code>files_id</code> in the
+found ids that were just deleted.</p>
+<p>If there are no files collection documents with the given filename, drivers MUST raise an error.</p>
 <h3 id="generic-find-on-files-collection"><a class="header" href="#generic-find-on-files-collection">Generic Find on Files Collection</a></h3>
 <pre><code class="language-javascript">class GridFSFindOptions {
 
@@ -811,7 +829,7 @@ values represent non-negative byte offsets from the beginning of the file. When 
 return the bytes of the file in <code>[start, end)</code>. If "start" and "end" are equal no data is returned.</p>
 <p>If either "start" or "end" is invalid, drivers MUST raise an error. These values are considered invalid if they are
 negative, greater than the file length, or if "start" is greater than "end".</p>
-<p>When performing partial reads, drivers SHOULD use the file"s "chunkSize" to calculate which chunks contain the desired
+<p>When performing partial reads, drivers SHOULD use the file's "chunkSize" to calculate which chunks contain the desired
 section and avoid reading unneeded documents from the "chunks" collection.</p>
 <h3 id="renaming-stored-files"><a class="header" href="#renaming-stored-files">Renaming stored files</a></h3>
 <pre><code class="language-javascript">class GridFSBucket {
@@ -823,13 +841,29 @@ section and avoid reading unneeded documents from the "chunks" collection.</p>
 
 }
 </code></pre>
-<p>Sets the filename field in the stored file"s files collection document to the new filename.</p>
+<p>Sets the filename field in the stored file's files collection document to the new filename.</p>
 <p><strong>Implementation details:</strong></p>
 <p>Drivers construct and execute an update_one command on the files collection using <code>{ _id: @id }</code> as the filter and
 <code>{ $set : { filename : "new_filename" } }</code> as the update parameter.</p>
-<p>To rename multiple revisions of the same filename, users must retrieve the full list of files collection documents for a
-given filename and execute "rename" on each corresponding <code>_id</code>.</p>
+<p>If <code>renameByName</code> is not implemented to rename multiple revisions of the same filename, users must retrieve the full
+list of files collection documents for a given filename and execute "rename" on each corresponding <code>_id</code>.</p>
 <p>If there is no file with the given id, drivers MUST raise an error.</p>
+<h3 id="renaming-stored-files-by-filename"><a class="header" href="#renaming-stored-files-by-filename">Renaming stored files by filename</a></h3>
+<p>To rename all revisions of a stored file with the specified filename, drivers SHOULD provide the method
+<code>rename_by_name</code>:</p>
+<pre><code class="language-javascript">class GridFSBucket {
+
+  /**
+   * Renames all revisions of the stored file with the specified @filename.
+   */
+  void rename_by_name(string filename, string new_filename);
+
+}
+</code></pre>
+<p><strong>Implementation details:</strong></p>
+<p>Drivers construct and execute an update_many command on the files collection using <code>{ filename: @filename }</code> as the
+filter and <code>{ $set : { filename : "new_filename" } }</code> as the update parameter.</p>
+<p>If there is no file with the given filename, drivers MUST raise an error.</p>
 <h3 id="dropping-an-entire-gridfs-bucket"><a class="header" href="#dropping-an-entire-gridfs-bucket">Dropping an entire GridFS bucket</a></h3>
 <pre><code class="language-javascript">class GridFSBucket {
 
@@ -984,6 +1018,7 @@ system. While this functionality is not in-scope for this spec (see "Why can"t I
 system?") it is a potential area of growth for the future.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2024-10-30: Add <code>delete_by_name</code> and <code>rename_by_name</code></li>
 <li>2024-10-28: Removed deprecated fields from tests: <code>md5</code>, <code>contentType</code>, <code>aliases</code></li>
 <li>2024-02-27: Migrated from reStructuredText to Markdown.</li>
 <li>2016-05-10: Support custom file ids</li>
