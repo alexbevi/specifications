@@ -15933,7 +15933,8 @@ command error.</p>
 <p>Starting in MongoDB 4.0, any command error may include a top level "errorLabels" field. The field contains an array of
 string error labels. Drivers may also add error labels to errors that they return.</p>
 <h4 id="transient-transaction-error"><a class="header" href="#transient-transaction-error">Transient Transaction Error</a></h4>
-<p>Any command or network error that includes the "TransientTransactionError" error label in the "errorLabels" field.</p>
+<p>Any command, network, or driver error that includes the "TransientTransactionError" error label in the "errorLabels"
+field.</p>
 <h3 id="naming-variations-2"><a class="header" href="#naming-variations-2"><strong>Naming variations</strong></a></h3>
 <p>This specification defines names for new methods and types. To the extent possible you SHOULD use these names in your
 driver. However, where your driver's and/or language's naming conventions differ you SHOULD continue to use them
@@ -16364,6 +16365,7 @@ considered retryable, the session MUST be unpinned before performing server sele
 be unpinned before performing server selection for the first operation of the new transaction.</li>
 <li>A non-transactional operation is performed using the ClientSession. The session MUST be unpinned before performing
 server selection for the operation.</li>
+<li>The ClientSession is ended either explicitly via <code>endSession</code> method, or implicitly when supported by the driver.</li>
 </ol>
 <p>Note that committing a transaction on a pinned ClientSession MUST NOT unpin the session as <code>commitTransaction</code> may be
 called multiple times.</p>
@@ -16385,12 +16387,15 @@ contents of the document.</p>
 <p>Starting in MongoDB 4.0, any command error may include a top level "errorLabels" field. The field contains an array of
 string error labels.</p>
 <h3 id="transient-transaction-error-1"><a class="header" href="#transient-transaction-error-1">Transient Transaction Error</a></h3>
-<p>Any command error that includes the "TransientTransactionError" error label in the "errorLabels" field. Any network
-error or server selection error encountered running any command besides commitTransaction in a transaction. In the case
-of command errors, the server adds the label; in the case of network errors or server selection errors where the client
-receives no server reply, the client MUST add the label. If a network error occurs while running the commitTransaction
-command then it is not known whether the transaction committed or not, and thus the "TransientTransactionError" label
-MUST NOT be added.</p>
+<ul>
+<li>Any command error that includes the "TransientTransactionError" error label in the "errorLabels" field. In the case of
+command errors, the server adds the label.</li>
+<li>Any network error or server selection error encountered running any command besides commitTransaction in a
+transaction. In the case of network errors or server selection errors where the client receives no server reply, the
+client MUST add the label. If a network error occurs while running the commitTransaction command then it is not
+known whether the transaction committed or not, and thus the "TransientTransactionError" label MUST NOT be added.</li>
+<li><code>PoolClearedError</code>. Driver MUST add the label to this error.</li>
+</ul>
 <h4 id="retrying-transactions-that-fail-with-transienttransactionerror"><a class="header" href="#retrying-transactions-that-fail-with-transienttransactionerror">Retrying transactions that fail with TransientTransactionError</a></h4>
 <p>If an exception with the "TransientTransactionError" label is thrown, an application can retry the entire transaction
 from the beginning with a reasonable expectation that it will succeed. For example:</p>
@@ -16712,7 +16717,10 @@ objective of avoiding duplicate commits.</p>
 <h2 id="changelog-28"><a class="header" href="#changelog-28"><strong>Changelog</strong></a></h2>
 <ul>
 <li>
-<p>2024-10-28: Clarify when drivers must add TransientTransactionError label.</p>
+<p>2024-11-01: Specify that ClientSession must be unpinned when ended.</p>
+</li>
+<li>
+<p>2024-10-31: Clarify when drivers must add TransientTransactionError label.</p>
 </li>
 <li>
 <p>2024-10-28: Note read preference must always be primary in a transaction.</p>
