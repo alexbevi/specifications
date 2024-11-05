@@ -953,16 +953,6 @@ Compiling the individual results server-side and consuming these results driver-
 recording the summary counts. We expect that most users are not interested in the individual results of their operations
 and that most users will rely on defaults, so <code>verboseResults</code> defaults to <code>false</code> to improve performance in the common
 case.</p>
-<h3 id="why-should-drivers-send-bypassdocumentvalidation-false-for-bulkwrite"><a class="header" href="#why-should-drivers-send-bypassdocumentvalidation-false-for-bulkwrite">Why should drivers send <code>bypassDocumentValidation: false</code> for <code>bulkWrite</code>?</a></h3>
-<p><a href="https://jira.mongodb.org/browse/DRIVERS-450">DRIVERS-450</a> introduced a requirement that drivers only send a value for
-<code>bypassDocumentValidation</code> on write commands if it was specified as true. The original motivation for this change is not
-documented. This specification requires that drivers send <code>bypassDocumentValidation</code> in the <code>bulkWrite</code> command if it is
-set by the user in <code>BulkWriteOptions</code>, regardless of its value.</p>
-<p>Explicitly defining <code>bypassDocumentValidation: false</code> aligns with the server's default to perform schema validation and
-thus has no effect. However, checking the value of an option that the user specified and omitting it from the command
-document if it matches the server's default creates unnecessary work for drivers. Always sending the user's specified
-value also safeguards against the unlikely event that the server changes the default value for
-<code>bypassDocumentValidation</code> in the future.</p>
 <h3 id="why-is-providing-access-to-the-raw-server-response-when-a-command-error-occurs-required"><a class="header" href="#why-is-providing-access-to-the-raw-server-response-when-a-command-error-occurs-required">Why is providing access to the raw server response when a command error occurs required?</a></h3>
 <p>This allows users to access new error fields that the server may add in the future without needing to upgrade their
 driver version. See <a href="https://jira.mongodb.org/browse/DRIVERS-2385">DRIVERS-2385</a> for more details.</p>

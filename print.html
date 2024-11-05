@@ -18995,6 +18995,16 @@ class DistinctOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
+
+  /**
+   * The index to use. Specify either the index name as a string or the index key pattern.
+   * If specified, then the query system will only consider plans using the hinted index.
+   *
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
+   *
+   * @see https://www.mongodb.com/docs/manual/reference/command/find/
+   */
+  hint: Optional&lt;(String | Document)&gt;;
 }
 
 enum CursorType {
@@ -19465,7 +19475,7 @@ class BulkWriteOptions {
   /**
    * If true, allows the write to opt-out of document level validation.
    *
-   * This option is sent only if the caller explicitly provides a true value. The default is to not send a value.
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    * For servers &lt; 3.2, this option is ignored and not sent as document validation is not available.
    * For unacknowledged writes using OP_INSERT, OP_UPDATE, or OP_DELETE, the driver MUST raise an error if the caller explicitly provides a value.
    */
@@ -19500,7 +19510,7 @@ class InsertOneOptions {
   /**
    * If true, allows the write to opt-out of document level validation.
    *
-   * This option is sent only if the caller explicitly provides a true value. The default is to not send a value.
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    * For servers &lt; 3.2, this option is ignored and not sent as document validation is not available.
    * For unacknowledged writes using OP_INSERT, the driver MUST raise an error if the caller explicitly provides a value.
    */
@@ -19522,7 +19532,7 @@ class InsertManyOptions {
   /**
    * If true, allows the write to opt-out of document level validation.
    *
-   * This option is sent only if the caller explicitly provides a true value. The default is to not send a value.
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    * For servers &lt; 3.2, this option is ignored and not sent as document validation is not available.
    * For unacknowledged writes using OP_INSERT, the driver MUST raise an error if the caller explicitly provides a value.
    */
@@ -19562,7 +19572,7 @@ class UpdateOptions {
   /**
    * If true, allows the write to opt-out of document level validation.
    *
-   * This option is sent only if the caller explicitly provides a true value. The default is to not send a value.
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    * For servers &lt; 3.2, this option is ignored and not sent as document validation is not available.
    * For unacknowledged writes using OP_UPDATE, the driver MUST raise an error if the caller explicitly provides a value.
    */
@@ -19642,7 +19652,7 @@ class ReplaceOptions {
   /**
    * If true, allows the write to opt-out of document level validation.
    *
-   * This option is sent only if the caller explicitly provides a true value. The default is to not send a value.
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    * For servers &lt; 3.2, this option is ignored and not sent as document validation is not available.
    * For unacknowledged writes using OP_UPDATE, the driver MUST raise an error if the caller explicitly provides a value.
    */
@@ -20501,7 +20511,7 @@ class FindOneAndReplaceOptions {
   /**
    * If true, allows the write to opt-out of document level validation.
    *
-   * This option is sent only if the caller explicitly provides a true value. The default is to not send a value.
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    * For servers &lt; 3.2, this option is ignored and not sent as document validation is not available.
    */
   bypassDocumentValidation: Optional&lt;Boolean&gt;;
@@ -20619,7 +20629,7 @@ class FindOneAndUpdateOptions {
   /**
    * If true, allows the write to opt-out of document level validation.
    *
-   * This option is sent only if the caller explicitly provides a true value. The default is to not send a value.
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    * For servers &lt; 3.2, this option is ignored and not sent as document validation is not available.
    */
   bypassDocumentValidation: Optional&lt;Boolean&gt;;
@@ -20933,6 +20943,12 @@ the Stable API, it was decided that this change was acceptable to make in minor 
 aforementioned allowance in the SemVer spec.</p>
 <h2 id="changelog-33"><a class="header" href="#changelog-33">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-11-04: Always send a value for <code>bypassDocumentValidation</code> if it was specified.</p>
+</li>
+<li>
+<p>2024-11-01: Add hint to DistinctOptions</p>
+</li>
 <li>
 <p>2024-10-30: Document query limitations in <code>countDocuments</code>.</p>
 </li>
@@ -22494,16 +22510,6 @@ Compiling the individual results server-side and consuming these results driver-
 recording the summary counts. We expect that most users are not interested in the individual results of their operations
 and that most users will rely on defaults, so <code>verboseResults</code> defaults to <code>false</code> to improve performance in the common
 case.</p>
-<h3 id="why-should-drivers-send-bypassdocumentvalidation-false-for-bulkwrite"><a class="header" href="#why-should-drivers-send-bypassdocumentvalidation-false-for-bulkwrite">Why should drivers send <code>bypassDocumentValidation: false</code> for <code>bulkWrite</code>?</a></h3>
-<p><a href="https://jira.mongodb.org/browse/DRIVERS-450">DRIVERS-450</a> introduced a requirement that drivers only send a value for
-<code>bypassDocumentValidation</code> on write commands if it was specified as true. The original motivation for this change is not
-documented. This specification requires that drivers send <code>bypassDocumentValidation</code> in the <code>bulkWrite</code> command if it is
-set by the user in <code>BulkWriteOptions</code>, regardless of its value.</p>
-<p>Explicitly defining <code>bypassDocumentValidation: false</code> aligns with the server's default to perform schema validation and
-thus has no effect. However, checking the value of an option that the user specified and omitting it from the command
-document if it matches the server's default creates unnecessary work for drivers. Always sending the user's specified
-value also safeguards against the unlikely event that the server changes the default value for
-<code>bypassDocumentValidation</code> in the future.</p>
 <h3 id="why-is-providing-access-to-the-raw-server-response-when-a-command-error-occurs-required"><a class="header" href="#why-is-providing-access-to-the-raw-server-response-when-a-command-error-occurs-required">Why is providing access to the raw server response when a command error occurs required?</a></h3>
 <p>This allows users to access new error fields that the server may add in the future without needing to upgrade their
 driver version. See <a href="https://jira.mongodb.org/browse/DRIVERS-2385">DRIVERS-2385</a> for more details.</p>
@@ -25618,14 +25624,14 @@ provided as part of a MongoDB Enterprise distribution. It replaces <a href="clie
 <p><strong>ciphertext</strong></p>
 <p>One of the data formats of <a href="client-side-encryption/../bson-binary-encrypted/binary-encrypted.html">BSON binary encrypted</a>, representing an
 encoded BSON document containing encrypted ciphertext and metadata.</p>
-<p><strong>FLE</strong></p>
-<p>FLE is the first version of Client-Side Field Level Encryption. FLE is almost entirely client-side with the exception of
-server-side JSON schema.</p>
-<p><strong>Queryable Encryption</strong></p>
-<p>Queryable Encryption the second version of Client-Side Field Level Encryption. Data is encrypted client-side. Queryable
-Encryption supports indexed encrypted fields, which are further processed server-side.</p>
+<p><strong>Client-Side Field Level Encryption (CSFLE)</strong></p>
+<p>CSFLE is the first version of In-Use Encryption. CSFLE is almost entirely client-side with the exception of server-side
+JSON schema.</p>
+<p><strong>Queryable Encryption (QE)</strong></p>
+<p>Queryable Encryption the second version of In-Use Encryption. Data is encrypted client-side. Queryable Encryption
+supports indexed encrypted fields, which are further processed server-side.</p>
 <p><strong>In-Use Encryption</strong></p>
-<p>Is an umbrella term describing the both FLE and Queryable Encryption.</p>
+<p>Is an umbrella term describing the both CSFLE and Queryable Encryption.</p>
 <p><strong>encryptedFields</strong></p>
 <p>A BSON document describing the Queryable Encryption encrypted fields. This is analogous to the JSON Schema in FLE. The
 following is an example encryptedFields in extended canonical JSON:</p>
@@ -25697,6 +25703,7 @@ created_key_id = clientencryption.create_data_key("aws", opts)
 opts = EncryptOpts(key_id=created_key_id,
     algorithm="AEAD_AES_256_CBC_HMAC_SHA_512-Random")
 encrypted = clientencryption.encrypt("secret text", opts)
+# Decryption does not require the key ID or algorithm. The ciphertext indicates the key ID and algorithm used.
 decrypted = clientencryption.decrypt(encrypted)
 </code></pre>
 <p>There are many moving parts to client side encryption with lots of similar sounding terms. Before proceeding to
@@ -26648,8 +26655,7 @@ client = MongoClient(auto_encryption_opts=opts)
 opts = ClientEncryptionOpts (
    key_vault_client=client,
    key_vault_namespace="keyvault.datakeys",
-   kms_providers=kms,
-   bypass_auto_encryption=True)
+   kms_providers=kms)
 client_encryption = ClientEncryption(opts)
 
 accounts = client.db.accounts
@@ -27356,14 +27362,14 @@ to MongoDB servers.</p>
 <a href="https://www.mongodb.com/docs/manual/tutorial/configure-encryption/">https://www.mongodb.com/docs/manual/tutorial/configure-encryption/</a>.</p>
 <p>TLS options may be useful for the AWS, Azure, and GCP KMS providers in a case where the default trust store does not
 include the needed CA certificates.</p>
-<h3 id="why-is-it-an-error-to-have-an-fle-1-and-queryable-encryption-field-in-the-same-collection"><a class="header" href="#why-is-it-an-error-to-have-an-fle-1-and-queryable-encryption-field-in-the-same-collection">Why is it an error to have an FLE 1 and Queryable Encryption field in the same collection?</a></h3>
-<p>There is no technical limitation to having a separate FLE field and Queryable Encryption field in the same collection.
-Prohibiting FLE and Queryable Encryption in the same collection reduces complexity. From the product perspective, a
-random FLE field and a non-queryable Queryable Encryption field have the same behavior and similar security guarantees.
-A deterministic FLE field leaks more information then a deterministic Queryable Encryption field. There is not a
-compelling use case to use both FLE and Queryable Encryption in the same collection.</p>
+<h3 id="why-is-it-an-error-to-have-an-csfle-and-queryable-encryption-field-in-the-same-collection"><a class="header" href="#why-is-it-an-error-to-have-an-csfle-and-queryable-encryption-field-in-the-same-collection">Why is it an error to have an CSFLE and Queryable Encryption field in the same collection?</a></h3>
+<p>There is no technical limitation to having a separate CSFLE field and Queryable Encryption field in the same collection.
+Prohibiting CSFLE and Queryable Encryption in the same collection reduces complexity. From the product perspective, a
+random CSFLE field and a non-queryable Queryable Encryption field have the same behavior and similar security
+guarantees. A deterministic CSFLE field leaks more information then a deterministic Queryable Encryption field. There is
+not a compelling use case to use both CSFLE and Queryable Encryption in the same collection.</p>
 <h3 id="is-it-an-error-to-set-schemamap-and-encryptedfieldsmap"><a class="header" href="#is-it-an-error-to-set-schemamap-and-encryptedfieldsmap">Is it an error to set schemaMap and encryptedFieldsMap?</a></h3>
-<p>No. FLE and Queryable Encryption fields can coexist in different collections. The same collection cannot be in the
+<p>No. CSFLE and Queryable Encryption fields can coexist in different collections. The same collection cannot be in the
 <code>encryptedFieldsMap</code> and <code>schemaMap</code>. <a href="client-side-encryption/client-side-encryption.html#libmongocrypt">libmongocrypt</a> will error if the same collection is specified in
 a <code>schemaMap</code> and <code>encryptedFieldsMap</code>.</p>
 <h3 id="why-is-bypassqueryanalysis-needed"><a class="header" href="#why-is-bypassqueryanalysis-needed">Why is bypassQueryAnalysis needed?</a></h3>
@@ -31085,8 +31091,7 @@ test (e.g. JIRA ticket).</li>
 </ul>
 <p><span id="test_operations"></span></p>
 <ul>
-<li><code>operations</code>: Required array of one or more <a href="unified-test-format/unified-test-format.html#operation">operation</a> objects. List of operations to be executed for the
-test case.</li>
+<li><code>operations</code>: Required array of <a href="unified-test-format/unified-test-format.html#operation">operation</a> objects. List of operations to be executed for the test case.</li>
 </ul>
 <p><span id="test_expectEvents"></span></p>
 <ul>
@@ -33359,6 +33364,9 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-10-31: Test operations array may be empty.</p>
+</li>
 <li>
 <p>2024-10-29: List more examples of root-level documents</p>
 </li>

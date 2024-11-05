@@ -273,14 +273,14 @@ provided as part of a MongoDB Enterprise distribution. It replaces <a href="#mon
 <p><strong>ciphertext</strong></p>
 <p>One of the data formats of <a href="../bson-binary-encrypted/binary-encrypted.html">BSON binary encrypted</a>, representing an
 encoded BSON document containing encrypted ciphertext and metadata.</p>
-<p><strong>FLE</strong></p>
-<p>FLE is the first version of Client-Side Field Level Encryption. FLE is almost entirely client-side with the exception of
-server-side JSON schema.</p>
-<p><strong>Queryable Encryption</strong></p>
-<p>Queryable Encryption the second version of Client-Side Field Level Encryption. Data is encrypted client-side. Queryable
-Encryption supports indexed encrypted fields, which are further processed server-side.</p>
+<p><strong>Client-Side Field Level Encryption (CSFLE)</strong></p>
+<p>CSFLE is the first version of In-Use Encryption. CSFLE is almost entirely client-side with the exception of server-side
+JSON schema.</p>
+<p><strong>Queryable Encryption (QE)</strong></p>
+<p>Queryable Encryption the second version of In-Use Encryption. Data is encrypted client-side. Queryable Encryption
+supports indexed encrypted fields, which are further processed server-side.</p>
 <p><strong>In-Use Encryption</strong></p>
-<p>Is an umbrella term describing the both FLE and Queryable Encryption.</p>
+<p>Is an umbrella term describing the both CSFLE and Queryable Encryption.</p>
 <p><strong>encryptedFields</strong></p>
 <p>A BSON document describing the Queryable Encryption encrypted fields. This is analogous to the JSON Schema in FLE. The
 following is an example encryptedFields in extended canonical JSON:</p>
@@ -352,6 +352,7 @@ created_key_id = clientencryption.create_data_key("aws", opts)
 opts = EncryptOpts(key_id=created_key_id,
     algorithm="AEAD_AES_256_CBC_HMAC_SHA_512-Random")
 encrypted = clientencryption.encrypt("secret text", opts)
+# Decryption does not require the key ID or algorithm. The ciphertext indicates the key ID and algorithm used.
 decrypted = clientencryption.decrypt(encrypted)
 </code></pre>
 <p>There are many moving parts to client side encryption with lots of similar sounding terms. Before proceeding to
@@ -1303,8 +1304,7 @@ client = MongoClient(auto_encryption_opts=opts)
 opts = ClientEncryptionOpts (
    key_vault_client=client,
    key_vault_namespace="keyvault.datakeys",
-   kms_providers=kms,
-   bypass_auto_encryption=True)
+   kms_providers=kms)
 client_encryption = ClientEncryption(opts)
 
 accounts = client.db.accounts
@@ -2011,14 +2011,14 @@ to MongoDB servers.</p>
 <a href="https://www.mongodb.com/docs/manual/tutorial/configure-encryption/">https://www.mongodb.com/docs/manual/tutorial/configure-encryption/</a>.</p>
 <p>TLS options may be useful for the AWS, Azure, and GCP KMS providers in a case where the default trust store does not
 include the needed CA certificates.</p>
-<h3 id="why-is-it-an-error-to-have-an-fle-1-and-queryable-encryption-field-in-the-same-collection"><a class="header" href="#why-is-it-an-error-to-have-an-fle-1-and-queryable-encryption-field-in-the-same-collection">Why is it an error to have an FLE 1 and Queryable Encryption field in the same collection?</a></h3>
-<p>There is no technical limitation to having a separate FLE field and Queryable Encryption field in the same collection.
-Prohibiting FLE and Queryable Encryption in the same collection reduces complexity. From the product perspective, a
-random FLE field and a non-queryable Queryable Encryption field have the same behavior and similar security guarantees.
-A deterministic FLE field leaks more information then a deterministic Queryable Encryption field. There is not a
-compelling use case to use both FLE and Queryable Encryption in the same collection.</p>
+<h3 id="why-is-it-an-error-to-have-an-csfle-and-queryable-encryption-field-in-the-same-collection"><a class="header" href="#why-is-it-an-error-to-have-an-csfle-and-queryable-encryption-field-in-the-same-collection">Why is it an error to have an CSFLE and Queryable Encryption field in the same collection?</a></h3>
+<p>There is no technical limitation to having a separate CSFLE field and Queryable Encryption field in the same collection.
+Prohibiting CSFLE and Queryable Encryption in the same collection reduces complexity. From the product perspective, a
+random CSFLE field and a non-queryable Queryable Encryption field have the same behavior and similar security
+guarantees. A deterministic CSFLE field leaks more information then a deterministic Queryable Encryption field. There is
+not a compelling use case to use both CSFLE and Queryable Encryption in the same collection.</p>
 <h3 id="is-it-an-error-to-set-schemamap-and-encryptedfieldsmap"><a class="header" href="#is-it-an-error-to-set-schemamap-and-encryptedfieldsmap">Is it an error to set schemaMap and encryptedFieldsMap?</a></h3>
-<p>No. FLE and Queryable Encryption fields can coexist in different collections. The same collection cannot be in the
+<p>No. CSFLE and Queryable Encryption fields can coexist in different collections. The same collection cannot be in the
 <code>encryptedFieldsMap</code> and <code>schemaMap</code>. <a href="#libmongocrypt">libmongocrypt</a> will error if the same collection is specified in
 a <code>schemaMap</code> and <code>encryptedFieldsMap</code>.</p>
 <h3 id="why-is-bypassqueryanalysis-needed"><a class="header" href="#why-is-bypassqueryanalysis-needed">Why is bypassQueryAnalysis needed?</a></h3>
