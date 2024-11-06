@@ -79,7 +79,7 @@ An external service providing fixed-size encryption/decryption. Only data keys a
 
 A map of KMS providers to credentials. Configured client-side. Example:
 
-```python
+```javascript
 kms_providers = {
    "aws": {
       "accessKeyId": AWS_KEYID,
@@ -93,19 +93,18 @@ kms_providers = {
 
 **KMS provider**
 
-A configured KMS. Identified by a key in the KMS providers map. The key has the form "<KMS provider type>" or
-"<KMS provider type>:<KMS
-provider name>". Examples: "aws" or "aws:myname". In [libmongocrypt](#libmongocrypt), the key
+A configured KMS. Identified by a key in the KMS providers map. The key has the form `<KMS provider type>` or
+`<KMS provider type>:<KMS provider name>`. Examples: `aws` or `aws:myname`. In [libmongocrypt](#libmongocrypt), the key
 is referred to as the KMS ID.
 
 **KMS provider type**
 
-The type of backing KMS. Identified by the string: "aws", "azure", "gcp", "kmip", or "local".
+The type of backing KMS. Identified by the string: `aws`, `azure`, `gcp`, `kmip`, or `local`.
 
 **KMS provider name**
 
 An optional name to identify a KMS provider. Enables configuring multiple KMS providers with the same KMS provider type
-(e.g. "aws:name1" and "aws:name2" can refer to different AWS accounts).
+(e.g. `aws:name1` and `aws:name2` can refer to different AWS accounts).
 
 **Customer Master Key (CMK)**
 
@@ -855,7 +854,7 @@ Assume an exposition-only function $GetEncryptedFields(opts, collName, dbName, a
 options, $collName$ is the name of the collection, $dbName$ is the name of the database associated with that collection,
 and $askDb$ is a boolean value. The resulting `encryptedFields` $EF$ is found by:
 
-1. Let $QualName$ be the string formed by joining$dbName$ and $collName$ with an ASCII dot `"."`.
+1. Let $QualName$ be the string formed by joining $dbName$ and $collName$ with an ASCII dot `"."`.
 2. If $opts$ contains an `"encryptedFields"` property, then $EF$ is the value of that property.
 3. Otherwise, if `AutoEncryptionOptions.encryptedFieldsMap` contains an element named by $QualName$, then $EF$ is the
     value of that element.
