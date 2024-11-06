@@ -574,13 +574,13 @@ retrieve the abstracted value as a different type (e.g. casting it). <code>doubl
 <h2 id="specification-1"><a class="header" href="#specification-1">Specification</a></h2>
 <h3 id="bson-decimal128-implementation-details"><a class="header" href="#bson-decimal128-implementation-details">BSON Decimal128 implementation details</a></h3>
 <p>The <code>BSON Decimal128</code> data type implements the
-<a href="http://speleotrove.com/decimal/decbits.html">Decimal Arithmetic Encodings</a> specification, with certain exceptions
+<a href="https://speleotrove.com/decimal/decbits.html">Decimal Arithmetic Encodings</a> specification, with certain exceptions
 around value integrity and the coefficient encoding. When a value cannot be represented exactly, the value will be
 rejected.</p>
 <p>The coefficient MUST be stored as an unsigned binary integer (BID) rather than the densely-packed decimal (DPD) shown in
 the specification. See either the <code>IEEE Std 754-2008</code> spec or the driver examples for further detail.</p>
 <p>The specification defines several statuses which are meant to signal exceptional
-<a href="http://speleotrove.com/decimal/daexcep.html">circumstances</a>, such as when overflowing occurs, and how to handle them.</p>
+<a href="https://speleotrove.com/decimal/daexcep.html">circumstances</a>, such as when overflowing occurs, and how to handle them.</p>
 <p><code>BSON Decimal128</code> Value Objects MUST implement these actions for these exceptions:</p>
 <ul>
 <li>
@@ -656,8 +656,8 @@ Decimal128 Value Objects and assigning the result to a new object.</p>
 native language value representations of the objects and perform the operations on those native representations. The
 user will then create a new Decimal128 Value Object and optionally overwrite the original Decimal128 Value Object.</p>
 <h3 id="from-string-representation"><a class="header" href="#from-string-representation">From String Representation</a></h3>
-<p>For finite numbers, we will use the definition at <a href="http://speleotrove.com/decimal/daconvs.html">http://speleotrove.com/decimal/daconvs.html</a>. It has been modified to
-account for a different NaN representation and whitespace rules and copied here:</p>
+<p>For finite numbers, we will use the definition at <a href="https://speleotrove.com/decimal/daconvs.html">https://speleotrove.com/decimal/daconvs.html</a>. It has been modified
+to account for a different NaN representation and whitespace rules and copied here:</p>
 <pre><code class="language-text">Strings which are acceptable for conversion to the abstract representation of
 numbers, or which might result from conversion from the abstract representation
 to a string, are called numeric strings.
@@ -727,7 +727,7 @@ Notes:
        are permitted.
 </code></pre>
 <h3 id="to-string-representation"><a class="header" href="#to-string-representation">To String Representation</a></h3>
-<p>For finite numbers, we will use the definition at <a href="http://speleotrove.com/decimal/daconvs.html">http://speleotrove.com/decimal/daconvs.html</a>. It has been copied
+<p>For finite numbers, we will use the definition at <a href="https://speleotrove.com/decimal/daconvs.html">https://speleotrove.com/decimal/daconvs.html</a>. It has been copied
 here:</p>
 <pre><code class="language-text">The coefficient is first converted to a string in base ten using the characters
 0 through 9 with no leading zeros (except if its value is zero, in which case a
@@ -807,7 +807,7 @@ BSON/Extended JSON Decimal128.</p>
 <h2 id="tests"><a class="header" href="#tests">Tests</a></h2>
 <p>See the <a href="bson-decimal128/../bson-corpus/bson-corpus.html">BSON Corpus</a> for tests.</p>
 <p>Most of the tests are converted from the
-<a href="http://speleotrove.com/decimal/dectest.html">General Decimal Arithmetic Testcases</a>.</p>
+<a href="https://speleotrove.com/decimal/dectest.html">General Decimal Arithmetic Testcases</a>.</p>
 <h2 id="qa"><a class="header" href="#qa">Q&amp;A</a></h2>
 <ul>
 <li>
@@ -4428,7 +4428,7 @@ normally.</p>
 <h3 id="connection-strings-and-results"><a class="header" href="#connection-strings-and-results">Connection strings, and results</a></h3>
 <ul>
 <li>
-<p><a href="mongodb://localhost:27017/?compressors=snappy">mongodb://localhost:27017/?compressors=snappy</a></p>
+<p><code>mongodb://localhost:27017/?compressors=snappy</code></p>
 <p>mongod should have logged the following (the exact log output may differ depending on server version):</p>
 <pre><code class="language-javascript">{"t":{"$date":"2021-04-08T13:28:38.885-06:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"Connection accepted","attr":{"remote":"127.0.0.1:50635","uuid":"03961627-aec7-4543-8a17-9690f87273a6","connectionId":2,"connectionCount":1}}
 {"t":{"$date":"2021-04-08T13:28:38.886-06:00"},"s":"D3", "c":"EXECUTOR", "id":22983,   "ctx":"listener","msg":"Starting new executor thread in passthrough mode"}
@@ -4474,7 +4474,7 @@ normally.</p>
 </code></pre>
 </li>
 <li>
-<p><a href="mongodb://localhost:27017/?compressors=snoopy">mongodb://localhost:27017/?compressors=snoopy</a></p>
+<p><code>mongodb://localhost:27017/?compressors=snoopy</code></p>
 <p>mongod should have logged the following:</p>
 <pre><code class="language-javascript">{"t":{"$date":"2021-04-20T09:57:26.823-06:00"},"s":"D2", "c":"COMMAND",  "id":21965,   "ctx":"conn5","msg":"About to run the command","attr":{"db":"admin","commandArgs":{"hello":1,"client":{"driver":{"name":"mongo-csharp-driver","version":"2.12.2.0"},"os":{"type":"macOS","name":"Darwin 19.6.0 Darwin Kernel Version 19.6.0: Tue Jan 12 22:13:05 PST 2021; root:xnu-6153.141.16~1/RELEASE_X86_64","architecture":"x86_64","version":"19.6.0"},"platform":".NET 5.0.3"},"compression":[],"$readPreference":{"mode":"secondaryPreferred"},"$db":"admin"}}}
 {"t":{"$date":"2021-04-20T09:57:26.823-06:00"},"s":"I",  "c":"NETWORK",  "id":51800,   "ctx":"conn5","msg":"client metadata","attr":{"remote":"127.0.0.1:54372","client":"conn5","doc":{"driver":{"name":"mongo-csharp-driver","version":"2.12.2.0"},"os":{"type":"macOS","name":"Darwin 19.6.0 Darwin Kernel Version 19.6.0: Tue Jan 12 22:13:05 PST 2021; root:xnu-6153.141.16~1/RELEASE_X86_64","architecture":"x86_64","version":"19.6.0"},"platform":".NET 5.0.3"}}}
@@ -4489,7 +4489,7 @@ normally.</p>
 </code></pre>
 </li>
 <li>
-<p><a href="mongodb://localhost:27017/?compressors=snappy,zlib">mongodb://localhost:27017/?compressors=snappy,zlib</a></p>
+<p><code>mongodb://localhost:27017/?compressors=snappy,zlib</code></p>
 <p>mongod should have logged the following:</p>
 <pre><code class="language-javascript">{"t":{"$date":"2021-04-08T13:28:38.898-06:00"},"s":"D3", "c":"NETWORK",  "id":22927,   "ctx":"conn2","msg":"Decompressing message","attr":{"compressor":"snappy"}}
 </code></pre>
@@ -4498,7 +4498,7 @@ normally.</p>
 </code></pre>
 </li>
 <li>
-<p><a href="mongodb://localhost:27017/?compressors=zlib,snappy">mongodb://localhost:27017/?compressors=zlib,snappy</a></p>
+<p><code>mongodb://localhost:27017/?compressors=zlib,snappy</code></p>
 <p>mongod should have logged the following:</p>
 <pre><code class="language-javascript">{"t":{"$date":"2021-04-08T13:28:38.898-06:00"},"s":"D3", "c":"NETWORK",  "id":22927,   "ctx":"conn2","msg":"Decompressing message","attr":{"compressor":"zlib"}}
 </code></pre>
@@ -7310,7 +7310,7 @@ interrupting in-use connections, its next run MUST be scheduled as soon as possi
 <p>The pool MUST only interrupt in-use Connections whose generation is less than or equal to the generation of the pool at
 the moment of the clear (before the increment) that used the interruptInUseConnections flag. Any operations that have
 their Connections interrupted in this way MUST fail with a retryable error. If possible, the error SHOULD be a
-PoolClearedError with the following message: "Connection to <pool address> interrupted due to server monitor timeout".</p>
+PoolClearedError with the following message: <code>"Connection to &lt;pool address&gt; interrupted due to server monitor timeout"</code>.</p>
 <h5 id="clearing-a-load-balanced-pool"><a class="header" href="#clearing-a-load-balanced-pool">Clearing a load balanced pool</a></h5>
 <p>A Pool MUST also have a method of clearing all <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> for a specific <code>serviceId</code> for use when in
 load balancer mode. This method increments the generation of the pool for that specific <code>serviceId</code> in the generation
@@ -8987,11 +8987,11 @@ else // the valid host string contains no periods and is not "aws.amazonaws.com"
 <tr><td>sts.us-west-2.amazonaws.com.ch</td><td>us-west-2</td><td>use the second label</td></tr>
 <tr><td>example.com</td><td>com</td><td>use the second label</td></tr>
 <tr><td>localhost</td><td>us-east-1</td><td>no "<code>.</code>" character; use the default region</td></tr>
-<tr><td>sts..com</td><td><Error></td><td>second label is empty</td></tr>
-<tr><td>.amazonaws.com</td><td><Error></td><td>starts with a period</td></tr>
-<tr><td>sts.amazonaws.</td><td><Error></td><td>ends with a period</td></tr>
-<tr><td>""</td><td><Error></td><td>empty string</td></tr>
-<tr><td>"string longer than 255"</td><td><Error></td><td>string longer than 255 bytes</td></tr>
+<tr><td>sts..com</td><td>&lt; Error &gt;</td><td>second label is empty</td></tr>
+<tr><td>.amazonaws.com</td><td>&lt; Error &gt;</td><td>starts with a period</td></tr>
+<tr><td>sts.amazonaws.</td><td>&lt; Error &gt;</td><td>ends with a period</td></tr>
+<tr><td>""</td><td>&lt; Error &gt;</td><td>empty string</td></tr>
+<tr><td>"string longer than 255"</td><td>&lt; Error &gt;</td><td>string longer than 255 bytes</td></tr>
 </tbody></table>
 </div>
 <h4 id="mongocredential-properties-5"><a class="header" href="#mongocredential-properties-5"><a href="auth/auth.html#mongocredential">MongoCredential</a> Properties</a></h4>
@@ -9899,10 +9899,10 @@ forms:</p>
 </ul>
 <p>As a URI, those have to be UTF-8 encoded and URL-escaped, e.g.:</p>
 <ul>
-<li><a href="mongodb://IX:IX@mongodb.example.com/admin">mongodb://IX:IX@mongodb.example.com/admin</a></li>
-<li><a href="mongodb://IX:I%C2%ADX@mongodb.example.com/admin">mongodb://IX:I%C2%ADX@mongodb.example.com/admin</a></li>
-<li><a href="mongodb://%E2%85%A8:IV@mongodb.example.com/admin">mongodb://%E2%85%A8:IV@mongodb.example.com/admin</a></li>
-<li><a href="mongodb://%E2%85%A8:I%C2%ADV@mongodb.example.com/admin">mongodb://%E2%85%A8:I%C2%ADV@mongodb.example.com/admin</a></li>
+<li><code>mongodb://IX:IX@mongodb.example.com/admin</code></li>
+<li><code>mongodb://IX:I%C2%ADX@mongodb.example.com/admin</code></li>
+<li><code>mongodb://%E2%85%A8:IV@mongodb.example.com/admin</code></li>
+<li><code>mongodb://%E2%85%A8:I%C2%ADV@mongodb.example.com/admin</code></li>
 </ul>
 <h3 id="speculative-authentication-2"><a class="header" href="#speculative-authentication-2">Speculative Authentication</a></h3>
 <p>See the speculative authentication section in the <a href="auth/../mongodb-handshake/handshake.html">MongoDB Handshake spec</a>.</p>
@@ -25580,7 +25580,7 @@ a separate external MongoDB cluster.</p>
 <p>An external service providing fixed-size encryption/decryption. Only data keys are encrypted and decrypted with KMS.</p>
 <p><strong>KMS providers</strong></p>
 <p>A map of KMS providers to credentials. Configured client-side. Example:</p>
-<pre><code class="language-python">kms_providers = {
+<pre><code class="language-javascript">kms_providers = {
    "aws": {
       "accessKeyId": AWS_KEYID,
       "secretAccessKey": AWS_SECRET,
@@ -25591,15 +25591,14 @@ a separate external MongoDB cluster.</p>
 }
 </code></pre>
 <p><strong>KMS provider</strong></p>
-<p>A configured KMS. Identified by a key in the KMS providers map. The key has the form "<KMS provider type>" or
-"<KMS provider type>:<KMS
-provider name>". Examples: "aws" or "aws:myname". In <a href="client-side-encryption/client-side-encryption.html#libmongocrypt">libmongocrypt</a>, the key
+<p>A configured KMS. Identified by a key in the KMS providers map. The key has the form <code>&lt;KMS provider type&gt;</code> or
+<code>&lt;KMS provider type&gt;:&lt;KMS provider name&gt;</code>. Examples: <code>aws</code> or <code>aws:myname</code>. In <a href="client-side-encryption/client-side-encryption.html#libmongocrypt">libmongocrypt</a>, the key
 is referred to as the KMS ID.</p>
 <p><strong>KMS provider type</strong></p>
-<p>The type of backing KMS. Identified by the string: "aws", "azure", "gcp", "kmip", or "local".</p>
+<p>The type of backing KMS. Identified by the string: <code>aws</code>, <code>azure</code>, <code>gcp</code>, <code>kmip</code>, or <code>local</code>.</p>
 <p><strong>KMS provider name</strong></p>
 <p>An optional name to identify a KMS provider. Enables configuring multiple KMS providers with the same KMS provider type
-(e.g. "aws:name1" and "aws:name2" can refer to different AWS accounts).</p>
+(e.g. <code>aws:name1</code> and <code>aws:name2</code> can refer to different AWS accounts).</p>
 <p><strong>Customer Master Key (CMK)</strong></p>
 <p>The underlying key AWS KMS uses to encrypt and decrypt. See
 <a href="https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#master_keys">AWS Key Management Service Concepts</a>.</p>
@@ -26248,7 +26247,7 @@ collection.</p>
 options, $collName$ is the name of the collection, $dbName$ is the name of the database associated with that collection,
 and $askDb$ is a boolean value. The resulting <code>encryptedFields</code> $EF$ is found by:</p>
 <ol>
-<li>Let $QualName$ be the string formed by joining$dbName$ and $collName$ with an ASCII dot <code>"."</code>.</li>
+<li>Let $QualName$ be the string formed by joining $dbName$ and $collName$ with an ASCII dot <code>"."</code>.</li>
 <li>If $opts$ contains an <code>"encryptedFields"</code> property, then $EF$ is the value of that property.</li>
 <li>Otherwise, if <code>AutoEncryptionOptions.encryptedFieldsMap</code> contains an element named by $QualName$, then $EF$ is the
 value of that element.</li>
@@ -29709,7 +29708,7 @@ interrupting in-use connections, its next run MUST be scheduled as soon as possi
 <p>The pool MUST only interrupt in-use Connections whose generation is less than or equal to the generation of the pool at
 the moment of the clear (before the increment) that used the interruptInUseConnections flag. Any operations that have
 their Connections interrupted in this way MUST fail with a retryable error. If possible, the error SHOULD be a
-PoolClearedError with the following message: "Connection to <pool address> interrupted due to server monitor timeout".</p>
+PoolClearedError with the following message: <code>"Connection to &lt;pool address&gt; interrupted due to server monitor timeout"</code>.</p>
 <h5 id="clearing-a-load-balanced-pool-1"><a class="header" href="#clearing-a-load-balanced-pool-1">Clearing a load balanced pool</a></h5>
 <p>A Pool MUST also have a method of clearing all <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> for a specific <code>serviceId</code> for use when in
 load balancer mode. This method increments the generation of the pool for that specific <code>serviceId</code> in the generation
@@ -34199,11 +34198,11 @@ pseudo-specification provides such tests.</p>
 </ul>
 <h3 id="non-goals-2"><a class="header" href="#non-goals-2">Non-Goals</a></h3>
 <ul>
-<li>Replace or extend the official BSON spec at <a href="http://bsonspec.org">http://bsonspec.org</a>.</li>
+<li>Replace or extend the official BSON spec at <a href="https://bsonspec.org">https://bsonspec.org</a>.</li>
 <li>Provide a formal specification for <code>extjson</code>.</li>
 </ul>
 <h2 id="specification-43"><a class="header" href="#specification-43">Specification</a></h2>
-<p>The specification for BSON lives at <a href="http://bsonspec.org">http://bsonspec.org</a>. The <code>extjson</code> format specification is
+<p>The specification for BSON lives at <a href="https://bsonspec.org">https://bsonspec.org</a>. The <code>extjson</code> format specification is
 <a href="bson-corpus/../extended-json/extended-json.html">here</a>.</p>
 <h2 id="test-plan-35"><a class="header" href="#test-plan-35">Test Plan</a></h2>
 <p>This test plan describes a general approach for BSON testing. Future BSON specifications (such as for new types like

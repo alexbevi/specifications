@@ -784,7 +784,7 @@ interrupting in-use connections, its next run MUST be scheduled as soon as possi
 <p>The pool MUST only interrupt in-use Connections whose generation is less than or equal to the generation of the pool at
 the moment of the clear (before the increment) that used the interruptInUseConnections flag. Any operations that have
 their Connections interrupted in this way MUST fail with a retryable error. If possible, the error SHOULD be a
-PoolClearedError with the following message: "Connection to <pool address> interrupted due to server monitor timeout".</p>
+PoolClearedError with the following message: <code>"Connection to &lt;pool address&gt; interrupted due to server monitor timeout"</code>.</p>
 <h5 id="clearing-a-load-balanced-pool"><a class="header" href="#clearing-a-load-balanced-pool">Clearing a load balanced pool</a></h5>
 <p>A Pool MUST also have a method of clearing all <a href="#connection">Connections</a> for a specific <code>serviceId</code> for use when in
 load balancer mode. This method increments the generation of the pool for that specific <code>serviceId</code> in the generation

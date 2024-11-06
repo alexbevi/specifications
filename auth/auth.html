@@ -969,11 +969,11 @@ else // the valid host string contains no periods and is not "aws.amazonaws.com"
 <tr><td>sts.us-west-2.amazonaws.com.ch</td><td>us-west-2</td><td>use the second label</td></tr>
 <tr><td>example.com</td><td>com</td><td>use the second label</td></tr>
 <tr><td>localhost</td><td>us-east-1</td><td>no "<code>.</code>" character; use the default region</td></tr>
-<tr><td>sts..com</td><td><Error></td><td>second label is empty</td></tr>
-<tr><td>.amazonaws.com</td><td><Error></td><td>starts with a period</td></tr>
-<tr><td>sts.amazonaws.</td><td><Error></td><td>ends with a period</td></tr>
-<tr><td>""</td><td><Error></td><td>empty string</td></tr>
-<tr><td>"string longer than 255"</td><td><Error></td><td>string longer than 255 bytes</td></tr>
+<tr><td>sts..com</td><td>&lt; Error &gt;</td><td>second label is empty</td></tr>
+<tr><td>.amazonaws.com</td><td>&lt; Error &gt;</td><td>starts with a period</td></tr>
+<tr><td>sts.amazonaws.</td><td>&lt; Error &gt;</td><td>ends with a period</td></tr>
+<tr><td>""</td><td>&lt; Error &gt;</td><td>empty string</td></tr>
+<tr><td>"string longer than 255"</td><td>&lt; Error &gt;</td><td>string longer than 255 bytes</td></tr>
 </tbody></table>
 </div>
 <h4 id="mongocredential-properties-5"><a class="header" href="#mongocredential-properties-5"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
@@ -1881,10 +1881,10 @@ forms:</p>
 </ul>
 <p>As a URI, those have to be UTF-8 encoded and URL-escaped, e.g.:</p>
 <ul>
-<li><a href="mongodb://IX:IX@mongodb.example.com/admin">mongodb://IX:IX@mongodb.example.com/admin</a></li>
-<li><a href="mongodb://IX:I%C2%ADX@mongodb.example.com/admin">mongodb://IX:I%C2%ADX@mongodb.example.com/admin</a></li>
-<li><a href="mongodb://%E2%85%A8:IV@mongodb.example.com/admin">mongodb://%E2%85%A8:IV@mongodb.example.com/admin</a></li>
-<li><a href="mongodb://%E2%85%A8:I%C2%ADV@mongodb.example.com/admin">mongodb://%E2%85%A8:I%C2%ADV@mongodb.example.com/admin</a></li>
+<li><code>mongodb://IX:IX@mongodb.example.com/admin</code></li>
+<li><code>mongodb://IX:I%C2%ADX@mongodb.example.com/admin</code></li>
+<li><code>mongodb://%E2%85%A8:IV@mongodb.example.com/admin</code></li>
+<li><code>mongodb://%E2%85%A8:I%C2%ADV@mongodb.example.com/admin</code></li>
 </ul>
 <h3 id="speculative-authentication-1"><a class="header" href="#speculative-authentication-1">Speculative Authentication</a></h3>
 <p>See the speculative authentication section in the <a href="../mongodb-handshake/handshake.html">MongoDB Handshake spec</a>.</p>

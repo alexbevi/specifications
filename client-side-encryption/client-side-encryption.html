@@ -229,7 +229,7 @@ a separate external MongoDB cluster.</p>
 <p>An external service providing fixed-size encryption/decryption. Only data keys are encrypted and decrypted with KMS.</p>
 <p><strong>KMS providers</strong></p>
 <p>A map of KMS providers to credentials. Configured client-side. Example:</p>
-<pre><code class="language-python">kms_providers = {
+<pre><code class="language-javascript">kms_providers = {
    "aws": {
       "accessKeyId": AWS_KEYID,
       "secretAccessKey": AWS_SECRET,
@@ -240,15 +240,14 @@ a separate external MongoDB cluster.</p>
 }
 </code></pre>
 <p><strong>KMS provider</strong></p>
-<p>A configured KMS. Identified by a key in the KMS providers map. The key has the form "<KMS provider type>" or
-"<KMS provider type>:<KMS
-provider name>". Examples: "aws" or "aws:myname". In <a href="#libmongocrypt">libmongocrypt</a>, the key
+<p>A configured KMS. Identified by a key in the KMS providers map. The key has the form <code>&lt;KMS provider type&gt;</code> or
+<code>&lt;KMS provider type&gt;:&lt;KMS provider name&gt;</code>. Examples: <code>aws</code> or <code>aws:myname</code>. In <a href="#libmongocrypt">libmongocrypt</a>, the key
 is referred to as the KMS ID.</p>
 <p><strong>KMS provider type</strong></p>
-<p>The type of backing KMS. Identified by the string: "aws", "azure", "gcp", "kmip", or "local".</p>
+<p>The type of backing KMS. Identified by the string: <code>aws</code>, <code>azure</code>, <code>gcp</code>, <code>kmip</code>, or <code>local</code>.</p>
 <p><strong>KMS provider name</strong></p>
 <p>An optional name to identify a KMS provider. Enables configuring multiple KMS providers with the same KMS provider type
-(e.g. "aws:name1" and "aws:name2" can refer to different AWS accounts).</p>
+(e.g. <code>aws:name1</code> and <code>aws:name2</code> can refer to different AWS accounts).</p>
 <p><strong>Customer Master Key (CMK)</strong></p>
 <p>The underlying key AWS KMS uses to encrypt and decrypt. See
 <a href="https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#master_keys">AWS Key Management Service Concepts</a>.</p>
@@ -897,7 +896,7 @@ collection.</p>
 options, $collName$ is the name of the collection, $dbName$ is the name of the database associated with that collection,
 and $askDb$ is a boolean value. The resulting <code>encryptedFields</code> $EF$ is found by:</p>
 <ol>
-<li>Let $QualName$ be the string formed by joining$dbName$ and $collName$ with an ASCII dot <code>"."</code>.</li>
+<li>Let $QualName$ be the string formed by joining $dbName$ and $collName$ with an ASCII dot <code>"."</code>.</li>
 <li>If $opts$ contains an <code>"encryptedFields"</code> property, then $EF$ is the value of that property.</li>
 <li>Otherwise, if <code>AutoEncryptionOptions.encryptedFieldsMap</code> contains an element named by $QualName$, then $EF$ is the
 value of that element.</li>
