@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="light" dir="ltr">
+<html lang="en" class="light sidebar-visible" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -8,7 +8,7 @@
 
 
         <!-- Custom HTML head -->
-        
+
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
@@ -32,7 +32,7 @@
         <!-- Custom theme stylesheets -->
 
     </head>
-    <body class="sidebar-visible no-js">
+    <body>
     <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
@@ -61,19 +61,16 @@
             var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
-            var html = document.querySelector('html');
+            const html = document.documentElement;
             html.classList.remove('light')
             html.classList.add(theme);
-            var body = document.querySelector('body');
-            body.classList.remove('no-js')
-            body.classList.add('js');
+            html.classList.add("js");
         </script>
 
         <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var body = document.querySelector('body');
             var sidebar = null;
             var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
@@ -83,45 +80,27 @@
                 sidebar = 'hidden';
             }
             sidebar_toggle.checked = sidebar === 'visible';
-            body.classList.remove('sidebar-visible');
-            body.classList.add("sidebar-" + sidebar);
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
-            <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><a href="driver-mantras.html">Mantras</a></li><li class="chapter-item expanded affix "><a href="wireversion-featurelist/wireversion-featurelist.html">Wire Version Feature List</a></li><li class="chapter-item expanded affix "><li class="part-title">Specifications</li><li class="chapter-item expanded "><div><strong aria-hidden="true">1.</strong> Serialization</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="BSON.html"><strong aria-hidden="true">1.1.</strong> BSON</a></li><li class="chapter-item expanded "><a href="bson-objectid/objectid.html"><strong aria-hidden="true">1.2.</strong> ObjectId</a></li><li class="chapter-item expanded "><a href="bson-decimal128/decimal128.html"><strong aria-hidden="true">1.3.</strong> Decimal128</a></li><li class="chapter-item expanded "><a href="bson-binary-uuid/uuid.html"><strong aria-hidden="true">1.4.</strong> UUID</a></li><li class="chapter-item expanded "><a href="dbref/dbref.html"><strong aria-hidden="true">1.5.</strong> DBRef</a></li><li class="chapter-item expanded "><a href="extended-json/extended-json.html"><strong aria-hidden="true">1.6.</strong> Extended JSON</a></li></ol></li><li class="chapter-item expanded "><li class="spacer"></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Communication</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="message/OP_MSG.html"><strong aria-hidden="true">2.1.</strong> OP_MSG</a></li><li class="chapter-item expanded "><a href="run-command/run-command.html"><strong aria-hidden="true">2.2.</strong> Command Execution</a></li><li class="chapter-item expanded "><a href="connection-string/connection-string-spec.html"><strong aria-hidden="true">2.3.</strong> Connection String</a></li><li class="chapter-item expanded "><a href="uri-options/uri-options.html"><strong aria-hidden="true">2.4.</strong> URI Options</a></li><li class="chapter-item expanded "><a href="ocsp-support/ocsp-support.html"><strong aria-hidden="true">2.5.</strong> OCSP</a></li><li class="chapter-item expanded "><a href="mongodb-handshake/handshake.html"><strong aria-hidden="true">2.6.</strong> Initial Handshake</a></li><li class="chapter-item expanded "><a href="compression/OP_COMPRESSED.html"><strong aria-hidden="true">2.7.</strong> Wire Compression</a></li><li class="chapter-item expanded "><a href="socks5-support/socks5.html"><strong aria-hidden="true">2.8.</strong> SOCKS5</a></li><li class="chapter-item expanded "><a href="initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html"><strong aria-hidden="true">2.9.</strong> Initial DNS Seedlist Discovery</a></li></ol></li><li class="chapter-item expanded "><li class="spacer"></li><li class="chapter-item expanded "><div><strong aria-hidden="true">3.</strong> Connectivity</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html"><strong aria-hidden="true">3.1.</strong> Server Discovery and Monitoring</a></li><li class="chapter-item expanded "><a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html"><strong aria-hidden="true">3.2.</strong> Connection Monitoring and Pooling</a></li><li class="chapter-item expanded "><a href="load-balancers/load-balancers.html"><strong aria-hidden="true">3.3.</strong> Load Balancer Support</a></li></ol></li><li class="chapter-item expanded "><li class="spacer"></li><li class="chapter-item expanded "><a href="auth/auth.html"><strong aria-hidden="true">4.</strong> Authentication</a></li><li class="chapter-item expanded affix "><li class="spacer"></li><li class="chapter-item expanded "><div><strong aria-hidden="true">5.</strong> Availability</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="server-discovery-and-monitoring/server-monitoring.html"><strong aria-hidden="true">5.1.</strong> Server Monitoring</a></li><li class="chapter-item expanded "><a href="polling-srv-records-for-mongos-discovery/polling-srv-records-for-mongos-discovery.html"><strong aria-hidden="true">5.2.</strong> SRV Polling for mongos Discovery</a></li><li class="chapter-item expanded "><a href="server-selection/server-selection.html"><strong aria-hidden="true">5.3.</strong> Server Selection</a></li><li class="chapter-item expanded "><a href="max-staleness/max-staleness.html"><strong aria-hidden="true">5.4.</strong> Max Staleness</a></li></ol></li><li class="chapter-item expanded "><li class="spacer"></li><li class="chapter-item expanded "><div><strong aria-hidden="true">6.</strong> Resilience</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">6.1.</strong> Retryability</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="retryable-reads/retryable-reads.html"><strong aria-hidden="true">6.1.1.</strong> Reads</a></li><li class="chapter-item expanded "><a href="retryable-writes/retryable-writes.html"><strong aria-hidden="true">6.1.2.</strong> Writes</a></li></ol></li><li class="chapter-item expanded "><a href="client-side-operations-timeout/client-side-operations-timeout.html"><strong aria-hidden="true">6.2.</strong> CSOT</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">6.3.</strong> Consistency</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="sessions/driver-sessions.html"><strong aria-hidden="true">6.3.1.</strong> Sessions</a></li><li class="chapter-item expanded "><a href="causal-consistency/causal-consistency.html"><strong aria-hidden="true">6.3.2.</strong> Causal Consistency</a></li><li class="chapter-item expanded "><a href="sessions/snapshot-sessions.html"><strong aria-hidden="true">6.3.3.</strong> Snapshot Reads</a></li><li class="chapter-item expanded "><a href="transactions/transactions.html"><strong aria-hidden="true">6.3.4.</strong> Transactions</a></li><li class="chapter-item expanded "><a href="transactions-convenient-api/transactions-convenient-api.html"><strong aria-hidden="true">6.3.5.</strong> Convenient Transactions API</a></li></ol></li></ol></li><li class="chapter-item expanded "><li class="spacer"></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.</strong> Programmability</div></li><li><ol class="section"><li class="chapter-item expanded "><div><strong aria-hidden="true">7.1.</strong> Resource Management</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="enumerate-databases/enumerate-databases.html"><strong aria-hidden="true">7.1.1.</strong> Databases</a></li><li class="chapter-item expanded "><a href="enumerate-collections/enumerate-collections.html"><strong aria-hidden="true">7.1.2.</strong> Collections</a></li><li class="chapter-item expanded "><a href="index-management/index-management.html"><strong aria-hidden="true">7.1.3.</strong> Indexes</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.2.</strong> Data Management</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="crud/crud.html"><strong aria-hidden="true">7.2.1.</strong> CRUD</a></li><li class="chapter-item expanded "><a href="collation/collation.html"><strong aria-hidden="true">7.2.2.</strong> Collation</a></li><li class="chapter-item expanded "><a href="server_write_commands/server_write_commands.html"><strong aria-hidden="true">7.2.3.</strong> Write Commands</a></li><li class="chapter-item expanded "><a href="driver-bulk-update.html"><strong aria-hidden="true">7.2.4.</strong> Bulk API</a></li><li class="chapter-item expanded "><a href="crud/bulk-write.html"><strong aria-hidden="true">7.2.5.</strong> Bulk Write</a></li><li class="chapter-item expanded "><a href="read-write-concern/read-write-concern.html"><strong aria-hidden="true">7.2.6.</strong> R/W Concern</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.3.</strong> Cursors</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="change-streams/change-streams.html"><strong aria-hidden="true">7.3.1.</strong> Change Streams</a></li><li class="chapter-item expanded "><a href="find_getmore_killcursors_commands/find_getmore_killcursors_commands.html"><strong aria-hidden="true">7.3.2.</strong> find/getMore/killCursors</a></li></ol></li><li class="chapter-item expanded "><a href="gridfs/gridfs-spec.html"><strong aria-hidden="true">7.4.</strong> GridFS</a></li><li class="chapter-item expanded "><a href="versioned-api/versioned-api.html"><strong aria-hidden="true">7.5.</strong> Stable API</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">7.6.</strong> Security</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="client-side-encryption/client-side-encryption.html"><strong aria-hidden="true">7.6.1.</strong> Client Side Encryption</a></li><li class="chapter-item expanded "><a href="bson-binary-encrypted/binary-encrypted.html"><strong aria-hidden="true">7.6.2.</strong> BSON Binary Subtype 6</a></li></ol></li></ol></li><li class="chapter-item expanded "><li class="spacer"></li><li class="chapter-item expanded "><div><strong aria-hidden="true">8.</strong> Observability</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="command-logging-and-monitoring/command-logging-and-monitoring.html"><strong aria-hidden="true">8.1.</strong> Command Logging and Monitoring</a></li><li class="chapter-item expanded "><a href="server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html"><strong aria-hidden="true">8.2.</strong> SDAM Logging and Monitoring</a></li><li class="chapter-item expanded "><a href="logging/logging.html"><strong aria-hidden="true">8.3.</strong> Standardized Logging</a></li><li class="chapter-item expanded "><a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html"><strong aria-hidden="true">8.4.</strong> Connection Pool Logging</a></li></ol></li><li class="chapter-item expanded "><li class="spacer"></li><li class="chapter-item expanded "><div><strong aria-hidden="true">9.</strong> Testability</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="unified-test-format/unified-test-format.html"><strong aria-hidden="true">9.1.</strong> Unified Test Format</a></li><li class="chapter-item expanded "><a href="atlas-data-lake-testing/tests/index.html"><strong aria-hidden="true">9.2.</strong> Atlas Data Federation Testing</a></li><li class="chapter-item expanded "><a href="benchmarking/benchmarking.html"><strong aria-hidden="true">9.3.</strong> Performance Benchmarking</a></li><li class="chapter-item expanded "><a href="bson-corpus/bson-corpus.html"><strong aria-hidden="true">9.4.</strong> BSON Corpus</a></li><li class="chapter-item expanded "><a href="connections-survive-step-down/tests/index.html"><strong aria-hidden="true">9.5.</strong> Replication Event Resilience</a></li><li class="chapter-item expanded "><a href="faas-automated-testing/faas-automated-testing.html"><strong aria-hidden="true">9.6.</strong> FAAS Automated Testing</a></li><li class="chapter-item expanded "><a href="serverless-testing/index.html"><strong aria-hidden="true">9.7.</strong> Atlas Serverless Testing</a></li></ol></li></ol>
-            </div>
+            <!-- populated by js -->
+            <div class="sidebar-scrollbox"></div>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
             </div>
         </nav>
 
-        <!-- Track and set sidebar scroll position -->
-        <script>
-            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
-            sidebarScrollbox.addEventListener('click', function(e) {
-                if (e.target.tagName === 'A') {
-                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
-                }
-            }, { passive: true });
-            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
-            sessionStorage.removeItem('sidebar-scroll');
-            if (sidebarScrollTop) {
-                // preserve sidebar scroll position when navigating via links within sidebar
-                sidebarScrollbox.scrollTop = sidebarScrollTop;
-            } else {
-                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
-                var activeSection = document.querySelector('#sidebar .active');
-                if (activeSection) {
-                    activeSection.scrollIntoView({ block: 'center' });
-                }
-            }
-        </script>
+        <script async src="toc.js"></script>
 
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
                         <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
@@ -4085,78 +4064,6 @@ limit:</p>
 </ol>
 <p>Additionally, implementers are encouraged to place high priority information about the platform earlier in the string,
 in order to avoid possible truncating of those details.</p>
-<h2 id="test-plan-8"><a class="header" href="#test-plan-8">Test Plan</a></h2>
-<p>Drivers that capture values for <code>client.env</code> should test that a connection and hello command succeeds in the presence of
-the following sets of environment variables:</p>
-<ol>
-<li>
-<p>Valid AWS</p>
-<div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
-<tr><td><code>AWS_EXECUTION_ENV</code></td><td><code>AWS_Lambda_java8</code></td></tr>
-<tr><td><code>AWS_REGION</code></td><td><code>us-east-2</code></td></tr>
-<tr><td><code>AWS_LAMBDA_FUNCTION_MEMORY_SIZE</code></td><td><code>1024</code></td></tr>
-</tbody></table>
-</div></li>
-<li>
-<p>Valid Azure</p>
-<div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
-<tr><td><code>FUNCTIONS_WORKER_RUNTIME</code></td><td><code>node</code></td></tr>
-</tbody></table>
-</div></li>
-<li>
-<p>Valid GCP</p>
-<div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
-<tr><td><code>K_SERVICE</code></td><td><code>servicename</code></td></tr>
-<tr><td><code>FUNCTION_MEMORY_MB</code></td><td><code>1024</code></td></tr>
-<tr><td><code>FUNCTION_TIMEOUT_SEC</code></td><td><code>60</code></td></tr>
-<tr><td><code>FUNCTION_REGION</code></td><td><code>us-central1</code></td></tr>
-</tbody></table>
-</div></li>
-<li>
-<p>Valid Vercel</p>
-<div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
-<tr><td><code>VERCEL</code></td><td><code>1</code></td></tr>
-<tr><td><code>VERCEL_REGION</code></td><td><code>cdg1</code></td></tr>
-</tbody></table>
-</div></li>
-<li>
-<p>Invalid - multiple providers</p>
-<div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
-<tr><td><code>AWS_EXECUTION_ENV</code></td><td><code>AWS_Lambda_java8</code></td></tr>
-<tr><td><code>FUNCTIONS_WORKER_RUNTIME</code></td><td><code>node</code></td></tr>
-</tbody></table>
-</div></li>
-<li>
-<p>Invalid - long string</p>
-<div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
-<tr><td><code>AWS_EXECUTION_ENV</code></td><td><code>AWS_Lambda_java8</code></td></tr>
-<tr><td><code>AWS_REGION</code></td><td><code>a</code> repeated 512 times</td></tr>
-</tbody></table>
-</div></li>
-<li>
-<p>Invalid - wrong types</p>
-<div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
-<tr><td><code>AWS_EXECUTION_ENV</code></td><td><code>AWS_Lambda_java8</code></td></tr>
-<tr><td><code>AWS_LAMBDA_FUNCTION_MEMORY_SIZE</code></td><td><code>big</code></td></tr>
-</tbody></table>
-</div></li>
-<li>
-<p>Invalid - <code>AWS_EXECUTION_ENV</code> does not start with <code>"AWS_Lambda_"</code></p>
-<div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
-<tr><td><code>AWS_EXECUTION_ENV</code></td><td><code>EC2</code></td></tr>
-</tbody></table>
-</div></li>
-<li>
-<p>Valid container and FaaS provider. This test MUST verify that both the container metadata and the AWS Lambda metadata
-is present in <code>client.env</code>.</p>
-<div class="table-wrapper"><table><thead><tr><th>Environment Variable</th><th>Value</th></tr></thead><tbody>
-<tr><td><code>AWS_EXECUTION_ENV</code></td><td><code>AWS_Lambda_java8</code></td></tr>
-<tr><td><code>AWS_REGION</code></td><td><code>us-east-2</code></td></tr>
-<tr><td><code>AWS_LAMBDA_FUNCTION_MEMORY_SIZE</code></td><td><code>1024</code></td></tr>
-<tr><td><code>KUBERNETES_SERVICE_HOST</code></td><td><code>1</code></td></tr>
-</tbody></table>
-</div></li>
-</ol>
 <h2 id="motivation-for-change-6"><a class="header" href="#motivation-for-change-6">Motivation For Change</a></h2>
 <p>Being able to annotate individual connections with custom data will allow users and sysadmins to easily correlate events
 happening on their MongoDB deployment to a specific application. For support engineers, it furthermore helps identify
@@ -4251,6 +4158,7 @@ specification</li>
 </ul>
 <h2 id="changelog-10"><a class="header" href="#changelog-10">Changelog</a></h2>
 <ul>
+<li>2024-11-05: Move handshake prose tests from spec file to prose test file.</li>
 <li>2024-10-09: Clarify that FaaS and container metadata must both be populated when both are present.</li>
 <li>2024-08-16: Migrated from reStructuredText to Markdown.</li>
 <li>2019-11-13: Added section about supporting wrapping libraries</li>
@@ -4414,7 +4322,7 @@ authentication requests.</p>
 <li>copydbgetnonce</li>
 <li>copydb</li>
 </ul>
-<h2 id="test-plan-9"><a class="header" href="#test-plan-9">Test Plan</a></h2>
+<h2 id="test-plan-8"><a class="header" href="#test-plan-8">Test Plan</a></h2>
 <p>There are no automated tests accompanying this specification, instead the following is a description of test scenarios
 clients should implement.</p>
 <p>In general, after implementing this functionality and the test cases, running the traditional client test suite against
@@ -4914,7 +4822,7 @@ server.mongodb.com. 86400 IN TXT   "replicaSet=replProduction&amp;authSource=aut
 Client MUST treat the host information as if the following URI was used instead:</p>
 <pre><code class="language-text">mongodb://mongodb1.mongodb.com:27317,mongodb2.mongodb.com:27107/?ssl=true&amp;replicaSet=replProduction&amp;authSource=otherDB
 </code></pre>
-<h2 id="test-plan-10"><a class="header" href="#test-plan-10">Test Plan</a></h2>
+<h2 id="test-plan-9"><a class="header" href="#test-plan-9">Test Plan</a></h2>
 <h3 id="prose-tests"><a class="header" href="#prose-tests">Prose Tests</a></h3>
 <p>See README.md in the accompanying <a href="initial-dns-seedlist-discovery/tests/README.html">test directory</a>.</p>
 <h3 id="spec-tests"><a class="header" href="#spec-tests">Spec Tests</a></h3>
@@ -5156,7 +5064,7 @@ ServerType; it is synonymous with Unknown.</p>
 (<code>electionId</code>, <code>setVersion</code>) tuple.</li>
 <li><code>maxSetVersion</code>: an integer or null. The largest setVersion ever reported by a primary. It may not monotonically
 increase, as electionId takes precedence in ordering Default null. Part of the (<code>electionId</code>, <code>setVersion</code>) tuple.</li>
-<li><code>servers</code>: a set of ServerDescription instances. Default contains one server: "localhost:27017", ServerType Unknown.</li>
+<li><code>servers</code>: a set of ServerDescription instances, one for each of the servers in the topology.</li>
 <li><code>stale</code>: a boolean for single-threaded clients, whether the topology must be re-scanned. (Not related to
 maxStalenessSeconds, nor to stale primaries.)</li>
 <li><code>compatible</code>: a boolean. False if any server's wire protocol version range is incompatible with the client's. Default
@@ -6565,6 +6473,9 @@ oversaw the specification process.</p>
 <h2 id="changelog-14"><a class="header" href="#changelog-14">Changelog</a></h2>
 <ul>
 <li>
+<p>2024-11-04: Make the description of <code>TopologyDescription.servers</code> consistent with the spec tests.</p>
+</li>
+<li>
 <p>2024-08-16: Updated host b wire versions in <code>too_new</code> and <code>too_old</code> tests</p>
 </li>
 <li>
@@ -7780,7 +7691,7 @@ interface WaitQueueTimeoutError {
   address: &lt;pool address&gt;;
 }
 </code></pre>
-<h2 id="test-plan-11"><a class="header" href="#test-plan-11">Test Plan</a></h2>
+<h2 id="test-plan-10"><a class="header" href="#test-plan-10">Test Plan</a></h2>
 <p>See <a href="connection-monitoring-and-pooling/tests/README.html">tests/README</a></p>
 <h2 id="design-rationale-10"><a class="header" href="#design-rationale-10">Design Rationale</a></h2>
 <h3 id="why-do-we-set-minpoolsize-across-all-members-of-a-replicaset-when-most-traffic-will-be-against-a-primary"><a class="header" href="#why-do-we-set-minpoolsize-across-all-members-of-a-replicaset-when-most-traffic-will-be-against-a-primary">Why do we set minPoolSize across all members of a replicaSet, when most traffic will be against a Primary?</a></h3>
@@ -9849,7 +9760,7 @@ colon follow the username before the '@' hostname separator.</p>
 </ul>
 </li>
 </ol>
-<h2 id="test-plan-12"><a class="header" href="#test-plan-12">Test Plan</a></h2>
+<h2 id="test-plan-11"><a class="header" href="#test-plan-11">Test Plan</a></h2>
 <p>Connection string tests have been defined in the associated files:</p>
 <ul>
 <li><a href="auth/./tests/legacy/connection-string.json">Connection String</a>.</li>
@@ -11061,7 +10972,7 @@ other operations.</p>
 <p>The rescan MUST happen <strong>before</strong> scanning all servers as part of the normal
 <a href="polling-srv-records-for-mongos-discovery/../server-discovery-and-monitoring/server-monitoring.html#scanning">scanning</a> functionality, but only if
 <em>rescanSRVIntervalMS</em> has passed.</p>
-<h2 id="test-plan-13"><a class="header" href="#test-plan-13">Test Plan</a></h2>
+<h2 id="test-plan-12"><a class="header" href="#test-plan-12">Test Plan</a></h2>
 <p>See README.md in the accompanying <a href="polling-srv-records-for-mongos-discovery/tests/README.html">test directory</a>.</p>
 <h2 id="motivation-for-change-8"><a class="header" href="#motivation-for-change-8">Motivation for Change</a></h2>
 <p>The original <a href="polling-srv-records-for-mongos-discovery/../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html">Initial DNS Seedlist Discovery</a>
@@ -12144,7 +12055,7 @@ process. Sharded transaction operations MUST be sent to the original mongos serv
 <a href="https://jira.mongodb.org/browse/SERVER-10947">SERVER-10947</a>.</p>
 <p>However, the "text" command is deprecated in 2.6, so this command-specific helper may become deprecated before this is
 fixed.</p>
-<h2 id="test-plan-14"><a class="header" href="#test-plan-14">Test Plan</a></h2>
+<h2 id="test-plan-13"><a class="header" href="#test-plan-13">Test Plan</a></h2>
 <p>The server selection test plan is given in a separate document that describes the tests and supporting data files:
 <a href="server-selection/./server-selection-tests.html">Server Selection Tests</a></p>
 <h2 id="design-rationale-12"><a class="header" href="#design-rationale-12">Design Rationale</a></h2>
@@ -12721,7 +12632,7 @@ idle replica set.</li>
 given a random distribution of values for maxStalenessSeconds, heartbeatFrequencyMS, lastWriteDate, and
 lastUpdateTime.</li>
 </ul>
-<h2 id="test-plan-15"><a class="header" href="#test-plan-15">Test Plan</a></h2>
+<h2 id="test-plan-14"><a class="header" href="#test-plan-14">Test Plan</a></h2>
 <p>See <code>max-staleness-tests.md</code>, and the YAML and JSON tests in the tests directory.</p>
 <h2 id="design-rationale-13"><a class="header" href="#design-rationale-13">Design Rationale</a></h2>
 <h3 id="specify-max-staleness-in-seconds"><a class="header" href="#specify-max-staleness-in-seconds">Specify max staleness in seconds</a></h3>
@@ -13264,7 +13175,7 @@ details).</li>
 will be retried if it is passed as a command to the command runner. These drivers also MUST document the potential
 for degraded performance given that "Early Failure on Socket Disconnect" feature does not support <code>mapReduce</code>.</li>
 </ol>
-<h2 id="test-plan-16"><a class="header" href="#test-plan-16">Test Plan</a></h2>
+<h2 id="test-plan-15"><a class="header" href="#test-plan-15">Test Plan</a></h2>
 <p>See the <a href="retryable-reads/./tests/README.html">README</a> for tests.</p>
 <p>At a high level, the test plan will cover executing supported read operations within a MongoClient where retryable reads
 have been enabled, ensuring that reads are retried.</p>
@@ -13842,7 +13753,7 @@ states that the <code>operationId</code> field is a driver-generated, 64-bit int
 as bulk write operations." Each attempt of a retryable write operation SHOULD report the same <code>operationId</code>; however,
 drivers SHOULD NOT use the <code>operationId</code> field to relay information about a transaction ID. A bulk write operation may
 consist of multiple write commands, each of which may specify a unique transaction ID.</p>
-<h2 id="test-plan-17"><a class="header" href="#test-plan-17">Test Plan</a></h2>
+<h2 id="test-plan-16"><a class="header" href="#test-plan-16">Test Plan</a></h2>
 <p>See the <a href="retryable-writes/tests/README.html">README</a> for tests.</p>
 <p>At a high level, the test plan will cover the following scenarios for executing supported write operations within a
 MongoClient where retryable writes have been enabled:</p>
@@ -14466,7 +14377,7 @@ the <code>explain</code> command. For example, Node's implementation might look 
 // sends:
 { explain: { find: ... }, maxTimeMS: &lt;remaining timeoutMS - min rtt&gt;}
 </code></pre>
-<h2 id="test-plan-18"><a class="header" href="#test-plan-18">Test Plan</a></h2>
+<h2 id="test-plan-17"><a class="header" href="#test-plan-17">Test Plan</a></h2>
 <p>See the <a href="client-side-operations-timeout/tests/README.html">README.md</a> in the tests directory.</p>
 <h2 id="motivation-for-change-13"><a class="header" href="#motivation-for-change-13">Motivation for Change</a></h2>
 <p>Users have many options to set timeouts for various parts of operation execution including, but not limited to,
@@ -15215,7 +15126,7 @@ received from servers.</p>
 <p>Drivers MUST check that the server they are sending a command to supports <code>$clusterTime</code> before adding <code>$clusterTime</code> to
 the command. A server supports <code>$clusterTime</code> when the <code>maxWireVersion</code> &gt;= 6.</p>
 <p>This supports the (presumably short lived) scenario where not all servers have been upgraded to 3.6.</p>
-<h2 id="test-plan-19"><a class="header" href="#test-plan-19">Test Plan</a></h2>
+<h2 id="test-plan-18"><a class="header" href="#test-plan-18">Test Plan</a></h2>
 <p>See the <a href="sessions/tests/README.html">README</a> for tests.</p>
 <h2 id="motivation-1"><a class="header" href="#motivation-1">Motivation</a></h2>
 <p>Drivers currently have no concept of a session. The driver API needs to be extended to support sessions.</p>
@@ -15530,7 +15441,7 @@ a write. Since unacknowledged writes don't receive a response from the server (o
 read after an unacknowledged write cannot be causally consistent with the unacknowledged write. Rather than prohibiting
 unacknowledged writes in a causally consistent session we have decided to accept this limitation. Drivers MUST document
 that causally consistent reads are not causally consistent with unacknowledged writes.</p>
-<h2 id="test-plan-20"><a class="header" href="#test-plan-20">Test Plan</a></h2>
+<h2 id="test-plan-19"><a class="header" href="#test-plan-19">Test Plan</a></h2>
 <p>Below is a list of test cases to write.</p>
 <p>Note: some tests are only relevant to certain deployments. For the purpose of deciding which tests to run assume that
 any deployment that is version 3.6 or higher and is either a replica set or a sharded cluster supports cluster times.</p>
@@ -16466,7 +16377,7 @@ while True:
 <h2 id="handling-command-errors"><a class="header" href="#handling-command-errors">Handling command errors</a></h2>
 <p>Drivers MUST document that command errors inside a transaction may abort the transaction on the server. An attempt to
 commit such transaction will be rejected with <code>NoSuchTransaction</code> error.</p>
-<h2 id="test-plan-21"><a class="header" href="#test-plan-21"><strong>Test Plan</strong></a></h2>
+<h2 id="test-plan-20"><a class="header" href="#test-plan-20"><strong>Test Plan</strong></a></h2>
 <p>See the <a href="transactions/tests/README.html">README</a> for tests.</p>
 <p>The Python driver serves as a reference implementation.</p>
 <h2 id="design-rationale-20"><a class="header" href="#design-rationale-20"><strong>Design Rationale</strong></a></h2>
@@ -17001,7 +16912,7 @@ the commit attempt with <code>NoSuchTransaction</code> error. This error has the
 will retry the commit. This will result in an infinite loop.</p>
 <p>Drivers MUST recommend that the callback re-throw command errors if they need to be handled inside the callback. Drivers
 SHOULD also recommend using Core Transaction API if a user wants to handle errors in a custom way.</p>
-<h2 id="test-plan-22"><a class="header" href="#test-plan-22">Test Plan</a></h2>
+<h2 id="test-plan-21"><a class="header" href="#test-plan-21">Test Plan</a></h2>
 <p>See the <a href="transactions-convenient-api/tests/README.html">README</a> for tests.</p>
 <h2 id="motivation-for-change-14"><a class="header" href="#motivation-for-change-14">Motivation for Change</a></h2>
 <p>Reliably committing a transaction in the face of errors can be a complicated endeavor using the MongoDB 4.0 drivers API.
@@ -17233,7 +17144,7 @@ inherited by selecting an individual MongoDatabase through MongoClient (e.g. rea
 <h3 id="replica-sets-1"><a class="header" href="#replica-sets-1">Replica Sets</a></h3>
 <p>The <code>listDatabases</code> command may be run on a secondary node. Drivers MUST run the <code>listDatabases</code> command only on the
 primary node in replica set topology, unless directly connected to a secondary node in Single topology.</p>
-<h2 id="test-plan-23"><a class="header" href="#test-plan-23">Test Plan</a></h2>
+<h2 id="test-plan-22"><a class="header" href="#test-plan-22">Test Plan</a></h2>
 <h3 id="test-environments"><a class="header" href="#test-environments">Test Environments</a></h3>
 <p>The test plan should be executed against the following servers:</p>
 <ul>
@@ -17493,7 +17404,7 @@ method</p>
 <li>Drivers MUST run <code>listCollections</code> on the primary node when in a replica set topology, unless directly connected to a
 secondary node in Single topology.</li>
 </ul>
-<h2 id="test-plan-24"><a class="header" href="#test-plan-24">Test Plan</a></h2>
+<h2 id="test-plan-23"><a class="header" href="#test-plan-23">Test Plan</a></h2>
 <h3 id="configurations"><a class="header" href="#configurations">Configurations</a></h3>
 <ul>
 <li>standalone node</li>
@@ -20804,7 +20715,7 @@ collection.find({ name: 'john doe' }).explain({ timeoutMS: 1000 });
 }
 </code></pre>
 <p>Drivers MUST document how users can specify options on their explain helpers.</p>
-<h2 id="test-plan-25"><a class="header" href="#test-plan-25">Test Plan</a></h2>
+<h2 id="test-plan-24"><a class="header" href="#test-plan-24">Test Plan</a></h2>
 <p>See the <a href="crud/tests/README.html">README</a> for tests.</p>
 <h2 id="motivation-4"><a class="header" href="#motivation-4">Motivation</a></h2>
 <p>Current drivers have chosen slightly different names and semantics for the same operations and options. In addition, not
@@ -21297,7 +21208,7 @@ user will provide BulkWrite operation models as in the following example:</p>
 <p>The driver must inspect each operation for a Collation if maxWireVersion is &lt; 5 and fail the entire bulkWrite if a
 collation was explicitly specified. In the example above, that means even the insertOne (without Collation) MUST NOT be
 sent.</p>
-<h2 id="test-plan-26"><a class="header" href="#test-plan-26">Test Plan</a></h2>
+<h2 id="test-plan-25"><a class="header" href="#test-plan-25">Test Plan</a></h2>
 <p>There is no specific test plan for driver Collation support; however drivers should test each affected CRUD, Index
 Management API, and collection creation/modification component to ensure that Collation is a supported option.</p>
 <p>In addition, drivers should test that two indexes can be created with identical key patterns and different collations. A
@@ -22475,7 +22386,7 @@ However, drivers MUST throw an exception at the end of execution if any write co
 individual write error is encountered during an ordered bulk write, drivers MUST record the error in <code>writeErrors</code> and
 immediately throw the exception. Otherwise, drivers MUST continue to iterate the results cursor and execute any further
 <code>bulkWrite</code> batches.</p>
-<h2 id="test-plan-27"><a class="header" href="#test-plan-27">Test Plan</a></h2>
+<h2 id="test-plan-26"><a class="header" href="#test-plan-26">Test Plan</a></h2>
 <p>The majority of tests for <code>MongoClient.bulkWrite</code> are written in the
 <a href="crud/../unified-test-format/unified-test-format.html">Unified Test Format</a> and reside in the CRUD unified tests directory.</p>
 <p>Additional prose tests are specified <a href="crud/../crud/tests/README.html">here</a>. These tests require constructing very large
@@ -22965,7 +22876,7 @@ mongodb://server:27017/db?w=majority&amp;wtimeoutMS=1000
 <h2 id="backwards-compatibility-24"><a class="header" href="#backwards-compatibility-24">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns. This specification merely deals with how to specify read and write
 concerns.</p>
-<h2 id="test-plan-28"><a class="header" href="#test-plan-28">Test Plan</a></h2>
+<h2 id="test-plan-27"><a class="header" href="#test-plan-27">Test Plan</a></h2>
 <p>Yaml tests are located <a href="read-write-concern/../read-write-concern/tests/README.html">here</a></p>
 <p>Below are English descriptions of other items that should be tested:</p>
 <h3 id="readconcern-1"><a class="header" href="#readconcern-1">ReadConcern</a></h3>
@@ -23964,7 +23875,7 @@ duration of <code>maxAwaitTimeMS</code> but finds no matching entries and return
 tries resuming. If we tried resuming with the most recent <code>_id</code>, this throws out the oplog scanning the server had done
 for the long sequence of getMores with empty responses. But resuming with the last <code>postBatchResumeToken</code> skips the
 unnecessary scanning of unmatched oplog entries.</p>
-<h2 id="test-plan-29"><a class="header" href="#test-plan-29">Test Plan</a></h2>
+<h2 id="test-plan-28"><a class="header" href="#test-plan-28">Test Plan</a></h2>
 <p>See <a href="change-streams/tests/README.html">tests/README.md</a></p>
 <h2 id="backwards-compatibility-25"><a class="header" href="#backwards-compatibility-25">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns.</p>
@@ -25200,7 +25111,7 @@ filter and <code>{ $set : { filename : "new_filename" } }</code> as the update p
 </code></pre>
 <p>This method drops the files and chunks collections associated with this GridFS bucket.</p>
 <p>Drivers should drop the files collection first, and then the chunks collection.</p>
-<h2 id="test-plan-30"><a class="header" href="#test-plan-30">Test Plan</a></h2>
+<h2 id="test-plan-29"><a class="header" href="#test-plan-29">Test Plan</a></h2>
 <p>TBD</p>
 <h2 id="motivation-for-change-16"><a class="header" href="#motivation-for-change-16">Motivation for Change</a></h2>
 <p>The <a href="https://www.mongodb.com/docs/manual/core/gridfs/">existing GridFS documentation</a> is only concerned with the
@@ -27161,7 +27072,7 @@ below. Commands not listed in this table will result in an error returned by lib
 </div>
 <p>All AUTOENCRYPT commands are sent to mongocryptd, even if there is no JSONSchema. This is to ensure that commands that
 reference other collections (e.g. aggregate with <code>$lookup</code>) are handled properly.</p>
-<h2 id="test-plan-31"><a class="header" href="#test-plan-31">Test Plan</a></h2>
+<h2 id="test-plan-30"><a class="header" href="#test-plan-30">Test Plan</a></h2>
 <p>See the <a href="client-side-encryption/tests/README.html">README.md</a> in the test directory.</p>
 <h2 id="rationale-3"><a class="header" href="#rationale-3">Rationale</a></h2>
 <h3 id="design-principles"><a class="header" href="#design-principles">Design Principles</a></h3>
@@ -27730,7 +27641,7 @@ intent-to-encrypt markings which are only used between libmongocrypt and mongocr
 <tr><td>ciphertext[]</td><td>The encrypted ciphertext (includes IV prepended).</td></tr>
 </tbody></table>
 </div>
-<h2 id="test-plan-32"><a class="header" href="#test-plan-32">Test Plan</a></h2>
+<h2 id="test-plan-31"><a class="header" href="#test-plan-31">Test Plan</a></h2>
 <p>Covered in <a href="bson-binary-encrypted/../client-side-encryption/client-side-encryption.html">Driver Spec: Client Side Encryption Encryption</a>.</p>
 <h2 id="design-rationale-26"><a class="header" href="#design-rationale-26">Design Rationale</a></h2>
 <h3 id="why-not-use-a-new-bson-type"><a class="header" href="#why-not-use-a-new-bson-type">Why not use a new BSON type?</a></h3>
@@ -28948,7 +28859,7 @@ use.</p>
 configuration MUST take precedence over environment variables. Drivers supporting both forms of configuration MUST
 document this behavior and MUST provide an example of how users can implement custom logic to allow an environment
 variable to override a programmatic default, so that users who prefer the opposite behavior have a way to achieve it.</p>
-<h2 id="test-plan-33"><a class="header" href="#test-plan-33">Test Plan</a></h2>
+<h2 id="test-plan-32"><a class="header" href="#test-plan-32">Test Plan</a></h2>
 <p>Tests for logging behavior are defined in each corresponding specification. The
 <a href="logging/../unified-test-format/unified-test-format.html">unified test runner specification</a> has support for specifying logging
 expectations in tests.</p>
@@ -30178,7 +30089,7 @@ interface WaitQueueTimeoutError {
   address: &lt;pool address&gt;;
 }
 </code></pre>
-<h2 id="test-plan-34"><a class="header" href="#test-plan-34">Test Plan</a></h2>
+<h2 id="test-plan-33"><a class="header" href="#test-plan-33">Test Plan</a></h2>
 <p>See <a href="connection-monitoring-and-pooling/tests/README.html">tests/README</a></p>
 <h2 id="design-rationale-28"><a class="header" href="#design-rationale-28">Design Rationale</a></h2>
 <h3 id="why-do-we-set-minpoolsize-across-all-members-of-a-replicaset-when-most-traffic-will-be-against-a-primary-1"><a class="header" href="#why-do-we-set-minpoolsize-across-all-members-of-a-replicaset-when-most-traffic-will-be-against-a-primary-1">Why do we set minPoolSize across all members of a replicaSet, when most traffic will be against a Primary?</a></h3>
@@ -34204,7 +34115,7 @@ pseudo-specification provides such tests.</p>
 <h2 id="specification-43"><a class="header" href="#specification-43">Specification</a></h2>
 <p>The specification for BSON lives at <a href="https://bsonspec.org">https://bsonspec.org</a>. The <code>extjson</code> format specification is
 <a href="bson-corpus/../extended-json/extended-json.html">here</a>.</p>
-<h2 id="test-plan-35"><a class="header" href="#test-plan-35">Test Plan</a></h2>
+<h2 id="test-plan-34"><a class="header" href="#test-plan-34">Test Plan</a></h2>
 <p>This test plan describes a general approach for BSON testing. Future BSON specifications (such as for new types like
 Decimal128) may specialize or alter the approach described below.</p>
 <h3 id="description-of-the-bson-corpus"><a class="header" href="#description-of-the-bson-corpus">Description of the BSON Corpus</a></h3>
