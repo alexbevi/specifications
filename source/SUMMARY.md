@@ -8,6 +8,7 @@
 
 - [Serialization]()
   - [BSON](BSON.md)
+  - [BSON Binary Subtype 9: Vector](bson-binary-vector/bson-binary-vector.md)
   - [ObjectId](bson-objectid/objectid.md)
   - [Decimal128](bson-decimal128/decimal128.md)
   - [UUID](bson-binary-uuid/uuid.md)
@@ -81,7 +82,7 @@
   - [Stable API](versioned-api/versioned-api.md)
   - [Security]()
     - [Client Side Encryption](client-side-encryption/client-side-encryption.md)
-    - [BSON Binary Subtype 6](bson-binary-encrypted/binary-encrypted.md))
+    - [BSON Binary Subtype 6: Encrypted](bson-binary-encrypted/binary-encrypted.md))
 
 ---
 
