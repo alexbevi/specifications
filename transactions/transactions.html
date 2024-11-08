@@ -30,15 +30,17 @@
 
         <!-- Custom theme stylesheets -->
 
-    </head>
-    <body>
-    <div id="body-container">
+
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
-
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
@@ -85,7 +87,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <!-- populated by js -->
-            <div class="sidebar-scrollbox"></div>
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
                 <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
             </noscript>
@@ -93,8 +95,6 @@
                 <div class="sidebar-resize-indicator"></div>
             </div>
         </nav>
-
-        <script async src="../toc.js"></script>
 
         <div id="page-wrapper" class="page-wrapper">
 
@@ -311,6 +311,16 @@ collection, database, or client to any preceding commands in the transaction.</p
 <p>Drivers MUST raise an error if the user provides or if defaults would result in an unacknowledged writeConcern. The
 Driver Sessions spec disallows using unacknowledged writes in a session. The error message MUST contain "transactions do
 not support unacknowledged write concerns".</p>
+<p>If a higher level object, such as a Collection, is created inside a transaction, their write concern option MUST be
+ignored if provided and the transaction level write concern used instead. An example of expected behaviour is:</p>
+<pre><code class="language-python">client = MongoClient("mongodb://host/?readPreference=nearest")
+coll = client.db.test
+with client.start_session() as s:
+    with s.start_transaction():
+        w_0_coll = db.get_collection("w_0_coll", writeConcern=WriteConcern(w=0))
+        # This is allowed, the write concern of the transaction is used instead of w=0 from the collection.
+        w_0_coll.insert_one({}, session=s)
+</code></pre>
 <h4 id="readpreference"><a class="header" href="#readpreference">readPreference</a></h4>
 <p>The read preference to use for all read operations in this transaction.</p>
 <p>Note that the readPreference property is optional. The default value is NULL. If readPreference is NULL the value will
@@ -977,6 +987,9 @@ has been disabled, drivers can readily trust that a majority write concern is du
 objective of avoiding duplicate commits.</p>
 <h2 id="changelog"><a class="header" href="#changelog"><strong>Changelog</strong></a></h2>
 <ul>
+<li>
+<p>2024-11-01: Clarify collection options inside txn.</p>
+</li>
 <li>
 <p>2024-11-01: Specify that ClientSession must be unpinned when ended.</p>
 </li>
