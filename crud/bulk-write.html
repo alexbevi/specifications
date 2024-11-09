@@ -727,20 +727,6 @@ write concern containing the following message:</p>
 <blockquote>
 <p>Cannot request unacknowledged write concern and ordered writes</p>
 </blockquote>
-<h3 id="size-limits"><a class="header" href="#size-limits">Size Limits</a></h3>
-<p>The server reports a <code>maxBsonObjectSize</code> in its <code>hello</code> response. This value defines the maximum size for documents that
-are inserted into the database. Documents that are sent to the server but are not intended to be inserted into the
-database (e.g. command documents) have a size limit of <code>maxBsonObjectSize + 16KiB</code>. When an acknowledged write concern
-is used, drivers MUST NOT perform any checks related to these size limits and MUST rely on the server to raise an error
-if a limit is exceeded. However, when an unacknowledged write concern is used, drivers MUST raise an error if one of the
-following limits is exceeded:</p>
-<ul>
-<li>The size of a document to be inserted MUST NOT exceed <code>maxBsonObjectSize</code>. This applies to the <code>document</code> field of an
-<code>InsertOneModel</code> and the <code>replacement</code> field of a <code>ReplaceOneModel</code>.</li>
-<li>The size of an entry in the <code>ops</code> array MUST NOT exceed <code>maxBsonObjectSize + 16KiB</code>.</li>
-<li>The size of the <code>bulkWrite</code> command document MUST NOT exceed <code>maxBsonObjectSize + 16KiB</code>.</li>
-</ul>
-<p>See <a href="https://jira.mongodb.org/browse/SERVER-10643">SERVER-10643</a> for more details on these size limits.</p>
 <h2 id="auto-encryption"><a class="header" href="#auto-encryption">Auto-Encryption</a></h2>
 <p>If <code>MongoClient.bulkWrite</code> is called on a <code>MongoClient</code> configured with <code>AutoEncryptionOpts</code>, drivers MUST return an
 error with the message: "bulkWrite does not currently support automatic encryption".</p>
@@ -950,8 +936,18 @@ number was determined by constructing <code>OP_MSG</code> messages with various 
 <code>OP_MSG</code> structure or the introduction of new command-agnostic fields.</p>
 <p>Drivers are required to use this value even if they are capable of determining the exact size of the message prior to
 batch-splitting to standardize implementations across drivers and simplify batch-splitting testing.</p>
+<h3 id="why-is-there-no-requirement-to-validate-the-size-of-a-bson-document"><a class="header" href="#why-is-there-no-requirement-to-validate-the-size-of-a-bson-document">Why is there no requirement to validate the size of a BSON document?</a></h3>
+<p>Following
+<a href="https://github.com/mongodb/specifications/blob/f8dbd2469f18d093f917efa1f758024bca5d3aaa/source/driver-mantras.md#where-possible-depend-on-server-to-return-errors">"<em>Where possible, depend on server to return errors</em>"</a>,
+drivers should rely on the server to return errors about exceeded size limits. Such reliance is not possible for
+unacknowledged writes. This specification previously required drivers to check size limits for unacknowledged writes.
+The requirement has since been removed. Checking size limits complicates some driver implementations. Returning a driver
+error in this specific situation does not seem helpful enough to require size checks.</p>
 <h2 id="changelog"><a class="header" href="#changelog"><strong>Changelog</strong></a></h2>
 <ul>
+<li>
+<p>2024-11-05: Updated the requirements regarding the size validation.</p>
+</li>
 <li>
 <p>2024-10-07: Error if <code>w:0</code> is used with <code>ordered=true</code> or <code>verboseResults=true</code>.</p>
 </li>
