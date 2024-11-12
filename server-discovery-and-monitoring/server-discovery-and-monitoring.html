@@ -1042,7 +1042,7 @@ def parseGle(response):
     if "err" in response:
         handleError(CommandError(response, response["err"], response["code"]))
 
-# Parse response to any command besides getLastError.
+# Parse response to any command
 def parseCommandResponse(response):
     if not response["ok"]:
         handleError(CommandError(response, response["errmsg"], response["code"]))
@@ -1091,8 +1091,8 @@ too.</p>
 <p>The server will not remain Unknown forever. It will be refreshed by the next periodic check or, if an application
 operation needs the server sooner than that, then a re-check will be triggered by the server selection algorithm.</p>
 <h5 id="not-writable-primary-and-node-is-recovering"><a class="header" href="#not-writable-primary-and-node-is-recovering">"not writable primary" and "node is recovering"</a></h5>
-<p>These errors are detected from a getLastError response, write command response, or query response. Clients MUST check if
-the server error is a "node is recovering" error or a "not writable primary" error.</p>
+<p>These errors are detected from a write command response or query response. Clients MUST check if the server error is a
+"node is recovering" error or a "not writable primary" error.</p>
 <p>If the response includes an error code, it MUST be solely used to determine if error is a "node is recovering" or "not
 writable primary" error. Clients MUST match the errors by the numeric error code and not by the code name, as the code
 name can change from one server version to the next.</p>
@@ -1697,6 +1697,9 @@ Mathias Stearn's beautiful design for replica set monitoring in mongos 2.6 contr
 oversaw the specification process.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-11-11: Removed references to <code>getLastError</code></p>
+</li>
 <li>
 <p>2024-11-04: Make the description of <code>TopologyDescription.servers</code> consistent with the spec tests.</p>
 </li>

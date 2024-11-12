@@ -5817,7 +5817,7 @@ def parseGle(response):
     if "err" in response:
         handleError(CommandError(response, response["err"], response["code"]))
 
-# Parse response to any command besides getLastError.
+# Parse response to any command
 def parseCommandResponse(response):
     if not response["ok"]:
         handleError(CommandError(response, response["errmsg"], response["code"]))
@@ -5866,8 +5866,8 @@ too.</p>
 <p>The server will not remain Unknown forever. It will be refreshed by the next periodic check or, if an application
 operation needs the server sooner than that, then a re-check will be triggered by the server selection algorithm.</p>
 <h5 id="not-writable-primary-and-node-is-recovering"><a class="header" href="#not-writable-primary-and-node-is-recovering">"not writable primary" and "node is recovering"</a></h5>
-<p>These errors are detected from a getLastError response, write command response, or query response. Clients MUST check if
-the server error is a "node is recovering" error or a "not writable primary" error.</p>
+<p>These errors are detected from a write command response or query response. Clients MUST check if the server error is a
+"node is recovering" error or a "not writable primary" error.</p>
 <p>If the response includes an error code, it MUST be solely used to determine if error is a "node is recovering" or "not
 writable primary" error. Clients MUST match the errors by the numeric error code and not by the code name, as the code
 name can change from one server version to the next.</p>
@@ -6472,6 +6472,9 @@ Mathias Stearn's beautiful design for replica set monitoring in mongos 2.6 contr
 oversaw the specification process.</p>
 <h2 id="changelog-14"><a class="header" href="#changelog-14">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-11-11: Removed references to <code>getLastError</code></p>
+</li>
 <li>
 <p>2024-11-04: Make the description of <code>TopologyDescription.servers</code> consistent with the spec tests.</p>
 </li>
@@ -21629,9 +21632,13 @@ corresponding response off the wire -- even if the caller is not interested in t
 <h3 id="what-happens-if-a-driver-receives-a-write-request-against-an-old-server"><a class="header" href="#what-happens-if-a-driver-receives-a-write-request-against-an-old-server">What happens if a driver receives a write request against an old server?</a></h3>
 <p>It must convert that request into write operations + gle's and use the old op codes.</p>
 <h3 id="are-we-discontinuing-the-use-of-getlasterror"><a class="header" href="#are-we-discontinuing-the-use-of-getlasterror">Are we discontinuing the use of getLastError?</a></h3>
-<p>Yes but as of 2.6 the existing getLastError behavior is supported for backward compatibility.</p>
+<p>Yes but as of 2.6 the existing getLastError behavior is supported for backward compatibility. Note also that
+<code>getLastError</code> was removed in server version 5.1.</p>
 <h2 id="changelog-35"><a class="header" href="#changelog-35">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-11-11: Add note that getLastError has been removed from the server.</p>
+</li>
 <li>
 <p>2024-07-31: Migrated from reStructuredText to Markdown.</p>
 </li>
@@ -22715,14 +22722,6 @@ writeConcern = { w: 0, journal: false }; // Unacknowledged
 writeConcern = { w: 0, wtimeoutMS: 100 }; // Unacknowledged
 </code></pre>
 <h4 id="on-the-wire-1"><a class="header" href="#on-the-wire-1">On the Wire</a></h4>
-<h5 id="op_insert-op_delete-op_update"><a class="header" href="#op_insert-op_delete-op_update">OP_INSERT, OP_DELETE, OP_UPDATE</a></h5>
-<p><code>WriteConcern</code> is implemented by sending the <code>getLastError</code> (GLE) command directly after the operation. Drivers SHOULD
-piggy-back the GLE onto the same buffer as the operation. Regardless, GLE MUST be sent on the same connection as the
-initial write operation.</p>
-<p>When a user has not specified a <code>WriteConcern</code> or has specified the server's default <code>WriteConcern</code>, drivers MUST send
-the GLE command without arguments. For example: <code>{ getLastError: 1 }</code></p>
-<p>Drivers MUST NOT send a GLE for an <code>Unacknowledged WriteConcern</code>. In this instance, the server will not send a reply.</p>
-<p>See the <code>getLastError</code> command documentation for other formatting.</p>
 <h5 id="write-commands"><a class="header" href="#write-commands">Write Commands</a></h5>
 <p>The <code>insert</code>, <code>delete</code>, and <code>update</code> commands take a named parameter, <code>writeConcern</code>. See the command documentation for
 further examples.</p>
@@ -22901,11 +22900,7 @@ non-local read concern is specified.</li>
 <h3 id="writeconcern-1"><a class="header" href="#writeconcern-1">WriteConcern</a></h3>
 <ol>
 <li>Commands supporting a write concern MUST NOT send the default write concern to the server.</li>
-<li>Commands supporting a write concern MUST send any non-default acknowledged write concern to the server, either in the
-command or as a getLastError.</li>
-<li>On ServerVersion less than 2.6, drivers MUST NOT send a getLastError command for an Unacknowledged write concern.</li>
-<li>FindAndModify helper methods MUST NOT send a write concern when the MaxWireVersion is less than 4.</li>
-<li>Helper methods for other commands that write MUST NOT send a write concern when the MaxWireVersion is less than 5.</li>
+<li>Commands supporting a write concern MUST send any non-default write concern to the server in the command.</li>
 </ol>
 <h2 id="reference-implementation-21"><a class="header" href="#reference-implementation-21">Reference Implementation</a></h2>
 <p>These are currently under construction.</p>
@@ -22923,9 +22918,6 @@ don't send one and if a user does specify a <code>ReadConcern</code>, we do send
 instance, we send it.</p>
 <h2 id="changelog-37"><a class="header" href="#changelog-37">Changelog</a></h2>
 <ul>
-<li>
-<p>2024-08-23: Migrated from reStructuredText to Markdown.</p>
-</li>
 <li>
 <p>2015-10-16: ReadConcern of local is no longer allowed to be used when talking with MaxWireVersion &lt; 4.</p>
 </li>
@@ -22984,6 +22976,12 @@ MongoDB 3.5+. See <a href="https://jira.mongodb.org/browse/SERVER-27891">SERVER-
 </li>
 <li>
 <p>2022-10-05: Remove spec front matter and reformat changelog.</p>
+</li>
+<li>
+<p>2024-08-23: Migrated from reStructuredText to Markdown.</p>
+</li>
+<li>
+<p>2024-10-30: Remove reference to getLastError</p>
 </li>
 </ul>
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>

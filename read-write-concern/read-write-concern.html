@@ -386,14 +386,6 @@ writeConcern = { w: 0, journal: false }; // Unacknowledged
 writeConcern = { w: 0, wtimeoutMS: 100 }; // Unacknowledged
 </code></pre>
 <h4 id="on-the-wire-1"><a class="header" href="#on-the-wire-1">On the Wire</a></h4>
-<h5 id="op_insert-op_delete-op_update"><a class="header" href="#op_insert-op_delete-op_update">OP_INSERT, OP_DELETE, OP_UPDATE</a></h5>
-<p><code>WriteConcern</code> is implemented by sending the <code>getLastError</code> (GLE) command directly after the operation. Drivers SHOULD
-piggy-back the GLE onto the same buffer as the operation. Regardless, GLE MUST be sent on the same connection as the
-initial write operation.</p>
-<p>When a user has not specified a <code>WriteConcern</code> or has specified the server's default <code>WriteConcern</code>, drivers MUST send
-the GLE command without arguments. For example: <code>{ getLastError: 1 }</code></p>
-<p>Drivers MUST NOT send a GLE for an <code>Unacknowledged WriteConcern</code>. In this instance, the server will not send a reply.</p>
-<p>See the <code>getLastError</code> command documentation for other formatting.</p>
 <h5 id="write-commands"><a class="header" href="#write-commands">Write Commands</a></h5>
 <p>The <code>insert</code>, <code>delete</code>, and <code>update</code> commands take a named parameter, <code>writeConcern</code>. See the command documentation for
 further examples.</p>
@@ -572,11 +564,7 @@ non-local read concern is specified.</li>
 <h3 id="writeconcern"><a class="header" href="#writeconcern">WriteConcern</a></h3>
 <ol>
 <li>Commands supporting a write concern MUST NOT send the default write concern to the server.</li>
-<li>Commands supporting a write concern MUST send any non-default acknowledged write concern to the server, either in the
-command or as a getLastError.</li>
-<li>On ServerVersion less than 2.6, drivers MUST NOT send a getLastError command for an Unacknowledged write concern.</li>
-<li>FindAndModify helper methods MUST NOT send a write concern when the MaxWireVersion is less than 4.</li>
-<li>Helper methods for other commands that write MUST NOT send a write concern when the MaxWireVersion is less than 5.</li>
+<li>Commands supporting a write concern MUST send any non-default write concern to the server in the command.</li>
 </ol>
 <h2 id="reference-implementation"><a class="header" href="#reference-implementation">Reference Implementation</a></h2>
 <p>These are currently under construction.</p>
@@ -594,9 +582,6 @@ don't send one and if a user does specify a <code>ReadConcern</code>, we do send
 instance, we send it.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
-<li>
-<p>2024-08-23: Migrated from reStructuredText to Markdown.</p>
-</li>
 <li>
 <p>2015-10-16: ReadConcern of local is no longer allowed to be used when talking with MaxWireVersion &lt; 4.</p>
 </li>
@@ -655,6 +640,12 @@ MongoDB 3.5+. See <a href="https://jira.mongodb.org/browse/SERVER-27891">SERVER-
 </li>
 <li>
 <p>2022-10-05: Remove spec front matter and reformat changelog.</p>
+</li>
+<li>
+<p>2024-08-23: Migrated from reStructuredText to Markdown.</p>
+</li>
+<li>
+<p>2024-10-30: Remove reference to getLastError</p>
 </li>
 </ul>
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>

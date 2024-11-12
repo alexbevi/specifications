@@ -526,9 +526,13 @@ corresponding response off the wire -- even if the caller is not interested in t
 <h3 id="what-happens-if-a-driver-receives-a-write-request-against-an-old-server"><a class="header" href="#what-happens-if-a-driver-receives-a-write-request-against-an-old-server">What happens if a driver receives a write request against an old server?</a></h3>
 <p>It must convert that request into write operations + gle's and use the old op codes.</p>
 <h3 id="are-we-discontinuing-the-use-of-getlasterror"><a class="header" href="#are-we-discontinuing-the-use-of-getlasterror">Are we discontinuing the use of getLastError?</a></h3>
-<p>Yes but as of 2.6 the existing getLastError behavior is supported for backward compatibility.</p>
+<p>Yes but as of 2.6 the existing getLastError behavior is supported for backward compatibility. Note also that
+<code>getLastError</code> was removed in server version 5.1.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-11-11: Add note that getLastError has been removed from the server.</p>
+</li>
 <li>
 <p>2024-07-31: Migrated from reStructuredText to Markdown.</p>
 </li>
