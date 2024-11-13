@@ -64,6 +64,7 @@
 ---
 
 - [Programmability]()
+  - [Stable API](versioned-api/versioned-api.md)
   - [Resource Management]()
     - [Databases](enumerate-databases/enumerate-databases.md)
     - [Collections](enumerate-collections/enumerate-collections.md)
@@ -79,10 +80,12 @@
     - [Change Streams](change-streams/change-streams.md)
     - [`find`/`getMore`/`killCursors`](find_getmore_killcursors_commands/find_getmore_killcursors_commands.md)
   - [GridFS](gridfs/gridfs-spec.md)
-  - [Stable API](versioned-api/versioned-api.md)
-  - [Security]()
-    - [Client Side Encryption](client-side-encryption/client-side-encryption.md)
-    - [BSON Binary Subtype 6: Encrypted](bson-binary-encrypted/binary-encrypted.md))
+
+---
+
+- [Security]()
+  - [Client Side Encryption](client-side-encryption/client-side-encryption.md)
+  - [BSON Binary Subtype 6: Encrypted](bson-binary-encrypted/binary-encrypted.md))
 
 ---
 
