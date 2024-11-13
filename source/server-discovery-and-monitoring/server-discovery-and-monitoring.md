@@ -204,7 +204,7 @@ Fields:
     (`electionId`, `setVersion`) tuple.
 - `maxSetVersion`: an integer or null. The largest setVersion ever reported by a primary. It may not monotonically
     increase, as electionId takes precedence in ordering Default null. Part of the (`electionId`, `setVersion`) tuple.
-- `servers`: a set of ServerDescription instances. Default contains one server: "localhost:27017", ServerType Unknown.
+- `servers`: a set of ServerDescription instances, one for each of the servers in the topology.
 - `stale`: a boolean for single-threaded clients, whether the topology must be re-scanned. (Not related to
     maxStalenessSeconds, nor to stale primaries.)
 - `compatible`: a boolean. False if any server's wire protocol version range is incompatible with the client's. Default
@@ -1109,7 +1109,7 @@ def parseGle(response):
     if "err" in response:
         handleError(CommandError(response, response["err"], response["code"]))
 
-# Parse response to any command besides getLastError.
+# Parse response to any command
 def parseCommandResponse(response):
     if not response["ok"]:
         handleError(CommandError(response, response["errmsg"], response["code"]))
@@ -1169,8 +1169,8 @@ operation needs the server sooner than that, then a re-check will be triggered b
 
 ##### "not writable primary" and "node is recovering"
 
-These errors are detected from a getLastError response, write command response, or query response. Clients MUST check if
-the server error is a "node is recovering" error or a "not writable primary" error.
+These errors are detected from a write command response or query response. Clients MUST check if the server error is a
+"node is recovering" error or a "not writable primary" error.
 
 If the response includes an error code, it MUST be solely used to determine if error is a "node is recovering" or "not
 writable primary" error. Clients MUST match the errors by the numeric error code and not by the code name, as the code
@@ -1241,11 +1241,11 @@ if and only if the error is "node is shutting down" or the error originated from
 and [other transient errors](#other-transient-errors) and
 [Why close connections when a node is shutting down?](#why-close-connections-when-a-node-is-shutting-down).)
 
-##### Authentication errors
+##### Authentication and Handshake errors
 
-If the authentication handshake fails for a connection, drivers MUST mark the server Unknown and clear the server's
-connection pool if the TopologyType is not LoadBalanced. (See
-[Why mark a server Unknown after an auth error?](#why-mark-a-server-unknown-after-an-auth-error))
+If the driver encounters errors when establishing application connections (this includes the initial handshake and
+authentication), the driver MUST mark the server Unknown and clear the server's connection pool if the TopologyType is
+not LoadBalanced. (See [Why mark a server Unknown after an auth error?](#why-mark-a-server-unknown-after-an-auth-error))
 
 ### Monitoring SDAM events
 
@@ -1920,6 +1920,10 @@ Mathias Stearn's beautiful design for replica set monitoring in mongos 2.6 contr
 oversaw the specification process.
 
 ## Changelog
+
+- 2024-11-11: Removed references to `getLastError`
+
+- 2024-11-04: Make the description of `TopologyDescription.servers` consistent with the spec tests.
 
 - 2024-08-16: Updated host b wire versions in `too_new` and `too_old` tests
 

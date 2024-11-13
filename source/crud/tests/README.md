@@ -370,56 +370,15 @@ Assert that a CommandStartedEvent was observed for the `killCursors` command.
 
 ### 10. `MongoClient.bulkWrite` returns error for unacknowledged too-large insert
 
-This test must only be run on 8.0+ servers. This test must be skipped on Atlas Serverless.
-
-Construct a `MongoClient` (referred to as `client`).
-
-Perform a `hello` command using `client` and record the following values from the response: `maxBsonObjectSize`.
-
-Then, construct the following document (referred to as `document`):
-
-```javascript
-{
-  "a": "b".repeat(maxBsonObjectSize)
-}
-```
+Removed.
 
 #### With insert
 
-Construct the following write model (referred to as `model`):
-
-```javascript
-InsertOne: {
-  "namespace": "db.coll",
-  "document": document
-}
-```
-
-Construct as list of write models (referred to as `models`) with the one `model`.
-
-Call `MongoClient.bulkWrite` with `models`. Pass `BulkWriteOptions` with `ordered` set to `false` and `writeConcern` set
-to an unacknowledged write concern.
-
-Expect a client-side error due the size.
+Removed.
 
 #### With replace
 
-Construct the following write model (referred to as `model`):
-
-```javascript
-ReplaceOne: {
-  "namespace": "db.coll",
-  "filter": {},
-  "replacement": document
-}
-```
-
-Construct as list of write models (referred to as `models`) with the one `model`.
-
-Call `MongoClient.bulkWrite` with `models`. Pass `BulkWriteOptions` with `ordered` set to `false` and `writeConcern` set
-to an unacknowledged write concern.
-
-Expect a client-side error due the size.
+Removed.
 
 ### 11. `MongoClient.bulkWrite` batch splits when the addition of a new namespace exceeds the maximum message size
 
@@ -737,3 +696,15 @@ that `firstEvent.operationId` is equal to `secondEvent.operationId`. Assert both
 To force completion of the `w:0` writes, execute `coll.countDocuments` and expect the returned count is
 `maxMessageSizeBytes / maxBsonObjectSize + 1`. This is intended to avoid incomplete writes interfering with other tests
 that may use this collection.
+
+### 16. Generated document identifiers are the first field in their document
+
+Construct a `MongoClient` (referred to as `client`) with
+[command monitoring](../../command-logging-and-monitoring/command-logging-and-monitoring.md) enabled to observe
+CommandStartedEvents. For each of `insertOne`, client `bulkWrite`, and collection `bulkWrite`, do the following:
+
+- Execute the command with a document that does not contain an `_id` field.
+- If possible, capture the wire protocol message (referred to as `request`) of the command and assert that the first
+    field of `request.documents[0]` is `_id`.
+- Otherwise, capture the CommandStartedEvent (referred to as `event`) emitted by the command and assert that the first
+    field of `event.command.documents[0]` is `_id`.
