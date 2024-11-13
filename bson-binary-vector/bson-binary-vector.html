@@ -1,0 +1,421 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>BSON Binary Subtype 9: Vector - MongoDB Driver Specifications</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">MongoDB Driver Specifications</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="bson-binary-subtype-9---vector"><a class="header" href="#bson-binary-subtype-9---vector">BSON Binary Subtype 9 - Vector</a></h1>
+<ul>
+<li>Status: Accepted</li>
+<li>Minimum Server Version: N/A</li>
+</ul>
+<hr />
+<h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
+<p>This document describes the subtype of the Binary BSON type used for efficient storage and retrieval of vectors. Vectors
+here refer to densely packed arrays of numbers, all of the same type.</p>
+<h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
+<p>These representations correspond to the numeric types supported by popular numerical libraries for vector processing,
+such as NumPy, PyTorch, TensorFlow and Apache Arrow. Storing and retrieving vector data using the same densely packed
+format used by these libraries can result in significant memory savings and processing efficiency.</p>
+<h3 id="meta"><a class="header" href="#meta">META</a></h3>
+<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
+<p>This specification introduces a new BSON binary subtype, the vector, with value <code>9</code>.</p>
+<p>Drivers SHOULD provide idiomatic APIs to translate between arrays of numbers and this BSON Binary specification.</p>
+<h3 id="data-types-dtypes"><a class="header" href="#data-types-dtypes">Data Types (dtypes)</a></h3>
+<p>Each vector can take one of multiple data types (dtypes). The following table lists the dtypes implemented.</p>
+<div class="table-wrapper"><table><thead><tr><th>Vector data type</th><th>Alias</th><th>Bits per vector element</th><th><a href="https://arrow.apache.org/docs/cpp/api/datatype.html">Arrow Data Type</a> (for illustration)</th></tr></thead><tbody>
+<tr><td><code>0x03</code></td><td>INT8</td><td>8</td><td>INT8</td></tr>
+<tr><td><code>0x27</code></td><td>FLOAT32</td><td>32</td><td>FLOAT</td></tr>
+<tr><td><code>0x10</code></td><td>PACKED_BIT</td><td>1     <code>*</code></td><td>BOOL</td></tr>
+</tbody></table>
+</div>
+<p><code>*</code> A Binary Quantized (PACKED_BIT) Vector is a vector of 0s and 1s (bits), but it is represented in memory as a list of
+integers in [0, 255]. So, for example, the vector <code>[0, 255]</code> would be shorthand for the 16-bit vector
+<code>[0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1]</code>. The idea is that each number (a uint8) can be stored as a single byte. Of course,
+some languages, Python for one, do not have an uint8 type, so must be represented as an int in memory, but not on disk.</p>
+<h3 id="byte-padding"><a class="header" href="#byte-padding">Byte padding</a></h3>
+<p>As not all data types have a bit length equal to a multiple of 8, and hence do not fit squarely into a certain number of
+bytes, a second piece of metadata, the "padding" is included. This instructs the driver of the number of bits in the
+final byte that are to be ignored. The least-significant bits are ignored.</p>
+<h3 id="binary-structure"><a class="header" href="#binary-structure">Binary structure</a></h3>
+<p>Following the binary subtype <code>9</code>, a two-element byte array of metadata precedes the packed numbers.</p>
+<ul>
+<li>
+<p>The first byte (dtype) describes its data type. The table above shows those that MUST be implemented. This table may
+increase. dtype is an unsigned integer.</p>
+</li>
+<li>
+<p>The second byte (padding) prescribes the number of bits to ignore in the final byte of the value. It is a non-negative
+integer. It must be present, even in cases where it is not applicable, and set to zero.</p>
+</li>
+<li>
+<p>The remainder contains the actual vector elements packed according to dtype.</p>
+</li>
+</ul>
+<p>All values use the little-endian format.</p>
+<h4 id="example"><a class="header" href="#example">Example</a></h4>
+<p>Let's take a vector <code>[238, 224]</code> of dtype PACKED_BIT (<code>\x10</code>) with a padding of <code>4</code>.</p>
+<p>In hex, it looks like this: <code>b"\x10\x04\xee\xe0"</code>: 1 byte for dtype, 1 for padding, and 1 for each uint8.</p>
+<p>We can visualize the binary representation like so:</p>
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <td colspan="8">1st byte: dtype (from list in previous table) </td>
+    <td colspan="8">2nd byte: padding (values in [0,7])</td>
+    <td colspan="8">1st uint8: 238</td>
+    <td colspan="8">2nd uint8: 224</td>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>1</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>1</td>
+    <td>0</td>
+    <td>0</td>
+    <td>1</td>
+    <td>1</td>
+    <td>1</td>
+    <td>0</td>
+    <td>1</td>
+    <td>1</td>
+    <td>1</td>
+    <td>0</td>
+    <td>1</td>
+    <td>1</td>
+    <td>1</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+    <td>0</td>
+  </tr>
+</table>
+<p>Finally, after we remove the last 4 bits of padding, the actual bit vector has a length of 12 and looks like this!</p>
+<div class="table-wrapper"><table><thead><tr><th>1</th><th>1</th><th>1</th><th>0</th><th>1</th><th>1</th><th>1</th><th>0</th><th>1</th><th>1</th><th>1</th><th>0</th></tr></thead><tbody>
+</tbody></table>
+</div>
+<h2 id="api-guidance"><a class="header" href="#api-guidance">API Guidance</a></h2>
+<p>Drivers MUST implement methods for explicit encoding and decoding that adhere to the pattern described below while
+following idioms of the language of the driver.</p>
+<h3 id="encoding"><a class="header" href="#encoding">Encoding</a></h3>
+<pre><code>Function from_vector(vector: Iterable&lt;Number&gt;, dtype: DtypeEnum, padding: Integer = 0) -&gt; Binary
+    # Converts a numeric vector into a binary representation based on the specified dtype and padding.
+
+    # :param vector: A sequence or iterable of numbers (either float or int)
+    # :param dtype: Data type for binary conversion (from DtypeEnum)
+    # :param padding: Optional integer specifying how many bits to ignore in the final byte
+    # :return: A binary representation of the vector
+
+    Declare binary_data as Binary
+    
+    # Process each number in vector and convert according to dtype
+    For each number in vector
+        binary_element = convert_to_binary(number, dtype)
+        binary_data.append(binary_element)
+    End For
+    
+    # Apply padding to the binary data if needed
+    If padding &gt; 0
+        apply_padding(binary_data, padding)
+    End If
+    
+    Return binary_data
+End Function
+</code></pre>
+<p>Note: If a driver chooses to implement a <code>Vector</code> type (or numerous) like that suggested in the Data Structure
+subsection below, they MAY decide that <code>from_vector</code> that has a single argument, a Vector.</p>
+<h3 id="decoding"><a class="header" href="#decoding">Decoding</a></h3>
+<pre><code>Function as_vector() -&gt; Vector
+    # Unpacks binary data (BSON or similar) into a Vector structure.
+    # This process involves extracting numeric values, the data type, and padding information.
+
+    # :return: A BinaryVector containing the unpacked numeric values, dtype, and padding.
+
+    Declare binary_vector as BinaryVector  # Struct to hold the unpacked data
+
+    # Extract dtype (data type) from the binary data
+    binary_vector.dtype = extract_dtype_from_binary()
+
+    # Extract padding from the binary data
+    binary_vector.padding = extract_padding_from_binary()
+
+    # Unpack the actual numeric values from the binary data according to the dtype
+    binary_vector.data = unpack_numeric_values(binary_vector.dtype)
+
+    Return binary_vector
+End Function
+</code></pre>
+<h4 id="validation"><a class="header" href="#validation">Validation</a></h4>
+<p>Drivers MUST validate vector metadata and raise an error if any invariant is violated:</p>
+<ul>
+<li>Padding MUST be 0 for all dtypes where padding doesn’t apply, and MUST be within [0, 7] for PACKED_BIT.</li>
+<li>A PACKED_BIT vector MUST NOT be empty if padding is in the range [1, 7].</li>
+</ul>
+<p>Drivers MUST perform this validation when a numeric vector and padding are provided through the API, and when unpacking
+binary data (BSON or similar) into a Vector structure.</p>
+<h4 id="data-structures"><a class="header" href="#data-structures">Data Structures</a></h4>
+<p>Drivers MAY find the following structures to represent the dtype and vector structure useful.</p>
+<pre><code>Enum Dtype
+    # Enum for data types (dtype)
+
+    # FLOAT32: Represents packing of list of floats as float32
+    # Value: 0x27 (hexadecimal byte value)
+
+    # INT8: Represents packing of list of signed integers in the range [-128, 127] as signed int8
+    # Value: 0x03 (hexadecimal byte value)
+
+    # PACKED_BIT: Special case where vector values are 0 or 1, packed as unsigned uint8 in range [0, 255]
+    # Packed into groups of 8 (a byte)
+    # Value: 0x10 (hexadecimal byte value)
+    
+    # Documentation:
+    # Each value is a byte (length of one), a convenient choice for decoding.
+End Enum
+
+Struct Vector
+    # Numeric vector with metadata for binary interoperability
+
+    # Fields:
+    # data: Sequence of numeric values (either float or int)
+    # dtype: Data type of vector (from enum BinaryVectorDtype)
+    # padding: Number of bits to ignore in the final byte for alignment
+
+    data     # Sequence of float or int
+    dtype    # Type: DtypeEnum
+    padding  # Integer: Number of padding bits
+ End Struct
+</code></pre>
+<h2 id="reference-implementation"><a class="header" href="#reference-implementation">Reference Implementation</a></h2>
+<ul>
+<li>PYTHON (PYTHON-4577)</li>
+</ul>
+<h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
+<p>See the <a href="tests/README.html">README</a> for tests.</p>
+<h2 id="faq"><a class="header" href="#faq">FAQ</a></h2>
+<ul>
+<li>What MongoDB Server version does this apply to?
+<ul>
+<li>Files in the "specifications" repository have no version scheme. They are not tied to a MongoDB server version.</li>
+</ul>
+</li>
+<li>In PACKED_BIT, why would one choose to use integers in [0, 256)?
+<ul>
+<li>This follows a well-established precedent for packing binary-valued arrays into bytes (8 bits), This technique is
+widely used across different fields, such as data compression, communication protocols, and file formats, where
+you want to store or transmit binary data more efficiently by grouping 8 bits into a single byte (uint8). For an
+example in Python, see
+<a href="https://numpy.org/doc/2.0/reference/generated/numpy.unpackbits.html#numpy.unpackbits">numpy.unpackbits</a>.</li>
+</ul>
+</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../BSON.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../bson-objectid/objectid.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../BSON.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../bson-objectid/objectid.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

@@ -300,17 +300,19 @@ drivers will have different requirements, types, and idioms.</p>
   /**
    * Finds the documents matching the model.
    *
-   * Note: The filter parameter below equates to the $query meta operator. It cannot
-   * contain other meta operators like $maxScan. However, do not validate this document
-   * as it would be impossible to be forwards and backwards compatible. Let the server
-   * handle the validation.
-   *
    * Note: result iteration should be backed by a cursor. Depending on the implementation,
    * the cursor may back the returned Iterable instance or an iterator that it produces.
    *
-   * @see https://www.mongodb.com/docs/manual/core/read-operations-introduction/
+   * @see https://www.mongodb.com/docs/manual/reference/command/find/
    */
   find(filter: Document, options: Optional&lt;FindOptions&gt;): Iterable&lt;Document&gt;;
+
+  /**
+   * Find a document matching the model.
+   *
+   * @see https://www.mongodb.com/docs/manual/reference/command/find/
+   */
+  findOne(filter: Document, options: Optional&lt;FindOneOptions&gt;): Optional&lt;Document&gt;;
 
 }
 
@@ -836,6 +838,8 @@ class FindOptions {
    */
   let: Optional&lt;Document&gt;;
 }
+
+type FindOneOptions = Omit&lt;FindOptions, 'batchSize' | 'cursorType' | 'limit' | 'noCursorTimeout'&gt;;
 </code></pre>
 <h5 id="count-api-details"><a class="header" href="#count-api-details">Count API Details</a></h5>
 <p>MongoDB drivers provide two helpers for counting the number of documents in a collection, estimatedDocumentCount and
@@ -892,7 +896,22 @@ documentation.</p>
 filter, skip, and limit are added as options to the <code>aggregate</code> command.</p>
 <p>In the event this aggregation is run against an empty collection, an empty array will be returned with no <code>n</code> field.
 Drivers MUST interpret this result as a <code>0</code> count.</p>
-<h5 id="combining-limit-and-batch-size-for-the-wire-protocol"><a class="header" href="#combining-limit-and-batch-size-for-the-wire-protocol">Combining Limit and Batch Size for the Wire Protocol</a></h5>
+<h5 id="findone-api-details"><a class="header" href="#findone-api-details">findOne API details</a></h5>
+<p>The <code>findOne</code> operation is implemented using a <code>find</code> operation, but only returns the first document returned in the
+cursor. Due to the special case, <code>findOne</code> does not support the following options supported in <code>find</code>:</p>
+<ul>
+<li><code>batchSize</code>: drivers MUST NOT set a <code>batchSize</code> in the <code>find</code> command created for a <code>findOne</code> operation</li>
+<li><code>cursorType</code>: <code>findOne</code> only supports non-tailable cursors</li>
+<li><code>limit</code>: drivers MUST set <code>limit</code> to 1 in the <code>find</code> command created for a <code>findOne</code> operation</li>
+<li><code>noCursorTimeout</code>: with a <code>limit</code> of 1 and no <code>batchSize</code>, there will not be an open cursor on the server</li>
+</ul>
+<p>To ensure that the cursor is closed regardless of the default server <code>batchSize</code>, drivers MUST also set
+<code>singleBatch: true</code> in the <code>find</code> command.</p>
+<h5 id="setting-limit-and-batchsize-options-for-find-commands"><a class="header" href="#setting-limit-and-batchsize-options-for-find-commands">Setting limit and batchSize options for find commands</a></h5>
+<p>When users specify both <code>limit</code> and <code>batchSize</code> options with the same value, the server returns all results in the first
+batch, but still leaves an open cursor that needs to be closed using the <code>killCursors</code> command. To avoid this, drivers
+MUST send a value of <code>limit + 1</code> for <code>batchSize</code> in the resulting <code>find</code> command. This eliminates the open cursor issue.</p>
+<h5 id="combining-limit-and-batch-size-for-op_query"><a class="header" href="#combining-limit-and-batch-size-for-op_query">Combining Limit and Batch Size for OP_QUERY</a></h5>
 <p>The OP_QUERY wire protocol only contains a numberToReturn value which drivers must calculate to get expected limit and
 batch size behavior. Subsequent calls to OP_GET_MORE should use the user-specified batchSize or default to 0. If the
 result is larger than the max Int32 value, an error MUST be raised as the computed value is impossible to send to the
@@ -2422,10 +2441,6 @@ the maximum number of documents that could be affected is one vs. infinite.</p>
 update and delete. This generally causes some issues for new developers and is a minor annoyance for existing
 developers. The safest way to combat this without introducing discrepancies between drivers/driver versions or breaking
 backwards compatibility was to use multiple methods, each signifying the number of documents that could be affected.</p>
-<p>Q: Speaking of "One", where is <code>findOne</code>?</p>
-<p>If your driver wishes to offer a <code>findOne</code> method, that is perfectly fine. If you choose to implement <code>findOne</code>, please
-keep to the naming conventions followed by the <code>FindOptions</code> and keep in mind that certain things don't make sense like
-limit (which should be -1), tailable, awaitData, etc...</p>
 <p>Q: What considerations have been taken for the eventual merging of query and the aggregation framework?</p>
 <p>In the future, it is probable that a new query engine (QE) will look very much like the aggregation framework. Given
 this assumption, we know that both <code>find</code> and <code>aggregate</code> will be renderable in QE, each maintaining their ordering
@@ -2499,6 +2514,9 @@ the Stable API, it was decided that this change was acceptable to make in minor 
 aforementioned allowance in the SemVer spec.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-11-13: Define <code>findOne</code> operation as optional, and add guidance on <code>limit</code> and <code>batchSize</code> for <code>find</code> operations.</p>
+</li>
 <li>
 <p>2024-11-04: Always send a value for <code>bypassDocumentValidation</code> if it was specified.</p>
 </li>
