@@ -1149,10 +1149,10 @@ if and only if the error is "node is shutting down" or the error originated from
 <a href="#use-error-messages-to-detect-not-master-and-node-is-recovering">use error messages to detect "not master" and "node is recovering"</a>,
 and <a href="#other-transient-errors">other transient errors</a> and
 <a href="#why-close-connections-when-a-node-is-shutting-down">Why close connections when a node is shutting down?</a>.)</p>
-<h5 id="authentication-errors"><a class="header" href="#authentication-errors">Authentication errors</a></h5>
-<p>If the authentication handshake fails for a connection, drivers MUST mark the server Unknown and clear the server's
-connection pool if the TopologyType is not LoadBalanced. (See
-<a href="#why-mark-a-server-unknown-after-an-auth-error">Why mark a server Unknown after an auth error?</a>)</p>
+<h5 id="authentication-and-handshake-errors"><a class="header" href="#authentication-and-handshake-errors">Authentication and Handshake errors</a></h5>
+<p>If the driver encounters errors when establishing application connections (this includes the initial handshake and
+authentication), the driver MUST mark the server Unknown and clear the server's connection pool if the TopologyType is
+not LoadBalanced. (See <a href="#why-mark-a-server-unknown-after-an-auth-error">Why mark a server Unknown after an auth error?</a>)</p>
 <h3 id="monitoring-sdam-events"><a class="header" href="#monitoring-sdam-events">Monitoring SDAM events</a></h3>
 <p>The required driver specification for providing lifecycle hooks into server discovery and monitoring for applications to
 consume can be found in the <a href="server-discovery-and-monitoring-logging-and-monitoring.html">SDAM Monitoring Specification</a>.</p>
