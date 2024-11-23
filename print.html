@@ -25971,6 +25971,7 @@ as described in <a href="client-side-encryption/../bson-binary-uuid/uuid.html">H
    // Set bypassQueryAnalysis to true to use explicit encryption on indexed fields
    // without the MongoDB Enterprise Advanced licensed crypt_shared library.
    bypassQueryAnalysis: Optional&lt;Boolean&gt;; // Default false.
+   keyExpirationMS: Optional&lt;Uint64&gt;; // Default 60000.
 }
 </code></pre>
 <p>A MongoClient can be configured to automatically encrypt collection commands and decrypt results.</p>
@@ -26594,6 +26595,7 @@ use the collection name <code>enxcol_.&lt;collectionName&gt;.ecoc</code>.</li>
    keyVaultNamespace: String;
    kmsProviders: KMSProviders;
    tlsOptions?: KMSProvidersTLSOptions; // Maps KMS provider to TLS options.
+   keyExpirationMS: Optional&lt;Uint64&gt;; // Default 60000.
 };
 
 interface KMSProvidersTLSOptions {
@@ -31040,6 +31042,9 @@ use separate AWS accounts that do not have permission to the other's keys.</p>
 <p>See the <a href="unified-test-format/../client-side-encryption/tests/README.html#credentials">Client-Side Encryption test README</a> for
 instructions to obtain test credentials.</p>
 </li>
+<li>
+<p><code>keyExpirationMS</code>: Optional integer. The cache expiration time for data encryption keys.</p>
+</li>
 </ul>
 </li>
 </ul>
@@ -33520,6 +33525,10 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-11-12: <strong>Schema version 1.22.</strong></p>
+<p>Add <code>keyExpirationMS</code> to <code>clientEncryption</code> entity.</p>
+</li>
 <li>
 <p>2024-10-31: Test operations array may be empty.</p>
 </li>

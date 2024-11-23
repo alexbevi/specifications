@@ -445,6 +445,7 @@ as described in <a href="../bson-binary-uuid/uuid.html">Handling of Native UUID 
    // Set bypassQueryAnalysis to true to use explicit encryption on indexed fields
    // without the MongoDB Enterprise Advanced licensed crypt_shared library.
    bypassQueryAnalysis: Optional&lt;Boolean&gt;; // Default false.
+   keyExpirationMS: Optional&lt;Uint64&gt;; // Default 60000.
 }
 </code></pre>
 <p>A MongoClient can be configured to automatically encrypt collection commands and decrypt results.</p>
@@ -1068,6 +1069,7 @@ use the collection name <code>enxcol_.&lt;collectionName&gt;.ecoc</code>.</li>
    keyVaultNamespace: String;
    kmsProviders: KMSProviders;
    tlsOptions?: KMSProvidersTLSOptions; // Maps KMS provider to TLS options.
+   keyExpirationMS: Optional&lt;Uint64&gt;; // Default 60000.
 };
 
 interface KMSProvidersTLSOptions {
