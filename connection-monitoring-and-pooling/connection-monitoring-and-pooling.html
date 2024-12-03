@@ -365,8 +365,10 @@ use. Examples include, but are not limited to:
 either receives a <a href="#connection">Connection</a> or times out. A WaitQueue has the following traits:</p>
 <ul>
 <li><strong>Thread-Safe</strong>: When multiple threads attempt to enter or exit a WaitQueue, they do so in a thread-safe manner.</li>
-<li><strong>Ordered/Fair</strong>: When <a href="#connection">Connections</a> are made available, they are issued out to threads in the order that
-the threads entered the WaitQueue.</li>
+<li><strong>Ordered/fair</strong>: When <a href="#connection">Connections</a> are made available, they SHOULD be issued out to threads in the
+order that the threads entered the WaitQueue. If this is behavior poses too much of an implementation burden, then
+at the very least threads that have entered the queue more recently MUST NOT be intentionally prioritized over those
+that entered it earlier.</li>
 <li><strong>Timeout aggressively:</strong> Members of a WaitQueue MUST timeout if they are enqueued for longer than the computed
 timeout and MUST leave the WaitQueue immediately in this case.</li>
 </ul>
@@ -639,7 +641,7 @@ MUST wait to service the request until neither of those two conditions are met o
 becomes available, re-entering the checkOut loop in either case. This waiting MUST NOT prevent
 <a href="#connection">Connections</a> from being checked into the pool. Additionally, the Pool MUST NOT service any newer checkOut
 requests before fulfilling the original one which could not be fulfilled. For drivers that implement the WaitQueue via a
-fair semaphore, a condition variable may also be needed to to meet this requirement. Waiting on the condition variable
+fair semaphore, a condition variable may also be needed to meet this requirement. Waiting on the condition variable
 SHOULD also be limited by the WaitQueueTimeout, if the driver supports one and it was specified by the user.</p>
 <p>If the pool is "closed" or "paused", any attempt to check out a <a href="#connection">Connection</a> MUST throw an Error. The error
 thrown as a result of the pool being "paused" MUST be considered a retryable error and MUST NOT be an error that marks
@@ -1256,12 +1258,11 @@ not specified here.</p>
 <p>These options were originally only implemented in three drivers (Java, C#, and Python), and provided little value. While
 these fields would allow for faster diagnosis of issues in the connection pool, they would not actually prevent an error
 from occurring.</p>
-<p>Additionally, these options have the effect of prioritizing older requests over newer requests, which is not necessarily
-the behavior that users want. They can also result in cases where queue access oscillates back and forth between full
-and not full. If a driver has a full waitQueue, then all requests for <a href="#connection">Connections</a> will be rejected. If
-the client is continually spammed with requests, you could wind up with a scenario where as soon as the waitQueue is no
-longer full, it is immediately filled. It is not a favorable situation to be in, partially b/c it violates the fairness
-guarantee that the waitQueue normally provides.</p>
+<p>Additionally, these options have the effect of prioritizing newer requests over older requests, which is not necessarily
+the behavior that users want. For example, consider a situation when a WaitQueue is full, and a request for
+<a href="#connection">Connection</a> gets rejected. Then a spot opens in the WaitQueue, and a newer request gets accepted. One may
+say that the newer request was prioritized over the older one, which violates the fairness recommendation that the
+WaitQueue normally adheres to.</p>
 <p>Because of these issues, it does not make sense to
 <a href="../driver-mantras.html#">go against driver mantras and provide an additional knob</a>. We may eventually pursue an
 alternative configuration to address wait queue size in <a href="#advanced-pooling-behaviors">Advanced Pooling Behaviors</a>.</p>
@@ -1348,6 +1349,9 @@ Connection.</li>
 to close and remove from its pool a <a href="#connection">Connection</a> which has unread exhaust messages.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-11-27: Relaxed the WaitQueue fairness requirement.</p>
+</li>
 <li>
 <p>2024-11-01: Fixed race condition in pool-checkout-returned-connection-maxConnecting.yml test.</p>
 </li>
