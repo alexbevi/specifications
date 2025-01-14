@@ -227,9 +227,11 @@ is referred to as the KMS ID.</p>
 <p><strong>KMS provider name</strong></p>
 <p>An optional name to identify a KMS provider. Enables configuring multiple KMS providers with the same KMS provider type
 (e.g. <code>aws:name1</code> and <code>aws:name2</code> can refer to different AWS accounts).</p>
-<p><strong>Customer Master Key (CMK)</strong></p>
-<p>The underlying key AWS KMS uses to encrypt and decrypt. See
-<a href="https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#master_keys">AWS Key Management Service Concepts</a>.</p>
+<p><strong>Master Key</strong></p>
+<p>The underlying key the KMS service uses to encrypt and decrypt. See
+<a href="https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#master_keys">AWS KMS Concepts</a> for an AWS-specific
+example (other KMS providers work similarly).</p>
+<p>The master key is also sometimes referred to as a Customer Master Key (CMK).</p>
 <p><strong>schema</strong></p>
 <p>A MongoDB JSON Schema (either supplied by the server or client-side) which may include metadata about encrypted fields.
 This is a JSON Schema based on draft 4 of the JSON Schema specification,
@@ -321,7 +323,7 @@ opts = ClientEncryptionOpts(kms_providers=kms, key_vault_namespace="db.datakeys"
 clientencryption = ClientEncryption(client, opts)
 
 # Use a ClientEncryption to create new data keys.
-# The master key identifies the CMK on AWS KMS to use for encrypting the data key.
+# The master key identifies the KMS key on AWS KMS to use for encrypting the data key.
 master_key = open("./aws_masterkey.json", "r").read()
 opts = DataKeyOpts (master_key=master_key)
 created_key_id = clientencryption.create_data_key("aws", opts)
@@ -1104,7 +1106,7 @@ yield.</p>
 type "aws", the masterKey is required and has the following fields:</p>
 <pre><code class="language-typescript">{
    region: String,
-   key: String, // The Amazon Resource Name (ARN) to the AWS customer master key (CMK).
+   key: String, // The Amazon Resource Name (ARN) to the AWS customer master key (KMS key).
    endpoint: Optional&lt;String&gt; // An alternate host identifier to send KMS requests to. May include port number. Defaults to "kms.&lt;region&gt;.amazonaws.com"
 }
 </code></pre>
