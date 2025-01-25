@@ -493,7 +493,7 @@ placeholders as appropriate:</p>
 <p>In addition to the common fields, command succeeded messages MUST contain the following key-value pairs:</p>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
 <tr><td>message</td><td>String</td><td>"Command succeeded"</td></tr>
-<tr><td>durationMS</td><td>Int</td><td>The execution time for the command in milliseconds. The calculated value MUST be the time to send the message and receive the reply from the server and MAY include BSON serialization and/or deserialization.</td></tr>
+<tr><td>durationMS</td><td>Int32/Int64/Double</td><td>The execution time for the command in milliseconds. The calculated value MUST be the time to send the message and receive the reply from the server and MAY include BSON serialization and/or deserialization.</td></tr>
 <tr><td>reply</td><td>String</td><td>Relaxed extJSON representation of the reply. This document MUST be truncated appropriately according to rules defined in the <a href="../logging/logging.html#configurable-max-document-length">logging specification</a>, and MUST be replaced with an empty document "{ }" if the command is considered sensitive.</td></tr>
 </tbody></table>
 </div>
@@ -509,7 +509,7 @@ driver-generated ID {{driverConnectionId}} and server-generated ID {{serverConne
 <p>In addition to the common fields, command failed messages MUST contain the following key-value pairs:</p>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
 <tr><td>message</td><td>String</td><td>"Command failed"</td></tr>
-<tr><td>durationMS</td><td>Int</td><td>The execution time for the command in milliseconds. The calculated value MUST be the time to send the message and receive the reply from the server and MAY include BSON serialization and/or deserialization.</td></tr>
+<tr><td>durationMS</td><td>Int32/Int64/Double</td><td>The execution time for the command in milliseconds. The calculated value MUST be the time to send the message and receive the reply from the server and MAY include BSON serialization and/or deserialization.</td></tr>
 <tr><td>failure</td><td>Flexible</td><td>The error. The type and format of this value is flexible; see the <a href="../logging/logging.html#representing-errors-in-log-messages">logging specification</a> for details on representing errors in log messages. If the command is considered sensitive, the error MUST be redacted and replaced with a language-appropriate alternative for a redacted error, e.g. an empty string, empty document, or null.</td></tr>
 </tbody></table>
 </div>
@@ -531,6 +531,9 @@ released. Requiring the retention of this buffer until command completion could 
 penalties, particularly when event listeners are introduced.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
+</li>
 <li>
 <p>2024-09-11: Migrated from reStructuredText to Markdown.</p>
 </li>

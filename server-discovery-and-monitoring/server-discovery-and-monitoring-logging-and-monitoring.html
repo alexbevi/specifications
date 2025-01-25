@@ -596,7 +596,7 @@ server-generated ID {{serverConnectionId}} in topology with ID {{topologyId}}. A
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
 <tr><td>message</td><td>String</td><td>"Server heartbeat succeeded"</td></tr>
 <tr><td>awaited</td><td>Boolean</td><td>Whether this log message is for an awaitable hello or legacy "hello".</td></tr>
-<tr><td>durationMS</td><td>Int</td><td>The execution time for the heartbeat in milliseconds. See <code>ServerHeartbeatSucceededEvent</code> in <a href="#events-api">Events API</a> for details on calculating this value.</td></tr>
+<tr><td>durationMS</td><td>Int32/Int64/Double</td><td>The execution time for the heartbeat in milliseconds. See <code>ServerHeartbeatSucceededEvent</code> in <a href="#events-api">Events API</a> for details on calculating this value.</td></tr>
 <tr><td>reply</td><td>String</td><td>Relaxed extended JSON representation of the reply to the heartbeat command.</td></tr>
 </tbody></table>
 </div>
@@ -614,7 +614,7 @@ placeholders as appropriate:</p>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
 <tr><td>message</td><td>String</td><td>"Server heartbeat failed"</td></tr>
 <tr><td>awaited</td><td>Boolean</td><td>Whether this log message is for an awaitable hello or legacy "hello".</td></tr>
-<tr><td>durationMS</td><td>Int</td><td>The execution time for the heartbeat in milliseconds. See <code>ServerHeartbeatFailedEvent</code> in <a href="#events-api">Events API</a> for details on calculating this value.</td></tr>
+<tr><td>durationMS</td><td>Int32/Int64/Double</td><td>The execution time for the heartbeat in milliseconds. See <code>ServerHeartbeatFailedEvent</code> in <a href="#events-api">Events API</a> for details on calculating this value.</td></tr>
 <tr><td>failure</td><td>Flexible</td><td>The error. The type and format of this value is flexible; see the <a href="../logging/logging.html#representing-errors-in-log-messages">logging specification</a> for details on representing errors in log messages. If the command is considered sensitive, the error MUST be redacted and replaced with a language-appropriate alternative for a redacted error, e.g. an empty string, empty document, or null.</td></tr>
 </tbody></table>
 </div>
@@ -629,6 +629,9 @@ placeholders as appropriate:</p>
 <p>See the <a href="tests/monitoring/README.html">README</a>.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
+</li>
 <li>
 <p>2024-05-02: Migrated from reStructuredText to Markdown.</p>
 </li>

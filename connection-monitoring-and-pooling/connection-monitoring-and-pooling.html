@@ -1129,7 +1129,7 @@ placeholders as appropriate:</p>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
 <tr><td>message</td><td>String</td><td>"Connection ready"</td></tr>
 <tr><td>driverConnectionId</td><td>Int64</td><td>The driver-generated ID for the connection as defined in <a href="#connection">Connection</a>.</td></tr>
-<tr><td>durationMS</td><td>Int64</td><td><code>ConnectionReadyEvent.duration</code> converted to milliseconds.</td></tr>
+<tr><td>durationMS</td><td>Int32/Int64/Double</td><td><code>ConnectionReadyEvent.duration</code> converted to milliseconds.</td></tr>
 </tbody></table>
 </div>
 <p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
@@ -1170,7 +1170,7 @@ placeholders as appropriate:</p>
 <tr><td>message</td><td>String</td><td>"Connection checkout failed"</td></tr>
 <tr><td>reason</td><td>String</td><td>A string describing the reason checkout. The following strings MUST be used for each possible reason as defined in <a href="#events">Events</a> above:<br>- Timeout: "Wait queue timeout elapsed without a connection becoming available"<br>- ConnectionError: "An error occurred while trying to establish a new connection"<br>- Pool closed: "Connection pool was closed"</td></tr>
 <tr><td>error</td><td>Flexible</td><td>If <code>reason</code> is <code>ConnectionError</code>, the associated error. The type and format of this value is flexible; see the <a href="../logging/logging.html#representing-errors-in-log-messages">logging specification</a> for details on representing errors in log messages.</td></tr>
-<tr><td>durationMS</td><td>Int64</td><td><code>ConnectionCheckOutFailedEvent.duration</code> converted to milliseconds.</td></tr>
+<tr><td>durationMS</td><td>Int32/Int64/Double</td><td><code>ConnectionCheckOutFailedEvent.duration</code> converted to milliseconds.</td></tr>
 </tbody></table>
 </div>
 <p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
@@ -1184,7 +1184,7 @@ placeholders as appropriate:</p>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
 <tr><td>message</td><td>String</td><td>"Connection checked out"</td></tr>
 <tr><td>driverConnectionId</td><td>Int64</td><td>The driver-generated ID for the connection as defined in <a href="#connection">Connection</a>.</td></tr>
-<tr><td>durationMS</td><td>Int64</td><td><code>ConnectionCheckedOutEvent.duration</code> converted to milliseconds.</td></tr>
+<tr><td>durationMS</td><td>Int32/Int64/Double</td><td><code>ConnectionCheckedOutEvent.duration</code> converted to milliseconds.</td></tr>
 </tbody></table>
 </div>
 <p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
@@ -1349,6 +1349,9 @@ Connection.</li>
 to close and remove from its pool a <a href="#connection">Connection</a> which has unread exhaust messages.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
+</li>
 <li>
 <p>2024-11-27: Relaxed the WaitQueue fairness requirement.</p>
 </li>
