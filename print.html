@@ -5300,7 +5300,8 @@ field in the server's hello or legacy hello response, in the case that the serve
 the address the client uses.</p>
 </li>
 <li>
-<p>(=) <code>error</code>: information about the last error related to this server. Default null.</p>
+<p>(=) <code>error</code>: information about the last error related to this server. Default null. MUST contain or be able to produce
+a string describing the error.</p>
 </li>
 <li>
 <p><code>roundTripTime</code>: the duration of the hello or legacy hello call. Default null.</p>
@@ -5521,7 +5522,13 @@ client can use it to find the primary. Since the hidden member does not appear i
 removed once the primary is checked.</p>
 <h4 id="error"><a class="header" href="#error">error</a></h4>
 <p>If the client experiences any error when checking a server, it stores error information in the ServerDescription's error
-field.</p>
+field. The message contained in this field MUST contain the substrings detailed in the table below when the
+ServerDescription is changed to Unknown in the circumstances outlined.</p>
+<div class="table-wrapper"><table><thead><tr><th>circumstance</th><th>error substring</th></tr></thead><tbody>
+<tr><td>RSPrimary with a stale electionId/setVersion is discovered</td><td><code>'primary marked stale due to electionId/setVersion mismatch, &lt;stale tuple&gt; is stale compared to &lt;max tuple&gt;'</code></td></tr>
+<tr><td>New primary is elected/discovered</td><td><code>'primary marked stale due to discovery of newer primary'</code></td></tr>
+</tbody></table>
+</div>
 <h4 id="roundtriptime"><a class="header" href="#roundtriptime">roundTripTime</a></h4>
 <p>Drivers MUST record the server's <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#round-trip-time">round trip time</a> (RTT) after each successful call to hello or legacy
 hello. The Server Selection Spec describes how RTT is averaged and how it is used in server selection. Drivers MUST also
@@ -5824,7 +5831,8 @@ if serverDescription.maxWireVersion &gt;= 17:  # MongoDB 6.0+
         topologyDescription.maxSetVersion = serverDescription.setVersion
     else:
         # Stale primary.
-        # replace serverDescription with a default ServerDescription of type "Unknown"
+        # The error field MUST include the substring "primary marked stale due to electionId/setVersion mismatch"
+         replace serverDescription with a default ServerDescription of type "Unknown"
         checkIfHasPrimary()
         return
 else:
@@ -5842,7 +5850,8 @@ else:
             )
         ):
             # Stale primary.
-            # replace serverDescription with a default ServerDescription of type "Unknown"
+            # The error field MUST include the substring "primary marked stale due to electionId/setVersion mismatch"
+            replace serverDescription with a default ServerDescription of type "Unknown" 
             checkIfHasPrimary()
             return
 
@@ -5859,6 +5868,7 @@ for each server in topologyDescription.servers:
     if server.address != serverDescription.address:
         if server.type is RSPrimary:
             # See note below about invalidating an old primary.
+            # the error field MUST include the substring "primary marked stale due to discovery of newer primary"
             replace the server with a default ServerDescription of type "Unknown"
 
 for each address in serverDescription's "hosts", "passives", and "arbiters":
@@ -5873,16 +5883,19 @@ for each server in topologyDescription.servers:
 checkIfHasPrimary()
 </code></pre>
 <p>A note on invalidating the old primary: when a new primary is discovered, the client finds the previous primary (there
-should be none or one) and replaces its description with a default ServerDescription of type "Unknown." A multi-threaded
-client MUST <a href="server-discovery-and-monitoring/server-monitoring.html#requesting-an-immediate-check">request an immediate check</a> for that server as soon as
-possible.</p>
+should be none or one) and replaces its description with a default ServerDescription of type "Unknown". Additionally,
+the <code>error</code> field of the new <code>ServerDescription</code> object MUST include a descriptive error explaining that it was
+invalidated because the primary was determined to be stale. A multi-threaded client MUST
+<a href="server-discovery-and-monitoring/server-monitoring.html#requesting-an-immediate-check">request an immediate check</a> for that server as soon as possible.</p>
 <p>If the old primary server version is 4.0 or earlier, the client MUST clear its connection pool for the old primary, too:
 the connections are all bad because the old primary has closed its sockets. If the old primary server version is 4.2 or
 newer, the client MUST NOT clear its connection pool for the old primary.</p>
 <p>See <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#replica-set-monitoring-with-and-without-a-primary">replica set monitoring with and without a primary</a>.</p>
 <p>If the server is primary with an obsolete electionId or setVersion, it is likely a stale primary that is going to step
 down. Mark it Unknown and let periodic monitoring detect when it becomes secondary. See
-<a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#using-electionid-and-setversion-to-detect-stale-primaries">using electionId and setVersion to detect stale primaries</a>.</p>
+<a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#using-electionid-and-setversion-to-detect-stale-primaries">using electionId and setVersion to detect stale primaries</a>.
+Drivers MAY additionally specify whether this was due to an electionId or setVersion mismatch as described in the
+<a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#error">ServerDescripion.error section</a>.</p>
 <p>A note on checking "me": Unlike <code>updateRSWithPrimaryFromMember</code>, there is no need to remove the server if the address is
 not equal to "me": since the server address will not be a member of either "hosts", "passives", or "arbiters", the
 server will already have been removed.</p>
@@ -6688,21 +6701,6 @@ oversaw the specification process.</p>
 <h2 id="changelog-14"><a class="header" href="#changelog-14">Changelog</a></h2>
 <ul>
 <li>
-<p>2024-11-11: Removed references to <code>getLastError</code></p>
-</li>
-<li>
-<p>2024-11-04: Make the description of <code>TopologyDescription.servers</code> consistent with the spec tests.</p>
-</li>
-<li>
-<p>2024-08-16: Updated host b wire versions in <code>too_new</code> and <code>too_old</code> tests</p>
-</li>
-<li>
-<p>2024-08-09: Updated wire versions in tests to 4.0+.</p>
-</li>
-<li>
-<p>2024-05-08: Migrated from reStructuredText to Markdown.</p>
-</li>
-<li>
 <p>2015-12-17: Require clients to compare (setVersion, electionId) tuples.</p>
 </li>
 <li>
@@ -6818,6 +6816,25 @@ used.</p>
 </li>
 <li>
 <p>2024-01-17: Add section on expected client close behaviour</p>
+</li>
+<li>
+<p>2024-05-08: Migrated from reStructuredText to Markdown.</p>
+</li>
+<li>
+<p>2024-08-09: Updated wire versions in tests to 4.0+.</p>
+</li>
+<li>
+<p>2024-08-16: Updated host b wire versions in <code>too_new</code> and <code>too_old</code> tests</p>
+</li>
+<li>
+<p>2024-11-04: Make the description of <code>TopologyDescription.servers</code> consistent with the spec tests.</p>
+</li>
+<li>
+<p>2024-11-11: Removed references to <code>getLastError</code></p>
+</li>
+<li>
+<p>2025-01-22: Add error messages when a new primary is elected or a primary with a stale electionId or setVersion is
+discovered.</p>
 </li>
 </ul>
 <hr />
