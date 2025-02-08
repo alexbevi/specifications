@@ -556,6 +556,8 @@ End Function
 <ul>
 <li>Padding MUST be 0 for all dtypes where padding doesn’t apply, and MUST be within [0, 7] for PACKED_BIT.</li>
 <li>A PACKED_BIT vector MUST NOT be empty if padding is in the range [1, 7].</li>
+<li>When unpacking binary data into a FLOAT32 Vector structure, the length of the binary data following the dtype and
+padding MUST be a multiple of 4 bytes.</li>
 </ul>
 <p>Drivers MUST perform this validation when a numeric vector and padding are provided through the API, and when unpacking
 binary data (BSON or similar) into a Vector structure.</p>
@@ -612,6 +614,15 @@ you want to store or transmit binary data more efficiently by grouping 8 bits in
 example in Python, see
 <a href="https://numpy.org/doc/2.0/reference/generated/numpy.unpackbits.html#numpy.unpackbits">numpy.unpackbits</a>.</li>
 </ul>
+</li>
+</ul>
+<h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
+<ul>
+<li>
+<p>2025-02-04: Update validation for decoding into a FLOAT32 vector.</p>
+</li>
+<li>
+<p>2024-11-01: BSON Binary Subtype 9 accepted DRIVERS-2926 (#1708)</p>
 </li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bson-objectid"><a class="header" href="#bson-objectid">BSON ObjectID</a></h1>
@@ -704,7 +715,7 @@ value. This will change the behaviour of ObjectID generation, as well as the beh
 getters and setters for the original <em>Machine ID</em> and <em>Process ID</em> fields.</p>
 <h2 id="reference-implementation-1"><a class="header" href="#reference-implementation-1">Reference Implementation</a></h2>
 <p>Currently there is no full reference implementation yet.</p>
-<h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
+<h2 id="changelog-1"><a class="header" href="#changelog-1">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-30: Migrated from reStructuredText to Markdown.</p>
@@ -1031,7 +1042,7 @@ example, '2.00' always remains stored as 200E-2 in Decimal128, and it differs fr
 </ul>
 </li>
 </ul>
-<h2 id="changelog-1"><a class="header" href="#changelog-1">Changelog</a></h2>
+<h2 id="changelog-2"><a class="header" href="#changelog-2">Changelog</a></h2>
 <ul>
 <li>2024-02-08: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter.</li>
@@ -1346,7 +1357,7 @@ Instead, the specification allows for a global override so that the C# driver ca
 writers at a level below the serializers. This configuration affects the semantics of the existing BsonBinary class in a
 way that doesn't allow for the constructor(UUID) mentioned in the specification. For this reason, that constructor is
 specified as optional.</p>
-<h2 id="changelog-2"><a class="header" href="#changelog-2">Changelog</a></h2>
+<h2 id="changelog-3"><a class="header" href="#changelog-3">Changelog</a></h2>
 <ul>
 <li>2024-08-01: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter.</li>
@@ -1618,7 +1629,7 @@ the document is otherwise valid). This follows the
 accepts and conservative in what it emits. This does mean that round-tripping an out of order DBRef through a driver
 could result in its field order being changed; however, this behavior is consistent with existing behavior in drivers
 that model DBRefs (e.g. C#, Java, Node, Python, Ruby) and applications can opt out of implicit decoding if desired.</p>
-<h2 id="changelog-3"><a class="header" href="#changelog-3">Changelog</a></h2>
+<h2 id="changelog-4"><a class="header" href="#changelog-4">Changelog</a></h2>
 <ul>
 <li>2024-02-26: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter.</li>
@@ -2192,7 +2203,7 @@ a <code>$type</code> key whose value is an integral type, or a document with a <
 parsed as a normal document and not reported as an error.</p>
 <p><strong>Q</strong>. Sometimes I see the term "extjson" used in other specifications. Is "extjson" related to this specification?</p>
 <p><strong>A</strong>. Yes, "extjson" is short for "Extended JSON".</p>
-<h3 id="changelog-4"><a class="header" href="#changelog-4">Changelog</a></h3>
+<h3 id="changelog-5"><a class="header" href="#changelog-5">Changelog</a></h3>
 <ul>
 <li>2024-05-29: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter and reformat changelog.</li>
@@ -2589,7 +2600,7 @@ the failover until next time the socket is used.</li>
 helper, rather then adding wire protocol headers as options to the existing <code>runCommand</code> helpers.</p>
 </li>
 </ul>
-<h3 id="changelog-5"><a class="header" href="#changelog-5">Changelog</a></h3>
+<h3 id="changelog-6"><a class="header" href="#changelog-6">Changelog</a></h3>
 <ul>
 <li>2024-04-30: Convert from RestructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter.</li>
@@ -2892,7 +2903,7 @@ specification.</p>
 <li>See Client Side Operations Timeout's section on
 <a href="run-command/../client-side-operations-timeout/client-side-operations-timeout.html#cursors">Cursors</a></li>
 </ul>
-<h2 id="changelog-6"><a class="header" href="#changelog-6">Changelog</a></h2>
+<h2 id="changelog-7"><a class="header" href="#changelog-7">Changelog</a></h2>
 <ul>
 <li>2024-09-02: Migrated from reStructuredText to Markdown.</li>
 <li>2023-05-10: Add runCursorCommand API specification.</li>
@@ -3241,7 +3252,7 @@ encoded. This disambiguates between the auth database and the connection options
 <p>Space characters SHOULD be encoded as <code>%20</code> rather than <code>+</code>, this will be portable across all implementations.
 Implementations MAY support decoding <code>+</code> into a space, as many languages treat strings as <code>x-www-form-urlencoded</code> data
 by default.</p>
-<h2 id="changelog-7"><a class="header" href="#changelog-7">Changelog</a></h2>
+<h2 id="changelog-8"><a class="header" href="#changelog-8">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-05-29: Clarify handling of key-value pairs and add specification test.</p>
@@ -3436,7 +3447,7 @@ default.</p>
 of the options at the time it was written. Whenever another specification is written or modified in a way that changes
 the name or the semantics of a URI option or adds a new URI option, this specification MUST be updated to reflect those
 changes.</p>
-<h2 id="changelog-8"><a class="header" href="#changelog-8">Changelog</a></h2>
+<h2 id="changelog-9"><a class="header" href="#changelog-9">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-05-08: Migrated from reStructuredText to Markdown.</p>
@@ -3892,7 +3903,7 @@ endeavor.</li>
 <li>If the TLS library utilizes an OCSP cache and the cache was cleared prior to starting the test application, check the
 OCSP cache for a response from an OCSP endpoint specified in the server's certificate.</li>
 </ul>
-<h2 id="changelog-9"><a class="header" href="#changelog-9">Changelog</a></h2>
+<h2 id="changelog-10"><a class="header" href="#changelog-10">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-08-20: Migrated from reStructuredText to Markdown.</p>
@@ -4371,7 +4382,7 @@ specification</li>
 </ul>
 </li>
 </ul>
-<h2 id="changelog-10"><a class="header" href="#changelog-10">Changelog</a></h2>
+<h2 id="changelog-11"><a class="header" href="#changelog-11">Changelog</a></h2>
 <ul>
 <li>2024-11-05: Move handshake prose tests from spec file to prose test file.</li>
 <li>2024-10-09: Clarify that FaaS and container metadata must both be populated when both are present.</li>
@@ -4753,7 +4764,7 @@ which could originate on any type of platform, which may or may not support snap
 </ul>
 </li>
 </ul>
-<h2 id="changelog-11"><a class="header" href="#changelog-11">Changelog</a></h2>
+<h2 id="changelog-12"><a class="header" href="#changelog-12">Changelog</a></h2>
 <ul>
 <li>2024-02-16: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter and reformat changelog.</li>
@@ -4857,7 +4868,7 @@ implementation complexity for drivers. This advantage is sufficient to ignore th
 with enabling other authentication methods.</p>
 <h3 id="design-rationales"><a class="header" href="#design-rationales">Design Rationales</a></h3>
 <h3 id="alternative-designs"><a class="header" href="#alternative-designs">Alternative Designs</a></h3>
-<h2 id="changelog-12"><a class="header" href="#changelog-12">Changelog</a></h2>
+<h2 id="changelog-13"><a class="header" href="#changelog-13">Changelog</a></h2>
 <ul>
 <li>2024-09-04: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter</li>
@@ -5075,7 +5086,7 @@ left the behaviour of supporting UTF-8 characters as unspecified.</p>
 <p>There are no backwards compatibility concerns.</p>
 <h2 id="future-work-5"><a class="header" href="#future-work-5">Future Work</a></h2>
 <p>In the future we could consider using the priority and weight fields of the SRV records.</p>
-<h2 id="changelog-13"><a class="header" href="#changelog-13">ChangeLog</a></h2>
+<h2 id="changelog-14"><a class="header" href="#changelog-14">ChangeLog</a></h2>
 <ul>
 <li>
 <p>2024-09-24: Removed requirement for URI to have three '.' separated parts; these SRVs have stricter parent domain
@@ -6698,7 +6709,7 @@ comparison in code as a tuple of the two to ensure their always updated together
 <p>Jeff Yemin's code for the Java driver 2.12, and his patient explanation thereof, is the major inspiration for this spec.
 Mathias Stearn's beautiful design for replica set monitoring in mongos 2.6 contributed as well. Bernie Hackett gently
 oversaw the specification process.</p>
-<h2 id="changelog-14"><a class="header" href="#changelog-14">Changelog</a></h2>
+<h2 id="changelog-15"><a class="header" href="#changelog-15">Changelog</a></h2>
 <ul>
 <li>
 <p>2015-12-17: Require clients to compare (setVersion, electionId) tuples.</p>
@@ -8040,7 +8051,7 @@ Connection.</li>
 <h3 id="add-support-for-op_msg-exhaustallowed"><a class="header" href="#add-support-for-op_msg-exhaustallowed">Add support for OP_MSG exhaustAllowed</a></h3>
 <p>Exhaust Cursors may require changes to how we close <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> in the future, specifically to add a way
 to close and remove from its pool a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> which has unread exhaust messages.</p>
-<h2 id="changelog-15"><a class="header" href="#changelog-15">Changelog</a></h2>
+<h2 id="changelog-16"><a class="header" href="#changelog-16">Changelog</a></h2>
 <ul>
 <li>
 <p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
@@ -8338,7 +8349,7 @@ the results of the server monitors. From a service perspective, every service wo
 PROXY protocol header bytes prepended to the initial connection and modify their states and hello responses accordingly.
 Additionally load balancers would need to have additional configuration as noted in the reference section below, and
 only load balancers that support the PROXY protocol would be supported.</p>
-<h2 id="changelog-16"><a class="header" href="#changelog-16">Changelog</a></h2>
+<h2 id="changelog-17"><a class="header" href="#changelog-17">Changelog</a></h2>
 <ul>
 <li>2024-04-25: Clarify that <code>TopologyDescriptionChangedEvent</code> must be emitted on topology close</li>
 <li>2024-03-06: Migrated from reStructuredText to Markdown.</li>
@@ -10142,7 +10153,7 @@ SASLprep usernames in SCRAM-SHA-256.</p>
 practice to avoid this. (See
 <a href="https://aws.amazon.com/premiumsupport/knowledge-center/ecs-container-ec2-metadata/">accessing EC2 metadata in ECS</a> and
 <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html">IAM Roles for Tasks</a>)</p>
-<h2 id="changelog-17"><a class="header" href="#changelog-17">Changelog</a></h2>
+<h2 id="changelog-18"><a class="header" href="#changelog-18">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-10-02: Add Kubernetes built-in OIDC provider integration.</p>
@@ -11076,7 +11087,7 @@ performance, and reliability.</p>
 <p>The serverMonitoringMode knob provides a workaround in cases where the polling protocol would be a better choice but the
 driver is not running on a FaaS platform. It also provides a workaround in case the FaaS detection logic becomes
 outdated or inaccurate.</p>
-<h2 id="changelog-18"><a class="header" href="#changelog-18">Changelog</a></h2>
+<h2 id="changelog-19"><a class="header" href="#changelog-19">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-05-02: Migrated from reStructuredText to Markdown.</p>
@@ -11259,7 +11270,7 @@ were familiar with the old behaviour. We do not expect this to negatively impact
 <a href="polling-srv-records-for-mongos-discovery/../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html">Initial DNS Seedlist Discovery</a> specification.</p>
 <h2 id="future-work-7"><a class="header" href="#future-work-7">Future work</a></h2>
 <p>No future work is expected.</p>
-<h2 id="changelog-19"><a class="header" href="#changelog-19">Changelog</a></h2>
+<h2 id="changelog-20"><a class="header" href="#changelog-20">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-08-22: Migrated from reStructuredText to Markdown.</p>
@@ -12559,7 +12570,7 @@ maxStalenessSeconds first, then tag_sets, and select Node 2.</p>
 <li><a href="server-selection/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">Connection Monitoring and Pooling</a>
 specification</li>
 </ul>
-<h2 id="changelog-20"><a class="header" href="#changelog-20">Changelog</a></h2>
+<h2 id="changelog-21"><a class="header" href="#changelog-21">Changelog</a></h2>
 <ul>
 <li>
 <p>2015-06-26: Updated single-threaded selection logic with "stale" and serverSelectionTryOnce.</p>
@@ -12995,7 +13006,7 @@ server communicates is staleness configuration in its hello response like:</p>
 </code></pre>
 <p>... then a future client can use the value from the server as its default maxStalenessSeconds when there is no
 client-side setting.</p>
-<h2 id="changelog-21"><a class="header" href="#changelog-21">Changelog</a></h2>
+<h2 id="changelog-22"><a class="header" href="#changelog-22">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-08-09: Updated wire versions in tests to 4.0+.</p>
@@ -13524,7 +13535,7 @@ that no client is interested in. This prevents applications from seeing degraded
 retried. Upon further discussion, we decided that "Early Failure on Socket Disconnect" should not be required to retry
 reads because the resilience benefit of retryable reads outweighs the minor risk of degraded performance. Additionally,
 any customers experiencing degraded performance can simply disable <code>retryableReads</code>.</p>
-<h2 id="changelog-22"><a class="header" href="#changelog-22">Changelog</a></h2>
+<h2 id="changelog-23"><a class="header" href="#changelog-23">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-04-30: Migrated from reStructuredText to Markdown.</p>
@@ -14136,7 +14147,7 @@ same from a replica set or sharded cluster (mongos just forwards the error from 
 (MongoDB version 4.4 and newer) only add the label to an error when the client has added a txnNumber to the command,
 which only happens when the retryWrites option is true on the client. For the driver to add the label even if
 retryWrites is not true would be inconsistent with the server and potentially confusing to developers.</p>
-<h2 id="changelog-23"><a class="header" href="#changelog-23">Changelog</a></h2>
+<h2 id="changelog-24"><a class="header" href="#changelog-24">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-05-08: Add guidance for client-level <code>bulkWrite()</code> retryability.</p>
@@ -14792,7 +14803,7 @@ during non-MongoDB operations (e.g. streaming data read from a GridFS stream int
 toggling GridFS behavior via an option similar to <code>timeoutMode</code> for cursors. To avoid backwards-breaking behavioral
 changes, the default would continue to cap the stream lifetime but there could be another mode that refreshes the
 timeout for each database operation. This would mimic using <code>timeoutMode=ITERATION</code> for cursors.</p>
-<h2 id="changelog-24"><a class="header" href="#changelog-24">Changelog</a></h2>
+<h2 id="changelog-25"><a class="header" href="#changelog-25">Changelog</a></h2>
 <ul>
 <li>2024-09-12: Specify that explain helpers support support timeoutMS.</li>
 <li>2023-12-07: Migrated from reStructuredText to Markdown.</li>
@@ -15457,7 +15468,7 @@ could over allocate sessions. But those scenarios are extenuating and outside th
 <p>There are a variety of cases, such as retryable operations or cursor creating operations, where a <code>serverSession</code> must
 remain acquired by the <code>ClientSession</code> after an operation is attempted. Attempting to account for all these scenarios
 has risks that do not justify the potential guaranteed <code>ServerSession</code> allocation limiting.</p>
-<h2 id="changelog-25"><a class="header" href="#changelog-25">Changelog</a></h2>
+<h2 id="changelog-26"><a class="header" href="#changelog-26">Changelog</a></h2>
 <ul>
 <li>2024-05-08: Migrated from reStructuredText to Markdown.</li>
 <li>2017-09-13: If causalConsistency option is omitted assume true</li>
@@ -15830,7 +15841,7 @@ before the spec is "Accepted". While there is merit to the approach of reaching 
 rationale before writing code, the principle of "rough consensus and running code" is still useful when it comes to
 resolving many discussions of spec details. A final reference implementation must include test code and documentation.</p>
 <h2 id="qa-9"><a class="header" href="#qa-9">Q&amp;A</a></h2>
-<h2 id="changelog-26"><a class="header" href="#changelog-26">Changelog</a></h2>
+<h2 id="changelog-27"><a class="header" href="#changelog-27">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-02-08: Migrated from reStructuredText to Markdown.</p>
@@ -16037,7 +16048,7 @@ Existing programs that don't use snapshot reads continue to compile and run corr
 <p>C# driver will provide the reference implementation. The corresponding ticket is
 <a href="https://jira.mongodb.org/browse/CSHARP-3668">CSHARP-3668</a>.</p>
 <h2 id="qa-10"><a class="header" href="#qa-10">Q&amp;A</a></h2>
-<h2 id="changelog-27"><a class="header" href="#changelog-27">Changelog</a></h2>
+<h2 id="changelog-28"><a class="header" href="#changelog-28">Changelog</a></h2>
 <ul>
 <li>2024-05-08: Migrated from reStructuredText to Markdown.</li>
 <li>2021-06-15: Initial version.</li>
@@ -16880,7 +16891,7 @@ custom write concerns. Excluding the edge case where
 <a href="https://www.mongodb.com/docs/manual/reference/replica-configuration/#rsconf.writeConcernMajorityJournalDefault">writeConcernMajorityJournalDefault</a>
 has been disabled, drivers can readily trust that a majority write concern is durable, which achieves the primary
 objective of avoiding duplicate commits.</p>
-<h2 id="changelog-28"><a class="header" href="#changelog-28"><strong>Changelog</strong></a></h2>
+<h2 id="changelog-29"><a class="header" href="#changelog-29"><strong>Changelog</strong></a></h2>
 <ul>
 <li>
 <p>2024-11-01: Clarify collection options inside txn.</p>
@@ -17257,7 +17268,7 @@ implementations may be found via <a href="https://jira.mongodb.org/browse/DRIVER
 a helper method to execute a user-defined function within a transaction has few security implications, as it only
 provides an implementation of a technique already described in the MongoDB 4.0 documentation
 (<a href="https://jira.mongodb.org/browse/DRIVERS-488">DRIVERS-488</a>).</p>
-<h2 id="changelog-29"><a class="header" href="#changelog-29">Changelog</a></h2>
+<h2 id="changelog-30"><a class="header" href="#changelog-30">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-09-06: Migrated from reStructuredText to Markdown.</p>
@@ -17422,7 +17433,7 @@ why and how users would want to override the declared API version.</p>
 <h3 id="stable-crud-api"><a class="header" href="#stable-crud-api">Stable CRUD API</a></h3>
 <p>Drivers may also want to provide specialized <code>MongoClient</code>, <code>MongoDatabase</code>, and <code>MongoCollection</code> classes to only
 include features that are part of the stable API. This is not covered in this specification.</p>
-<h2 id="changelog-30"><a class="header" href="#changelog-30">Changelog</a></h2>
+<h2 id="changelog-31"><a class="header" href="#changelog-31">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-09-10: Migrated from reStructuredText to Markdown.</p>
@@ -17627,7 +17638,7 @@ database information documents is the primary result. Returning a tuple or compo
 driver method would complicate the general use case, as opposed to an optional output argument (if supported by the
 language). Furthermore, the <code>totalSize</code> value can be calculated client-side by summing all <code>sizeOnDisk</code> fields in the
 array of database information documents.</p>
-<h2 id="changelog-31"><a class="header" href="#changelog-31">Changelog</a></h2>
+<h2 id="changelog-32"><a class="header" href="#changelog-32">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-26: Migrated from reStructuredText to Markdown. Removed note that applied to pre-3.6 servers.</p>
@@ -17874,7 +17885,7 @@ versions of MongoDB.</p>
 <h2 id="reference-implementation-19"><a class="header" href="#reference-implementation-19">Reference Implementation</a></h2>
 <p>The shell implements the first algorithm for falling back if the <code>listCollections</code> command does not exist
 (<a href="https://github.com/mongodb/mongo/blob/f32ba54f971c045fb589fe4c3a37da77dc486cee/src/mongo/shell/db.js#L550">https://github.com/mongodb/mongo/blob/f32ba54f971c045fb589fe4c3a37da77dc486cee/src/mongo/shell/db.js#L550</a>).</p>
-<h2 id="changelog-32"><a class="header" href="#changelog-32">Changelog</a></h2>
+<h2 id="changelog-33"><a class="header" href="#changelog-33">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-26: Migrated from reStructuredText to Markdown. Drop description of behavior for MongoDB 2.x servers.</p>
@@ -18868,7 +18879,7 @@ Starting in 3.4, the server validates all options passed to the <code>createInde
 4.2.0-4.2.5 of the server (SERVER-47193), specifying <code>commitQuorum</code> does not result in an error. The option is used
 internally by the server on those versions, and its value could have adverse effects on index builds. To prevent users
 from mistakenly specifying this option, drivers manually verify it is only sent to 4.4+ servers.</p>
-<h4 id="changelog-33"><a class="header" href="#changelog-33">Changelog</a></h4>
+<h4 id="changelog-34"><a class="header" href="#changelog-34">Changelog</a></h4>
 <ul>
 <li>
 <p>2024-09-05: Moved options in SearchIndexModel to SearchIndexOptions for consistency with IndexModel and IndexOptions.</p>
@@ -21295,7 +21306,7 @@ Given that the original switch to <code>$collStats</code> was a breaking change 
 using estimatedDocumentCount with <code>apiStrict: true</code> is small, and the server is back-porting the addition of <code>count</code> to
 the Stable API, it was decided that this change was acceptable to make in minor version releases of the drivers per the
 aforementioned allowance in the SemVer spec.</p>
-<h2 id="changelog-34"><a class="header" href="#changelog-34">Changelog</a></h2>
+<h2 id="changelog-35"><a class="header" href="#changelog-35">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-11-13: Define <code>findOne</code> operation as optional, and add guidance on <code>limit</code> and <code>batchSize</code> for <code>find</code> operations.</p>
@@ -21678,7 +21689,7 @@ server has maxWireVersion &lt; 5.</p>
 collation when deleting a document matching <code>ObjectID()</code> doesn’t change anything, but matching a string value would.</p>
 <p>Q: How do I create a collection with default collation? Does it affect my existing collection creation helper?</p>
 <p>A: A collection with a default collation can be created using the create helper and by providing a collation option.</p>
-<h2 id="changelog-35"><a class="header" href="#changelog-35">Changelog</a></h2>
+<h2 id="changelog-36"><a class="header" href="#changelog-36">Changelog</a></h2>
 <ul>
 <li>2024-02-15: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter and reformat changelog.</li>
@@ -22061,7 +22072,7 @@ corresponding response off the wire -- even if the caller is not interested in t
 <h3 id="are-we-discontinuing-the-use-of-getlasterror"><a class="header" href="#are-we-discontinuing-the-use-of-getlasterror">Are we discontinuing the use of getLastError?</a></h3>
 <p>Yes but as of 2.6 the existing getLastError behavior is supported for backward compatibility. Note also that
 <code>getLastError</code> was removed in server version 5.1.</p>
-<h2 id="changelog-36"><a class="header" href="#changelog-36">Changelog</a></h2>
+<h2 id="changelog-37"><a class="header" href="#changelog-37">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-11-11: Add note that getLastError has been removed from the server.</p>
@@ -22882,7 +22893,7 @@ drivers should rely on the server to return errors about exceeded size limits. S
 unacknowledged writes. This specification previously required drivers to check size limits for unacknowledged writes.
 The requirement has since been removed. Checking size limits complicates some driver implementations. Returning a driver
 error in this specific situation does not seem helpful enough to require size checks.</p>
-<h2 id="changelog-37"><a class="header" href="#changelog-37"><strong>Changelog</strong></a></h2>
+<h2 id="changelog-38"><a class="header" href="#changelog-38"><strong>Changelog</strong></a></h2>
 <ul>
 <li>
 <p>2024-11-05: Updated the requirements regarding the size validation.</p>
@@ -23343,7 +23354,7 @@ set differently. While this setting does not currently exist for <code>ReadConce
 costs a driver nothing to be prepared for it. Second, it makes sense that if a user doesn't specify a <code>ReadConcern</code>, we
 don't send one and if a user does specify a <code>ReadConcern</code>, we do send one. If the user specifies level="local", for
 instance, we send it.</p>
-<h2 id="changelog-38"><a class="header" href="#changelog-38">Changelog</a></h2>
+<h2 id="changelog-39"><a class="header" href="#changelog-39">Changelog</a></h2>
 <ul>
 <li>
 <p>2015-10-16: ReadConcern of local is no longer allowed to be used when talking with MaxWireVersion &lt; 4.</p>
@@ -24322,7 +24333,7 @@ unnecessary scanning of unmatched oplog entries.</p>
 <li>PYTHON (PYTHON-1338)</li>
 <li>RUBY (RUBY-1228)</li>
 </ul>
-<h2 id="changelog-39"><a class="header" href="#changelog-39">Changelog</a></h2>
+<h2 id="changelog-40"><a class="header" href="#changelog-40">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-02-09: Migrated from reStructuredText to Markdown.</p>
@@ -24807,7 +24818,7 @@ Information about the command can be found in the
 <p>This format is general for all commands when executing against a Mongos proxy.</p>
 <p>More in depth information about passing read preferences to Mongos can be found in the Server Selection Specification
 <a href="find_getmore_killcursors_commands/../server-selection/server-selection.html#passing-read-preference-to-mongos">Server Selection Specification</a>.</p>
-<h2 id="changelog-40"><a class="header" href="#changelog-40">Changelog</a></h2>
+<h2 id="changelog-41"><a class="header" href="#changelog-41">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-30: Migrated from reStructuredText to Markdown.</p>
@@ -25687,7 +25698,7 @@ instead.</p>
 <p>The ability to alter or append to existing GridFS files has been cited as something that would greatly improve the
 system. While this functionality is not in-scope for this spec (see "Why can"t I alter documents once they are in the
 system?") it is a potential area of growth for the future.</p>
-<h2 id="changelog-41"><a class="header" href="#changelog-41">Changelog</a></h2>
+<h2 id="changelog-42"><a class="header" href="#changelog-42">Changelog</a></h2>
 <ul>
 <li>2024-10-30: Add <code>delete_by_name</code> and <code>rename_by_name</code></li>
 <li>2024-10-28: Removed deprecated fields from tests: <code>md5</code>, <code>contentType</code>, <code>aliases</code></li>
@@ -27686,7 +27697,7 @@ libmongocrypt would create multiple OP_MSGs to send.</p>
 <p>Key management functions currently assume there are no concurrent accesses of the key vault collection being operated
 on. To support concurrent access of the key vault collection, the key management functions may be overloaded to take an
 explicit session parameter as described in the <a href="client-side-encryption/../sessions/driver-sessions.html">Drivers Sessions Specification</a>.</p>
-<h2 id="changelog-42"><a class="header" href="#changelog-42">Changelog</a></h2>
+<h2 id="changelog-43"><a class="header" href="#changelog-43">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-10-09: Add retry prose test.</p>
@@ -27946,7 +27957,7 @@ validate that the underlying encrypted BSON type is correct.</p>
 <p>It would be a very bad security flaw if intent-to-encrypt markings were confused with ciphertexts. This could lead to a
 marking inadvertently being stored on a server – meaning that plaintext is stored where ciphertext should have been.</p>
 <p>Therefore, the leading byte of the BSON binary subtype distinguishes between marking and ciphertext.</p>
-<h2 id="changelog-43"><a class="header" href="#changelog-43">Changelog</a></h2>
+<h2 id="changelog-44"><a class="header" href="#changelog-44">Changelog</a></h2>
 <ul>
 <li>2024-03-04: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter and create changelog.</li>
@@ -28328,7 +28339,7 @@ driver-generated ID {{driverConnectionId}} and server-generated ID {{serverConne
 server and stored in an internal buffer. By the time the server's response is received, this buffer may have been
 released. Requiring the retention of this buffer until command completion could result in unacceptable performance
 penalties, particularly when event listeners are introduced.</p>
-<h2 id="changelog-44"><a class="header" href="#changelog-44">Changelog</a></h2>
+<h2 id="changelog-45"><a class="header" href="#changelog-45">Changelog</a></h2>
 <ul>
 <li>
 <p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
@@ -28889,7 +28900,7 @@ placeholders as appropriate:</p>
 </blockquote>
 <h3 id="tests-2"><a class="header" href="#tests-2">Tests</a></h3>
 <p>See the <a href="server-discovery-and-monitoring/tests/monitoring/README.html">README</a>.</p>
-<h2 id="changelog-45"><a class="header" href="#changelog-45">Changelog</a></h2>
+<h2 id="changelog-46"><a class="header" href="#changelog-46">Changelog</a></h2>
 <ul>
 <li>
 <p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
@@ -29258,7 +29269,7 @@ infinitely if each write to store a log message generates additional log message
 issue in drivers that already produce log messages, or with the command monitoring API, but if users start to run into
 this issue, we could try to address it at the specification level by e.g. requiring drivers to support disabling logging
 on individual clients or for particular namespaces.</p>
-<h2 id="changelog-46"><a class="header" href="#changelog-46">Changelog</a></h2>
+<h2 id="changelog-47"><a class="header" href="#changelog-47">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-03-06: Migrated from reStructuredText to Markdown.</p>
@@ -30480,7 +30491,7 @@ Connection.</li>
 <h3 id="add-support-for-op_msg-exhaustallowed-1"><a class="header" href="#add-support-for-op_msg-exhaustallowed-1">Add support for OP_MSG exhaustAllowed</a></h3>
 <p>Exhaust Cursors may require changes to how we close <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connections</a> in the future, specifically to add a way
 to close and remove from its pool a <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection">Connection</a> which has unread exhaust messages.</p>
-<h2 id="changelog-47"><a class="header" href="#changelog-47">Changelog</a></h2>
+<h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
 <ul>
 <li>
 <p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
@@ -33562,7 +33573,7 @@ CRUD spec and this spec and its schema.</p>
 <p>As discussed in <a href="unified-test-format/unified-test-format.html#executing-an-operation">Executing an Operation</a>, test runners MUST raise errors for unsupported
 operations and arguments. This is a concession until such time that better processes can be established for versioning
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
-<h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
+<h2 id="changelog-49"><a class="header" href="#changelog-49">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-11-12: <strong>Schema version 1.22.</strong></p>
@@ -33838,7 +33849,7 @@ MongoClient using a valid connection string without auth credentials and execute
 <p>Test that the driver can establish a connection with Atlas Data Lake with authentication. For these tests, create a
 MongoClient using a valid connection string with SCRAM-SHA-1 and credentials from the drivers-evergreen-tools ADL
 configuration and execute a ping command. Repeat this test using SCRAM-SHA-256.</p>
-<h2 id="changelog-49"><a class="header" href="#changelog-49">Changelog</a></h2>
+<h2 id="changelog-50"><a class="header" href="#changelog-50">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-03-08: Convert legacy ADL tests to unified format. Convert test README from reStructuredText to Markdown.</p>
@@ -34425,7 +34436,7 @@ minimize disk I/O impact?); same AWS zone as client</p>
 <p>TBD: spec system to hold scores over time</p>
 <h3 id="datasets"><a class="header" href="#datasets">Datasets</a></h3>
 <p>TBD: generated datasets should be park in S3 or somewhere for retrieval by URL</p>
-<h2 id="changelog-50"><a class="header" href="#changelog-50">Changelog</a></h2>
+<h2 id="changelog-51"><a class="header" href="#changelog-51">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-12-23: Add Client and Collection BulkWrite benchmarks</p>
@@ -34763,7 +34774,7 @@ to the Extended JSON Specification.</p>
 different in different cases, but the <code>canonical_bson</code> field is the same. This is by design so that each case stands
 alone and can be confirmed to be internally consistent via the assertions. This makes for easier and safer test case
 development.</p>
-<h2 id="changelog-51"><a class="header" href="#changelog-51">Changelog</a></h2>
+<h2 id="changelog-52"><a class="header" href="#changelog-52">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-01-22: Migrated from reStructuredText to Markdown.</p>
@@ -35187,7 +35198,7 @@ limit. The variant itself MUST have the SAM CLI installed.</p>
 <li>Calls the frozen lambda function again.</li>
 <li>Deletes the Lambda function.</li>
 </ul>
-<h2 id="changelog-52"><a class="header" href="#changelog-52">Changelog</a></h2>
+<h2 id="changelog-53"><a class="header" href="#changelog-53">Changelog</a></h2>
 <ul>
 <li>2024-02-27: Migrated from reStructuredText to Markdown.</li>
 <li>2023-08-21: Drivers MUST assert that the streaming protocol is disabled in the Lambda function.</li>
@@ -35285,7 +35296,7 @@ Serverless testing.</p>
 <p>Any other existing tests for cursor behavior that a driver may have implemented independently of any spec requirements
 SHOULD also be included in the driver's Atlas Serverless testing suite. Note that change streams are not supported by
 the proxy, so their spec and prose tests MUST be skipped.</p>
-<h2 id="changelog-53"><a class="header" href="#changelog-53">Changelog</a></h2>
+<h2 id="changelog-54"><a class="header" href="#changelog-54">Changelog</a></h2>
 <ul>
 <li>2024-09-02: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Add spec front matter</li>
