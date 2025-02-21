@@ -23541,6 +23541,16 @@ following structure:</p>
   ns: Document;
 
   /**
+   * Only present for ops of type 'create'.
+   * Only present when the `showExpandedEvents` change stream option is enabled.
+   * 
+   * The type of the newly created object.
+   * 
+   * @since 8.1.0
+   */
+  nsType: "collection" | "timeseries" | "view" | null;
+
+  /**
    * Only present for ops of type 'rename'.
    *
    * The namespace, in the same format as `ns`, that a collection has been renamed to.
@@ -24335,6 +24345,9 @@ unnecessary scanning of unmatched oplog entries.</p>
 </ul>
 <h2 id="changelog-40"><a class="header" href="#changelog-40">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-01-29: Add <code>nsType</code> to <code>ChangeStreamDocument</code>.</p>
+</li>
 <li>
 <p>2024-02-09: Migrated from reStructuredText to Markdown.</p>
 </li>
