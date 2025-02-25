@@ -23548,7 +23548,7 @@ following structure:</p>
    * 
    * @since 8.1.0
    */
-  nsType: "collection" | "timeseries" | "view" | null;
+  nsType: Optional&lt;"collection" | "timeseries" | "view"&gt;;
 
   /**
    * Only present for ops of type 'rename'.
@@ -24345,6 +24345,9 @@ unnecessary scanning of unmatched oplog entries.</p>
 </ul>
 <h2 id="changelog-40"><a class="header" href="#changelog-40">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-02-24: Make <code>nsType</code> <code>Optional</code> to match other optional fields in the change stream spec.</p>
+</li>
 <li>
 <p>2025-01-29: Add <code>nsType</code> to <code>ChangeStreamDocument</code>.</p>
 </li>
