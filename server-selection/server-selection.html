@@ -217,6 +217,10 @@ servers in the deployment.</p>
 preference parameters.</p>
 <p><strong>Hedged Read</strong></p>
 <p>A server mode in which the same query is dispatched in parallel to multiple replica set members.</p>
+<blockquote>
+<p>[!NOTE]
+Hedged reads are deprecated in MongoDB Server version 8.0.</p>
+</blockquote>
 <p><strong>Immediate topology check</strong></p>
 <p>For a multi-threaded or asynchronous client, this means waking all server monitors for an immediate check. For a
 single-threaded client, this means a (blocking) scan of all servers.</p>
@@ -236,7 +240,7 @@ and the semantics for choosing a specific one.</p>
 <p>An OP_QUERY operation targeting a regular (non '$cmd') collection namespace.</p>
 <p><strong>Read preference</strong></p>
 <p>The parameters describing which servers in a deployment can receive read operations, including <code>mode</code>, <code>tag_sets</code>,
-<code>maxStalenessSeconds</code>, and <code>hedge</code>.</p>
+<code>maxStalenessSeconds</code>, and <code>hedge</code> (deprecated).</p>
 <p><strong>RS</strong></p>
 <p>Abbreviation for "replica set".</p>
 <p><strong>RTT</strong></p>
@@ -369,9 +373,9 @@ differently based on topology type. See topology-type-specific server selection 
 <p>When no servers are suitable, the selection might be retried or will eventually fail following the rules described in
 the <a href="#rules-for-server-selection">Rules for server selection</a> section.</p>
 <h4 id="components-of-a-read-preference"><a class="header" href="#components-of-a-read-preference">Components of a read preference</a></h4>
-<p>A read preference consists of a <code>mode</code> and optional <code>tag_sets</code>, <code>maxStalenessSeconds</code>, and <code>hedge</code>. The <code>mode</code>
-prioritizes between primaries and secondaries to produce either a single suitable server or a list of candidate servers.
-If <code>tag_sets</code> and <code>maxStalenessSeconds</code> are set, they determine which candidate servers are eligible for selection. If
+<p>A read preference consists of a <code>mode</code> and optional <code>tag_sets</code>, <code>maxStalenessSeconds</code>, and <code>hedge</code> (deprecated). The
+<code>mode</code> prioritizes between primaries and secondaries to produce either a single suitable server or a list of candidate
+servers. If <code>tag_sets</code> and <code>maxStalenessSeconds</code> are set, they determine which candidate servers are for selection. If
 <code>hedge</code> is set, it configures how server hedged reads are used.</p>
 <p>The default <code>mode</code> is 'primary'. The default <code>tag_sets</code> is a list with an empty tag set: <code>[{}]</code>. The default
 <code>maxStalenessSeconds</code> is -1 or null, depending on the language. The default <code>hedge</code> is unset.</p>
@@ -465,8 +469,8 @@ ignored.</li>
 servers.</li>
 </ul>
 <h5 id="hedge"><a class="header" href="#hedge">hedge</a></h5>
-<p>The read preference <code>hedge</code> parameter is a document that configures how the server will perform hedged reads. It
-consists of the following keys:</p>
+<p>The deprecated read preference <code>hedge</code> parameter is a document that configures how the server will perform hedged reads.
+It consists of the following keys:</p>
 <ul>
 <li><code>enabled</code>: Enables or disables hedging</li>
 </ul>
@@ -477,6 +481,9 @@ hedging, the <code>hedge</code> document must be passed. An empty document uses 
 driver that exposes a builder API for read preference objects MUST NOT allow an empty <code>hedge</code> document to be
 constructed. In this case, the user MUST specify a value for <code>enabled</code>, which MUST default to <code>true</code>. If the user does
 not call a <code>hedge</code> API method, drivers MUST NOT send a <code>hedge</code> option to the server.</p>
+<p>Driver APIs related to the <code>hedge</code> parameter SHOULD be annotated and documented as deprecated. If static annotations are
+not used, drivers MUST emit a runtime deprecation warning if a <code>hedge</code> parameter is specified. Such deprecation warnings
+should note that hedged reads are deprecated in MongoDB Server 8.0 and will be removed in a future version.</p>
 <h4 id="read-preference-configuration"><a class="header" href="#read-preference-configuration">Read preference configuration</a></h4>
 <p>Drivers MUST allow users to configure a default read preference on a <code>MongoClient</code> object. Drivers MAY allow users to
 configure a default read preference on a <code>Database</code> or <code>Collection</code> object.</p>
@@ -491,8 +498,7 @@ db.collection.find(
     {},
     read_preference=ReadPreference.NEAREST,
     tag_sets=[{'dc': 'ny'}],
-    maxStalenessSeconds=120,
-    hedge={'enabled': true})
+    maxStalenessSeconds=120)
 </code></pre>
 <p><span id="passing-read-preference-to-mongos"></span></p>
 <h4 id="passing-read-preference-to-mongos-and-load-balancers"><a class="header" href="#passing-read-preference-to-mongos-and-load-balancers">Passing read preference to mongos and load balancers</a></h4>
@@ -516,8 +522,8 @@ modifier.</p>
 <li>For mode 'secondary', drivers MUST set the <code>SecondaryOk</code> wire protocol flag and MUST also use <code>$readPreference</code></li>
 <li>For mode 'primaryPreferred', drivers MUST set the <code>SecondaryOk</code> wire protocol flag and MUST also use <code>$readPreference</code></li>
 <li>For mode 'secondaryPreferred', drivers MUST set the <code>SecondaryOk</code> wire protocol flag. If the read preference contains
-a non-empty <code>tag_sets</code> parameter, <code>maxStalenessSeconds</code> is a positive integer, or the <code>hedge</code> parameter is
-non-empty, drivers MUST use <code>$readPreference</code>; otherwise, drivers MUST NOT use <code>$readPreference</code></li>
+a non-empty <code>tag_sets</code> parameter, <code>maxStalenessSeconds</code> is a positive integer, or the deprecated <code>hedge</code> parameter
+is non-empty, drivers MUST use <code>$readPreference</code>; otherwise, drivers MUST NOT use <code>$readPreference</code></li>
 <li>For mode 'nearest', drivers MUST set the <code>SecondaryOk</code> wire protocol flag and MUST also use <code>$readPreference</code></li>
 </ul>
 <p>The <code>$readPreference</code> query modifier sends the read preference as part of the query. The read preference fields
@@ -532,8 +538,7 @@ query MUST be provided using the <code>$query</code> modifier like so:</p>
     $readPreference: {
         mode: 'secondary',
         tags: [ { 'dc': 'ny' } ],
-        maxStalenessSeconds: 120,
-        hedge: { enabled: true }
+        maxStalenessSeconds: 120
     }
 }
 </code></pre>
@@ -1141,7 +1146,7 @@ suits their design.</p>
         else if loopEndTime &gt; maxTime:
             throw server selection error with details
 
-        if the message was not logged already: 
+        if the message was not logged already:
             log a "waiting for suitable server to become available" message
 </code></pre>
 <h3 id="server-selection-errors"><a class="header" href="#server-selection-errors">Server Selection Errors</a></h3>
@@ -1537,6 +1542,9 @@ preference is not primary.</p>
 </li>
 <li>
 <p>2024-02-07: Migrated from reStructuredText to Markdown.</p>
+</li>
+<li>
+<p>2025-02-25: Note the deprecation of hedged reads.</p>
 </li>
 </ul>
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
