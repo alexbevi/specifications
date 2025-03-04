@@ -496,8 +496,8 @@ writeConcernError but may not be exhaustive. Note that some errors have been abb
 <li><code>{ok:1, writeConcernError: {code: 11600, codeName: "InterruptedAtShutdown"}}</code></li>
 <li><code>{ok:1, writeConcernError: {code: 11601, codeName: "Interrupted"}}</code></li>
 <li><code>{ok:1, writeConcernError: {code: 11602, codeName: "InterruptedDueToReplStateChange"}}</code></li>
-<li><code>{ok:1, writeConcernError: {code: 64, codeName: "WriteConcernFailed", errmsg: "waiting for replication timed out", errInfo: {wtimeout: True}}}</code></li>
-<li><code>{ok:1, writeConcernError: {code: 64, codeName: "WriteConcernFailed", errmsg: "multiple errors reported : {...} at shardName1 :: and :: {...} at shardName2"}}</code><sup class="footnote-reference"><a href="#1">1</a></sup></li>
+<li><code>{ok:1, writeConcernError: {code: 64, codeName: "WriteConcernTimeout", errmsg: "waiting for replication timed out", errInfo: {wtimeout: True}}}</code></li>
+<li><code>{ok:1, writeConcernError: {code: 64, codeName: "WriteConcernTimeout", errmsg: "multiple errors reported : {...} at shardName1 :: and :: {...} at shardName2"}}</code><sup class="footnote-reference"><a href="#1">1</a></sup></li>
 <li><code>{ok:1, writeConcernError: {code: 50, codeName: "MaxTimeMSExpired"}}</code></li>
 <li><code>{ok:1, writeConcernError: {code: 100, codeName: "UnsatisfiableWriteConcern", errmsg: "Not enough data-bearing nodes"}}</code></li>
 <li><code>{ok:1, writeConcernError: {code: 79, codeName: "UnknownReplWriteConcern"}}</code></li>
@@ -583,6 +583,9 @@ instance, we send it.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
 <li>
+<p>2025-02-25: Rename WriteConcernFailed to WriteConcernTimeout</p>
+</li>
+<li>
 <p>2015-10-16: ReadConcern of local is no longer allowed to be used when talking with MaxWireVersion &lt; 4.</p>
 </li>
 <li>
@@ -650,7 +653,7 @@ MongoDB 3.5+. See <a href="https://jira.mongodb.org/browse/SERVER-27891">SERVER-
 </ul>
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
 <p>This is only possible in a sharded cluster. When a write is routed to multiple shards and more than one shard
-returns a writeConcernError, then mongos will construct a new writeConcernError with the "WriteConcernFailed" error
+returns a writeConcernError, then mongos will construct a new writeConcernError with the "WriteConcernTimeout" error
 code and an errmsg field contains the stringified writeConcernError from each shard. Note that each shard may return
 a different writeConcernError.</p>
 </div>
