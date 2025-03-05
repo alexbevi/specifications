@@ -2192,7 +2192,9 @@ forms in the parser without requiring the application to specify one or the othe
 query operator use case will require that the rules set forth in the 1.0.0 version of this specification are followed
 for <code>$regex</code>; specifically, that a document with a <code>$regex</code> key whose value is a JSON object should be parsed as a
 normal document and not reported as an error.</p>
-<p><strong>Q</strong>. How can implementations which require backwards compatibility with Legacy Extended JSON, in which BSON binary values were represented like <code>{"$binary": "AQIDBAU=", "$type": "80"}</code>, handle parsing of extended JSON test representing a MongoDB query filter containing the <code>$type</code>operator?</p>
+<p><strong>Q</strong>. How can implementations which require backwards compatibility with Legacy Extended JSON, in which BSON binary
+values were represented like <code>{"$binary": "AQIDBAU=", "$type": "80"}</code>, handle parsing of extended JSON test representing
+a MongoDB query filter containing the <code>$type</code>operator?</p>
 <p><strong>A</strong>. An implementation can handle this in a number of ways:</p>
 <p>Introduce an enumeration that determines the behavior of the parser. If the value is LEGACY, it will parse the new
 binary form and not treat the legacy one specially, and if the value is CANONICAL, it will parse the new form and not
