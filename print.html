@@ -9216,10 +9216,24 @@ those credentials will be used by default if AWS auth environment variables are 
 <code>AWS_SHARED_CREDENTIALS_FILE=""</code> in your shell or set the equivalent environment variable value in your script or
 application. Alternatively, you can create an AWS profile specifically for your MongoDB credentials and set the
 <code>AWS_PROFILE</code> environment variable to that profile name."</p>
+<h5 id="custom-credential-providers"><a class="header" href="#custom-credential-providers">Custom Credential Providers</a></h5>
+<p>Drivers that choose to use the AWS SDK to fetch credentials MAY also allow users to provide a custom credential provider
+as an option to the <code>MongoClient</code>. The interface for the option provided depends on the individual language SDK and
+drivers MUST consult AWS SDK documentation to determine that format when implementing. The name of the option MUST be
+<code>AWS_CREDENTIAL_PROVIDER</code> and be part of the authentication mechanism properties options that can be provided to the
+client.</p>
+<p>Drivers MAY expose API for default providers for the following scenarios when applicable in their language's SDK:</p>
+<ol>
+<li>The default SDK credential provider.</li>
+<li>A custom credential provider chain.</li>
+<li>A single credential provider of any available SDK options provided by the SDK.</li>
+</ol>
+<h5 id="credential-fetching-order"><a class="header" href="#credential-fetching-order">Credential Fetching Order</a></h5>
 <p>The order in which Drivers MUST search for credentials is:</p>
 <ol>
 <li>The URI</li>
 <li>Environment variables</li>
+<li>A custom AWS credential provider if the driver supports it.</li>
 <li>Using <code>AssumeRoleWithWebIdentity</code> if <code>AWS_WEB_IDENTITY_TOKEN_FILE</code> and <code>AWS_ROLE_ARN</code> are set.</li>
 <li>The ECS endpoint if <code>AWS_CONTAINER_CREDENTIALS_RELATIVE_URI</code> is set. Otherwise, the EC2 endpoint.</li>
 </ol>
@@ -9476,6 +9490,12 @@ hostname that does not match any of list of allowed hosts, the driver MUST raise
 invoking any user-provided callbacks. This value MUST NOT be allowed in the URI connection string. The hostname
 check MUST be performed after SRV record resolution, if applicable. This property is only required for drivers
 that support the <a href="auth/auth.html#human-authentication-flow">Human Authentication Flow</a>.</p>
+</li>
+<li>
+<p>AWS_CREDENTIAL_PROVIDER</p>
+<p>A function or object from the AWS SDK that can be used to return AWS credentials. Drivers MAY allow the user to
+specify the callback using a <code>MongoClient</code> configuration instead of a mechanism property, depending on what is
+idiomatic for the driver.</p>
 </li>
 </ul>
 </li>
@@ -10160,6 +10180,9 @@ practice to avoid this. (See
 <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html">IAM Roles for Tasks</a>)</p>
 <h2 id="changelog-18"><a class="header" href="#changelog-18">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-01-29: Add support for custom AWS credential providers.</p>
+</li>
 <li>
 <p>2024-10-02: Add Kubernetes built-in OIDC provider integration.</p>
 </li>
@@ -26054,6 +26077,7 @@ as described in <a href="client-side-encryption/../bson-binary-uuid/uuid.html">H
    // without the MongoDB Enterprise Advanced licensed crypt_shared library.
    bypassQueryAnalysis: Optional&lt;Boolean&gt;; // Default false.
    keyExpirationMS: Optional&lt;Uint64&gt;; // Default 60000. 0 means "never expire".
+   credentialProviders: Optional&lt;CredentialProviders&gt;;
 }
 </code></pre>
 <p>A MongoClient can be configured to automatically encrypt collection commands and decrypt results.</p>
@@ -26132,6 +26156,37 @@ configuration (monitoring callbacks, stable API, etc.).</p>
 <a href="client-side-encryption/client-side-encryption.html#whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client">What's the deal with metadataClient, keyVaultClient, and the internal client?</a></p>
 <p><span id="GCPKMSOptions"></span> <span id="AWSKMSOptions"></span> <span id="KMSProvider"></span>
 <span id="KMSProviders"></span> <span id="AzureAccessToken"></span> <span id="kmsproviders"></span></p>
+<h4 id="credentialproviders"><a class="header" href="#credentialproviders">credentialProviders</a></h4>
+<p>The <code>credentialProviders</code> property may be specified on <a href="client-side-encryption/client-side-encryption.html#ClientEncryptionOpts">ClientEncryptionOpts</a> or
+<a href="client-side-encryption/client-side-encryption.html#AutoEncryptionOpts">AutoEncryptionOpts</a>. Current support is for AWS only, but is designed to be able to accommodate
+additional providers in the future. If a custom credential provider is present, it MUST be used instead of the default
+flow for fetching automatic credentials and if the <code>kmsProviders</code> are not configured for automatic credential fetching
+an error MUST be thrown.</p>
+<pre><code class="language-typescript">interface CredentialProviders {
+   aws?: AWSCredentialProvider
+}
+
+// The type of the AWS credential provider is dictated by the AWS SDK's credential provider for the specific
+// language.
+type AWSCredentialProvider = Function | Object;
+</code></pre>
+<p>The following shows an example object of <code>CredentialProviders</code> for Node.js:</p>
+<pre><code class="language-typescript">import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
+
+const client = new MongoClient(process.env.MONGODB_URI, {
+  autoEncryption: {
+    keyVaultNamespace: 'keyvault.datakeys',
+    kmsProviders: {
+      // Set to empty map to use `credentialProviders`.
+      aws: {}
+   },
+    credentialProviders: {
+      // Acquire credentials for AWS:
+      aws: fromNodeProviderChain()
+    }
+  }
+}
+</code></pre>
 <h4 id="kmsproviders"><a class="header" href="#kmsproviders">kmsProviders</a></h4>
 <p>The <code>kmsProviders</code> property may be specified on <a href="client-side-encryption/client-side-encryption.html#ClientEncryptionOpts">ClientEncryptionOpts</a> or
 <a href="client-side-encryption/client-side-encryption.html#AutoEncryptionOpts">AutoEncryptionOpts</a>. Multiple KMS providers may be specified, each using a specific property on
@@ -26239,11 +26294,17 @@ Drivers MUST NOT eagerly fill an empty KMS options property.</p>
 <li>Initialize $P$ to an empty <a href="client-side-encryption/client-side-encryption.html#kmsproviders">KMSProviders</a> object.</li>
 <li>If $K$ contains an <code>aws</code> property, and that property is an empty map:
 <ol>
+<li>If a custom credential provider is supplied via the <code>credentialProviders.aws</code> applicable encryption option, use
+that to fetch the credentials from AWS.</li>
+<li>Otherwise:
+<ol>
 <li>Attempt to obtain credentials $C$ from the environment using similar logic as is detailed in
 <a href="client-side-encryption/../auth/auth.html#obtaining-credentials">the obtaining-AWS-credentials section from the Driver Authentication specification</a>,
 but ignoring the case of loading the credentials from a URI</li>
-<li>If credentials $C$ were successfully loaded, create a new <a href="client-side-encryption/client-side-encryption.html#AWSKMSOptions">AWSKMSOptions</a> map from $C$ and insert
-that map onto $P$ as the <code>aws</code> property.</li>
+<li>If credentials $C$ were successfully loaded, create a new <a href="client-side-encryption/client-side-encryption.html#AWSKMSOptions">AWSKMSOptions</a> map from $C$ and
+insert that map onto $P$ as the <code>aws</code> property.</li>
+</ol>
+</li>
 </ol>
 </li>
 <li>If $K$ contains an <code>gcp</code> property, and that property is an empty map:
@@ -26676,6 +26737,7 @@ use the collection name <code>enxcol_.&lt;collectionName&gt;.ecoc</code>.</li>
    keyVaultClient: MongoClient;
    keyVaultNamespace: String;
    kmsProviders: KMSProviders;
+   credentialProviders: CredentialProviders;
    tlsOptions?: KMSProvidersTLSOptions; // Maps KMS provider to TLS options.
    keyExpirationMS: Optional&lt;Uint64&gt;; // Default 60000. 0 means "never expire".
 };
@@ -27744,6 +27806,9 @@ on. To support concurrent access of the key vault collection, the key management
 explicit session parameter as described in the <a href="client-side-encryption/../sessions/driver-sessions.html">Drivers Sessions Specification</a>.</p>
 <h2 id="changelog-43"><a class="header" href="#changelog-43">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-02-19: Add custom options AWS credential provider.</p>
+</li>
 <li>
 <p>2024-10-09: Add retry prose test.</p>
 </li>

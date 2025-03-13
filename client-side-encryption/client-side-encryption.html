@@ -448,6 +448,7 @@ as described in <a href="../bson-binary-uuid/uuid.html">Handling of Native UUID 
    // without the MongoDB Enterprise Advanced licensed crypt_shared library.
    bypassQueryAnalysis: Optional&lt;Boolean&gt;; // Default false.
    keyExpirationMS: Optional&lt;Uint64&gt;; // Default 60000. 0 means "never expire".
+   credentialProviders: Optional&lt;CredentialProviders&gt;;
 }
 </code></pre>
 <p>A MongoClient can be configured to automatically encrypt collection commands and decrypt results.</p>
@@ -526,6 +527,37 @@ configuration (monitoring callbacks, stable API, etc.).</p>
 <a href="#whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client">What's the deal with metadataClient, keyVaultClient, and the internal client?</a></p>
 <p><span id="GCPKMSOptions"></span> <span id="AWSKMSOptions"></span> <span id="KMSProvider"></span>
 <span id="KMSProviders"></span> <span id="AzureAccessToken"></span> <span id="kmsproviders"></span></p>
+<h4 id="credentialproviders"><a class="header" href="#credentialproviders">credentialProviders</a></h4>
+<p>The <code>credentialProviders</code> property may be specified on <a href="#ClientEncryptionOpts">ClientEncryptionOpts</a> or
+<a href="#AutoEncryptionOpts">AutoEncryptionOpts</a>. Current support is for AWS only, but is designed to be able to accommodate
+additional providers in the future. If a custom credential provider is present, it MUST be used instead of the default
+flow for fetching automatic credentials and if the <code>kmsProviders</code> are not configured for automatic credential fetching
+an error MUST be thrown.</p>
+<pre><code class="language-typescript">interface CredentialProviders {
+   aws?: AWSCredentialProvider
+}
+
+// The type of the AWS credential provider is dictated by the AWS SDK's credential provider for the specific
+// language.
+type AWSCredentialProvider = Function | Object;
+</code></pre>
+<p>The following shows an example object of <code>CredentialProviders</code> for Node.js:</p>
+<pre><code class="language-typescript">import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
+
+const client = new MongoClient(process.env.MONGODB_URI, {
+  autoEncryption: {
+    keyVaultNamespace: 'keyvault.datakeys',
+    kmsProviders: {
+      // Set to empty map to use `credentialProviders`.
+      aws: {}
+   },
+    credentialProviders: {
+      // Acquire credentials for AWS:
+      aws: fromNodeProviderChain()
+    }
+  }
+}
+</code></pre>
 <h4 id="kmsproviders"><a class="header" href="#kmsproviders">kmsProviders</a></h4>
 <p>The <code>kmsProviders</code> property may be specified on <a href="#ClientEncryptionOpts">ClientEncryptionOpts</a> or
 <a href="#AutoEncryptionOpts">AutoEncryptionOpts</a>. Multiple KMS providers may be specified, each using a specific property on
@@ -633,11 +665,17 @@ Drivers MUST NOT eagerly fill an empty KMS options property.</p>
 <li>Initialize $P$ to an empty <a href="#kmsproviders">KMSProviders</a> object.</li>
 <li>If $K$ contains an <code>aws</code> property, and that property is an empty map:
 <ol>
+<li>If a custom credential provider is supplied via the <code>credentialProviders.aws</code> applicable encryption option, use
+that to fetch the credentials from AWS.</li>
+<li>Otherwise:
+<ol>
 <li>Attempt to obtain credentials $C$ from the environment using similar logic as is detailed in
 <a href="../auth/auth.html#obtaining-credentials">the obtaining-AWS-credentials section from the Driver Authentication specification</a>,
 but ignoring the case of loading the credentials from a URI</li>
-<li>If credentials $C$ were successfully loaded, create a new <a href="#AWSKMSOptions">AWSKMSOptions</a> map from $C$ and insert
-that map onto $P$ as the <code>aws</code> property.</li>
+<li>If credentials $C$ were successfully loaded, create a new <a href="#AWSKMSOptions">AWSKMSOptions</a> map from $C$ and
+insert that map onto $P$ as the <code>aws</code> property.</li>
+</ol>
+</li>
 </ol>
 </li>
 <li>If $K$ contains an <code>gcp</code> property, and that property is an empty map:
@@ -1070,6 +1108,7 @@ use the collection name <code>enxcol_.&lt;collectionName&gt;.ecoc</code>.</li>
    keyVaultClient: MongoClient;
    keyVaultNamespace: String;
    kmsProviders: KMSProviders;
+   credentialProviders: CredentialProviders;
    tlsOptions?: KMSProvidersTLSOptions; // Maps KMS provider to TLS options.
    keyExpirationMS: Optional&lt;Uint64&gt;; // Default 60000. 0 means "never expire".
 };
@@ -2138,6 +2177,9 @@ on. To support concurrent access of the key vault collection, the key management
 explicit session parameter as described in the <a href="../sessions/driver-sessions.html">Drivers Sessions Specification</a>.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2024-02-19: Add custom options AWS credential provider.</p>
+</li>
 <li>
 <p>2024-10-09: Add retry prose test.</p>
 </li>

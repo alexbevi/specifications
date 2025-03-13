@@ -1005,10 +1005,24 @@ those credentials will be used by default if AWS auth environment variables are 
 <code>AWS_SHARED_CREDENTIALS_FILE=""</code> in your shell or set the equivalent environment variable value in your script or
 application. Alternatively, you can create an AWS profile specifically for your MongoDB credentials and set the
 <code>AWS_PROFILE</code> environment variable to that profile name."</p>
+<h5 id="custom-credential-providers"><a class="header" href="#custom-credential-providers">Custom Credential Providers</a></h5>
+<p>Drivers that choose to use the AWS SDK to fetch credentials MAY also allow users to provide a custom credential provider
+as an option to the <code>MongoClient</code>. The interface for the option provided depends on the individual language SDK and
+drivers MUST consult AWS SDK documentation to determine that format when implementing. The name of the option MUST be
+<code>AWS_CREDENTIAL_PROVIDER</code> and be part of the authentication mechanism properties options that can be provided to the
+client.</p>
+<p>Drivers MAY expose API for default providers for the following scenarios when applicable in their language's SDK:</p>
+<ol>
+<li>The default SDK credential provider.</li>
+<li>A custom credential provider chain.</li>
+<li>A single credential provider of any available SDK options provided by the SDK.</li>
+</ol>
+<h5 id="credential-fetching-order"><a class="header" href="#credential-fetching-order">Credential Fetching Order</a></h5>
 <p>The order in which Drivers MUST search for credentials is:</p>
 <ol>
 <li>The URI</li>
 <li>Environment variables</li>
+<li>A custom AWS credential provider if the driver supports it.</li>
 <li>Using <code>AssumeRoleWithWebIdentity</code> if <code>AWS_WEB_IDENTITY_TOKEN_FILE</code> and <code>AWS_ROLE_ARN</code> are set.</li>
 <li>The ECS endpoint if <code>AWS_CONTAINER_CREDENTIALS_RELATIVE_URI</code> is set. Otherwise, the EC2 endpoint.</li>
 </ol>
@@ -1265,6 +1279,12 @@ hostname that does not match any of list of allowed hosts, the driver MUST raise
 invoking any user-provided callbacks. This value MUST NOT be allowed in the URI connection string. The hostname
 check MUST be performed after SRV record resolution, if applicable. This property is only required for drivers
 that support the <a href="#human-authentication-flow">Human Authentication Flow</a>.</p>
+</li>
+<li>
+<p>AWS_CREDENTIAL_PROVIDER</p>
+<p>A function or object from the AWS SDK that can be used to return AWS credentials. Drivers MAY allow the user to
+specify the callback using a <code>MongoClient</code> configuration instead of a mechanism property, depending on what is
+idiomatic for the driver.</p>
 </li>
 </ul>
 </li>
@@ -1949,6 +1969,9 @@ practice to avoid this. (See
 <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html">IAM Roles for Tasks</a>)</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-01-29: Add support for custom AWS credential providers.</p>
+</li>
 <li>
 <p>2024-10-02: Add Kubernetes built-in OIDC provider integration.</p>
 </li>
