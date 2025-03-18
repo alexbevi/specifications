@@ -640,6 +640,23 @@ client's log collector(s) and SHOULD NOT be included in <a href="#test_expectLog
 client.</li>
 <li><code>serverApi</code>: Optional <a href="#serverapi">serverApi</a> object.</li>
 </ul>
+<p><span id="entity_client_autoEncryptOpts"></span></p>
+<ul>
+<li><code>autoEncryptOpts</code>: Optional object corresponding to
+<a href="../client-side-encryption/client-side-encryption.html#mongoclient-changes">AutoEncryptionOpts</a> with the following
+fields:
+<ul>
+<li><code>kmsProviders</code>: The same as in <a href="#entity_clientEncryption"><code>clientEncryption</code></a>.</li>
+<li><code>keyVaultNamespace</code>: The same as in <a href="#entity_clientEncryption"><code>clientEncryption</code></a>.</li>
+<li><code>bypassAutoEncryption</code>: Optional, a boolean to indicate whether or not auto encryption should be bypassed.</li>
+<li><code>schemaMap</code>: Optional object. Maps namespaces to CSFLE schemas.</li>
+<li><code>encryptedFieldsMap</code>: Optional object. Maps namespaces to QE schemas.</li>
+<li><code>extraOptions</code>: Optional object. Configuration options for the encryption library.</li>
+<li><code>bypassQueryAnalysis</code>: Optional. Disables analysis of outgoing commands. Defaults to <code>false</code>.</li>
+<li><code>keyExpirationMS</code>: The same as in <a href="#entity_clientEncryption"><code>clientEncryption</code></a>.</li>
+</ul>
+</li>
+</ul>
 </li>
 </ul>
 <p><span id="entity_clientEncryption"></span></p>
@@ -2596,7 +2613,7 @@ actual: [ { x: 1, y: 1 }, { x: 2, y: 2 } ]
 include:</p>
 <ul>
 <li><a href="#aggregate">aggregate</a></li>
-<li><a href="#find">find</a>)</li>
+<li><a href="#find">find</a></li>
 <li><a href="#listcollections">listCollections</a>, listDatabases, and listIndexes</li>
 <li><a href="#listsearchindexes">listSearchIndexes</a></li>
 <li><a href="#runcursorcommand">runCursorCommand</a></li>
@@ -3150,17 +3167,6 @@ to the <a href="#download">download</a>, <a href="#downloadByName">downloadByNam
 would need to represent streams as entities and support IO operations to directly read from and write to a stream
 entity. This may not be worth the added complexity if the existing operations provide adequate test coverage for GridFS
 implementations.</p>
-<h3 id="support-client-side-encryption-integration-tests"><a class="header" href="#support-client-side-encryption-integration-tests">Support Client-side Encryption integration tests</a></h3>
-<p>Supporting client-side encryption spec tests will require the following changes to the test format:</p>
-<ul>
-<li><code>json_schema</code> will need to be specified when creating a collection, via either the collection entity definition or
-<a href="#initialData">initialData</a>.</li>
-<li><code>key_vault_data</code> can be expressed via <a href="#initialData">initialData</a></li>
-<li><code>autoEncryptOpts</code> will need to be specified when defining a client entity. Preparation of this field may require
-reading AWS credentials from environment variables.</li>
-</ul>
-<p>The process for executing tests should not require significant changes, but test files will need to express a dependency
-on mongocryptd.</p>
 <h3 id="incorporate-referenced-entity-operations-into-the-schema-version"><a class="header" href="#incorporate-referenced-entity-operations-into-the-schema-version">Incorporate referenced entity operations into the schema version</a></h3>
 <p>The <a href="#schema-version">Schema Version</a> is not impacted by changes to operations defined in other specs and referenced in
 <code>Entity Test Operations</code> (e.g. <code>find</code> for CRUD). The <a href="#operation_name">operation.name</a> and
@@ -3174,6 +3180,10 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-01-21: <strong>Schema version 1.23.</strong></p>
+<p>Support automatic encryption. Add <code>autoEncryptOpts</code> to <code>client</code> entity.</p>
+</li>
 <li>
 <p>2024-11-12: <strong>Schema version 1.22.</strong></p>
 <p>Add <code>keyExpirationMS</code> to <code>clientEncryption</code> entity.</p>
