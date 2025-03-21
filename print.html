@@ -14585,10 +14585,10 @@ MUST error if the option is set to <code>CURSOR_LIFETIME</code>.</p>
 resulting cursor but MUST NOT append a <code>maxTimeMS</code> field to any commands.</p>
 <h5 id="tailable-awaitdata-cursors"><a class="header" href="#tailable-awaitdata-cursors">Tailable awaitData Cursors</a></h5>
 <p>If <code>timeoutMS</code> is set, drivers MUST apply it to the original operation. Drivers MUST also apply the original <code>timeoutMS</code>
-value to each <code>next</code> call on the resulting cursor but MUST NOT use it to derive a <code>maxTimeMS</code> value for <code>getMore</code>
-commands. Helpers for operations that create tailable awaitData cursors MUST also support the <code>maxAwaitTimeMS</code> option.
-Drivers MUST error if this option is set, <code>timeoutMS</code> is set to a non-zero value, and <code>maxAwaitTimeMS</code> is greater than
-or equal to <code>timeoutMS</code>. If this option is set, drivers MUST use it as the <code>maxTimeMS</code> field on <code>getMore</code> commands.</p>
+value to each <code>next</code> call on the resulting cursor. Helpers for operations that create tailable awaitData cursors MUST
+also support the <code>maxAwaitTimeMS</code> option. Drivers MUST error if this option is set, <code>timeoutMS</code> is set to a non-zero
+value, and <code>maxAwaitTimeMS</code> is greater than or equal to <code>timeoutMS</code>. If this option is set, drivers MUST use
+<code>min(maxAwaitTimeMS, remaining timeoutMS - minRoundTripTime)</code> as the <code>maxTimeMS</code> field on <code>getMore</code> commands.</p>
 <p>See <a href="client-side-operations-timeout/client-side-operations-timeout.html#tailable-cursor-behavior">Tailable cursor behavior</a> for rationale regarding both non-awaitData and awaitData
 cursors.</p>
 <h4 id="change-streams"><a class="header" href="#change-streams">Change Streams</a></h4>
@@ -14597,8 +14597,8 @@ cursors.</p>
 <code>timeoutMS</code>. These helpers MUST NOT support the <code>timeoutMode</code> option as change streams are an abstraction around
 tailable-awaitData cursors, so they implicitly use <code>ITERATION</code> mode. If set, drivers MUST apply the <code>timeoutMS</code> option
 to the initial <code>aggregate</code> operation. Drivers MUST also apply the original <code>timeoutMS</code> value to each <code>next</code> call on the
-change stream but MUST NOT use it to derive a <code>maxTimeMS</code> field for <code>getMore</code> commands. If the <code>maxAwaitTimeMS</code> option
-is set, drivers MUST use it as the <code>maxTimeMS</code> field on <code>getMore</code> commands.</p>
+change stream. If this option is set, drivers MUST use <code>min(maxAwaitTimeMS, remaining timeoutMS - minRoundTripTime)</code> as
+the <code>maxTimeMS</code> field on <code>getMore</code> commands.</p>
 <p>If a <code>next</code> call fails with a timeout error, drivers MUST NOT invalidate the change stream. The subsequent <code>next</code> call
 MUST perform a resume attempt to establish a new change stream on the server. Any errors from the <code>aggregate</code> operation
 done to create a new change stream MUST be propagated to the application. Drivers MUST document that users can either
@@ -14791,6 +14791,8 @@ timeouts, while the <code>maxAwaitTimeMS</code> option is used as the <code>maxT
 distinct meanings, so supporting both yields a more robust, albeit verbose, API. Drivers error if <code>maxAwaitTimeMS</code> is
 greater than or equal to <code>timeoutMS</code> because in that case, <code>getMore</code> requests would not succeed if the batch was empty:
 the server would wait for <code>maxAwaitTimeMS</code>, but the driver would close the socket after <code>timeoutMS</code>.</p>
+<p>For tailable awaitData cursors we use the <code>min(maxAwaitTimeMS, remaining timeoutMS - minRoundTripTime)</code> to allow the
+server more opportunities to respond with an empty batch before a client-side timeout</p>
 <h3 id="change-stream-behavior"><a class="header" href="#change-stream-behavior">Change stream behavior</a></h3>
 <p>Change streams internally behave as tailable awaitData cursors, so the behavior of the <code>timeoutMS</code> option is the same
 for both. The main difference is that change streams are resumable and drivers automatically perform resume attempts
@@ -14841,6 +14843,7 @@ changes, the default would continue to cap the stream lifetime but there could b
 timeout for each database operation. This would mimic using <code>timeoutMode=ITERATION</code> for cursors.</p>
 <h2 id="changelog-25"><a class="header" href="#changelog-25">Changelog</a></h2>
 <ul>
+<li>2024-01-29: Adjust getMore maxTimeMS calculation for tailable awaitData cursors.</li>
 <li>2024-09-12: Specify that explain helpers support support timeoutMS.</li>
 <li>2023-12-07: Migrated from reStructuredText to Markdown.</li>
 <li>2022-11-17: Use minimum RTT for maxTimeMS calculation instead of 90th percentile RTT.</li>
