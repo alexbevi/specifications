@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -229,17 +232,17 @@ but MUST be read in a case-insensitive fashion.</li>
 <tr><td>Int64</td><td><code>{"$numberLong": </code> &lt; 64-bit signed integer as a <em>string</em> &gt; <code>}</code></td><td><em>integer</em></td></tr>
 <tr><td>Double [finite]</td><td><code>{"$numberDouble": </code> &lt; 64-bit signed floating point as a decimal <em>string</em> &gt; <code>}</code></td><td><em>non-integer</em></td></tr>
 <tr><td>Double [non-finite]</td><td><code>{"$numberDouble": </code> &lt; One of the <em>strings</em>: <code>"Infinity"</code>, <code>"-Infinity"</code>, or <code>"NaN"</code>. &gt; <code>}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
-<tr><td>Decimal128</td><td><code>{"$numberDecimal": </code> &lt; decimal as a <em>string</em><sup class="footnote-reference"><a href="#1">1</a></sup> &gt; <code>}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
+<tr><td>Decimal128</td><td><code>{"$numberDecimal": </code> &lt; decimal as a <em>string</em><sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup> &gt; <code>}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
 <tr><td>Binary</td><td><code>{"$binary": {"base64": </code> &lt; base64-encoded (with padding as <code>=</code>) payload as a <em>string</em> &gt; <code>, "subType": </code> &lt; BSON binary type as a one- or two-character <em>hex string</em> &gt; <code>}}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
 <tr><td>Code</td><td><code>{"$code": </code> <em>string</em> <code>}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
 <tr><td>CodeWScope</td><td><code>{"$code": </code> <em>string</em> <code>, "$scope": </code> <em>Document</em> <code>}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
 <tr><td>Document</td><td><em>object</em> (with Extended JSON extensions)</td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
 <tr><td>Timestamp</td><td><code>{"$timestamp": {"t": </code> <em>pos-integer</em> <code>, "i": </code> <em>pos-integer</em> <code>}}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
-<tr><td>Regular Expression</td><td><code>{"$regularExpression": {pattern: </code> <em>string</em> <code>, "options": </code> &lt; BSON regular expression options as a <em>string</em> or <code>""</code><sup class="footnote-reference"><a href="#2">2</a></sup> &gt; <code>}}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
-<tr><td>DBPointer</td><td><code>{"$dbPointer": {"$ref": </code> &lt; namespace<sup class="footnote-reference"><a href="#3">3</a></sup> as a <em>string</em> &gt; <code>, "$id": </code> <em>ObjectId</em> <code>}}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
-<tr><td>Datetime [year from 1970 to 9999 inclusive]</td><td><code>{"$date": {"$numberLong": </code> &lt; 64-bit signed integer giving millisecs relative to the epoch, as a <em>string</em> &gt; <code>}}</code></td><td><code>{"$date": </code> ISO-8601 Internet Date/Time Format as described in RFC-3339<sup class="footnote-reference"><a href="#4">4</a></sup> with maximum time precision of milliseconds<sup class="footnote-reference"><a href="#5">5</a></sup> as a <em>string</em> <code>}</code></td></tr>
+<tr><td>Regular Expression</td><td><code>{"$regularExpression": {pattern: </code> <em>string</em> <code>, "options": </code> &lt; BSON regular expression options as a <em>string</em> or <code>""</code><sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup> &gt; <code>}}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
+<tr><td>DBPointer</td><td><code>{"$dbPointer": {"$ref": </code> &lt; namespace<sup class="footnote-reference" id="fr-3-1"><a href="#footnote-3">3</a></sup> as a <em>string</em> &gt; <code>, "$id": </code> <em>ObjectId</em> <code>}}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
+<tr><td>Datetime [year from 1970 to 9999 inclusive]</td><td><code>{"$date": {"$numberLong": </code> &lt; 64-bit signed integer giving millisecs relative to the epoch, as a <em>string</em> &gt; <code>}}</code></td><td><code>{"$date": </code> ISO-8601 Internet Date/Time Format as described in RFC-3339<sup class="footnote-reference" id="fr-4-1"><a href="#footnote-4">4</a></sup> with maximum time precision of milliseconds<sup class="footnote-reference" id="fr-5-1"><a href="#footnote-5">5</a></sup> as a <em>string</em> <code>}</code></td></tr>
 <tr><td>Datetime [year before 1970 or after 9999]</td><td><code>{"$date": {"$numberLong": </code> &lt; 64-bit signed integer giving millisecs relative to the epoch, as a <em>string</em> &gt; <code>}}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
-<tr><td>DBRef<sup class="footnote-reference"><a href="#6">6</a></sup><br><br>Note: this is not technically a BSON type, but it is a common convention.</td><td><code>{"$ref": </code> &lt; collection name as a <em>string</em> &gt; <code>, "$id": </code> &lt; Extended JSON for the id &gt; <code>}</code> <br><br>If the generator supports DBRefs with a database component, and the database component is nonempty:<br><br><code>{"$ref": </code> &lt; collection name as a <em>string</em> &gt; <code>, "$id": </code> &lt; Extended JSON for the id &gt; <code>, "$db": </code> &lt; database name as a <em>string</em> &gt; <code>}</code><br><br>DBRefs may also have other fields, which MUST appear after <code>$id</code> and <code>$db</code> (if supported).</td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
+<tr><td>DBRef<sup class="footnote-reference" id="fr-6-1"><a href="#footnote-6">6</a></sup><br><br>Note: this is not technically a BSON type, but it is a common convention.</td><td><code>{"$ref": </code> &lt; collection name as a <em>string</em> &gt; <code>, "$id": </code> &lt; Extended JSON for the id &gt; <code>}</code> <br><br>If the generator supports DBRefs with a database component, and the database component is nonempty:<br><br><code>{"$ref": </code> &lt; collection name as a <em>string</em> &gt; <code>, "$id": </code> &lt; Extended JSON for the id &gt; <code>, "$db": </code> &lt; database name as a <em>string</em> &gt; <code>}</code><br><br>DBRefs may also have other fields, which MUST appear after <code>$id</code> and <code>$db</code> (if supported).</td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
 <tr><td>MinKey</td><td><code>{"$minKey": 1}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
 <tr><td>MaxKey</td><td><code>{"$maxKey": 1}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
 <tr><td>Undefined</td><td><code>{"$undefined": true}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
@@ -774,26 +777,27 @@ v1 to unsigned 64-bit string was premature optimization)</p>
 </li>
 <li>2017-02-01: Initial specification version 1.0.</li>
 </ul>
-<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
-<p>This MUST conform to the <a href="../bson-decimal128/decimal128.html#writing-to-extended-json">Decimal128 specification</a></p>
-</div>
-<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
-<p>BSON Regular Expression options MUST be in alphabetical order.</p>
-</div>
-<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
-<p>See <a href="https://www.mongodb.com/docs/manual/reference/glossary/#term-namespace">the docs manual</a></p>
-</div>
-<div class="footnote-definition" id="4"><sup class="footnote-definition-label">4</sup>
-<p>See <a href="https://tools.ietf.org/html/rfc3339#section-5.6">https://tools.ietf.org/html/rfc3339#section-5.6</a></p>
-</div>
-<div class="footnote-definition" id="5"><sup class="footnote-definition-label">5</sup>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
+<p>This MUST conform to the <a href="../bson-decimal128/decimal128.html#writing-to-extended-json">Decimal128 specification</a> <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
+<p>BSON Regular Expression options MUST be in alphabetical order. <a href="#fr-2-1">↩</a></p>
+</li>
+<li id="footnote-3">
+<p>See <a href="https://www.mongodb.com/docs/manual/reference/glossary/#term-namespace">the docs manual</a> <a href="#fr-3-1">↩</a></p>
+</li>
+<li id="footnote-4">
+<p>See <a href="https://tools.ietf.org/html/rfc3339#section-5.6">https://tools.ietf.org/html/rfc3339#section-5.6</a> <a href="#fr-4-1">↩</a></p>
+</li>
+<li id="footnote-5">
 <p>Fractional seconds SHOULD have exactly 3 decimal places if the fractional part is non-zero. Otherwise, fractional
-seconds SHOULD be omitted if zero.</p>
-</div>
-<div class="footnote-definition" id="6"><sup class="footnote-definition-label">6</sup>
-<p>See <a href="https://www.mongodb.com/docs/manual/reference/database-references/#dbrefs">the docs manual</a></p>
-</div>
-
+seconds SHOULD be omitted if zero. <a href="#fr-5-1">↩</a></p>
+</li>
+<li id="footnote-6">
+<p>See <a href="https://www.mongodb.com/docs/manual/reference/database-references/#dbrefs">the docs manual</a> <a href="#fr-6-1">↩</a></p>
+</li>
+</ol>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

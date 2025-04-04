@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -497,14 +500,14 @@ writeConcernError but may not be exhaustive. Note that some errors have been abb
 <li><code>{ok:1, writeConcernError: {code: 11601, codeName: "Interrupted"}}</code></li>
 <li><code>{ok:1, writeConcernError: {code: 11602, codeName: "InterruptedDueToReplStateChange"}}</code></li>
 <li><code>{ok:1, writeConcernError: {code: 64, codeName: "WriteConcernTimeout", errmsg: "waiting for replication timed out", errInfo: {wtimeout: True}}}</code></li>
-<li><code>{ok:1, writeConcernError: {code: 64, codeName: "WriteConcernTimeout", errmsg: "multiple errors reported : {...} at shardName1 :: and :: {...} at shardName2"}}</code><sup class="footnote-reference"><a href="#1">1</a></sup></li>
+<li><code>{ok:1, writeConcernError: {code: 64, codeName: "WriteConcernTimeout", errmsg: "multiple errors reported : {...} at shardName1 :: and :: {...} at shardName2"}}</code><sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup></li>
 <li><code>{ok:1, writeConcernError: {code: 50, codeName: "MaxTimeMSExpired"}}</code></li>
 <li><code>{ok:1, writeConcernError: {code: 100, codeName: "UnsatisfiableWriteConcern", errmsg: "Not enough data-bearing nodes"}}</code></li>
 <li><code>{ok:1, writeConcernError: {code: 79, codeName: "UnknownReplWriteConcern"}}</code></li>
 </ul>
 <p>Note also that it is possible for a writeConcernError to be attached to a command failure. For example:</p>
 <ul>
-<li><code>{ok:0, code: 251, codeName: "NoSuchTransaction", writeConcernError: {code: 91, codeName: "ShutdownInProgress"}}</code><sup class="footnote-reference"><a href="#2">2</a></sup></li>
+<li><code>{ok:0, code: 251, codeName: "NoSuchTransaction", writeConcernError: {code: 91, codeName: "ShutdownInProgress"}}</code><sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup></li>
 </ul>
 <h4 id="location-specification-1"><a class="header" href="#location-specification-1">Location Specification</a></h4>
 <h5 id="via-code-1"><a class="header" href="#via-code-1">Via Code</a></h5>
@@ -651,16 +654,17 @@ MongoDB 3.5+. See <a href="https://jira.mongodb.org/browse/SERVER-27891">SERVER-
 <p>2024-10-30: Remove reference to getLastError</p>
 </li>
 </ul>
-<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
 <p>This is only possible in a sharded cluster. When a write is routed to multiple shards and more than one shard
 returns a writeConcernError, then mongos will construct a new writeConcernError with the "WriteConcernTimeout" error
 code and an errmsg field contains the stringified writeConcernError from each shard. Note that each shard may return
-a different writeConcernError.</p>
-</div>
-<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
-<p>See <a href="https://jira.mongodb.org/browse/SERVER-38850">https://jira.mongodb.org/browse/SERVER-38850</a></p>
-</div>
-
+a different writeConcernError. <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
+<p>See <a href="https://jira.mongodb.org/browse/SERVER-38850">https://jira.mongodb.org/browse/SERVER-38850</a> <a href="#fr-2-1">↩</a></p>
+</li>
+</ol>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
