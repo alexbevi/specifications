@@ -106,10 +106,13 @@ The type of backing KMS. Identified by the string: `aws`, `azure`, `gcp`, `kmip`
 An optional name to identify a KMS provider. Enables configuring multiple KMS providers with the same KMS provider type
 (e.g. `aws:name1` and `aws:name2` can refer to different AWS accounts).
 
-**Customer Master Key (CMK)**
+**Master Key**
 
-The underlying key AWS KMS uses to encrypt and decrypt. See
-[AWS Key Management Service Concepts](https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#master_keys).
+The underlying key the KMS service uses to encrypt and decrypt. See
+[AWS KMS Concepts](https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#master_keys) for an AWS-specific
+example (other KMS providers work similarly).
+
+The master key is also sometimes referred to as a Customer Master Key (CMK).
 
 **schema**
 
@@ -156,7 +159,7 @@ supports indexed encrypted fields, which are further processed server-side.
 
 Is an umbrella term describing the both CSFLE and Queryable Encryption.
 
-**encryptedFields**
+<span id="encryptedFields"></span> **encryptedFields**
 
 A BSON document describing the Queryable Encryption encrypted fields. This is analogous to the JSON Schema in FLE. The
 following is an example encryptedFields in extended canonical JSON:
@@ -227,7 +230,7 @@ opts = ClientEncryptionOpts(kms_providers=kms, key_vault_namespace="db.datakeys"
 clientencryption = ClientEncryption(client, opts)
 
 # Use a ClientEncryption to create new data keys.
-# The master key identifies the CMK on AWS KMS to use for encrypting the data key.
+# The master key identifies the KMS key on AWS KMS to use for encrypting the data key.
 master_key = open("./aws_masterkey.json", "r").read()
 opts = DataKeyOpts (master_key=master_key)
 created_key_id = clientencryption.create_data_key("aws", opts)
@@ -377,6 +380,7 @@ class AutoEncryptionOpts {
    // without the MongoDB Enterprise Advanced licensed crypt_shared library.
    bypassQueryAnalysis: Optional<Boolean>; // Default false.
    keyExpirationMS: Optional<Uint64>; // Default 60000. 0 means "never expire".
+   credentialProviders: Optional<CredentialProviders>;
 }
 ```
 
@@ -471,6 +475,44 @@ See
 
 <span id="GCPKMSOptions"></span> <span id="AWSKMSOptions"></span> <span id="KMSProvider"></span>
 <span id="KMSProviders"></span> <span id="AzureAccessToken"></span> <span id="kmsproviders"></span>
+
+#### credentialProviders
+
+The `credentialProviders` property may be specified on [ClientEncryptionOpts](#ClientEncryptionOpts) or
+[AutoEncryptionOpts](#AutoEncryptionOpts). Current support is for AWS only, but is designed to be able to accommodate
+additional providers in the future. If a custom credential provider is present, it MUST be used instead of the default
+flow for fetching automatic credentials and if the `kmsProviders` are not configured for automatic credential fetching
+an error MUST be thrown.
+
+```typescript
+interface CredentialProviders {
+   aws?: AWSCredentialProvider
+}
+
+// The type of the AWS credential provider is dictated by the AWS SDK's credential provider for the specific
+// language.
+type AWSCredentialProvider = Function | Object;
+```
+
+The following shows an example object of `CredentialProviders` for Node.js:
+
+```typescript
+import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
+
+const client = new MongoClient(process.env.MONGODB_URI, {
+  autoEncryption: {
+    keyVaultNamespace: 'keyvault.datakeys',
+    kmsProviders: {
+      // Set to empty map to use `credentialProviders`.
+      aws: {}
+   },
+    credentialProviders: {
+      // Acquire credentials for AWS:
+      aws: fromNodeProviderChain()
+    }
+  }
+}
+```
 
 #### kmsProviders
 
@@ -590,11 +632,14 @@ Once requested, drivers MUST create a new [KMSProviders](#kmsproviders) $P$ acco
     [ClientEncryptionOpts](#ClientEncryptionOpts) or [AutoEncryptionOpts](#AutoEncryptionOpts).
 2. Initialize $P$ to an empty [KMSProviders](#kmsproviders) object.
 3. If $K$ contains an `aws` property, and that property is an empty map:
-    1. Attempt to obtain credentials $C$ from the environment using similar logic as is detailed in
-        [the obtaining-AWS-credentials section from the Driver Authentication specification](../auth/auth.md#obtaining-credentials),
-        but ignoring the case of loading the credentials from a URI
-    2. If credentials $C$ were successfully loaded, create a new [AWSKMSOptions](#AWSKMSOptions) map from $C$ and insert
-        that map onto $P$ as the `aws` property.
+    1. If a custom credential provider is supplied via the `credentialProviders.aws` applicable encryption option, use
+        that to fetch the credentials from AWS.
+    2. Otherwise:
+        1. Attempt to obtain credentials $C$ from the environment using similar logic as is detailed in
+            [the obtaining-AWS-credentials section from the Driver Authentication specification](../auth/auth.md#obtaining-credentials),
+            but ignoring the case of loading the credentials from a URI
+        2. If credentials $C$ were successfully loaded, create a new [AWSKMSOptions](#AWSKMSOptions) map from $C$ and
+            insert that map onto $P$ as the `aws` property.
 4. If $K$ contains an `gcp` property, and that property is an empty map:
     1. Attempt to obtain credentials $C$ from the environment logic as is detailed in
         [Obtaining GCP Credentials](#obtaining-gcp-credentials).
@@ -1048,6 +1093,7 @@ interface ClientEncryptionOpts {
    keyVaultClient: MongoClient;
    keyVaultNamespace: String;
    kmsProviders: KMSProviders;
+   credentialProviders: CredentialProviders;
    tlsOptions?: KMSProvidersTLSOptions; // Maps KMS provider to TLS options.
    keyExpirationMS: Optional<Uint64>; // Default 60000. 0 means "never expire".
 };
@@ -1095,7 +1141,7 @@ type "aws", the masterKey is required and has the following fields:
 ```typescript
 {
    region: String,
-   key: String, // The Amazon Resource Name (ARN) to the AWS customer master key (CMK).
+   key: String, // The Amazon Resource Name (ARN) to the AWS customer master key (KMS key).
    endpoint: Optional<String> // An alternate host identifier to send KMS requests to. May include port number. Defaults to "kms.<region>.amazonaws.com"
 }
 ```
@@ -2416,6 +2462,8 @@ on. To support concurrent access of the key vault collection, the key management
 explicit session parameter as described in the [Drivers Sessions Specification](../sessions/driver-sessions.md).
 
 ## Changelog
+
+- 2024-02-19: Add custom options AWS credential provider.
 
 - 2024-10-09: Add retry prose test.
 
