@@ -559,6 +559,7 @@ End Function
 <ul>
 <li>Padding MUST be 0 for all dtypes where padding doesn’t apply, and MUST be within [0, 7] for PACKED_BIT.</li>
 <li>A PACKED_BIT vector MUST NOT be empty if padding is in the range [1, 7].</li>
+<li>For a PACKED_BIT vector, ignored bits must be zero.</li>
 <li>When unpacking binary data into a FLOAT32 Vector structure, the length of the binary data following the dtype and
 padding MUST be a multiple of 4 bytes.</li>
 </ul>
@@ -604,12 +605,14 @@ Struct Vector
 <p>See the <a href="bson-binary-vector/tests/README.html">README</a> for tests.</p>
 <h2 id="faq"><a class="header" href="#faq">FAQ</a></h2>
 <ul>
-<li>What MongoDB Server version does this apply to?
+<li>
+<p>What MongoDB Server version does this apply to?</p>
 <ul>
 <li>Files in the "specifications" repository have no version scheme. They are not tied to a MongoDB server version.</li>
 </ul>
 </li>
-<li>In PACKED_BIT, why would one choose to use integers in [0, 256)?
+<li>
+<p>In PACKED_BIT, why would one choose to use integers in [0, 256)?</p>
 <ul>
 <li>This follows a well-established precedent for packing binary-valued arrays into bytes (8 bits), This technique is
 widely used across different fields, such as data compression, communication protocols, and file formats, where
@@ -618,9 +621,19 @@ example in Python, see
 <a href="https://numpy.org/doc/2.0/reference/generated/numpy.unpackbits.html#numpy.unpackbits">numpy.unpackbits</a>.</li>
 </ul>
 </li>
+<li>
+<p>In PACKED_BIT, why are ignored bits required to be zero?</p>
+<ul>
+<li>To ensure the same data representation has the same encoding. For drivers supporting comparison operations, this
+avoids comparing different unused bits.</li>
+</ul>
+</li>
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-04-08: In PACKED_BIT vectors, ignored bits must be zero.</p>
+</li>
 <li>
 <p>2025-03-07: Update tests to use Extended JSON representation of +/-Infinity. (DRIVERS-3095)</p>
 </li>
