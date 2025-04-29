@@ -617,9 +617,9 @@ Java Driver (version 3.3.0), the MongoDB Python Driver (version 3.4.0.dev0), the
 option on the JSON codec. The following BSON types had conflicting Extended JSON representations:</p>
 <h5 id="binary-1"><a class="header" href="#binary-1">Binary</a></h5>
 <p>Some implementations write the Extended JSON form of a Binary object with a strict two-hexadecimal digit subtype (e.g.
-they output a leading <code>0</code> for subtypes &lt; 16). However, the NPM mongodb-extended-json module and Java driver use a
-single hexadecimal digit to represent subtypes less than 16. This specification makes both one- and two-digit
-representations acceptable.</p>
+they output a leading <code>0</code> for subtypes &lt; 16). However, the NPM mongodb-extended-json module and Java driver use a single
+hexadecimal digit to represent subtypes less than 16. This specification makes both one- and two-digit representations
+acceptable.</p>
 <h5 id="code"><a class="header" href="#code">Code</a></h5>
 <p>Mongoexport 2.4 does not quote the <code>Code</code> value when writing out the extended JSON form of a BSON Code object. All other
 implementations do so. This spec canonicalises the form where the Javascript code is quoted, since the latter form

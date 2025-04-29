@@ -321,7 +321,7 @@ without carefully reading the changelog and/or adequately testing the change.</p
 <a href="https://github.com/mongodb/mongo/blob/master/src/mongo/db/wire_version.h">src/mongo/db/wire_version.h</a>. Since server
 version 5.1 (<a href="https://jira.mongodb.org/browse/SERVER-58346">SERVER-58346</a>), the wire version is derived from the number
 of releases since 4.0 (using
-<a href="https://github.com/mongodb/mongo/blob/master/src/mongo/util/version/releases.h.tpl">src/mongo/util/version/releases.h.tpl</a>
+<a href="https://github.com/mongodb/mongo/blob/master/src/mongo/util/version/releases.tpl.h">src/mongo/util/version/releases.tpl.h</a>
 and
 <a href="https://github.com/mongodb/mongo/blob/master/src/mongo/util/version/releases.yml">src/mongo/util/version/releases.yml</a>).</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bson"><a class="header" href="#bson">BSON</a></h1>
@@ -426,7 +426,7 @@ format used by these libraries can result in significant memory savings and proc
 <div class="table-wrapper"><table><thead><tr><th>Vector data type</th><th>Alias</th><th>Bits per vector element</th><th><a href="https://arrow.apache.org/docs/cpp/api/datatype.html">Arrow Data Type</a> (for illustration)</th></tr></thead><tbody>
 <tr><td><code>0x03</code></td><td>INT8</td><td>8</td><td>INT8</td></tr>
 <tr><td><code>0x27</code></td><td>FLOAT32</td><td>32</td><td>FLOAT</td></tr>
-<tr><td><code>0x10</code></td><td>PACKED_BIT</td><td>1     <code>*</code></td><td>BOOL</td></tr>
+<tr><td><code>0x10</code></td><td>PACKED_BIT</td><td>1 <code>*</code></td><td>BOOL</td></tr>
 </tbody></table>
 </div>
 <p><code>*</code> A Binary Quantized (PACKED_BIT) Vector is a vector of 0s and 1s (bits), but it is represented in memory as a list of
@@ -2115,9 +2115,9 @@ Java Driver (version 3.3.0), the MongoDB Python Driver (version 3.4.0.dev0), the
 option on the JSON codec. The following BSON types had conflicting Extended JSON representations:</p>
 <h5 id="binary-1"><a class="header" href="#binary-1">Binary</a></h5>
 <p>Some implementations write the Extended JSON form of a Binary object with a strict two-hexadecimal digit subtype (e.g.
-they output a leading <code>0</code> for subtypes &lt; 16). However, the NPM mongodb-extended-json module and Java driver use a
-single hexadecimal digit to represent subtypes less than 16. This specification makes both one- and two-digit
-representations acceptable.</p>
+they output a leading <code>0</code> for subtypes &lt; 16). However, the NPM mongodb-extended-json module and Java driver use a single
+hexadecimal digit to represent subtypes less than 16. This specification makes both one- and two-digit representations
+acceptable.</p>
 <h5 id="code"><a class="header" href="#code">Code</a></h5>
 <p>Mongoexport 2.4 does not quote the <code>Code</code> value when writing out the extended JSON form of a BSON Code object. All other
 implementations do so. This spec canonicalises the form where the Javascript code is quoted, since the latter form
@@ -10705,9 +10705,8 @@ maxAwaitTimeMS.</p>
 clients MUST cancel the hello or legacy hello check on that server and close the current monitoring connection. (See
 <a href="server-discovery-and-monitoring/server-monitoring.html#drivers-cancel-in-progress-monitor-checks">Drivers cancel in-progress monitor checks</a>.)</p>
 <h3 id="polling-protocol"><a class="header" href="#polling-protocol">Polling Protocol</a></h3>
-<p>The polling protocol is used to monitor MongoDB &lt; 4.4 servers or when streaming is disabled. The client
-<a href="server-discovery-and-monitoring/server-monitoring.html#check">checks</a> a server with a hello or legacy hello command and then sleeps for heartbeatFrequencyMS before running
-another check.</p>
+<p>The polling protocol is used to monitor MongoDB &lt; 4.4 servers or when streaming is disabled. The client <a href="server-discovery-and-monitoring/server-monitoring.html#check">checks</a>
+a server with a hello or legacy hello command and then sleeps for heartbeatFrequencyMS before running another check.</p>
 <h3 id="marking-the-connection-pool-as-ready-cmap-only"><a class="header" href="#marking-the-connection-pool-as-ready-cmap-only">Marking the connection pool as ready (CMAP only)</a></h3>
 <p>When a monitor completes a successful check against a server, it MUST mark the connection pool for that server as
 "ready", and doing so MUST be synchronized with the update to the topology (e.g. by marking the pool as ready in
@@ -11603,8 +11602,8 @@ maxStalenessSeconds &gt;= smallestMaxStalenessSeconds
 <p>mongos MUST reject a read with <code>maxStalenessSeconds</code> that is not a positive integer.</p>
 <p>mongos MUST reject a read if <code>maxStalenessSeconds</code> is less than smallestMaxStalenessSeconds, with error code 160
 (SERVER-24421).</p>
-<p>During server selection, drivers (but not mongos) with <code>minWireVersion</code> &lt; 5 MUST raise an error if
-<code>maxStalenessSeconds</code> is a positive number, and any available server's <code>maxWireVersion</code> is less than 5.<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup></p>
+<p>During server selection, drivers (but not mongos) with <code>minWireVersion</code> &lt; 5 MUST raise an error if <code>maxStalenessSeconds</code>
+is a positive number, and any available server's <code>maxWireVersion</code> is less than 5.<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup></p>
 <p>After filtering servers according to <code>mode</code>, and before filtering with <code>tag_sets</code>, eligibility MUST be determined from
 <code>maxStalenessSeconds</code> as follows:</p>
 <ul>
@@ -21201,8 +21200,8 @@ preference is available and it is <em>not</em> a primary read preference (i.e. <
 a read preference for the operation. As of <code>featureCompatibilityVersion</code> 4.4, secondaries can now execute pipelines with
 <code>$out</code> or <code>$merge</code>. Since drivers do not track <code>featureCompatibilityVersion</code>, the decision to consider a read preference
 for such a pipeline will depend on the wire version(s) of the server(s) to which the driver is connected.</p>
-<p>If there are one or more available servers and one or more of those servers is pre-5.0 (i.e. wire version &lt; 13),
-drivers MUST NOT use the available read preference and MUST instead select a server using a primary read preference.</p>
+<p>If there are one or more available servers and one or more of those servers is pre-5.0 (i.e. wire version &lt; 13), drivers
+MUST NOT use the available read preference and MUST instead select a server using a primary read preference.</p>
 <p>Otherwise, if there are either no available servers, all available servers are 5.0+ (i.e. wire version &gt;= 13), or the
 topology type is LoadBalanced (we can assume the backing mongos is 5.0+), drivers MUST use the available read
 preference.</p>
@@ -21323,11 +21322,10 @@ api be consistent with the rest of the methods in the CRUD family of operations.
 able to be used as this change is non-backwards breaking. Any driver which implemented the fluent bulk API should
 deprecate it and drivers that have not built it should not do so.</p>
 <p>Q: Should drivers offer explain helpers?<br />
-Originally, it was determined that explain should not be exposed via
-specialized APIs in drivers because it it was deemed to be an unusual use-case for a driver. We'd like users to use the
-shell for this purpose. However, explain is still possible from a driver. Some drivers have historically provided
-explain helpers and continue to do so. Drivers that do not offer explain helpers can run explain commands using the
-runCommand API.</p>
+Originally, it was determined that explain should not be exposed via specialized APIs in drivers because it it was
+deemed to be an unusual use-case for a driver. We'd like users to use the shell for this purpose. However, explain is
+still possible from a driver. Some drivers have historically provided explain helpers and continue to do so. Drivers
+that do not offer explain helpers can run explain commands using the runCommand API.</p>
 <p>Q: What about explain?</p>
 <p>Explain has been determined to be not a normal use-case for a driver. We'd like users to use the shell for this purpose.
 However, explain is still possible from a driver. For find, it can be passed as a modifier. Aggregate can be run using a
@@ -28490,14 +28488,12 @@ penalties, particularly when event listeners are introduced.</p>
 </li>
 <li>
 <p>2015-09-16: Removed <code>limit</code> from find test with options to support 3.2.<br />
-Changed find test read preference to
-<code>primaryPreferred</code>.</p>
+Changed find test read preference to <code>primaryPreferred</code>.</p>
 </li>
 <li>
 <p>2015-10-01: Changed find test with a kill cursors to not run on server versions<br />
-greater than 3.0. Added a find test
-with no kill cursors command which only runs on 3.1 and higher. Added notes on which tests should run based on
-server versions.</p>
+greater than 3.0. Added a find test with no kill cursors command which only runs on 3.1 and higher. Added notes on
+which tests should run based on server versions.</p>
 </li>
 <li>
 <p>2015-10-19: Changed batchSize in the 3.2 find tests to expect the remaining value.</p>
@@ -28530,8 +28526,7 @@ values that should be redacted.</p>
 </li>
 <li>
 <p>2021-08-30: Added <code>serverConnectionId</code> field to <code>CommandStartedEvent</code>,<br />
-<code>CommandSucceededEvent</code> and
-<code>CommandFailedEvent</code>.</p>
+<code>CommandSucceededEvent</code> and <code>CommandFailedEvent</code>.</p>
 </li>
 <li>
 <p>2022-05-18: Converted legacy tests to the unified test format.</p>
@@ -28550,17 +28545,15 @@ values that should be redacted.</p>
 </li>
 <li>
 <p>2022-12-13: Updated log message <code>serverPort</code> field description to clarify drivers should populate it with the<br />
-default
-port 27017 when relevant. Updated suggested unstructured forms of log messages to more clearly label connection IDs
-and use more readable server address representations.</p>
+default port 27017 when relevant. Updated suggested unstructured forms of log messages to more clearly label
+connection IDs and use more readable server address representations.</p>
 </li>
 <li>
 <p>2023-03-23: Updated <code>serverConnectionId</code> field to be Int64 as long-running servers can return Int64.</p>
 </li>
 <li>
 <p>2023-06-13: Added <code>databaseName</code> field to <code>CommandFailedEvent</code> and <code>CommandSucceededEvent</code>.<br />
-Updated suggested
-unstructured forms of log messages reflecting the changes.</p>
+Updated suggested unstructured forms of log messages reflecting the changes.</p>
 </li>
 <li>
 <p>2023-10-19: Add Q&amp;A section</p>
@@ -28890,8 +28883,8 @@ preference is passed to <code>hasReadableServer</code>, the driver MUST default 
 <div class="table-wrapper"><table><thead><tr><th>Topology Type</th><th><code>hasReadableServer</code></th><th><code>hasWritableServer</code></th></tr></thead><tbody>
 <tr><td>Unknown</td><td><code>false</code></td><td><code>false</code></td></tr>
 <tr><td>Single</td><td><code>true</code> if the server is available</td><td><code>true</code> if the server is available</td></tr>
-<tr><td>ReplicaSetNoPrimary</td><td>Called with <code>primary</code>: <code>false</code>  <br>Called with any other option: uses the read preference to determine if any server in the cluster is suitable for reading.  <br>Called with no option: <code>false</code></td><td><code>false</code></td></tr>
-<tr><td>ReplicaSetWithPrimary</td><td>Called with any valid option: uses the read preference to determine if any server in the cluster is suitable for reading.  <br>Called with no option: <code>true</code></td><td><code>true</code></td></tr>
+<tr><td>ReplicaSetNoPrimary</td><td>Called with <code>primary</code>: <code>false</code> <br>Called with any other option: uses the read preference to determine if any server in the cluster is suitable for reading. <br>Called with no option: <code>false</code></td><td><code>false</code></td></tr>
+<tr><td>ReplicaSetWithPrimary</td><td>Called with any valid option: uses the read preference to determine if any server in the cluster is suitable for reading. <br>Called with no option: <code>true</code></td><td><code>true</code></td></tr>
 <tr><td>Sharded</td><td><code>true</code> if 1+ servers are available</td><td><code>true</code> if 1+ servers are available</td></tr>
 <tr><td>LoadBalanced</td><td><code>true</code></td><td><code>true</code></td></tr>
 </tbody></table>
@@ -33106,7 +33099,7 @@ bytes) times 10 operations, which equals 27,310,890 bytes or 27.31 MB.</p>
 <div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the LARGE_DOC dataset into memory as a language-appropriate document type (or JSON string for C).</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command. Construct a Collection object for the <code>corpus</code> collection to use for insertion.</td></tr>
-<tr><td>Do task</td><td>Do an ordered <code>insertMany</code> with 10 copies of the document.  DO NOT manually add an <code>_id</code> field; leave it to the driver or database.</td></tr>
+<tr><td>Do task</td><td>Do an ordered <code>insertMany</code> with 10 copies of the document. DO NOT manually add an <code>_id</code> field; leave it to the driver or database.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
 </tbody></table>
@@ -33179,7 +33172,7 @@ bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (275 bytes)
 times 20,000 operations (insert + replace), which equals 5,500,000 bytes or 5.5 MB.</p>
 <div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
-<tr><td>Setup</td><td>Construct a MongoClient object. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). <br> Create a list of 10 numbered collection names (<code>corpus_1</code>, <code>corpus_2</code>, ...) <br/> Create a list of write models for 10,000 document copies. For each document (where i goes from 0 to 9,999), create three write models with the namespace set to the collection name found at index <code>i % 10</code> in your collection names list: <br/> 1. An insert model. <br/> 2. A replace model (using an empty filter and a copy of the document). <br/> 3. A delete model (using an empty filter). <br/> Notes: <br/> - DO NOT manually add an <code>_id</code> field; leave it to the driver or database. You should have 30,000  write models in your list.</td></tr>
+<tr><td>Setup</td><td>Construct a MongoClient object. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). <br> Create a list of 10 numbered collection names (<code>corpus_1</code>, <code>corpus_2</code>, ...) <br/> Create a list of write models for 10,000 document copies. For each document (where i goes from 0 to 9,999), create three write models with the namespace set to the collection name found at index <code>i % 10</code> in your collection names list: <br/> 1. An insert model. <br/> 2. A replace model (using an empty filter and a copy of the document). <br/> 3. A delete model (using an empty filter). <br/> Notes: <br/> - DO NOT manually add an <code>_id</code> field; leave it to the driver or database. You should have 30,000 write models in your list.</td></tr>
 <tr><td>Before task</td><td>Drop the <code>perftest</code> database, create it again and create the collections found in your numbered collection names list.</td></tr>
 <tr><td>Do task</td><td>Do an ordered <code>Client::bulkWrite</code> with the list of write models.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
@@ -33194,7 +33187,7 @@ bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (275 bytes)
 times 20,000 operations (insert + replace), which equals 5,500,000 bytes or 5.5 MB.</p>
 <div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
-<tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). Create a list of write models for 10,000 copies of the document where for each copy of the document add the following models: <br/> 1. insert model. <br/> 2. replace model with a copy and using an empty filter. <br/> 3. delete model using empty filter. <br/> DO NOT manually add an <code>_id</code> field; leave it to the driver or database. You should have 30,000  write models in your list.</td></tr>
+<tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). Create a list of write models for 10,000 copies of the document where for each copy of the document add the following models: <br/> 1. insert model. <br/> 2. replace model with a copy and using an empty filter. <br/> 3. delete model using empty filter. <br/> DO NOT manually add an <code>_id</code> field; leave it to the driver or database. You should have 30,000 write models in your list.</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command. Construct a Collection object for the <code>corpus</code> collection to use for insertion.</td></tr>
 <tr><td>Do task</td><td>Do an ordered <code>Collection::bulkWrite</code> with the list of write models.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
@@ -33256,7 +33249,7 @@ or 565 MB.</p>
 <div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database.</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command.</td></tr>
-<tr><td>Do task</td><td>Do an unordered insert of all 500,000 documents in the dataset into the <code>corpus</code> collection as fast as possible.  Data must be loaded from disk during this phase.  Concurrency is encouraged.</td></tr>
+<tr><td>Do task</td><td>Do an unordered insert of all 500,000 documents in the dataset into the <code>corpus</code> collection as fast as possible. Data must be loaded from disk during this phase. Concurrency is encouraged.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
 </tbody></table>
@@ -33284,8 +33277,8 @@ file size corresponds roughly to the output of a (slightly dated) digital camera
 or 262.144 MB.</p>
 <div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database.</td></tr>
-<tr><td>Before task</td><td>Drop the default GridFS bucket in the <code>perftest</code> database.  Construct a GridFSBucket object for the default bucket in <code>perftest</code> to use for uploads.    Insert a 1-byte file into the bucket (to initialize indexes).</td></tr>
-<tr><td>Do task</td><td>Upload all 50 files in the  GRIDFS_MULTI dataset (reading each from disk). Concurrency is encouraged.</td></tr>
+<tr><td>Before task</td><td>Drop the default GridFS bucket in the <code>perftest</code> database. Construct a GridFSBucket object for the default bucket in <code>perftest</code> to use for uploads. Insert a 1-byte file into the bucket (to initialize indexes).</td></tr>
+<tr><td>Do task</td><td>Upload all 50 files in the GRIDFS_MULTI dataset (reading each from disk). Concurrency is encouraged.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
 </tbody></table>

@@ -424,8 +424,8 @@ maxStalenessSeconds &gt;= smallestMaxStalenessSeconds
 <p>mongos MUST reject a read with <code>maxStalenessSeconds</code> that is not a positive integer.</p>
 <p>mongos MUST reject a read if <code>maxStalenessSeconds</code> is less than smallestMaxStalenessSeconds, with error code 160
 (SERVER-24421).</p>
-<p>During server selection, drivers (but not mongos) with <code>minWireVersion</code> &lt; 5 MUST raise an error if
-<code>maxStalenessSeconds</code> is a positive number, and any available server's <code>maxWireVersion</code> is less than 5.<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup></p>
+<p>During server selection, drivers (but not mongos) with <code>minWireVersion</code> &lt; 5 MUST raise an error if <code>maxStalenessSeconds</code>
+is a positive number, and any available server's <code>maxWireVersion</code> is less than 5.<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup></p>
 <p>After filtering servers according to <code>mode</code>, and before filtering with <code>tag_sets</code>, eligibility MUST be determined from
 <code>maxStalenessSeconds</code> as follows:</p>
 <ul>

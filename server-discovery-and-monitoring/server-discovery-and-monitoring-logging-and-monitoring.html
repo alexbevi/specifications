@@ -479,8 +479,8 @@ preference is passed to <code>hasReadableServer</code>, the driver MUST default 
 <div class="table-wrapper"><table><thead><tr><th>Topology Type</th><th><code>hasReadableServer</code></th><th><code>hasWritableServer</code></th></tr></thead><tbody>
 <tr><td>Unknown</td><td><code>false</code></td><td><code>false</code></td></tr>
 <tr><td>Single</td><td><code>true</code> if the server is available</td><td><code>true</code> if the server is available</td></tr>
-<tr><td>ReplicaSetNoPrimary</td><td>Called with <code>primary</code>: <code>false</code>  <br>Called with any other option: uses the read preference to determine if any server in the cluster is suitable for reading.  <br>Called with no option: <code>false</code></td><td><code>false</code></td></tr>
-<tr><td>ReplicaSetWithPrimary</td><td>Called with any valid option: uses the read preference to determine if any server in the cluster is suitable for reading.  <br>Called with no option: <code>true</code></td><td><code>true</code></td></tr>
+<tr><td>ReplicaSetNoPrimary</td><td>Called with <code>primary</code>: <code>false</code> <br>Called with any other option: uses the read preference to determine if any server in the cluster is suitable for reading. <br>Called with no option: <code>false</code></td><td><code>false</code></td></tr>
+<tr><td>ReplicaSetWithPrimary</td><td>Called with any valid option: uses the read preference to determine if any server in the cluster is suitable for reading. <br>Called with no option: <code>true</code></td><td><code>true</code></td></tr>
 <tr><td>Sharded</td><td><code>true</code> if 1+ servers are available</td><td><code>true</code> if 1+ servers are available</td></tr>
 <tr><td>LoadBalanced</td><td><code>true</code></td><td><code>true</code></td></tr>
 </tbody></table>

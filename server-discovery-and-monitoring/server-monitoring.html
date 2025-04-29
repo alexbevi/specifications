@@ -505,9 +505,8 @@ maxAwaitTimeMS.</p>
 clients MUST cancel the hello or legacy hello check on that server and close the current monitoring connection. (See
 <a href="#drivers-cancel-in-progress-monitor-checks">Drivers cancel in-progress monitor checks</a>.)</p>
 <h3 id="polling-protocol"><a class="header" href="#polling-protocol">Polling Protocol</a></h3>
-<p>The polling protocol is used to monitor MongoDB &lt; 4.4 servers or when streaming is disabled. The client
-<a href="#check">checks</a> a server with a hello or legacy hello command and then sleeps for heartbeatFrequencyMS before running
-another check.</p>
+<p>The polling protocol is used to monitor MongoDB &lt; 4.4 servers or when streaming is disabled. The client <a href="#check">checks</a>
+a server with a hello or legacy hello command and then sleeps for heartbeatFrequencyMS before running another check.</p>
 <h3 id="marking-the-connection-pool-as-ready-cmap-only"><a class="header" href="#marking-the-connection-pool-as-ready-cmap-only">Marking the connection pool as ready (CMAP only)</a></h3>
 <p>When a monitor completes a successful check against a server, it MUST mark the connection pool for that server as
 "ready", and doing so MUST be synchronized with the update to the topology (e.g. by marking the pool as ready in

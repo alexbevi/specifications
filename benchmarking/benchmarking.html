@@ -502,7 +502,7 @@ bytes) times 10 operations, which equals 27,310,890 bytes or 27.31 MB.</p>
 <div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the LARGE_DOC dataset into memory as a language-appropriate document type (or JSON string for C).</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command. Construct a Collection object for the <code>corpus</code> collection to use for insertion.</td></tr>
-<tr><td>Do task</td><td>Do an ordered <code>insertMany</code> with 10 copies of the document.  DO NOT manually add an <code>_id</code> field; leave it to the driver or database.</td></tr>
+<tr><td>Do task</td><td>Do an ordered <code>insertMany</code> with 10 copies of the document. DO NOT manually add an <code>_id</code> field; leave it to the driver or database.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
 </tbody></table>
@@ -575,7 +575,7 @@ bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (275 bytes)
 times 20,000 operations (insert + replace), which equals 5,500,000 bytes or 5.5 MB.</p>
 <div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
-<tr><td>Setup</td><td>Construct a MongoClient object. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). <br> Create a list of 10 numbered collection names (<code>corpus_1</code>, <code>corpus_2</code>, ...) <br/> Create a list of write models for 10,000 document copies. For each document (where i goes from 0 to 9,999), create three write models with the namespace set to the collection name found at index <code>i % 10</code> in your collection names list: <br/> 1. An insert model. <br/> 2. A replace model (using an empty filter and a copy of the document). <br/> 3. A delete model (using an empty filter). <br/> Notes: <br/> - DO NOT manually add an <code>_id</code> field; leave it to the driver or database. You should have 30,000  write models in your list.</td></tr>
+<tr><td>Setup</td><td>Construct a MongoClient object. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). <br> Create a list of 10 numbered collection names (<code>corpus_1</code>, <code>corpus_2</code>, ...) <br/> Create a list of write models for 10,000 document copies. For each document (where i goes from 0 to 9,999), create three write models with the namespace set to the collection name found at index <code>i % 10</code> in your collection names list: <br/> 1. An insert model. <br/> 2. A replace model (using an empty filter and a copy of the document). <br/> 3. A delete model (using an empty filter). <br/> Notes: <br/> - DO NOT manually add an <code>_id</code> field; leave it to the driver or database. You should have 30,000 write models in your list.</td></tr>
 <tr><td>Before task</td><td>Drop the <code>perftest</code> database, create it again and create the collections found in your numbered collection names list.</td></tr>
 <tr><td>Do task</td><td>Do an ordered <code>Client::bulkWrite</code> with the list of write models.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
@@ -590,7 +590,7 @@ bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (275 bytes)
 times 20,000 operations (insert + replace), which equals 5,500,000 bytes or 5.5 MB.</p>
 <div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
-<tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). Create a list of write models for 10,000 copies of the document where for each copy of the document add the following models: <br/> 1. insert model. <br/> 2. replace model with a copy and using an empty filter. <br/> 3. delete model using empty filter. <br/> DO NOT manually add an <code>_id</code> field; leave it to the driver or database. You should have 30,000  write models in your list.</td></tr>
+<tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). Create a list of write models for 10,000 copies of the document where for each copy of the document add the following models: <br/> 1. insert model. <br/> 2. replace model with a copy and using an empty filter. <br/> 3. delete model using empty filter. <br/> DO NOT manually add an <code>_id</code> field; leave it to the driver or database. You should have 30,000 write models in your list.</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command. Construct a Collection object for the <code>corpus</code> collection to use for insertion.</td></tr>
 <tr><td>Do task</td><td>Do an ordered <code>Collection::bulkWrite</code> with the list of write models.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
@@ -652,7 +652,7 @@ or 565 MB.</p>
 <div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database.</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command.</td></tr>
-<tr><td>Do task</td><td>Do an unordered insert of all 500,000 documents in the dataset into the <code>corpus</code> collection as fast as possible.  Data must be loaded from disk during this phase.  Concurrency is encouraged.</td></tr>
+<tr><td>Do task</td><td>Do an unordered insert of all 500,000 documents in the dataset into the <code>corpus</code> collection as fast as possible. Data must be loaded from disk during this phase. Concurrency is encouraged.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
 </tbody></table>
@@ -680,8 +680,8 @@ file size corresponds roughly to the output of a (slightly dated) digital camera
 or 262.144 MB.</p>
 <div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database.</td></tr>
-<tr><td>Before task</td><td>Drop the default GridFS bucket in the <code>perftest</code> database.  Construct a GridFSBucket object for the default bucket in <code>perftest</code> to use for uploads.    Insert a 1-byte file into the bucket (to initialize indexes).</td></tr>
-<tr><td>Do task</td><td>Upload all 50 files in the  GRIDFS_MULTI dataset (reading each from disk). Concurrency is encouraged.</td></tr>
+<tr><td>Before task</td><td>Drop the default GridFS bucket in the <code>perftest</code> database. Construct a GridFSBucket object for the default bucket in <code>perftest</code> to use for uploads. Insert a 1-byte file into the bucket (to initialize indexes).</td></tr>
+<tr><td>Do task</td><td>Upload all 50 files in the GRIDFS_MULTI dataset (reading each from disk). Concurrency is encouraged.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
 </tbody></table>

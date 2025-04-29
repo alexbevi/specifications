@@ -2335,8 +2335,8 @@ preference is available and it is <em>not</em> a primary read preference (i.e. <
 a read preference for the operation. As of <code>featureCompatibilityVersion</code> 4.4, secondaries can now execute pipelines with
 <code>$out</code> or <code>$merge</code>. Since drivers do not track <code>featureCompatibilityVersion</code>, the decision to consider a read preference
 for such a pipeline will depend on the wire version(s) of the server(s) to which the driver is connected.</p>
-<p>If there are one or more available servers and one or more of those servers is pre-5.0 (i.e. wire version &lt; 13),
-drivers MUST NOT use the available read preference and MUST instead select a server using a primary read preference.</p>
+<p>If there are one or more available servers and one or more of those servers is pre-5.0 (i.e. wire version &lt; 13), drivers
+MUST NOT use the available read preference and MUST instead select a server using a primary read preference.</p>
 <p>Otherwise, if there are either no available servers, all available servers are 5.0+ (i.e. wire version &gt;= 13), or the
 topology type is LoadBalanced (we can assume the backing mongos is 5.0+), drivers MUST use the available read
 preference.</p>
@@ -2457,11 +2457,10 @@ api be consistent with the rest of the methods in the CRUD family of operations.
 able to be used as this change is non-backwards breaking. Any driver which implemented the fluent bulk API should
 deprecate it and drivers that have not built it should not do so.</p>
 <p>Q: Should drivers offer explain helpers?<br />
-Originally, it was determined that explain should not be exposed via
-specialized APIs in drivers because it it was deemed to be an unusual use-case for a driver. We'd like users to use the
-shell for this purpose. However, explain is still possible from a driver. Some drivers have historically provided
-explain helpers and continue to do so. Drivers that do not offer explain helpers can run explain commands using the
-runCommand API.</p>
+Originally, it was determined that explain should not be exposed via specialized APIs in drivers because it it was
+deemed to be an unusual use-case for a driver. We'd like users to use the shell for this purpose. However, explain is
+still possible from a driver. Some drivers have historically provided explain helpers and continue to do so. Drivers
+that do not offer explain helpers can run explain commands using the runCommand API.</p>
 <p>Q: What about explain?</p>
 <p>Explain has been determined to be not a normal use-case for a driver. We'd like users to use the shell for this purpose.
 However, explain is still possible from a driver. For find, it can be passed as a modifier. Aggregate can be run using a

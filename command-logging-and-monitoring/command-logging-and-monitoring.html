@@ -542,14 +542,12 @@ penalties, particularly when event listeners are introduced.</p>
 </li>
 <li>
 <p>2015-09-16: Removed <code>limit</code> from find test with options to support 3.2.<br />
-Changed find test read preference to
-<code>primaryPreferred</code>.</p>
+Changed find test read preference to <code>primaryPreferred</code>.</p>
 </li>
 <li>
 <p>2015-10-01: Changed find test with a kill cursors to not run on server versions<br />
-greater than 3.0. Added a find test
-with no kill cursors command which only runs on 3.1 and higher. Added notes on which tests should run based on
-server versions.</p>
+greater than 3.0. Added a find test with no kill cursors command which only runs on 3.1 and higher. Added notes on
+which tests should run based on server versions.</p>
 </li>
 <li>
 <p>2015-10-19: Changed batchSize in the 3.2 find tests to expect the remaining value.</p>
@@ -582,8 +580,7 @@ values that should be redacted.</p>
 </li>
 <li>
 <p>2021-08-30: Added <code>serverConnectionId</code> field to <code>CommandStartedEvent</code>,<br />
-<code>CommandSucceededEvent</code> and
-<code>CommandFailedEvent</code>.</p>
+<code>CommandSucceededEvent</code> and <code>CommandFailedEvent</code>.</p>
 </li>
 <li>
 <p>2022-05-18: Converted legacy tests to the unified test format.</p>
@@ -602,17 +599,15 @@ values that should be redacted.</p>
 </li>
 <li>
 <p>2022-12-13: Updated log message <code>serverPort</code> field description to clarify drivers should populate it with the<br />
-default
-port 27017 when relevant. Updated suggested unstructured forms of log messages to more clearly label connection IDs
-and use more readable server address representations.</p>
+default port 27017 when relevant. Updated suggested unstructured forms of log messages to more clearly label
+connection IDs and use more readable server address representations.</p>
 </li>
 <li>
 <p>2023-03-23: Updated <code>serverConnectionId</code> field to be Int64 as long-running servers can return Int64.</p>
 </li>
 <li>
 <p>2023-06-13: Added <code>databaseName</code> field to <code>CommandFailedEvent</code> and <code>CommandSucceededEvent</code>.<br />
-Updated suggested
-unstructured forms of log messages reflecting the changes.</p>
+Updated suggested unstructured forms of log messages reflecting the changes.</p>
 </li>
 <li>
 <p>2023-10-19: Add Q&amp;A section</p>
