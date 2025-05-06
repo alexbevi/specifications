@@ -93,7 +93,6 @@
   - [Command Logging and Monitoring](command-logging-and-monitoring/command-logging-and-monitoring.md)
   - [SDAM Logging and Monitoring](server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.md)
   - [Standardized Logging](logging/logging.md)
-  - [Connection Pool Logging](connection-monitoring-and-pooling/connection-monitoring-and-pooling.md)
 
 ---
 
