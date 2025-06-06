@@ -29738,14 +29738,17 @@ to avoid unnecessary overhead.</p>
 uses replica sets for its shards.</p>
 </li>
 <li>
-<p><code>serverless</code>: Optional string. Whether or not the test should be run on Atlas Serverless instances. Valid values are
-"require", "forbid", and "allow". If "require", the test MUST only be run on Atlas Serverless instances. If
-"forbid", the test MUST NOT be run on Atlas Serverless instances. If omitted or "allow", this option has no effect.</p>
+<p><code>serverless</code> (deprecated): Optional string. Whether or not the test should be run on Atlas Serverless instances. Valid
+values are "require", "forbid", and "allow". If "require", the test MUST only be run on Atlas Serverless instances.
+If "forbid", the test MUST NOT be run on Atlas Serverless instances. If omitted or "allow", this option has no
+effect.</p>
 <p>The test runner MUST be informed whether or not Atlas Serverless is being used in order to determine if this
 requirement is met (e.g. through an environment variable or configuration option).</p>
 <p>Note: the Atlas Serverless proxy imitates mongos, so the test runner is not capable of determining if Atlas Serverless
 is in use by issuing commands such as <code>buildInfo</code> or <code>hello</code>. Furthermore, connections to Atlas Serverless use a
 load balancer, so the topology will appear as "load-balanced".</p>
+<p>Note: serverless testing is no longer required, and drivers that no longer support serverless testing MAY omit
+implementation of this requirement and instantly skip all tests that use <code>serverless: require</code>.</p>
 </li>
 <li>
 <p><code>serverParameters</code>: Optional object of server parameters to check against. To check server parameters, drivers send a
@@ -32494,6 +32497,9 @@ other specs <em>and</em> collating spec changes developed in parallel or during 
 <h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
 <ul>
 <li>
+<p>2025-06-04: Deprecate the <code>serverless</code> runOnRequirement</p>
+</li>
+<li>
 <p>2025-04-25: Drop <code>_enxcol</code> collections.</p>
 </li>
 <li>
@@ -34138,10 +34144,13 @@ limit. The variant itself MUST have the SAM CLI installed.</p>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="atlas-serverless-tests"><a class="header" href="#atlas-serverless-tests">Atlas Serverless Tests</a></h1>
 <ul>
-<li>Status: Accepted</li>
+<li>Status: Obsolete</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
 <hr />
+<h2 id="obsolescence-notice"><a class="header" href="#obsolescence-notice">Obsolescence Notice</a></h2>
+<p>This document is obsolete and there is no longer a requirement for drivers to test against Atlas Serverless. The
+specification is preserved for historical purposes only.</p>
 <h2 id="introduction-2"><a class="header" href="#introduction-2">Introduction</a></h2>
 <p>This file describes a subset of existing tests that drivers MUST use to assert compatibility with Atlas Serverless.</p>
 <h2 id="serverless-configuration"><a class="header" href="#serverless-configuration">Serverless Configuration</a></h2>
