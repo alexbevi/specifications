@@ -4,3 +4,7 @@ language = "en"
 multilingual = false
 src = "source"
 title = "MongoDB Driver Specifications"
+
+[output.html]
+additional-css = ["theme/pagetoc.css", "theme/whichlang.css"]
+additional-js = ["theme/pagetoc.js", "theme/whichlang.js"]
