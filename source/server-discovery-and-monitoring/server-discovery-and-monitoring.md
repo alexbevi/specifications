@@ -22,17 +22,15 @@ mistakes when they take advantage of a design that has been well-considered, rev
 
 The server discovery and monitoring method is specified in four sections. First, a client is
 [configured](#configuration). Second, it begins [monitoring](#monitoring) by calling
-[hello or legacy hello](../mongodb-handshake/handshake.rst#terms) on all servers. (Multi-threaded and asynchronous
+[hello or legacy hello](../mongodb-handshake/handshake.md#terms) on all servers. (Multi-threaded and asynchronous
 monitoring is described first, then single-threaded monitoring.) Third, as hello or legacy hello responses are received
-the client [parses them](#parsing-a-hello-or-legacy-hello-response), and fourth, it \[updates its view of the
-topology\](#updates its view of the topology).
+the client [parses them](#parsing-a-hello-or-legacy-hello-response), and fourth, it updates its view of the topology.
 
-Finally, this spec describes how \[drivers update their topology view in response to errors\](#drivers update their
-topology view in response to errors), and includes generous implementation notes for driver authors.
+Finally, this spec describes how drivers update their topology view in response to errors, and includes generous
+implementation notes for driver authors.
 
 This spec does not describe how a client chooses a server for an operation; that is the domain of the Server Selection
-Spec. But there is a section describing the \[interaction between monitoring and server selection\](#interaction between
-monitoring and server selection).
+Spec. But there is a section describing the interaction between monitoring and server selection.
 
 There is no discussion of driver architecture and data structures, nor is there any specification of a user-facing API.
 This spec is only concerned with the algorithm for monitoring the server topology.
@@ -137,7 +135,7 @@ A timeout that occurs while reading from or writing to a network socket.
 
 #### minHeartbeatFrequencyMS
 
-Defined in the [Server Monitoring spec](server-monitoring.rst). This value MUST be 500 ms, and it MUST NOT be
+Defined in the [Server Monitoring spec](server-monitoring.md). This value MUST be 500 ms, and it MUST NOT be
 configurable.
 
 #### pool generation number
@@ -189,8 +187,10 @@ See [parsing a hello or legacy hello response](#parsing-a-hello-or-legacy-hello-
 
 > [!NOTE]
 > Single-threaded clients use the PossiblePrimary type to maintain proper
-> [scanning order](server-monitoring.rst#scanning-order). Multi-threaded and asynchronous clients do not need this
+> [scanning order](server-monitoring.md#scanning-order). Multi-threaded and asynchronous clients do not need this
 > ServerType; it is synonymous with Unknown.
+
+<span id="TopologyDescription"></span>
 
 #### TopologyDescription
 
@@ -198,19 +198,20 @@ The client's representation of everything it knows about the deployment's topolo
 
 Fields:
 
-- type: a [TopologyType](#topologytype) enum value. See [initial TopologyType](#initial-topologytype).
-- setName: the replica set name. Default null.
-- maxElectionId: an ObjectId or null. The largest electionId ever reported by a primary. Default null. Part of the
-  (`electionId`, `setVersion`) tuple.
-- maxSetVersion: an integer or null. The largest setVersion ever reported by a primary. It may not monotonically
-  increase, as electionId takes precedence in ordering Default null. Part of the (`electionId`, `setVersion`) tuple.
-- servers: a set of ServerDescription instances. Default contains one server: "localhost:27017", ServerType Unknown.
-- stale: a boolean for single-threaded clients, whether the topology must be re-scanned. (Not related to
-  maxStalenessSeconds, nor to \[stale primaries\](#stale primaries).)
-- compatible: a boolean. False if any server's wire protocol version range is incompatible with the client's. Default
-  true.
-- compatibilityError: a string. The error message if "compatible" is false, otherwise null.
-- logicalSessionTimeoutMinutes: integer or null. Default null. See [logical session timeout](#logical-session-timeout).
+- `type`: a [TopologyType](#topologytype) enum value. See [initial TopologyType](#initial-topologytype).
+- `setName`: the replica set name. Default null.
+- `maxElectionId`: an ObjectId or null. The largest electionId ever reported by a primary. Default null. Part of the
+    (`electionId`, `setVersion`) tuple.
+- `maxSetVersion`: an integer or null. The largest setVersion ever reported by a primary. It may not monotonically
+    increase, as electionId takes precedence in ordering Default null. Part of the (`electionId`, `setVersion`) tuple.
+- `servers`: a set of ServerDescription instances, one for each of the servers in the topology.
+- `stale`: a boolean for single-threaded clients, whether the topology must be re-scanned. (Not related to
+    maxStalenessSeconds, nor to stale primaries.)
+- `compatible`: a boolean. False if any server's wire protocol version range is incompatible with the client's. Default
+    true.
+- `compatibilityError`: a string. The error message if "compatible" is false, otherwise null.
+- `logicalSessionTimeoutMinutes`: integer or null. Default null. See
+    [logical session timeout](#logical-session-timeout).
 
 #### ServerDescription
 
@@ -221,39 +222,58 @@ the monitoring algorithm.
 
 Fields:
 
-- address: the hostname or IP, and the port number, that the client connects to. Note that this is **not** the "me"
-  field in the server's hello or legacy hello response, in the case that the server reports an address different from
-  the address the client uses.
-- (=) error: information about the last error related to this server. Default null.
-- roundTripTime: the duration of the hello or legacy hello call. Default null.
-- minRoundTripTime: the minimum RTT for the server. Default null.
-- lastWriteDate: a 64-bit BSON datetime or null. The "lastWriteDate" from the server's most recent hello or legacy hello
-  response.
-- opTime: an opTime or null. An opaque value representing the position in the oplog of the most recently seen write.
-  Default null. (Only mongos and shard servers record this field when monitoring config servers as replica sets, at
-  least until
-  [drivers allow applications to use readConcern "afterOptime".](../max-staleness/max-staleness.md#future-feature-to-support-readconcern-afteroptime))
-- (=) type: a [ServerType](#servertype) enum value. Default Unknown.
-- (=) minWireVersion, maxWireVersion: the wire protocol version range supported by the server. Both default to 0. \[Use
-  min and maxWireVersion only to determine compatibility\](#use min and maxWireVersion only to determine compatibility).
-- (=) me: The hostname or IP, and the port number, that this server was configured with in the replica set. Default
-  null.
-- (=) hosts, passives, arbiters: Sets of addresses. This server's opinion of the replica set's members, if any. These
-  [hostnames are normalized to lower-case](#hostnames-are-normalized-to-lower-case). Default empty. The client
-  \[monitors all three types of servers\](#monitors all three types of servers) in a replica set.
-- (=) tags: map from string to string. Default empty.
-- (=) setName: string or null. Default null.
-- (=) electionId: an ObjectId, if this is a MongoDB 2.6+ replica set member that believes it is primary. See
-  [using electionId and setVersion to detect stale primaries](#using-electionid-and-setversion-to-detect-stale-primaries).
-  Default null.
-- (=) setVersion: integer or null. Default null.
-- (=) primary: an address. This server's opinion of who the primary is. Default null.
-- lastUpdateTime: when this server was last checked. Default "infinity ago".
-- (=) logicalSessionTimeoutMinutes: integer or null. Default null.
-- (=) topologyVersion: A topologyVersion or null. Default null. The "topologyVersion" from the server's most recent
-  hello or legacy hello response or [State Change Error](#state-change-error).
-- (=) iscryptd: boolean indicating if the server is a
-  [mongocryptd](../client-side-encryption/client-side-encryption.md#mongocryptd) server. Default null.
+- `address`: the hostname or IP, and the port number, that the client connects to. Note that this is **not** the `me`
+    field in the server's hello or legacy hello response, in the case that the server reports an address different from
+    the address the client uses.
+
+- (=) `error`: information about the last error related to this server. Default null. MUST contain or be able to produce
+    a string describing the error.
+
+- `roundTripTime`: the duration of the hello or legacy hello call. Default null.
+
+- `minRoundTripTime`: the minimum RTT for the server. Default null.
+
+- `lastWriteDate`: a 64-bit BSON datetime or null. The `lastWriteDate` from the server's most recent hello or legacy
+    hello response.
+
+- `opTime`: an opTime or null. An opaque value representing the position in the oplog of the most recently seen write.
+    Default null. (Only mongos and shard servers record this field when monitoring config servers as replica sets, at
+    least until
+    [drivers allow applications to use readConcern "afterOptime".](../max-staleness/max-staleness.md#future-feature-to-support-readconcern-afteroptime))
+
+- (=) `type`: a [ServerType](#servertype) enum value. Default Unknown.
+
+- (=) `minWireVersion`, `maxWireVersion`: the wire protocol version range supported by the server. Both default to 0.
+    [Use min and maxWireVersion only to determine compatibility](#checking-wire-protocol-compatibility).
+
+- (=) `me`: The hostname or IP, and the port number, that this server was configured with in the replica set. Default
+    null.
+
+- (=) `hosts`, `passives`, `arbiters`: Sets of addresses. This server's opinion of the replica set's members, if any.
+    These [hostnames are normalized to lower-case](#hostnames-are-normalized-to-lower-case). Default empty. The client
+    monitors all three types of servers in a replica set.
+
+- (=) `tags`: map from string to string. Default empty.
+
+- (=) `setName`: string or null. Default null.
+
+- (=) `electionId`: an ObjectId, if this is a MongoDB 2.6+ replica set member that believes it is primary. See
+    [using electionId and setVersion to detect stale primaries](#using-electionid-and-setversion-to-detect-stale-primaries).
+    Default null.
+
+- (=) `setVersion`: integer or null. Default null.
+
+- (=) `primary`: an address. This server's opinion of who the primary is. Default null.
+
+- `lastUpdateTime`: when this server was last checked. Default "infinity ago".
+
+- (=) `logicalSessionTimeoutMinutes`: integer or null. Default null.
+
+- (=) `topologyVersion`: A topologyVersion or null. Default null. The "topologyVersion" from the server's most recent
+    hello or legacy hello response or [State Change Error](#state-change-error).
+
+- (=) `iscryptd`: boolean indicating if the server is a
+    [mongocryptd](../client-side-encryption/client-side-encryption.md#mongocryptd) server. Default null.
 
 "Passives" are priority-zero replica set members that cannot become primary. The client treats them precisely the same
 as other members.
@@ -327,7 +347,7 @@ Drivers MUST enforce:
 - TopologyType Single cannot be used with multiple seeds.
 - `directConnection=true` cannot be used with multiple seeds.
 - If setName is not null, only TopologyType ReplicaSetNoPrimary, and possibly Single, are allowed. (See
-  [verifying setName with TopologyType Single](#verifying-setname-with-topologytype-single).)
+    [verifying setName with TopologyType Single](#verifying-setname-with-topologytype-single).)
 - `loadBalanced=true` cannot be used in conjunction with `directConnection=true` or `replicaSet`
 
 ##### Handling of SRV URIs resolving to single host
@@ -336,6 +356,8 @@ When a driver is given an SRV URI, if the `directConnection` URI option is not s
 option is not specified, the driver MUST start in Unknown topology, and follow the rules in the
 [TopologyType table](#topologytype-table) for transitioning to other topologies. In particular, the driver MUST NOT use
 the number of hosts from the initial SRV lookup to decide what topology to start in.
+
+<span id="heartbeatFrequencyMS"></span>
 
 #### heartbeatFrequencyMS
 
@@ -383,7 +405,7 @@ servers from its `TopologyDescription` and set its `TopologyType` to `Unknown`, 
 
 ### Monitoring
 
-See the [Server Monitoring spec](server-monitoring.rst) for how a driver monitors each server. In summary, the client
+See the [Server Monitoring spec](server-monitoring.md) for how a driver monitors each server. In summary, the client
 monitors each server in the topology. The scope of server monitoring is to provide the topology with updated
 ServerDescriptions based on hello or legacy hello command responses.
 
@@ -463,13 +485,19 @@ removed once the primary is checked.
 #### error
 
 If the client experiences any error when checking a server, it stores error information in the ServerDescription's error
-field.
+field. The message contained in this field MUST contain the substrings detailed in the table below when the
+ServerDescription is changed to Unknown in the circumstances outlined.
+
+| circumstance                                               | error substring                                                                                                |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| RSPrimary with a stale electionId/setVersion is discovered | `'primary marked stale due to electionId/setVersion mismatch, <stale tuple> is stale compared to <max tuple>'` |
+| New primary is elected/discovered                          | `'primary marked stale due to discovery of newer primary'`                                                     |
 
 #### roundTripTime
 
 Drivers MUST record the server's [round trip time](#round-trip-time) (RTT) after each successful call to hello or legacy
 hello. The Server Selection Spec describes how RTT is averaged and how it is used in server selection. Drivers MUST also
-record the server's minimum RTT per [Server Monitoring (Measuring RTT)](server-monitoring.rst#measuring-rtt).
+record the server's minimum RTT per [Server Monitoring (Measuring RTT)](server-monitoring.md#measuring-rtt).
 
 If a hello or legacy hello call fails, the RTT is not updated. Furthermore, while a server's type is Unknown its RTT is
 null, and if it changes from a known type to Unknown its RTT is set to null. However, if it changes from one known type
@@ -529,11 +557,11 @@ To compare a topologyVersion from a hello or legacy hello or State Change Error 
 ServerDescription's topologyVersion:
 
 1. If the response topologyVersion is unset or the ServerDescription's topologyVersion is null, the client MUST assume
-   the response is more recent.
+    the response is more recent.
 2. If the response's topologyVersion.processId is not equal to the ServerDescription's, the client MUST assume the
-   response is more recent.
+    response is more recent.
 3. If the response's topologyVersion.processId is equal to the ServerDescription's, the client MUST use the counter
-   field to determine which topologyVersion is more recent.
+    field to determine which topologyVersion is more recent.
 
 See [Replacing the TopologyDescription](#replacing-the-topologydescription) for an example implementation of
 topologyVersion comparison.
@@ -575,27 +603,29 @@ Whenever the client checks a server (successfully or not), and regardless of whe
 to the previous server description as defined in [Server Description Equality](#server-description-equality), the
 ServerDescription in TopologyDescription.servers MUST be replaced with the new ServerDescription.
 
+<span id="checking-wire-protocol-compatibility"></span>
+
 ##### Checking wire protocol compatibility
 
 A ServerDescription which is not Unknown is incompatible if:
 
-- minWireVersion > clientMaxWireVersion, or
-- maxWireVersion \< clientMinWireVersion
+- `minWireVersion` > `clientMaxWireVersion`, or
+- `maxWireVersion` < `clientMinWireVersion`
 
 If any ServerDescription is incompatible, the client MUST set the TopologyDescription's "compatible" field to false and
 fill out the TopologyDescription's "compatibilityError" field like so:
 
-- if ServerDescription.minWireVersion > clientMaxWireVersion:
+- if `ServerDescription.minWireVersion` > `clientMaxWireVersion`:
 
-  "Server at $host:$port requires wire version $minWireVersion, but this version of $driverName only supports up to
-  $clientMaxWireVersion."
+    "Server at `host`:`port` requires wire version `minWireVersion`, but this version of `driverName` only supports up to
+    `clientMaxWireVersion`."
 
-- if ServerDescription.maxWireVersion \< clientMinWireVersion:
+- if `ServerDescription.maxWireVersion` < `clientMinWireVersion`:
 
-  "Server at $host:$port reports wire version $maxWireVersion, but this version of $driverName requires at least
-  $clientMinWireVersion (MongoDB $mongoVersion)."
+    "Server at `host`:`port` reports wire version `maxWireVersion`, but this version of `driverName` requires at least
+    `clientMinWireVersion` (MongoDB `mongoVersion`)."
 
-Replace $mongoVersion with the appropriate MongoDB minor version, for example if clientMinWireVersion is 2 and it
+Replace `mongoVersion` with the appropriate MongoDB minor version, for example if `clientMinWireVersion` is 2 and it
 connects to MongoDB 2.4, format the error like:
 
 > "Server at example.com:27017 reports wire version 0, but this version of My Driver requires at least 2 (MongoDB 2.6)."
@@ -663,23 +693,25 @@ ServerType and a TopologyType intersect, the table shows what action the client 
 This subsection complements the [TopologyType table](#topologytype-table) with prose explanations of the TopologyTypes
 (besides Single and LoadBalanced).
 
-TopologyType Unknown\
+**TopologyType Unknown**
+
 A starting state.
 
 **Actions**:
 
 - If the incoming ServerType is Unknown (that is, the hello or legacy hello call failed), keep the server in
-  TopologyDescription.servers. The TopologyType remains Unknown.
+    TopologyDescription.servers. The TopologyType remains Unknown.
 - The
-  [TopologyType remains Unknown when an RSGhost is discovered](#topologytype-remains-unknown-when-an-rsghost-is-discovered),
-  too.
+    [TopologyType remains Unknown when an RSGhost is discovered](#topologytype-remains-unknown-when-an-rsghost-is-discovered),
+    too.
 - If the type is Standalone, run [updateUnknownWithStandalone](#updateunknownwithstandalone).
 - If the type is Mongos, set the TopologyType to Sharded.
 - If the type is RSPrimary, record its setName and call [updateRSFromPrimary](#updatersfromprimary).
 - If the type is RSSecondary, RSArbiter or RSOther, record its setName, set the TopologyType to ReplicaSetNoPrimary, and
-  call [updateRSWithoutPrimary](#updaterswithoutprimary).
+    call [updateRSWithoutPrimary](#updaterswithoutprimary).
 
-TopologyType Sharded\
+**TopologyType Sharded**
+
 A steady state. Connected to one or more mongoses.
 
 **Actions**:
@@ -687,26 +719,28 @@ A steady state. Connected to one or more mongoses.
 - If the server is Unknown or Mongos, keep it.
 - Remove others.
 
-TopologyType ReplicaSetNoPrimary\
+**TopologyType ReplicaSetNoPrimary**
+
 A starting state. The topology is definitely a replica set, but no primary is known.
 
 **Actions**:
 
 - Keep Unknown servers.
 - Keep RSGhost servers: they are members of some replica set, perhaps this one, and may recover. (See
-  [RSGhost and RSOther](#rsghost-and-rsother).)
+    [RSGhost and RSOther](#rsghost-and-rsother).)
 - Remove any Standalones or Mongoses.
 - If the type is RSPrimary call [updateRSFromPrimary](#updatersfromprimary).
 - If the type is RSSecondary, RSArbiter or RSOther, run [updateRSWithoutPrimary](#updaterswithoutprimary).
 
-TopologyType ReplicaSetWithPrimary\
+**TopologyType ReplicaSetWithPrimary**
+
 A steady state. The primary is known.
 
 **Actions**:
 
 - If the server type is Unknown, keep it, and run [checkIfHasPrimary](#checkifhasprimary).
 - Keep RSGhost servers: they are members of some replica set, perhaps this one, and may recover. (See
-  [RSGhost and RSOther](#rsghost-and-rsother).) Run [checkIfHasPrimary](#checkifhasprimary).
+    [RSGhost and RSOther](#rsghost-and-rsother).) Run [checkIfHasPrimary](#checkifhasprimary).
 - Remove any Standalones or Mongoses and run [checkIfHasPrimary](#checkifhasprimary).
 - If the type is RSPrimary run [updateRSFromPrimary](#updatersfromprimary).
 - If the type is RSSecondary, RSArbiter or RSOther, run [updateRSWithPrimaryFromMember](#updaterswithprimaryfrommember).
@@ -729,6 +763,8 @@ else:
 
 See
 [TopologyType remains Unknown when one of the seeds is a Standalone](#topologytype-remains-unknown-when-one-of-the-seeds-is-a-standalone).
+
+<span id="updateRSWithoutPrimary"></span>
 
 ##### updateRSWithoutPrimary
 
@@ -807,6 +843,8 @@ if there is no primary in topologyDescription.servers:
 The special handling of description.primary ensures that a single-threaded client [scans](#scan) the possible primary
 before other members.
 
+<span id="updateRSFromPrimary"></span>
+
 ##### updateRSFromPrimary
 
 This subroutine is executed with a ServerDescription of type RSPrimary:
@@ -839,7 +877,8 @@ if serverDescription.maxWireVersion >= 17:  # MongoDB 6.0+
         topologyDescription.maxSetVersion = serverDescription.setVersion
     else:
         # Stale primary.
-        # replace serverDescription with a default ServerDescription of type "Unknown"
+        # The error field MUST include the substring "primary marked stale due to electionId/setVersion mismatch"
+         replace serverDescription with a default ServerDescription of type "Unknown"
         checkIfHasPrimary()
         return
 else:
@@ -857,7 +896,8 @@ else:
             )
         ):
             # Stale primary.
-            # replace serverDescription with a default ServerDescription of type "Unknown"
+            # The error field MUST include the substring "primary marked stale due to electionId/setVersion mismatch"
+            replace serverDescription with a default ServerDescription of type "Unknown" 
             checkIfHasPrimary()
             return
 
@@ -874,6 +914,7 @@ for each server in topologyDescription.servers:
     if server.address != serverDescription.address:
         if server.type is RSPrimary:
             # See note below about invalidating an old primary.
+            # the error field MUST include the substring "primary marked stale due to discovery of newer primary"
             replace the server with a default ServerDescription of type "Unknown"
 
 for each address in serverDescription's "hosts", "passives", and "arbiters":
@@ -889,9 +930,10 @@ checkIfHasPrimary()
 ```
 
 A note on invalidating the old primary: when a new primary is discovered, the client finds the previous primary (there
-should be none or one) and replaces its description with a default ServerDescription of type "Unknown." A multi-threaded
-client MUST [request an immediate check](server-monitoring.rst#requesting-an-immediate-check) for that server as soon as
-possible.
+should be none or one) and replaces its description with a default ServerDescription of type "Unknown". Additionally,
+the `error` field of the new `ServerDescription` object MUST include a descriptive error explaining that it was
+invalidated because the primary was determined to be stale. A multi-threaded client MUST
+[request an immediate check](server-monitoring.md#requesting-an-immediate-check) for that server as soon as possible.
 
 If the old primary server version is 4.0 or earlier, the client MUST clear its connection pool for the old primary, too:
 the connections are all bad because the old primary has closed its sockets. If the old primary server version is 4.2 or
@@ -902,6 +944,8 @@ See [replica set monitoring with and without a primary](#replica-set-monitoring-
 If the server is primary with an obsolete electionId or setVersion, it is likely a stale primary that is going to step
 down. Mark it Unknown and let periodic monitoring detect when it becomes secondary. See
 [using electionId and setVersion to detect stale primaries](#using-electionid-and-setversion-to-detect-stale-primaries).
+Drivers MAY additionally specify whether this was due to an electionId or setVersion mismatch as described in the
+[ServerDescripion.error section](#error).
 
 A note on checking "me": Unlike `updateRSWithPrimaryFromMember`, there is no need to remove the server if the address is
 not equal to "me": since the server address will not be a member of either "hosts", "passives", or "arbiters", the
@@ -944,7 +988,7 @@ to be [data-bearing](server-discovery-and-monitoring.md#data-bearing-server-type
 [direct connection](server-discovery-and-monitoring.md#general-requirements) to the server is requested, and does not
 already have a connection pool, the driver MUST create the connection pool for the server. Additionally, if a driver
 implements a CMAP compliant connection pool, the server's pool (even if it already existed) MUST be marked as "ready".
-See the [Server Monitoring spec](server-monitoring.rst) for more information.
+See the [Server Monitoring spec](server-monitoring.md) for more information.
 
 Clearing the connection pool for a server MUST be synchronized with the update to the corresponding ServerDescription
 (e.g. by holding the lock on the TopologyDescription when clearing the pool). This prevents a possible race between the
@@ -956,13 +1000,13 @@ for more information.
 
 #### Network error during server check
 
-See error handling in the [Server Monitoring spec](server-monitoring.rst).
+See error handling in the [Server Monitoring spec](server-monitoring.md).
 
 #### Application errors
 
-When processing a network or command error, clients MUST first check the error's \[generation number\](#generation
-number). If the error's generation number is equal to the pool's generation number then error handling MUST continue
-according to [Network error when reading or writing](#network-error-when-reading-or-writing) or
+When processing a network or command error, clients MUST first check the error's generation number. If the error's
+generation number is equal to the pool's generation number then error handling MUST continue according to
+[Network error when reading or writing](#network-error-when-reading-or-writing) or
 ["not writable primary" and "node is recovering"](#not-writable-primary-and-node-is-recovering). Otherwise, the error is
 considered stale and the client MUST NOT update any topology state. (See
 [Why ignore errors based on CMAP's generation number?](#why-ignore-errors-based-on-cmaps-generation-number))
@@ -972,7 +1016,7 @@ considered stale and the client MUST NOT update any topology state. (See
 Application operations can fail in various places, for example:
 
 - A network error, network timeout, or command error may occur while establishing a new connection. Establishing a
-  connection includes the MongoDB handshake and completing authentication (if configured).
+    connection includes the MongoDB handshake and completing authentication (if configured).
 - A network error or network timeout may occur while reading or writing to an established connection.
 - A command error may be returned from the server.
 - A "writeConcernError" field may be included in the command response.
@@ -1077,7 +1121,7 @@ def parseGle(response):
     if "err" in response:
         handleError(CommandError(response, response["err"], response["code"]))
 
-# Parse response to any command besides getLastError.
+# Parse response to any command
 def parseCommandResponse(response):
     if not response["ok"]:
         handleError(CommandError(response, response["errmsg"], response["code"]))
@@ -1099,7 +1143,7 @@ To describe how the client responds to network errors during application operati
 connecting to a server and using it for application operations:
 
 - *Before the handshake completes*: the client establishes a new connection to the server and completes an initial
-  handshake by calling "hello" or legacy hello and reading the response, and optionally completing authentication
+    handshake by calling "hello" or legacy hello and reading the response, and optionally completing authentication
 - *After the handshake completes*: the client uses the established connection for application operations
 
 If there is a network error or timeout on the connection before the handshake completes, the client MUST replace the
@@ -1137,8 +1181,8 @@ operation needs the server sooner than that, then a re-check will be triggered b
 
 ##### "not writable primary" and "node is recovering"
 
-These errors are detected from a getLastError response, write command response, or query response. Clients MUST check if
-the server error is a "node is recovering" error or a "not writable primary" error.
+These errors are detected from a write command response or query response. Clients MUST check if the server error is a
+"node is recovering" error or a "not writable primary" error.
 
 If the response includes an error code, it MUST be solely used to determine if error is a "node is recovering" or "not
 writable primary" error. Clients MUST match the errors by the numeric error code and not by the code name, as the code
@@ -1184,7 +1228,7 @@ new ServerDescription's error field, including the error message from the server
 [What is the purpose of topologyVersion?](#what-is-the-purpose-of-topologyversion))
 
 Multi-threaded and asynchronous clients MUST
-[request an immediate check](server-monitoring.rst#requesting-an-immediate-check) of the server. Unlike in the "network
+[request an immediate check](server-monitoring.md#requesting-an-immediate-check) of the server. Unlike in the "network
 error" scenario above, a "not writable primary" or "node is recovering" error means the server is available but the
 client is wrong about its type, thus an immediate re-check is likely to provide useful information.
 
@@ -1201,7 +1245,7 @@ The following subset of "node is recovering" errors is defined to be "node is sh
 | ShutdownInProgress    | 91         |
 
 When handling a "not writable primary" or "node is recovering" error, the client MUST clear the server's connection pool
-if and only if the error is "node is shutting down" or the error originated from server version \< 4.2.
+if and only if the error is "node is shutting down" or the error originated from server version < 4.2.
 
 (See
 [when does a client see "not writable primary" or "node is recovering"?](#when-does-a-client-see-not-writable-primary-or-node-is-recovering),
@@ -1209,33 +1253,33 @@ if and only if the error is "node is shutting down" or the error originated from
 and [other transient errors](#other-transient-errors) and
 [Why close connections when a node is shutting down?](#why-close-connections-when-a-node-is-shutting-down).)
 
-##### Authentication errors
+##### Authentication and Handshake errors
 
-If the authentication handshake fails for a connection, drivers MUST mark the server Unknown and clear the server's
-connection pool if the TopologyType is not LoadBalanced. (See
-[Why mark a server Unknown after an auth error?](#why-mark-a-server-unknown-after-an-auth-error))
+If the driver encounters errors when establishing application connections (this includes the initial handshake and
+authentication), the driver MUST mark the server Unknown and clear the server's connection pool if the TopologyType is
+not LoadBalanced. (See [Why mark a server Unknown after an auth error?](#why-mark-a-server-unknown-after-an-auth-error))
 
 ### Monitoring SDAM events
 
 The required driver specification for providing lifecycle hooks into server discovery and monitoring for applications to
-consume can be found in the [SDAM Monitoring Specification](server-discovery-and-monitoring-logging-and-monitoring.rst).
+consume can be found in the [SDAM Monitoring Specification](server-discovery-and-monitoring-logging-and-monitoring.md).
 
 ### Implementation notes
 
 This section intends to provide generous guidance to driver authors. It is complementary to the reference
 implementations. Words like "should", "may", and so on are used more casually here.
 
-See also, the implementation notes in the [Server Monitoring spec](server-monitoring.rst).
+See also, the implementation notes in the [Server Monitoring spec](server-monitoring.md).
 
 #### Multi-threaded or asynchronous server selection
 
 While no suitable server is available for an operation,
 [the client MUST re-check all servers every minHeartbeatFrequencyMS](#the-client-must-re-check-all-servers-every-minheartbeatfrequencyms).
-(See [requesting an immediate check](server-monitoring.rst#requesting-an-immediate-check).)
+(See [requesting an immediate check](server-monitoring.md#requesting-an-immediate-check).)
 
 #### Single-threaded server selection
 
-When a client that uses [single-threaded monitoring](server-monitoring.rst#single-threaded-monitoring) fails to select a
+When a client that uses [single-threaded monitoring](server-monitoring.md#single-threaded-monitoring) fails to select a
 suitable server for any operation, it [scans](#scan) the servers, then attempts selection again, to see if the scan
 discovered suitable servers. It repeats, waiting [minHeartbeatFrequencyMS](#minheartbeatfrequencyms) after each scan,
 until a timeout.
@@ -1265,19 +1309,19 @@ several classes of race, for example:
 - Setup: A MongoDB 3.0 Standalone with authentication enabled, the client must log in with SCRAM-SHA-1.
 - The monitor thread discovers the server and stores maxWireVersion on the ServerDescription
 - An application thread wants a socket, selects the Standalone, and is about to check the maxWireVersion on its
-  ServerDescription when...
+    ServerDescription when...
 - The monitor thread gets disconnected from server and marks it Unknown, with default maxWireVersion of 0.
 - The application thread resumes, creates a socket, and attempts to log in using MONGODB-CR, since maxWireVersion is
-  *now* reported as 0.
+    *now* reported as 0.
 - Authentication fails, the server requires SCRAM-SHA-1.
 
 Better to call hello or legacy hello for each new socket, as required by the [Auth Spec](../auth/auth.md), and use the
 hello or legacy hello response associated with that socket for maxWireVersion, maxBsonObjectSize, etc.: all the fields
 required to correctly communicate with the server.
 
-The hello or legacy hello responses received by monitors determine if the topology as a whole \[is compatible\](#is
-compatible) with the driver, and which servers are suitable for selection. The monitors' responses should not be used to
-determine how to format wire protocol messages to the servers.
+The hello or legacy hello responses received by monitors determine if the topology as a whole is compatible with the
+driver, and which servers are suitable for selection. The monitors' responses should not be used to determine how to
+format wire protocol messages to the servers.
 
 ##### Immutable data
 
@@ -1472,7 +1516,7 @@ This rule supports the following common scenario:
 1. Servers A and B are in a replica set.
 2. A seed list with A and B is stored in a configuration file.
 3. An administrator removes B from the set and brings it up as standalone for maintenance, without changing its port
-   number.
+    number.
 4. The client is initialized with seeds A and B, TopologyType Unknown, and no setName.
 5. The first hello or legacy hello response is from B, the standalone.
 
@@ -1496,10 +1540,10 @@ set, when the client most recently contacted the primary.
 The primary's view of the replica set is authoritative for two reasons:
 
 1. The primary is never on the minority side of a network partition. During a partition it is the primary's list of
-   servers the client should use.
+    servers the client should use.
 2. Since reconfigs must be executed on the primary, the primary is the first to know of them. Reconfigs propagate to
-   non-primaries eventually, but the client can receive hello or legacy hello responses from non-primaries that reflect
-   any past state of the replica set. See the "Replica set discovery" test scenario.
+    non-primaries eventually, but the client can receive hello or legacy hello responses from non-primaries that
+    reflect any past state of the replica set. See the "Replica set discovery" test scenario.
 
 If at any time the client believes there is no primary, the TopologyDescription's type is set to ReplicaSetNoPrimary.
 While there is no known primary, the client MUST **add** servers from non-primaries' host lists, but it MUST NOT remove
@@ -1537,11 +1581,11 @@ drivers continue to maintain the reversed logic when connected to a topology tha
 Using (electionId, setVersion) only provides read-your-writes consistency if:
 
 - The application uses the same MongoClient instance for write-concern "majority" writes and read-preference "primary"
-  reads, and
+    reads, and
 - All members use MongoDB 2.6.10+, 3.0.0+ or 3.2.0+ with replication protocol 0 and clocks are *less* than 30 seconds
-  skewed, or
+    skewed, or
 - All members run MongoDB 3.2.0 and replication protocol 1 and clocks are *less* skewed than the election timeout
-  (`electionTimeoutMillis`, which defaults to 10 seconds), or
+    (`electionTimeoutMillis`, which defaults to 10 seconds), or
 - All members run MongoDB 3.2.1+ and replication protocol 1 (in which case clocks need not be synchronized).
 
 #### Scenario
@@ -1552,10 +1596,10 @@ Consider the following situation:
 2. A network partition isolates A from the set, but the client still sees it.
 3. Server B is elected primary.
 4. The client discovers that B is primary, does a write-concern "majority" write operation on B and receives
-   acknowledgment.
+    acknowledgment.
 5. The client receives a hello or legacy hello response from A, claiming A is still primary.
 6. If the client trusts that A is primary, the next read-preference "primary" read sees stale data from A that may *not*
-   include the write sent to B.
+    include the write sent to B.
 
 See [SERVER-17975](https://jira.mongodb.org/browse/SERVER-17975), "Stale reads with WriteConcern Majority and
 ReadPreference Primary."
@@ -1601,7 +1645,7 @@ This scenario illustrates the problems that arise if this is NOT done:
 - Server A responds as a secondary with hosts D, E, F
 - The client executes a query with read preference of secondary, and server A is selected
 - Server B responds as a primary with hosts D, E, F. Servers A, B, C are removed, as they don't appear in the primary's
-  hosts list
+    hosts list
 - The client iterates the cursor and attempts to execute a getMore against server A.
 - Server selection fails because server A is no longer part of the topology.
 
@@ -1609,7 +1653,7 @@ With checking for "me" in place, it looks like this instead:
 
 - The client specifies a seed list of A, B, C
 - Server A responds as a secondary with hosts D, E, F, where "me" is D, and so the client adds D, E, F as type "Unknown"
-  and starts monitoring them, but removes A from the topology.
+    and starts monitoring them, but removes A from the topology.
 - The client executes a query with read preference of secondary, and goes into the server selection loop
 - Server D responds as a secondary where "me" is D
 - Server selection completes by matching D
@@ -1667,13 +1711,13 @@ shard.
 
 ### Why ignore errors based on CMAP's generation number?
 
-Using CMAP's \[generation number\](#generation number) solves the following race condition among application threads and
-the monitor during error handling:
+Using CMAP's generation number solves the following race condition among application threads and the monitor during
+error handling:
 
 1. Two concurrent writes begin on application threads A and B.
 2. The server restarts.
 3. Thread A receives the first non-timeout network error, and the client marks the server Unknown, and clears the
-   server's pool.
+    server's pool.
 4. The client re-checks the server and marks it Primary.
 5. Thread B receives the second non-timeout network error and the client marks the server Unknown again.
 
@@ -1684,10 +1728,10 @@ server's status with stale information. Using CMAP's generation number avoids th
 1. Two concurrent writes begin on application threads A and B, **with generation 1**.
 2. The server restarts.
 3. Thread A receives the first non-timeout network error, and the client marks the server Unknown, and clears the
-   server's pool. **The pool's generation is now 2.**
+    server's pool. **The pool's generation is now 2.**
 4. The client re-checks the server and marks it Primary.
 5. Thread B receives the second non-timeout network error, **and the client ignores the error because the error
-   originated from a connection with generation 1.**
+    originated from a connection with generation 1.**
 
 ### Why synchronize clearing a server's pool with updating the topology?
 
@@ -1698,12 +1742,13 @@ the previous example:
 2. The server restarts.
 3. The application thread receives a non-timeout network error.
 4. The application thread acquires the lock on the TopologyDescription, marks the Server as Unknown, and releases the
-   lock.
+    lock.
 5. The monitor re-checks the server and marks it Primary and its pool as "ready".
 6. Several other application threads enter the WaitQueue of the server's pool.
 7. The application thread clears the server's pool, evicting all those new threads from the WaitQueue, causing them to
-   return errors or to retry. Additionally, the pool is now "paused", but the server is considered the Primary, meaning
-   future operations will be routed to the server and fail until the next heartbeat marks the pool as "ready" again.
+    return errors or to retry. Additionally, the pool is now "paused", but the server is considered the Primary,
+    meaning future operations will be routed to the server and fail until the next heartbeat marks the pool as "ready"
+    again.
 
 If marking the server as Unknown and clearing its pool were synchronized, then the monitor marking the server as Primary
 after its check would happen after the pool was cleared and thus avoid putting it an inconsistent state.
@@ -1711,7 +1756,7 @@ after its check would happen after the pool was cleared and thus avoid putting i
 ### What is the purpose of topologyVersion?
 
 [topologyVersion](#topologyversion) solves the following race condition among application threads and the monitor when
-handling \[State Change Errors\](#State Change Errors):
+handling State Change Errors:
 
 1. Two concurrent writes begin on application threads A and B.
 2. The primary steps down.
@@ -1724,13 +1769,13 @@ server's status with stale information. Using topologyVersion avoids the race co
 State Change Errors can be identified (changes in **bold**):
 
 1. Two concurrent writes begin on application threads A and B.
-   1. **The primary's ServerDescription.topologyVersion == tv1**
+    1. **The primary's ServerDescription.topologyVersion == tv1**
 2. The primary steps down **and sets its topologyVersion to tv2**.
 3. Thread A receives the first State Change Error **containing tv2**, the client marks the server Unknown (**with
-   topologyVersion: tv2**).
+    topologyVersion: tv2**).
 4. The client re-checks the server and marks it Secondary (**with topologyVersion: tv2**).
 5. Thread B receives a delayed State Change Error (**with topologyVersion: tv2**) **and the client ignores the error
-   because the error's topologyVersion (tv2) is not greater than the current ServerDescription (tv2).**
+    because the error's topologyVersion (tv2) is not greater than the current ServerDescription (tv2).**
 
 ### Why mark a server Unknown after an auth error?
 
@@ -1744,7 +1789,7 @@ Note that authentication may fail for a variety of reasons, for example:
 - A network error, or network timeout error may occur.
 - The server may return a [State Change Error](#state-change-error).
 - The server may return a AuthenticationFailed command error (error code 18) indicating that the provided credentials
-  are invalid.
+    are invalid.
 
 Does this mean that authentication failures due to invalid credentials will manifest as server selection timeout errors?
 No, authentication errors are still returned to the application immediately. A subsequent operation will block until the
@@ -1755,14 +1800,14 @@ server is rediscovered and immediately attempt authentication on a new connectio
 Very often users have DNS aliases they use in their [seed list](#seed-list) instead of the hostnames in the replica set
 config. For example, the name "host_alias" might refer to a server also known as "host1", and the URI is:
 
-```
+```text
 mongodb://host_alias/?replicaSet=rs
 ```
 
 When the client connects to "host_alias", its hello or legacy hello response includes the list of hostnames from the
 replica set config, which does not include the seed:
 
-```
+```javascript
 {
    hosts: ["host1:27017", "host2:27017"],
    setName: "rs",
@@ -1820,7 +1865,7 @@ These errors indicate one of these:
 
 - A write was attempted on an unwritable server (arbiter, secondary, ghost, or recovering).
 - A read was attempted on an unreadable server (arbiter, ghost, or recovering) or a read was attempted on a read-only
-  server without the secondaryOk bit set.
+    server without the secondaryOk bit set.
 - An operation was attempted on a server that is now shutting down.
 
 In any case the error is a symptom that a ServerDescription's type no longer reflects reality.
@@ -1833,7 +1878,7 @@ following scenario:
 2. The primary steps down.
 3. Before the client checks the server and discovers the stepdown, the application attempts an operation.
 4. The client's connection pool is empty, either because it has never attempted an operation on this server, or because
-   all connections are in use by other threads.
+    all connections are in use by other threads.
 5. The client creates a connection to the old primary.
 6. The client attempts to write, or to read without the secondaryOk bit, and receives "not writable primary".
 
@@ -1856,10 +1901,10 @@ then?
 Periodic monitoring accomplishes three objectives:
 
 - Update each server's type, tags, and [round trip time](#round-trip-time). Read preferences and the mongos selection
-  algorithm require this information remains up to date.
+    algorithm require this information remains up to date.
 - Discover new secondaries so that secondary reads are evenly spread.
 - Detect incremental changes to the replica set configuration, so that the client remains connected to the set even
-  while it is migrated to a completely new set of hosts.
+    while it is migrated to a completely new set of hosts.
 
 If the application uses some servers very infrequently, monitoring can also proactively detect state changes (primary
 stepdown, server becoming unavailable) that would otherwise cause future errors.
@@ -1888,8 +1933,6 @@ oversaw the specification process.
 
 ## Changelog
 
-- 2024-05-08: Migrated from reStructuredText to Markdown.
-
 - 2015-12-17: Require clients to compare (setVersion, electionId) tuples.
 
 - 2015-10-09: Specify electionID comparison method.
@@ -1898,35 +1941,29 @@ oversaw the specification process.
 
 - 2016-05-04: Added link to SDAM monitoring.
 
-- 2016-07-18: Replace mentions of the "Read Preferences Spec" with "Server\
-  Selection Spec", and
-  "secondaryAcceptableLatencyMS" with "localThresholdMS".
+- 2016-07-18: Replace mentions of the "Read Preferences Spec" with "Server Selection Spec", and
+    "secondaryAcceptableLatencyMS" with "localThresholdMS".
 
 - 2016-07-21: Updated for Max Staleness support.
 
 - 2016-08-04: Explain better why clients use the hostnames in RS config, not URI.
 
-- 2016-08-31: Multi-threaded clients SHOULD use hello or legacy hello replies to\
-  update the topology when they
-  handshake application connections.
+- 2016-08-31: Multi-threaded clients SHOULD use hello or legacy hello replies to update the topology when they handshake
+    application connections.
 
-- 2016-10-06: In updateRSWithoutPrimary the hello or legacy hello response's\
-  "primary" field should be used to update
-  the topology description, even if address != me.
+- 2016-10-06: In updateRSWithoutPrimary the hello or legacy hello response's "primary" field should be used to update
+    the topology description, even if address != me.
 
 - 2016-10-29: Allow for idleWritePeriodMS to change someday.
 
-- 2016-11-01: "Unknown" is no longer the default TopologyType, the default is now\
-  explicitly unspecified. Update
-  instructions for setting the initial TopologyType when running the spec tests.
+- 2016-11-01: "Unknown" is no longer the default TopologyType, the default is now explicitly unspecified. Update
+    instructions for setting the initial TopologyType when running the spec tests.
 
-- 2016-11-21: Revert changes that would allow idleWritePeriodMS to change in the\
-  future.
+- 2016-11-21: Revert changes that would allow idleWritePeriodMS to change in the future.
 
-- 2017-02-28: Update "network error when reading or writing": timeout while\
-  connecting does mark a server Unknown,
-  unlike a timeout while reading or writing. Justify the different behaviors, and also remove obsolete reference to
-  auto-retry.
+- 2017-02-28: Update "network error when reading or writing": timeout while connecting does mark a server Unknown,
+    unlike a timeout while reading or writing. Justify the different behaviors, and also remove obsolete reference to
+    auto-retry.
 
 - 2017-06-13: Move socketCheckIntervalMS to Server Selection Spec.
 
@@ -1940,33 +1977,28 @@ oversaw the specification process.
 
 - 2019-05-29: Renamed InterruptedDueToStepDown to InterruptedDueToReplStateChange
 
-- 2020-02-13: Drivers must run SDAM flow even when server description is equal to\
-  the last one.
+- 2020-02-13: Drivers must run SDAM flow even when server description is equal to the last one.
 
-- 2020-03-31: Add topologyVersion to ServerDescription. Add rules for ignoring\
-  stale application errors.
+- 2020-03-31: Add topologyVersion to ServerDescription. Add rules for ignoring stale application errors.
 
 - 2020-05-07: Include error field in ServerDescription equality comparison.
 
 - 2020-06-08: Clarify reasoning behind how SDAM determines if a topologyVersion is stale.
 
-- 2020-12-17: Mark the pool for a server as "ready" after performing a successful\
-  check. Synchronize pool clearing with
-  SDAM updates.
+- 2020-12-17: Mark the pool for a server as "ready" after performing a successful check. Synchronize pool clearing with
+    SDAM updates.
 
 - 2021-01-17: Require clients to compare (electionId, setVersion) tuples.
 
-- 2021-02-11: Errors encountered during auth are handled by SDAM. Auth errors\
-  mark the server Unknown and clear the
-  pool.
+- 2021-02-11: Errors encountered during auth are handled by SDAM. Auth errors mark the server Unknown and clear the
+    pool.
 
 - 2021-04-12: Adding in behaviour for load balancer mode.
 
 - 2021-05-03: Require parsing "isWritablePrimary" field in responses.
 
-- 2021-06-09: Connection pools must be created and eventually marked ready for\
-  any server if a direct connection is
-  used.
+- 2021-06-09: Connection pools must be created and eventually marked ready for any server if a direct connection is
+    used.
 
 - 2021-06-29: Updated to use modern terminology.
 
@@ -1981,6 +2013,19 @@ oversaw the specification process.
 - 2022-11-17: Add minimum RTT tracking and remove 90th percentile RTT.
 
 - 2024-01-17: Add section on expected client close behaviour
+
+- 2024-05-08: Migrated from reStructuredText to Markdown.
+
+- 2024-08-09: Updated wire versions in tests to 4.0+.
+
+- 2024-08-16: Updated host b wire versions in `too_new` and `too_old` tests
+
+- 2024-11-04: Make the description of `TopologyDescription.servers` consistent with the spec tests.
+
+- 2024-11-11: Removed references to `getLastError`
+
+- 2025-01-22: Add error messages when a new primary is elected or a primary with a stale electionId or setVersion is
+    discovered.
 
 ______________________________________________________________________
 

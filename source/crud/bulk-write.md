@@ -9,7 +9,7 @@ This specification defines the driver API for the `bulkWrite` server command int
 in this specification allows users to perform insert, update, and delete operations against mixed namespaces in a
 minimized number of round trips, and to receive detailed results for each operation performed. This API is distinct from
 the [collection-level bulkWrite method](../crud/crud.md#insert-update-replace-delete-and-bulk-writes) defined in the
-CRUD specification and the [deprecated bulk write specification](../driver-bulk-update.rst).
+CRUD specification.
 
 ## Specification
 
@@ -90,6 +90,14 @@ class UpdateOneModel implements WriteModel {
      * value is false.
      */
     upsert: Optional<Boolean>;
+
+    /**
+     * Specify which document the operation updates if the query matches multiple
+     * documents. The first document matched by the sort order will be updated.
+     *
+     * This option is only sent if the caller explicitly provides a value.
+     */
+    sort: Optional<Document>;
 }
 
 class UpdateManyModel implements WriteModel {
@@ -167,6 +175,14 @@ class ReplaceOneModel implements WriteModel {
      * value is false.
      */
     upsert: Optional<Boolean>;
+
+    /**
+     * Specify which document the operation replaces if the query matches multiple
+     * documents. The first document matched by the sort order will be replaced.
+     *
+     * This option is only sent if the caller explicitly provides a value.
+     */
+    sort: Optional<Document>;
 }
 
 class DeleteOneModel implements WriteModel {
@@ -219,7 +235,7 @@ defines the collection on which the operation should be performed. Drivers SHOUL
 is most idiomatic for its language. For example, drivers may:
 
 - Include a required `namespace` field on each `WriteModel` variant and accept a list of `WriteModel` objects for the
-  `models` parameter.
+    `models` parameter.
 - Accept a list of `(Namespace, WriteModel)` tuples for `models`.
 - Define the following pair class:
 
@@ -242,12 +258,12 @@ Drivers MUST throw an exception if the list provided for `models` is empty.
 #### Update vs. replace document validation
 
 Update documents provided in `UpdateOne` and `UpdateMany` write models are required only to contain atomic modifiers
-(i.e. keys that start with "$"). Drivers MUST throw an error if an update document is empty or if the document's first
-key does not start with "$". Drivers MUST rely on the server to return an error if any other entries in the update
+(i.e. keys that start with `$`). Drivers MUST throw an error if an update document is empty or if the document's first
+key does not start with `$`. Drivers MUST rely on the server to return an error if any other entries in the update
 document are not atomic modifiers. Drivers are not required to perform validation on update pipelines.
 
 Replacement documents provided in `ReplaceOne` write models are required not to contain atomic modifiers. Drivers MUST
-throw an error if a replacement document is nonempty and its first key starts with "$". Drivers MUST rely on the server
+throw an error if a replacement document is nonempty and its first key starts with `$`. Drivers MUST rely on the server
 to return an error if any other entries in the replacement document are atomic modifiers.
 
 ### Options
@@ -309,19 +325,16 @@ class BulkWriteOptions {
 ```typescript
 class BulkWriteResult {
     /**
-     * Indicates whether this write result was acknowledged. If not, then all other members of this
-     * result will be undefined.
+     * Indicates whether this write result was acknowledged.
      *
-     * NOT REQUIRED TO IMPLEMENT. See below for more guidance on modeling unacknowledged results.
+     * NOT REQUIRED TO IMPLEMENT. See below for guidance on modeling unacknowledged results.
      */
     acknowledged: Boolean;
 
     /**
-     * Indicates whether the results are verbose. If false, the insertResults, updateResults, and
-     * deleteResults fields in this result will be undefined.
+     * Indicates whether this result contains verbose results.
      *
-     * NOT REQUIRED TO IMPLEMENT. See below for other ways to differentiate summary results from
-     * verbose results.
+     * NOT REQUIRED TO IMPLEMENT. See below for guidance on modeling verbose results.
      */
     hasVerboseResults: Boolean;
 
@@ -352,18 +365,24 @@ class BulkWriteResult {
 
     /**
      * The results of each individual insert operation that was successfully performed.
+     *
+     * NOT REQUIRED TO IMPLEMENT. See below for guidance on modeling verbose results.
      */
-    insertResults: Map<Int64, InsertOneResult>;
+    insertResults: Map<Index, InsertOneResult>;
 
     /**
      * The results of each individual update operation that was successfully performed.
+     *
+     * NOT REQUIRED TO IMPLEMENT. See below for guidance on modeling verbose results.
      */
-    updateResults: Map<Int64, UpdateResult>;
+    updateResults: Map<Index, UpdateResult>;
 
     /**
      * The results of each individual delete operation that was successfully performed.
+     *
+     * NOT REQUIRED TO IMPLEMENT. See below for guidance on modeling verbose results.
      */
-    deleteResults: Map<Int64, DeleteResult>;
+    deleteResults: Map<Index, DeleteResult>;
 }
 
 class InsertOneResult {
@@ -404,23 +423,60 @@ class DeleteResult {
 
 #### Unacknowledged results
 
-`BulkWriteResult` has an optional `acknowledged` field to indicate whether the result was acknowledged. This is not
-required to implement. Drivers should follow the guidance in the CRUD specification
+Users MUST be able to discern whether a `BulkWriteResult` contains acknowledged results without inspecting the
+configured write concern. Drivers should follow the guidance in the CRUD specification
 [here](../crud/crud.md#write-results) to determine how to model unacknowledged results.
+
+If drivers expose the `acknowledged` field, they MUST document what will happen if a user attempts to access a result
+value when `acknowledged` is `false` (e.g. an undefined value is returned or an error is thrown).
 
 #### Summary vs. verbose results
 
-Users MUST be able to discern whether a `BulkWriteResult` contains summary or verbose results without inspecting the
-value provided for `verboseResults` in `BulkWriteOptions`. Drivers MUST implement this in one of the following ways:
+When a user does not set the `verboseResults` option to `true`, drivers MUST NOT populate the `insertResults`,
+`updateResults`, and `deleteResults` fields. Users MUST be able to discern whether a `BulkWriteResult` contains these
+verbose results without inspecting the value provided for `verboseResults` in `BulkWriteOptions`. Drivers can implement
+this in a number of ways, including:
 
-- Expose the `hasVerboseResults` field in `BulkWriteResult` as defined above. Document that `insertResults`,
-  `updateResults`, and `deleteResults` will be undefined when `hasVerboseResults` is false. Raise an error if a user
-  tries to access one of these fields when `hasVerboseResults` is false.
-- Implement the `insertResults`, `updateResults`, and `deleteResults` fields as optional types and document that they
-  will be unset when `verboseResults` is false.
-- Introduce separate `SummaryBulkWriteResult` and `VerboseBulkWriteResult` types. `VerboseBulkWriteResult` MUST have all
-  of the required fields defined on `BulkWriteResult` above. `SummaryBulkWriteResult` MUST have all of the required
-  fields defined on `BulkWriteResult` above except `insertResults`, `updateResults`, and `deleteResults`.
+- Expose the `hasVerboseResults` field in `BulkWriteResult` as defined above. Document what will happen if a user
+    attempts to access the `insertResults`, `updateResults`, or `deleteResults` values when `hasVerboseResults` is
+    false. Drivers MAY raise an error if a user attempts to access one of these values when `hasVerboseResults` is
+    false.
+- Embed the verbose results in an optional type:
+
+```typescript
+class BulkWriteResult {
+    /**
+     * The results of each individual write operation that was successfully performed.
+     *
+     * This value will only be populated if the verboseResults option was set to true.
+     */ 
+    verboseResults: Optional<VerboseResults>;
+
+    /* rest of fields */
+}
+
+class VerboseResults {
+    /**
+     * The results of each individual insert operation that was successfully performed.
+     */
+    insertResults: Map<Index, InsertOneResult>;
+
+    /**
+     * The results of each individual update operation that was successfully performed.
+     */
+    updateResults: Map<Index, UpdateResult>;
+
+    /**
+     * The results of each individual delete operation that was successfully performed.
+     */
+    deleteResults: Map<Index, DeleteResult>;
+}
+```
+
+- Define separate `SummaryBulkWriteResult` and `VerboseBulkWriteResult` types. `SummaryBulkWriteResult` MUST only
+    contain the summary result fields, and `VerboseBulkWriteResult` MUST contain both the summary and verbose result
+    fields. Return `VerboseBulkWriteResult` when `verboseResults` was set to true and `SummaryBulkWriteResult`
+    otherwise.
 
 #### Individual results
 
@@ -451,7 +507,7 @@ class BulkWriteException {
      * Errors that occurred during the execution of individual write operations. This map will
      * contain at most one entry if the bulk write was ordered.
      */
-    writeErrors: Map<Int64, WriteError>;
+    writeErrors: Map<Index, WriteError>;
 
     /**
      * The results of any successful operations that were performed before the error was
@@ -460,6 +516,13 @@ class BulkWriteException {
     partialResult: Optional<BulkWriteResult>;
 }
 ```
+
+### Index Types
+
+The `insertResults`, `updateResults`, and `deleteResults` maps in `BulkWriteResult` and the `writeErrors` map in
+`BulkWriteException` specify `Index` as their key type. This value corresponds to the index of the operation in the
+`writeModels` list that was provided to `MongoClient.bulkWrite`. Drivers SHOULD use their language's standard numeric
+type for indexes for this type (e.g. `usize` in Rust). If no standard index type exists, drivers MUST use `Int64`.
 
 ## Building a `bulkWrite` Command
 
@@ -479,8 +542,7 @@ The `bulkWrite` server command has the following format:
 }
 ```
 
-Drivers MUST use document sequences ([`OP_MSG`](../message/OP_MSG.rst) payload type 1) for the `ops` and `nsInfo`
-fields.
+Drivers MUST use document sequences ([`OP_MSG`](../message/OP_MSG.md) payload type 1) for the `ops` and `nsInfo` fields.
 
 The `bulkWrite` command is executed on the "admin" database.
 
@@ -500,7 +562,7 @@ operation should be performed as its value. The documents have the following for
 ```
 
 If the document to be inserted does not contain an `_id` field, drivers MUST generate a new
-[`ObjectId`](../objectid.rst) and add it as the `_id` field at the beginning of the document.
+[`ObjectId`](../bson-objectid/objectid.md) and add it as the `_id` field at the beginning of the document.
 
 #### Update
 
@@ -512,9 +574,14 @@ If the document to be inserted does not contain an `_id` field, drivers MUST gen
     "multi": Optional<Boolean>,
     "upsert": Optional<Boolean>,
     "arrayFilters": Optional<Array>,
-    "hint": Optional<Document | String>
+    "hint": Optional<Document | String>,
+    "collation": Optional<Document>
 }
 ```
+
+The `update` command document is used for update and replace operations. For update operations, the `updateMods` field
+corresponds to the `update` field in `UpdateOneModel` and `UpdateManyModel`. For replace operations, the `updateMods`
+field corresponds to the `replacement` field in `ReplaceOneModel`.
 
 #### Delete
 
@@ -549,6 +616,11 @@ returned. This field is optional and defaults to false on the server.
 value for `verboseResults`, drivers MUST define `errorsOnly` as the opposite of `verboseResults`. If the user did not
 specify a value for `verboseResults`, drivers MUST define `errorsOnly` as `true`.
 
+Drivers MUST return a client-side error if `verboseResults` is true with an unacknowledged write concern containing the
+following message:
+
+> Cannot request unacknowledged write concern and verbose results
+
 ### `ordered`
 
 The `ordered` field defines whether writes should be executed in the order in which they were specified, and, if an
@@ -557,21 +629,10 @@ server. Drivers MUST explicitly define `ordered` as `true` in the `bulkWrite` co
 `BulkWriteOptions`. This is required to avoid inconsistencies between server and driver behavior if the server default
 changes in the future.
 
-### Size Limits
+Drivers MUST return a client-side error if `ordered` is true (including when default is applied) with an unacknowledged
+write concern containing the following message:
 
-The server reports a `maxBsonObjectSize` in its `hello` response. This value defines the maximum size for documents that
-are inserted into the database. Documents that are sent to the server but are not intended to be inserted into the
-database (e.g. command documents) have a size limit of `maxBsonObjectSize + 16KiB`. When an acknowledged write concern
-is used, drivers MUST NOT perform any checks related to these size limits and MUST rely on the server to raise an error
-if a limit is exceeded. However, when an unacknowledged write concern is used, drivers MUST raise an error if one of the
-following limits is exceeded:
-
-- The size of a document to be inserted MUST NOT exceed `maxBsonObjectSize`. This applies to the `document` field of an
-  `InsertOneModel` and the `replacement` field of a `ReplaceOneModel`.
-- The size of an entry in the `ops` array MUST NOT exceed `maxBsonObjectSize + 16KiB`.
-- The size of the `bulkWrite` command document MUST NOT exceed `maxBsonObjectSize + 16KiB`.
-
-See [SERVER-10643](https://jira.mongodb.org/browse/SERVER-10643) for more details on these size limits.
+> Cannot request unacknowledged write concern and ordered writes
 
 ## Auto-Encryption
 
@@ -609,7 +670,7 @@ operation-agnostic command field bytes (e.g. `txnNumber`, `lsid`). Drivers MUST 
 sequence to `maxMessageSizeBytes - 1000` to account for this overhead. The following pseudocode demonstrates how to
 apply this limit in batch-splitting logic:
 
-```
+```javascript
 MESSAGE_OVERHEAD_BYTES = 1000
 
 bulkWriteCommand = Document { "bulkWrite": 1 }
@@ -677,9 +738,16 @@ The server's response to `bulkWrite` has the following format:
 }
 ```
 
-If any operations were successful (i.e. `nErrors` is less than the number of operations that were sent), drivers MUST
-record the summary count fields in a `BulkWriteResult` to be returned to the user or embedded in a `BulkWriteException`.
-Drivers MUST NOT populate the `partialResult` field in `BulkWriteException` if no operations were successful.
+Drivers MUST record the summary count fields in a `BulkWriteResult` to be returned to the user or embedded in a
+`BulkWriteException` if the response indicates that at least one write was successful:
+
+- For ordered bulk writes, at least one write was successful if `nErrors` is 0 or if the `idx` value for the write error
+    returned in the results cursor is greater than 0.
+- For unordered bulk writes, at least one write was successful if `nErrors` is less than the number of operations that
+    were included in the `bulkWrite` command.
+
+Drivers MUST NOT populate the `partialResult` field in `BulkWriteException` if it cannot be determined that at least one
+write was successfully performed.
 
 Drivers MUST attempt to consume the contents of the cursor returned in the server's `bulkWrite` response before
 returning to the user. This is required regardless of whether the user requested verbose or summary results, as the
@@ -764,8 +832,7 @@ immediately throw the exception. Otherwise, drivers MUST continue to iterate the
 ## Test Plan
 
 The majority of tests for `MongoClient.bulkWrite` are written in the
-[Unified Test Format](../unified-test-format/unified-test-format.md) and reside in the
-[CRUD unified tests directory](../crud/tests/unified/).
+[Unified Test Format](../unified-test-format/unified-test-format.md) and reside in the CRUD unified tests directory.
 
 Additional prose tests are specified [here](../crud/tests/README.md). These tests require constructing very large
 documents to test batch splitting, which is not feasible in the unified test format at the time of writing this
@@ -780,6 +847,10 @@ entire `bulkWrite` command to receive a fresh cursor and retry iteration. This w
 the initial implementation and testing of the new bulk write API, but may be revisited in the future.
 
 ## Q&A
+
+### Is `bulkWrite` supported on Atlas Serverless?
+
+No. See [CLOUDP-256344](https://jira.mongodb.org/browse/CLOUDP-256344)
 
 ### Why are we adding a new bulk write API rather than updating the `MongoCollection.bulkWrite` implementation?
 
@@ -810,19 +881,6 @@ recording the summary counts. We expect that most users are not interested in th
 and that most users will rely on defaults, so `verboseResults` defaults to `false` to improve performance in the common
 case.
 
-### Why should drivers send `bypassDocumentValidation: false` for `bulkWrite`?
-
-[DRIVERS-450](https://jira.mongodb.org/browse/DRIVERS-450) introduced a requirement that drivers only send a value for
-`bypassDocumentValidation` on write commands if it was specified as true. The original motivation for this change is not
-documented. This specification requires that drivers send `bypassDocumentValidation` in the `bulkWrite` command if it is
-set by the user in `BulkWriteOptions`, regardless of its value.
-
-Explicitly defining `bypassDocumentValidation: false` aligns with the server's default to perform schema validation and
-thus has no effect. However, checking the value of an option that the user specified and omitting it from the command
-document if it matches the server's default creates unnecessary work for drivers. Always sending the user's specified
-value also safeguards against the unlikely event that the server changes the default value for
-`bypassDocumentValidation` in the future.
-
 ### Why is providing access to the raw server response when a command error occurs required?
 
 This allows users to access new error fields that the server may add in the future without needing to upgrade their
@@ -848,7 +906,30 @@ number was determined by constructing `OP_MSG` messages with various fields atta
 Drivers are required to use this value even if they are capable of determining the exact size of the message prior to
 batch-splitting to standardize implementations across drivers and simplify batch-splitting testing.
 
+### Why is there no requirement to validate the size of a BSON document?
+
+Following
+["_Where possible, depend on server to return errors_"](https://github.com/mongodb/specifications/blob/f8dbd2469f18d093f917efa1f758024bca5d3aaa/source/driver-mantras.md#where-possible-depend-on-server-to-return-errors),
+drivers should rely on the server to return errors about exceeded size limits. Such reliance is not possible for
+unacknowledged writes. This specification previously required drivers to check size limits for unacknowledged writes.
+The requirement has since been removed. Checking size limits complicates some driver implementations. Returning a driver
+error in this specific situation does not seem helpful enough to require size checks.
+
 ## **Changelog**
+
+- 2024-11-05: Updated the requirements regarding the size validation.
+
+- 2024-10-07: Error if `w:0` is used with `ordered=true` or `verboseResults=true`.
+
+- 2024-10-01: Add sort option to `replaceOne` and `updateOne`.
+
+- 2024-09-30: Define more options for modeling summary vs. verbose results.
+
+- 2024-09-25: Add `collation` field to `update` document and clarify usage of `updateMods`.
+
+- 2024-09-25: Update the `partialResult` population logic to account for ordered bulk writes.
+
+- 2024-09-18: Relax numeric type requirements for indexes.
 
 - 2024-05-17: Update specification status to "Accepted".
 

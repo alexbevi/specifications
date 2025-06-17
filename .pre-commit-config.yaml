@@ -22,31 +22,40 @@ repos:
       args: ["--severity=error"]
       stages: [manual]
 
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.22
+  hooks:
+    - id: mdformat
+      args: ["--wrap=120", "--number"]
+      additional_dependencies:
+        - mdformat-footnote
+        - mdformat-frontmatter
+        - mdformat-gfm
+        - mdformat-gfm-alerts
+        - mdformat-mkdocs
+
 - repo: local
   hooks:
   - id: generate-index
     name: generate-index
     entry: python3 scripts/generate_index.py
     language: system
-  - id: check-anchors
-    name: check-anchors
+  - id: markdown-link-format-check
+    name: markdown-link-format-check
     types: [markdown]
-    entry: bash scripts/check_anchors/check-anchors.sh
-    language: node
-    
-- repo: https://github.com/executablebooks/mdformat
-  rev: 0.7.17
-  hooks:
-    - id: mdformat
-      args: ["--wrap=120", "--number"]
-      additional_dependencies:
-        [mdformat-gfm, mdformat-frontmatter, mdformat-footnote, mdformat-gfm-alerts]
+    language: system
+    entry: python3 scripts/check_links.py
+  - id: markdown-html-check
+    name: markdown-html-check
+    types: [markdown]
+    language: system
+    entry: python3 scripts/check_md_html.py
 
 - repo: https://github.com/tcort/markdown-link-check
-  rev: v3.12.2
+  rev: v3.13.7
   hooks:
     - id: markdown-link-check
-      args: ["-c", "markdown_link_config.json"]
+      args: ["-q", "-c", "markdown_link_config.json"]
 
 - repo: https://github.com/rstcheck/rstcheck
   rev: v6.2.0
@@ -72,7 +81,7 @@ repos:
   rev: "v2.3.0"
   hooks:
   - id: codespell
-    args: ["-L", "fle,re-use,merchantibility,synching,crate,nin,infinit,te,checkin"]
+    args: ["-L", "fle,re-use,merchantibility,synching,crate,nin,infinit,te,checkin,aks"]
     exclude: |
             (?x)^(.*\.rst
             )$

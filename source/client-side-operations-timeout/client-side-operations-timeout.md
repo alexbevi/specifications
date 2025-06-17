@@ -20,9 +20,10 @@ The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SH
 
 ### Terms
 
-min(a, b)\
-Shorthand for "the minimum of a and b" where `a` and `b` are numeric values. For any cases where 0 means
-"infinite" (e.g. [timeoutMS](#timeoutms)), `min(0, other)` MUST evaluate to `other`.
+**min(a, b)**
+
+Shorthand for "the minimum of a and b" where `a` and `b` are numeric values. For any cases where 0 means "infinite"
+(e.g. [timeoutMS](#timeoutms)), `min(0, other)` MUST evaluate to `other`.
 
 ### MongoClient Configuration
 
@@ -90,12 +91,12 @@ The `timeoutMS` option applies to all operations defined in the following specif
 - [CRUD](../crud/crud.md)
 - [Change Streams](../change-streams/change-streams.md)
 - [Client Side Encryption](../client-side-encryption/client-side-encryption.md)
-- [Enumerating Collections](../enumerate-collections.rst)
-- [Enumerating Databases](../enumerate-databases.rst)
+- [Enumerating Collections](../enumerate-collections/enumerate-collections.md)
+- [Enumerating Databases](../enumerate-databases/enumerate-databases.md)
 - [GridFS](../gridfs/gridfs-spec.md)
 - [Index Management](../index-management/index-management.md)
 - [Transactions](../transactions/transactions.md)
-- [Convenient API for Transactions](../transactions-convenient-api/transactions-convenient-api.rst)
+- [Convenient API for Transactions](../transactions-convenient-api/transactions-convenient-api.md)
 
 In addition, it applies to all operations on cursor objects that may perform blocking work (e.g. methods to iterate or
 close a cursor, any method that reads documents from a cursor into an array, etc).
@@ -151,28 +152,28 @@ socket read/write timeouts and HTTP request timeouts.
 The following pieces of operation execution are considered blocking:
 
 1. Implicit session acquisition if an explicit session was not provided for the operation. This is only considered
-   blocking for drivers that perform server selection to determine session support when acquiring implicit sessions.
+    blocking for drivers that perform server selection to determine session support when acquiring implicit sessions.
 2. Server selection
 3. Connection checkout - If `maxPoolSize` has already been reached for the selected server, this is the amount of time
-   spent waiting for a connection to be available.
+    spent waiting for a connection to be available.
 4. Connection establishment - If the pool for the selected server is empty and a new connection is needed, the following
-   pieces of connection establishment are considered blocking:
-   1. TCP socket establishment
-   2. TLS handshake
-      1. All messages sent over the socket as part of the TLS handshake
-      2. OCSP verification - HTTP requests sent to OCSP responders.
-   3. MongoDB handshake (i.e. initial connection `hello`)
-   4. Authentication
-      1. SCRAM-SHA-1, SCRAM-SHA-256, PLAIN: Execution of the command required for the SASL conversation.
-      2. GSSAPI: Execution of the commands required for the SASL conversation and requests to the KDC and TGS.
-      3. MONGODB-AWS: Execution of the commands required for the SASL conversation and all HTTP requests to ECS and EC2
-         endpoints.
-      4. MONGODB-X509: Execution of the commands required for the authentication conversation.
+    pieces of connection establishment are considered blocking:
+    1. TCP socket establishment
+    2. TLS handshake
+        1. All messages sent over the socket as part of the TLS handshake
+        2. OCSP verification - HTTP requests sent to OCSP responders.
+    3. MongoDB handshake (i.e. initial connection `hello`)
+    4. Authentication
+        1. SCRAM-SHA-1, SCRAM-SHA-256, PLAIN: Execution of the command required for the SASL conversation.
+        2. GSSAPI: Execution of the commands required for the SASL conversation and requests to the KDC and TGS.
+        3. MONGODB-AWS: Execution of the commands required for the SASL conversation and all HTTP requests to ECS and EC2
+            endpoints.
+        4. MONGODB-X509: Execution of the commands required for the authentication conversation.
 5. Client-side encryption
-   1. Execution of `listCollections` commands to get collection schemas.
-   2. Execution of `find` commands against the key vault collection to get encrypted data keys.
-   3. Requests to non-local key management servers (e.g. AWS KMS) to decrypt data keys.
-   4. Requests to mongocryptd servers.
+    1. Execution of `listCollections` commands to get collection schemas.
+    2. Execution of `find` commands against the key vault collection to get encrypted data keys.
+    3. Requests to non-local key management servers (e.g. AWS KMS) to decrypt data keys.
+    4. Requests to mongocryptd servers.
 6. Socket write to send a command to the server
 7. Socket read to receive the server’s response
 
@@ -333,10 +334,10 @@ resulting cursor but MUST NOT append a `maxTimeMS` field to any commands.
 ##### Tailable awaitData Cursors
 
 If `timeoutMS` is set, drivers MUST apply it to the original operation. Drivers MUST also apply the original `timeoutMS`
-value to each `next` call on the resulting cursor but MUST NOT use it to derive a `maxTimeMS` value for `getMore`
-commands. Helpers for operations that create tailable awaitData cursors MUST also support the `maxAwaitTimeMS` option.
-Drivers MUST error if this option is set, `timeoutMS` is set to a non-zero value, and `maxAwaitTimeMS` is greater than
-or equal to `timeoutMS`. If this option is set, drivers MUST use it as the `maxTimeMS` field on `getMore` commands.
+value to each `next` call on the resulting cursor. Helpers for operations that create tailable awaitData cursors MUST
+also support the `maxAwaitTimeMS` option. Drivers MUST error if this option is set, `timeoutMS` is set to a non-zero
+value, and `maxAwaitTimeMS` is greater than or equal to `timeoutMS`. If this option is set, drivers MUST use
+`min(maxAwaitTimeMS, remaining timeoutMS - minRoundTripTime)` as the `maxTimeMS` field on `getMore` commands.
 
 See [Tailable cursor behavior](#tailable-cursor-behavior) for rationale regarding both non-awaitData and awaitData
 cursors.
@@ -348,8 +349,8 @@ Driver `watch` helpers MUST support both `timeoutMS` and `maxAwaitTimeMS` option
 `timeoutMS`. These helpers MUST NOT support the `timeoutMode` option as change streams are an abstraction around
 tailable-awaitData cursors, so they implicitly use `ITERATION` mode. If set, drivers MUST apply the `timeoutMS` option
 to the initial `aggregate` operation. Drivers MUST also apply the original `timeoutMS` value to each `next` call on the
-change stream but MUST NOT use it to derive a `maxTimeMS` field for `getMore` commands. If the `maxAwaitTimeMS` option
-is set, drivers MUST use it as the `maxTimeMS` field on `getMore` commands.
+change stream. If this option is set, drivers MUST use `min(maxAwaitTimeMS, remaining timeoutMS - minRoundTripTime)` as
+the `maxTimeMS` field on `getMore` commands.
 
 If a `next` call fails with a timeout error, drivers MUST NOT invalidate the change stream. The subsequent `next` call
 MUST perform a resume attempt to establish a new change stream on the server. Any errors from the `aggregate` operation
@@ -427,9 +428,23 @@ check the command document for the presence of a `maxTimeMS` field.
 
 See [runCommand behavior](#runcommand-behavior).
 
+### Explain
+
+> [!NOTE]
+> This portion of the specification is only relevant for drivers that provide `explain` helpers.
+
+When `timeoutMS` is specified, drivers MUST provide a way to specify timeoutMS that results in maxTimeMS being set on
+the `explain` command. For example, Node's implementation might look like:
+
+```typescript
+collection.find({}).explain({ timeoutMS: 1000 });
+// sends:
+{ explain: { find: ... }, maxTimeMS: <remaining timeoutMS - min rtt>}
+```
+
 ## Test Plan
 
-See the [README.rst](tests/README.md) in the tests directory.
+See the [README.md](tests/README.md) in the tests directory.
 
 ## Motivation for Change
 
@@ -585,6 +600,9 @@ distinct meanings, so supporting both yields a more robust, albeit verbose, API.
 greater than or equal to `timeoutMS` because in that case, `getMore` requests would not succeed if the batch was empty:
 the server would wait for `maxAwaitTimeMS`, but the driver would close the socket after `timeoutMS`.
 
+For tailable awaitData cursors we use the `min(maxAwaitTimeMS, remaining timeoutMS - minRoundTripTime)` to allow the
+server more opportunities to respond with an empty batch before a client-side timeout
+
 ### Change stream behavior
 
 Change streams internally behave as tailable awaitData cursors, so the behavior of the `timeoutMS` option is the same
@@ -650,6 +668,8 @@ timeout for each database operation. This would mimic using `timeoutMode=ITERATI
 
 ## Changelog
 
+- 2024-01-29: Adjust getMore maxTimeMS calculation for tailable awaitData cursors.
+- 2024-09-12: Specify that explain helpers support support timeoutMS.
 - 2023-12-07: Migrated from reStructuredText to Markdown.
 - 2022-11-17: Use minimum RTT for maxTimeMS calculation instead of 90th percentile RTT.
 - 2022-10-05: Remove spec front matter.

@@ -21,37 +21,44 @@ The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SH
 
 ### Terms
 
-**ClientSession**\
+**ClientSession**
+
 The driver object representing a client session and the operations that can be performed on it.
 
-**MongoClient**\
+**MongoClient**
+
 The root object of a driver's API. MAY be named differently in some drivers.
 
-**MongoCollection**\
-The driver object representing a collection and the operations that can be performed on it. MAY be
-named differently in some drivers.
+**MongoCollection**
 
-**MongoDatabase**\
-The driver object representing a database and the operations that can be performed on it. MAY be
-named differently in some drivers.
+The driver object representing a collection and the operations that can be performed on it. MAY be named differently in
+some drivers.
 
-**ServerSession**\
+**MongoDatabase**
+
+The driver object representing a database and the operations that can be performed on it. MAY be named differently in
+some drivers.
+
+**ServerSession**
+
 The driver object representing a server session.
 
-**Session**\
-A session is an abstract concept that represents a set of sequential operations executed by an application
-that are related in some way. This specification defines how sessions are used to implement snapshot reads.
+**Session**
 
-**Snapshot reads**\
-Reads with read concern level `snapshot` that occur outside of transactions on both the primary and
-secondary nodes, including in sharded clusters. Snapshots reads are majority committed reads.
+A session is an abstract concept that represents a set of sequential operations executed by an application that are
+related in some way. This specification defines how sessions are used to implement snapshot reads.
 
-**Snapshot timestamp**\
-Snapshot timestamp, representing timestamp of the first supported read operation (i.e.
-find/aggregate/distinct) in the session. The server creates a cursor in response to a snapshot find/aggregate command
-and reports `atClusterTime` within the `cursor` field in the response. For the distinct command the server adds a
-top-level `atClusterTime` field to the response. The `atClusterTime` field represents the timestamp of the read and is
-guaranteed to be majority committed.
+**Snapshot reads**
+
+Reads with read concern level `snapshot` that occur outside of transactions on both the primary and secondary nodes,
+including in sharded clusters. Snapshots reads are majority committed reads.
+
+**Snapshot timestamp**
+
+Snapshot timestamp, representing timestamp of the first supported read operation (i.e. find/aggregate/distinct) in the
+session. The server creates a cursor in response to a snapshot find/aggregate command and reports `atClusterTime` within
+the `cursor` field in the response. For the distinct command the server adds a top-level `atClusterTime` field to the
+response. The `atClusterTime` field represents the timestamp of the read and is guaranteed to be majority committed.
 
 ## Specification
 
@@ -110,17 +117,17 @@ MUST raise an error.
 
 ## ReadConcern changes
 
-`snapshot` added to [ReadConcernLevel enumeration](../read-write-concern/read-write-concern.rst#read-concern).
+`snapshot` added to [ReadConcernLevel enumeration](../read-write-concern/read-write-concern.md#read-concern).
 
 ## Server Commands
 
 There are no new server commands related to snapshot reads. Instead, snapshot reads are implemented by:
 
 1. Saving the `atClusterTime` returned by 5.0+ servers for the first find/aggregate/distinct operation in a private
-   `snapshotTime` property of the `ClientSession` object. Drivers MUST save `atClusterTime` in the `ClientSession`
-   object.
+    `snapshotTime` property of the `ClientSession` object. Drivers MUST save `atClusterTime` in the `ClientSession`
+    object.
 2. Passing that `snapshotTime` in the `atClusterTime` field of the `readConcern` field for subsequent snapshot read
-   operations (i.e. find/aggregate/distinct commands).
+    operations (i.e. find/aggregate/distinct commands).
 
 ## Server Command Responses
 
@@ -153,9 +160,9 @@ the `readConcern` with a `snapshot` level in subsequent read operations.
 ## Server Errors
 
 1. The server may reply to read commands with a `SnapshotTooOld(239)` error if the client's `atClusterTime` value is not
-   available in the server's history.
+    available in the server's history.
 2. The server will return `InvalidOptions(72)` error if both `atClusterTime` and `afterClusterTime` options are set to
-   true.
+    true.
 3. The server will return `InvalidOptions(72)` error if the command does not support readConcern.level "snapshot".
 
 ## Snapshot Read Commands
@@ -236,7 +243,7 @@ C# driver will provide the reference implementation. The corresponding ticket is
 
 - 2024-05-08: Migrated from reStructuredText to Markdown.
 - 2021-06-15: Initial version.
-- 2021-06-28: Raise client side error on \< 5.0.
+- 2021-06-28: Raise client side error on < 5.0.
 - 2021-06-29: Send readConcern with all snapshot session commands.
 - 2021-07-16: Grammar revisions. Change SHOULD to MUST for startTransaction error to comply with existing tests.
 - 2021-08-09: Updated client-side error spec tests to use correct syntax for `test.expectEvents`

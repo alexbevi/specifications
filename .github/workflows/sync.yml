@@ -1,5 +1,8 @@
 name: 'Scheduled Upstream Sync'
 on:
+  push:
+    branches:
+      - mkbook
   schedule:
     - cron:  '0 8 * * *'
 
@@ -13,6 +16,8 @@ on:
 jobs:
   sync_latest_from_upstream:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
     name: Sync latest commits from upstream repo
 
     steps:
@@ -35,7 +40,7 @@ jobs:
       with:
         target_sync_branch: mkbook
         # REQUIRED 'target_repo_token' exactly like this!
-        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+        target_repo_token: ${{ secrets.WORKFLOW_TOKEN }}
         upstream_sync_branch: master
         upstream_sync_repo: mongodb/specifications
         # upstream_repo_access_token: ${{ secrets.UPSTREAM_REPO_SECRET }}
@@ -55,19 +60,18 @@ jobs:
     - name: Show value of 'has_new_commits'
       run: echo ${{ steps.sync.outputs.has_new_commits }}
 
-    - name: Install latest mdbook
-      run: |
-        tag=$(curl 'https://api.github.com/repos/rust-lang/mdbook/releases/latest' | jq -r '.tag_name')
-        url="https://github.com/rust-lang/mdbook/releases/download/${tag}/mdbook-${tag}-x86_64-unknown-linux-gnu.tar.gz"
-        mkdir mdbook
-        curl -sSL $url | tar -xz --directory=./mdbook
-        echo `pwd`/mdbook >> $GITHUB_PATH
-    - name: Build Book
-      run: |
-        # This assumes your book is in the root of your repository.
-        # Just add a `cd` here if you need to change to another directory.
-        mdbook build
-    - uses: JamesIves/github-pages-deploy-action@4.1.7
+    - name: Setup mdBook
+      uses: peaceiris/actions-mdbook@v2
       with:
-        branch: gh-pages # The branch the action should deploy to.
-        folder: book # The folder the action should deploy.
+        mdbook-version: 'latest'
+
+    - run: mdbook build
+
+    - name: deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./book
+        # if the repo you are deploying to is <username>.github.io, uncomment the line below.
+        # if you are including the line below, make sure your source files are NOT in the master branch:
+        publish_branch: mdbook_output

@@ -74,12 +74,12 @@ Although there is no monitoring connection in load balanced mode, drivers MUST e
 
 - `TopologyOpeningEvent` when the topology is created.
 - `TopologyDescriptionChangedEvent`. The `previousDescription` field MUST have `TopologyType` `Unknown` and no servers.
-  The `newDescription` MUST have `TopologyType` `LoadBalanced` and one server with `ServerType` `Unknown`.
+    The `newDescription` MUST have `TopologyType` `LoadBalanced` and one server with `ServerType` `Unknown`.
 - `ServerOpeningEvent` when the server representing the load balancer is created.
 - `ServerDescriptionChangedEvent`. The `previousDescription` MUST have `ServerType` `Unknown`. The `newDescription` MUST
-  have `ServerType` `LoadBalancer`.
+    have `ServerType` `LoadBalancer`.
 - `TopologyDescriptionChangedEvent`. The `newDescription` MUST have `TopologyType` `LoadBalanced` and one server with
-  `ServerType` `LoadBalancer`.
+    `ServerType` `LoadBalancer`.
 
 Drivers MUST also emit a `ServerClosedEvent` followed by a `TopologyDescriptionChangedEvent` that transitions the
 `Topology` to the `UNKNOWN` state and a `TopologyClosedEvent` when the topology is closed and MUST NOT emit any other
@@ -128,7 +128,7 @@ During command construction, the LoadBalancer server MUST be treated like a mong
 
 In the case of the driver having the `loadBalanced=true` connection string option specified, every pooled connection
 MUST add a `loadBalanced` field to the - Code:`hello` command in its
-[handshake](../mongodb-handshake/handshake.rst#connection-handshake). The value of the field MUST be `true`. If
+[handshake](../mongodb-handshake/handshake.md#connection-handshake). The value of the field MUST be `true`. If
 `loadBalanced=true` is specified then the `OP_MSG` protocol MUST be used for all steps of the connection handshake.
 
 Example:

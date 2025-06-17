@@ -25,15 +25,16 @@ The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SH
 
 #### Terms
 
-**Collection:**\
-The term `interface Collection` will be seen in most of the sections. Each driver will likely have a
-class or interface defined for the concept of a collection. Operations appearing inside the `interface Collection` are
-required operations to be present on a driver's concept of a collection.
+**Collection:**
 
-**Iterable:**\
-The term `Iterable` will be seen as a return type from some of the [Read](#read) methods. Its use is as
-that of a sequence of items. For instance, `collection.find({})` returns a sequence of documents that can be iterated
-over.
+The term `interface Collection` will be seen in most of the sections. Each driver will likely have a class or interface
+defined for the concept of a collection. Operations appearing inside the `interface Collection` are required operations
+to be present on a driver's concept of a collection.
+
+**Iterable:**
+
+The term `Iterable` will be seen as a return type from some of the [Read](#read) methods. Its use is as that of a
+sequence of items. For instance, `collection.find({})` returns a sequence of documents that can be iterated over.
 
 ### Guidance
 
@@ -60,20 +61,20 @@ A non-exhaustive list of acceptable deviations are as follows:
 - Using named parameters instead of an options hash. For instance, `collection.find({x:1}, sort: {a: -1})`.
 
 - When using an `Options` class, if multiple `Options` classes are structurally equatable, it is permissible to
-  consolidate them into one with a clear name. For instance, it would be permissible to use the name `UpdateOptions` as
-  the options for `UpdateOne` and `UpdateMany`.
+    consolidate them into one with a clear name. For instance, it would be permissible to use the name `UpdateOptions`
+    as the options for `UpdateOne` and `UpdateMany`.
 
 - Using a fluent style builder for find or aggregate:
 
-  ```typescript
-  collection.find({x: 1}).sort({a: -1}).skip(10);
-  ```
+    ```typescript
+    collection.find({x: 1}).sort({a: -1}).skip(10);
+    ```
 
-  When using a fluent-style builder, all options should be named rather than inventing a new word to include in the
-  pipeline (like options). Required parameters are still required to be on the initiating method.
+    When using a fluent-style builder, all options should be named rather than inventing a new word to include in the
+    pipeline (like options). Required parameters are still required to be on the initiating method.
 
-  In addition, it is imperative that documentation indicate when the order of operations is important. For instance,
-  skip and limit in find is order irrelevant where skip and limit in aggregate is not.
+    In addition, it is imperative that documentation indicate when the order of operations is important. For instance,
+    skip and limit in find is order irrelevant where skip and limit in aggregate is not.
 
 #### Naming
 
@@ -89,13 +90,13 @@ the user of another driver.
 A non-exhaustive list of acceptable naming deviations are as follows:
 
 - Using "batchSize" as an example, Java would use "batchSize" while Python would use "batch_size". However, calling it
-  "batchCount" would not be acceptable.
+    "batchCount" would not be acceptable.
 - Using "maxTimeMS" as an example, .NET would use "MaxTime" where it's type is a TimeSpan structure that includes units.
-  However, calling it "MaximumTime" would not be acceptable.
+    However, calling it "MaximumTime" would not be acceptable.
 - Using "FindOptions" as an example, Javascript wouldn't need to name it while other drivers might prefer to call it
-  "FindArgs" or "FindParams". However, calling it "QueryOptions" would not be acceptable.
+    "FindArgs" or "FindParams". However, calling it "QueryOptions" would not be acceptable.
 - Using "isOrdered" rather than "ordered". Some languages idioms prefer the use of "is", "has", or "was" and this is
-  acceptable.
+    acceptable.
 
 #### Timeouts
 
@@ -103,6 +104,9 @@ Drivers MUST enforce timeouts for all operations per the
 [Client Side Operations Timeout](../client-side-operations-timeout/client-side-operations-timeout.md) specification. All
 operations that return cursors MUST support the timeout options documented in the
 [Cursors](../client-side-operations-timeout/client-side-operations-timeout.md#cursors) section of that specification.
+All explain helpers MUST support the timeout options documented in the
+[Explain Helpers](../client-side-operations-timeout/client-side-operations-timeout.md#explain) section of that
+specification.
 
 ### API
 
@@ -172,20 +176,19 @@ interface Collection {
   /**
    * Finds the documents matching the model.
    *
-   * Note: The filter parameter below equates to the $query meta operator. It cannot
-   * contain other meta operators like $maxScan. However, do not validate this document
-   * as it would be impossible to be forwards and backwards compatible. Let the server
-   * handle the validation.
-   *
-   * Note: If $explain is specified in the modifiers, the return value is a single
-   * document. This could cause problems for static languages using strongly typed entities.
-   *
    * Note: result iteration should be backed by a cursor. Depending on the implementation,
    * the cursor may back the returned Iterable instance or an iterator that it produces.
    *
-   * @see https://www.mongodb.com/docs/manual/core/read-operations-introduction/
+   * @see https://www.mongodb.com/docs/manual/reference/command/find/
    */
   find(filter: Document, options: Optional<FindOptions>): Iterable<Document>;
+
+  /**
+   * Find a document matching the model.
+   *
+   * @see https://www.mongodb.com/docs/manual/reference/command/find/
+   */
+  findOne(filter: Document, options: Optional<FindOneOptions>): Optional<Document>;
 
 }
 
@@ -426,6 +429,16 @@ class DistinctOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional<any>;
+
+  /**
+   * The index to use. Specify either the index name as a string or the index key pattern.
+   * If specified, then the query system will only consider plans using the hinted index.
+   *
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
+   *
+   * @see https://www.mongodb.com/docs/manual/reference/command/find/
+   */
+  hint: Optional<(String | Document)>;
 }
 
 enum CursorType {
@@ -701,6 +714,8 @@ class FindOptions {
    */
   let: Optional<Document>;
 }
+
+type FindOneOptions = Omit<FindOptions, 'batchSize' | 'cursorType' | 'limit' | 'noCursorTimeout'>;
 ```
 
 ##### Count API Details
@@ -739,11 +754,11 @@ on views, and so the change was seen as a backwards-incompatible regression and 
 driver versions that include the reversion from `$collStats` back to `count` MUST document the following:
 
 - The 5.0-compat release accidentally broke estimatedDocumentCount on views by changing its implementation to use
-  `aggregate` and a `$collStats` stage instead of the `count` command.
+    `aggregate` and a `$collStats` stage instead of the `count` command.
 - The new release is fixing estimatedDocumentCount on views by reverting back to using `count` in its implementation.
 - Due to an oversight, the `count` command was omitted from the Stable API in server versions 5.0.0 - 5.0.8 and 5.1.0 -
-  5.3.1, so users of the Stable API with estimatedDocumentCount are recommended to upgrade their MongoDB clusters to
-  5.0.9 or 5.3.2 (if on Atlas) or set `apiStrict: false` when constructing their MongoClients.
+    5.3.1, so users of the Stable API with estimatedDocumentCount are recommended to upgrade their MongoDB clusters to
+    5.0.9 or 5.3.2 (if on Atlas) or set `apiStrict: false` when constructing their MongoClients.
 
 ##### countDocuments
 
@@ -761,13 +776,37 @@ if (limit) {
 pipeline.push({'$group': {'_id': 1, 'n': {'$sum': 1}}})
 ```
 
+Due to countDocuments using the `$match` aggregation pipeline stage, certain query operators cannot be used in
+countDocuments. This includes the `$where` and `$near` query operators, among others. Drivers MUST document these
+[restrictions](https://www.mongodb.com/docs/manual/reference/operator/aggregation/match/#restrictions) in their
+documentation.
+
 The count of documents is returned in the `n` field, similar to the `count` command. countDocuments options other than
 filter, skip, and limit are added as options to the `aggregate` command.
 
 In the event this aggregation is run against an empty collection, an empty array will be returned with no `n` field.
 Drivers MUST interpret this result as a `0` count.
 
-##### Combining Limit and Batch Size for the Wire Protocol
+##### findOne API details
+
+The `findOne` operation is implemented using a `find` operation, but only returns the first document returned in the
+cursor. Due to the special case, `findOne` does not support the following options supported in `find`:
+
+- `batchSize`: drivers MUST NOT set a `batchSize` in the `find` command created for a `findOne` operation
+- `cursorType`: `findOne` only supports non-tailable cursors
+- `limit`: drivers MUST set `limit` to 1 in the `find` command created for a `findOne` operation
+- `noCursorTimeout`: with a `limit` of 1 and no `batchSize`, there will not be an open cursor on the server
+
+To ensure that the cursor is closed regardless of the default server `batchSize`, drivers MUST also set
+`singleBatch: true` in the `find` command.
+
+##### Setting limit and batchSize options for find commands
+
+When users specify both `limit` and `batchSize` options with the same value, the server returns all results in the first
+batch, but still leaves an open cursor that needs to be closed using the `killCursors` command. To avoid this, drivers
+MUST send a value of `limit + 1` for `batchSize` in the resulting `find` command. This eliminates the open cursor issue.
+
+##### Combining Limit and Batch Size for OP_QUERY
 
 The OP_QUERY wire protocol only contains a numberToReturn value which drivers must calculate to get expected limit and
 batch size behavior. Subsequent calls to OP_GET_MORE should use the user-specified batchSize or default to 0. If the
@@ -813,6 +852,13 @@ database-level aggregation will allow users to receive a cursor from these colle
 #### Write
 
 ##### Insert, Update, Replace, Delete, and Bulk Writes
+
+###### Generated identifiers
+
+The insert and bulk insert operations described below MUST generate identifiers for all documents that do not already
+have them. These identifiers SHOULD be prepended to the document so they are the first field, in order to prevent the
+server from spending time re-ordering the document. If a document already has a user-provided identifier, the driver MAY
+re-order the document so the identifier is the first field.
 
 ```typescript
 interface Collection {
@@ -911,7 +957,7 @@ class BulkWriteOptions {
   /**
    * If true, allows the write to opt-out of document level validation.
    *
-   * This option is sent only if the caller explicitly provides a true value. The default is to not send a value.
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    * For servers < 3.2, this option is ignored and not sent as document validation is not available.
    * For unacknowledged writes using OP_INSERT, OP_UPDATE, or OP_DELETE, the driver MUST raise an error if the caller explicitly provides a value.
    */
@@ -946,7 +992,7 @@ class InsertOneOptions {
   /**
    * If true, allows the write to opt-out of document level validation.
    *
-   * This option is sent only if the caller explicitly provides a true value. The default is to not send a value.
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    * For servers < 3.2, this option is ignored and not sent as document validation is not available.
    * For unacknowledged writes using OP_INSERT, the driver MUST raise an error if the caller explicitly provides a value.
    */
@@ -968,7 +1014,7 @@ class InsertManyOptions {
   /**
    * If true, allows the write to opt-out of document level validation.
    *
-   * This option is sent only if the caller explicitly provides a true value. The default is to not send a value.
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    * For servers < 3.2, this option is ignored and not sent as document validation is not available.
    * For unacknowledged writes using OP_INSERT, the driver MUST raise an error if the caller explicitly provides a value.
    */
@@ -1008,7 +1054,7 @@ class UpdateOptions {
   /**
    * If true, allows the write to opt-out of document level validation.
    *
-   * This option is sent only if the caller explicitly provides a true value. The default is to not send a value.
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    * For servers < 3.2, this option is ignored and not sent as document validation is not available.
    * For unacknowledged writes using OP_UPDATE, the driver MUST raise an error if the caller explicitly provides a value.
    */
@@ -1048,7 +1094,6 @@ class UpdateOptions {
    */
   upsert: Optional<Boolean>;
 
-
   /**
    * Map of parameter names and values. Values must be constant or closed
    * expressions that do not reference document fields. Parameters can then be
@@ -1070,6 +1115,18 @@ class UpdateOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional<any>;
+
+  /**
+   * Specify which document the operation updates if the query matches multiple
+   * documents. The first document matched by the sort order will be updated.
+   *
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
+   * The server will report an error if the caller explicitly provides a value with updateMany().
+   * This option is only supported by servers >= 8.0. Older servers will report an error for using this option.
+   *
+   * @see https://www.mongodb.com/docs/manual/reference/command/update/
+   */
+  sort: Optional<Document>;
 }
 
 class ReplaceOptions {
@@ -1077,7 +1134,7 @@ class ReplaceOptions {
   /**
    * If true, allows the write to opt-out of document level validation.
    *
-   * This option is sent only if the caller explicitly provides a true value. The default is to not send a value.
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    * For servers < 3.2, this option is ignored and not sent as document validation is not available.
    * For unacknowledged writes using OP_UPDATE, the driver MUST raise an error if the caller explicitly provides a value.
    */
@@ -1138,6 +1195,17 @@ class ReplaceOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional<any>;
+
+  /**
+   * Specify which document the operation replaces if the query matches multiple
+   * documents. The first document matched by the sort order will be replaced.
+   *
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
+   * This option is only supported by servers >= 8.0. Older servers will report an error for using this option.
+   *
+   * @see https://www.mongodb.com/docs/manual/reference/command/update/
+   */
+  sort: Optional<Document>;
 }
 
 class DeleteOptions {
@@ -1319,6 +1387,17 @@ class ReplaceOneModel implements WriteModel {
   hint: Optional<(String | Document)>;
 
   /**
+   * Specify which document the operation replaces if the query matches multiple
+   * documents. The first document matched by the sort order will be replaced.
+   *
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
+   * This option is only supported by servers >= 8.0. Older servers will report an error for using this option.
+   *
+   * @see https://www.mongodb.com/docs/manual/reference/command/update/
+   */
+  sort: Optional<Document>;
+
+  /**
    * When true, creates a new document if no document matches the query.
    *
    * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
@@ -1379,6 +1458,17 @@ class UpdateOneModel implements WriteModel {
    * @see https://www.mongodb.com/docs/manual/reference/command/update/
    */
   hint: Optional<(String | Document)>;
+
+  /**
+   * Specify which document the operation updates if the query matches multiple
+   * documents. The first document matched by the sort order will be updated.
+   *
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
+   * This option is only supported by servers >= 8.0. Older servers will report an error for using this option.
+   *
+   * @see https://www.mongodb.com/docs/manual/reference/command/update/
+   */
+  sort: Optional<Document>;
 
   /**
    * When true, creates a new document if no document matches the query.
@@ -1672,7 +1762,7 @@ Drivers MUST construct a `WriteConcernError` from a server reply as follows:
 - Set `message` to `writeConcernError.errmsg` if available.
 - Set `details` to `writeConcernError.errInfo` if available. Drivers MUST NOT parse inside `errInfo`.
 
-See [writeConcernError Examples](../read-write-concern/read-write-concern.rst#writeconcernerror-examples) in the
+See [writeConcernError Examples](../read-write-concern/read-write-concern.md#writeconcernerror-examples) in the
 Read/Write Concern spec for examples of how a server represents write concern errors in replies.
 
 ###### WriteError
@@ -1795,6 +1885,8 @@ class BulkWriteException {
 
 }
 ```
+
+<span id="find"></span>
 
 ##### Find And Modify
 
@@ -1924,7 +2016,7 @@ class FindOneAndReplaceOptions {
   /**
    * If true, allows the write to opt-out of document level validation.
    *
-   * This option is sent only if the caller explicitly provides a true value. The default is to not send a value.
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    * For servers < 3.2, this option is ignored and not sent as document validation is not available.
    */
   bypassDocumentValidation: Optional<Boolean>;
@@ -2042,7 +2134,7 @@ class FindOneAndUpdateOptions {
   /**
    * If true, allows the write to opt-out of document level validation.
    *
-   * This option is sent only if the caller explicitly provides a true value. The default is to not send a value.
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
    * For servers < 3.2, this option is ignored and not sent as document validation is not available.
    */
   bypassDocumentValidation: Optional<Boolean>;
@@ -2182,8 +2274,8 @@ a read preference for the operation. As of `featureCompatibilityVersion` 4.4, se
 `$out` or `$merge`. Since drivers do not track `featureCompatibilityVersion`, the decision to consider a read preference
 for such a pipeline will depend on the wire version(s) of the server(s) to which the driver is connected.
 
-If there are one or more available servers and one or more of those servers is pre-5.0 (i.e. wire version \< 13),
-drivers MUST NOT use the available read preference and MUST instead select a server using a primary read preference.
+If there are one or more available servers and one or more of those servers is pre-5.0 (i.e. wire version < 13), drivers
+MUST NOT use the available read preference and MUST instead select a server using a primary read preference.
 
 Otherwise, if there are either no available servers, all available servers are 5.0+ (i.e. wire version >= 13), or the
 topology type is LoadBalanced (we can assume the backing mongos is 5.0+), drivers MUST use the available read
@@ -2197,6 +2289,47 @@ Drivers MUST discern the read preference used to select a server for the operati
 the [$readPreference global command argument](../message/OP_MSG.md#global-command-arguments) and
 [passing read preference to mongos and load balancers](../server-selection/server-selection.md#passing-read-preference-to-mongos-and-load-balancers)
 (if applicable).
+
+### Explain
+
+> [!NOTE]
+> Explain helpers are optional. Drivers that do not provide explain helpers may ignore this section.
+
+```typescript
+interface ExplainOptions {
+  /**
+   * The maximum amount of time to allow the explain to run.
+   *
+   * This option is sent only if the caller explicitly provides a value. The default is to not send a value.
+   *
+   * NOTE: This option is deprecated in favor of timeoutMS.
+   */
+  maxTimeMS: Optional<Int64>;
+}
+```
+
+Drivers MUST ensure that its helper permits users to specify a timeout (maxTimeMS or timeoutMS) for the explain command
+specifically. An example, using Node, might look like:
+
+```typescript
+collection.find({ name: 'john doe' }).explain({ maxTimeMS: 1000 });
+
+// sends:
+{ 
+  explain: { find: <collection>, query: { name: 'john doe' } },
+  maxTimeMS: 1000
+}
+
+collection.find({ name: 'john doe' }).explain({ timeoutMS: 1000 });
+
+// sends:
+{ 
+  explain: { find: <collection>, query: { name: 'john doe' } },
+  maxTimeMS: <1000 - min rtt>
+}
+```
+
+Drivers MUST document how users can specify options on their explain helpers.
 
 ## Test Plan
 
@@ -2230,105 +2363,113 @@ deviations from the Naming section are still permissible.
 
 ## Q & A
 
-Q: Why do the names of the fields differ from those defined in the MongoDB manual?\
-Documentation and commands often
-refer to same-purposed fields with different names making it difficult to have a cohesive API. In addition, occasionally
-the name was correct at one point and its purpose has expanded to a point where the initial name doesn't accurately
-describe its current function.
+Q: Why do the names of the fields differ from those defined in the MongoDB manual?
+
+Documentation and commands often refer to same-purposed fields with different names making it difficult to have a
+cohesive API. In addition, occasionally the name was correct at one point and its purpose has expanded to a point where
+the initial name doesn't accurately describe its current function.
 
 In addition, responses from the servers are sometimes cryptic and used for the purposes of compactness. In these cases,
 we felt the more verbose form was desirable for self-documentation purposes.
 
-Q: Where is read preference?\
-Read preference is about selecting a server with which to perform a read operation, such
-as a query, a count, or an aggregate. Since all operations defined in this specification are performed on a collection,
-it's uncommon that two different read operations on the same collection would use a different read preference,
-potentially getting out-of-sync results. As such, the most natural place to indicate read preference is on the client,
-the database, or the collection itself and not the operations within it.
+Q: Where is read preference?
+
+Read preference is about selecting a server with which to perform a read operation, such as a query, a count, or an
+aggregate. Since all operations defined in this specification are performed on a collection, it's uncommon that two
+different read operations on the same collection would use a different read preference, potentially getting out-of-sync
+results. As such, the most natural place to indicate read preference is on the client, the database, or the collection
+itself and not the operations within it.
 
 However, it might be that a driver needs to expose this selection filter to a user per operation for various reasons. As
 noted before, it is permitted to specify this, along with other driver-specific options, in some alternative way.
 
-Q: Where is read concern?\
-Read concern is about indicating how reads are handled. Since all operations defined in this
-specification are performed on a collection, it's uncommon that two different read operations on the same collection
-would use a different read concern, potentially causing mismatched and out-of-sync data. As such, the most natural place
-to indicate read concern is on the client, the database, or the collection itself and not the operations within it.
+Q: Where is read concern?
+
+Read concern is about indicating how reads are handled. Since all operations defined in this specification are performed
+on a collection, it's uncommon that two different read operations on the same collection would use a different read
+concern, potentially causing mismatched and out-of-sync data. As such, the most natural place to indicate read concern
+is on the client, the database, or the collection itself and not the operations within it.
 
 However, it might be that a driver needs to expose read concern to a user per operation for various reasons. As noted
 before, it is permitted to specify this, along with other driver-specific options, in some alternative way.
 
-Q: Where is write concern?\
-Write concern is about indicating how writes are acknowledged. Since all operations defined
-in this specification are performed on a collection, it's uncommon that two different write operations on the same
-collection would use a different write concern, potentially causing mismatched and out-of-sync data. As such, the most
-natural place to indicate write concern is on the client, the database, or the collection itself and not the operations
-within it. See the [Read/Write Concern specification](../read-write-concern/read-write-concern.rst) for the API of
-constructing a read/write concern and associated API.
+Q: Where is write concern?
+
+Write concern is about indicating how writes are acknowledged. Since all operations defined in this specification are
+performed on a collection, it's uncommon that two different write operations on the same collection would use a
+different write concern, potentially causing mismatched and out-of-sync data. As such, the most natural place to
+indicate write concern is on the client, the database, or the collection itself and not the operations within it. See
+the [Read/Write Concern specification](../read-write-concern/read-write-concern.md) for the API of constructing a
+read/write concern and associated API.
 
 However, it might be that a driver needs to expose write concern to a user per operation for various reasons. As noted
 before, it is permitted to specify this, along with other driver-specific options, in some alternative way.
 
-Q: How do I throttle unacknowledged writes now that write concern is no longer defined on a per operation basis?\
-Some
-users used to throttle unacknowledged writes by using an acknowledged write concern every X number of operations. Going
-forward, the proper way to handle this is by using the bulk write API.
+Q: How do I throttle unacknowledged writes now that write concern is no longer defined on a per operation basis?
 
-Q: What is the logic for adding "One" or "Many" into the method and model names?\
-If the maximum number of documents
-affected can only be one, we added "One" into the name. This makes it explicit that the maximum number of documents that
-could be affected is one vs. infinite.
+Some users used to throttle unacknowledged writes by using an acknowledged write concern every X number of operations.
+Going forward, the proper way to handle this is by using the bulk write API.
+
+Q: What is the logic for adding "One" or "Many" into the method and model names?
+
+If the maximum number of documents affected can only be one, we added "One" into the name. This makes it explicit that
+the maximum number of documents that could be affected is one vs. infinite.
 
 In addition, the current API exposed by all our drivers has the default value for "one" or "many" set differently for
 update and delete. This generally causes some issues for new developers and is a minor annoyance for existing
 developers. The safest way to combat this without introducing discrepancies between drivers/driver versions or breaking
 backwards compatibility was to use multiple methods, each signifying the number of documents that could be affected.
 
-Q: Speaking of "One", where is `findOne`?\
-If your driver wishes to offer a `findOne` method, that is perfectly fine. If
-you choose to implement `findOne`, please keep to the naming conventions followed by the `FindOptions` and keep in mind
-that certain things don't make sense like limit (which should be -1), tailable, awaitData, etc...
+Q: What considerations have been taken for the eventual merging of query and the aggregation framework?
 
-Q: What considerations have been taken for the eventual merging of query and the aggregation framework?\
-In the future,
-it is probable that a new query engine (QE) will look very much like the aggregation framework. Given this assumption,
-we know that both `find` and `aggregate` will be renderable in QE, each maintaining their ordering guarantees for full
-backwards compatibility.
+In the future, it is probable that a new query engine (QE) will look very much like the aggregation framework. Given
+this assumption, we know that both `find` and `aggregate` will be renderable in QE, each maintaining their ordering
+guarantees for full backwards compatibility.
 
 Hence, the only real concern is how to initiate a query using QE. While `find` is preferable, it would be a backwards
 breaking change. It might be decided that `find` is what should be used, and all drivers will release major revisions
 with this backwards breaking change. Alternatively, it might be decided that another initiator would be used.
 
-Q: Didn't we just build a bulk API?\
-Yes, most drivers did just build out a bulk API (fluent-bulk-api). While
-unfortunate, we felt it better to have the bulk api be consistent with the rest of the methods in the CRUD family of
-operations. However, the fluent-bulk-api is still able to be used as this change is non-backwards breaking. Any driver
-which implemented the fluent bulk API should deprecate it and drivers that have not built it should not do so.
+Q: Didn't we just build a bulk API?
 
-Q: What about explain?\
-Explain has been determined to be not a normal use-case for a driver. We'd like users to use the
-shell for this purpose. However, explain is still possible from a driver. For find, it can be passed as a modifier.
-Aggregate can be run using a runCommand method passing the explain option. In addition, server 3.0 offers an explain
-command that can be run using a runCommand method.
+Yes, most drivers did just build out a bulk API (fluent-bulk-api). While unfortunate, we felt it better to have the bulk
+api be consistent with the rest of the methods in the CRUD family of operations. However, the fluent-bulk-api is still
+able to be used as this change is non-backwards breaking. Any driver which implemented the fluent bulk API should
+deprecate it and drivers that have not built it should not do so.
 
-Q: Where did modifiers go in FindOptions?\
-MongoDB 3.2 introduced the find command. As opposed to using the general
-"modifiers" field any longer, each relevant option is listed explicitly. Some options, such as "tailable" or
-"singleBatch" are not listed as they are derived from other fields. Upgrading a driver should be a simple procedure of
-deprecating the "modifiers" field and introducing the new fields. When a collision occurs, the explicitly specified
-field should override the value in "modifiers".
+Q: Should drivers offer explain helpers?\
+Originally, it was determined that explain should not be exposed via specialized APIs in drivers because it it was
+deemed to be an unusual use-case for a driver. We'd like users to use the shell for this purpose. However, explain is
+still possible from a driver. Some drivers have historically provided explain helpers and continue to do so. Drivers
+that do not offer explain helpers can run explain commands using the runCommand API.
 
-Q: Where is `save`?\
-Drivers have historically provided a `save` method, which was syntactic sugar for upserting or
-inserting a document based on whether it contained an identifier, respectively. While the `save` method may be
-convenient for interactive environments, such as the shell, it was intentionally excluded from the CRUD specification
-for language drivers for several reasons. The `save` method promotes a design pattern of "fetch, modify, replace" and
-invites race conditions in application logic. Additionally, the split nature of `save` makes it difficult to discern at
-a glance if application code will perform an insert or potentially dangerous full-document replacement. Instead of
-relying on `save`, application code should know whether document already has an identifier and explicitly call
-`insertOne` or `replaceOne` with the `upsert` option.
+Q: What about explain?
 
-Q: Where is `useCursor` in AggregateOptions?\
+Explain has been determined to be not a normal use-case for a driver. We'd like users to use the shell for this purpose.
+However, explain is still possible from a driver. For find, it can be passed as a modifier. Aggregate can be run using a
+runCommand method passing the explain option. In addition, server 3.0 offers an explain command that can be run using a
+runCommand method.
+
+Q: Where did modifiers go in FindOptions?
+
+MongoDB 3.2 introduced the find command. As opposed to using the general "modifiers" field any longer, each relevant
+option is listed explicitly. Some options, such as "tailable" or "singleBatch" are not listed as they are derived from
+other fields. Upgrading a driver should be a simple procedure of deprecating the "modifiers" field and introducing the
+new fields. When a collision occurs, the explicitly specified field should override the value in "modifiers".
+
+Q: Where is `save`?
+
+Drivers have historically provided a `save` method, which was syntactic sugar for upserting or inserting a document
+based on whether it contained an identifier, respectively. While the `save` method may be convenient for interactive
+environments, such as the shell, it was intentionally excluded from the CRUD specification for language drivers for
+several reasons. The `save` method promotes a design pattern of "fetch, modify, replace" and invites race conditions in
+application logic. Additionally, the split nature of `save` makes it difficult to discern at a glance if application
+code will perform an insert or potentially dangerous full-document replacement. Instead of relying on `save`,
+application code should know whether document already has an identifier and explicitly call `insertOne` or `replaceOne`
+with the `upsert` option.
+
+Q: Where is `useCursor` in AggregateOptions?
+
 Inline aggregation results are no longer supported in server 3.5.2+. The
 [aggregate command](https://www.mongodb.com/docs/manual/reference/command/aggregate/) must be provided either the
 `cursor` document or the `explain` boolean. AggregateOptions does not define an `explain` option. If a driver does
@@ -2337,27 +2478,29 @@ document must be added to the `aggregate` command. Regardless, `useCursor` is no
 a backwards breaking change, so drivers should first deprecate this option in a minor release, and remove it in a major
 release.
 
-Q: Where is `singleBatch` in FindOptions?\
-Drivers have historically allowed users to request a single batch of results
-(after which the cursor is closed) by specifying a negative value for the `limit` option. For servers \< 3.2, a single
-batch may be requested by specifying a negative value in the `numberToReturn` wire protocol field. For servers >= 3.2,
-the `find` command defines `limit` as a non-negative integer option but introduces a `singleBatch` boolean option.
-Rather than introduce a `singleBatch` option to FindOptions, the spec preserves the existing API for `limit` and
-instructs drivers to convert negative values accordingly for servers >= 3.2.
+Q: Where is `singleBatch` in FindOptions?
 
-Q: Why are client-side errors raised for some unsupported options?\
-Server versions before 3.4 were inconsistent about
-reporting errors for unrecognized command options and may simply ignore them, which means a client-side error is the
-only way to inform users that such options are unsupported. For unacknowledged writes using OP_MSG, a client-side error
-is necessary because the server has no chance to return a response (even though a 3.6+ server is otherwise capable of
-reporting errors for unrecognized options). For unacknowledged writes using legacy opcodes (i.e. OP_INSERT, OP_UPDATE,
-and OP_DELETE), the message body has no field with which to express these options so a client-side error is the only
-mechanism to inform the user that such options are unsupported. The spec does not explicitly refer to unacknowledged
-writes using OP_QUERY primarily because a response document is always returned and drivers generally would not consider
-using OP_QUERY precisely for that reason.
+Drivers have historically allowed users to request a single batch of results (after which the cursor is closed) by
+specifying a negative value for the `limit` option. For servers < 3.2, a single batch may be requested by specifying a
+negative value in the `numberToReturn` wire protocol field. For servers >= 3.2, the `find` command defines `limit` as a
+non-negative integer option but introduces a `singleBatch` boolean option. Rather than introduce a `singleBatch` option
+to FindOptions, the spec preserves the existing API for `limit` and instructs drivers to convert negative values
+accordingly for servers >= 3.2.
+
+Q: Why are client-side errors raised for some unsupported options?
+
+Server versions before 3.4 were inconsistent about reporting errors for unrecognized command options and may simply
+ignore them, which means a client-side error is the only way to inform users that such options are unsupported. For
+unacknowledged writes using OP_MSG, a client-side error is necessary because the server has no chance to return a
+response (even though a 3.6+ server is otherwise capable of reporting errors for unrecognized options). For
+unacknowledged writes using legacy opcodes (i.e. OP_INSERT, OP_UPDATE, and OP_DELETE), the message body has no field
+with which to express these options so a client-side error is the only mechanism to inform the user that such options
+are unsupported. The spec does not explicitly refer to unacknowledged writes using OP_QUERY primarily because a response
+document is always returned and drivers generally would not consider using OP_QUERY precisely for that reason.
 
 Q: Why does reverting to using `count` instead of `aggregate` with `$collStats` for estimatedDocumentCount not require a
-major version bump in the drivers, even though it might break users of the Stable API?\
+major version bump in the drivers, even though it might break users of the Stable API?
+
 SemVer
 [allows](https://semver.org/#what-if-i-inadvertently-alter-the-public-api-in-a-way-that-is-not-compliant-with-the-version-number-change-ie-the-code-incorrectly-introduces-a-major-breaking-change-in-a-patch-release)
 for a library to include a breaking change in a minor or patch version if the change is required to fix another
@@ -2368,6 +2511,20 @@ the Stable API, it was decided that this change was acceptable to make in minor 
 aforementioned allowance in the SemVer spec.
 
 ## Changelog
+
+- 2024-11-13: Define `findOne` operation as optional, and add guidance on `limit` and `batchSize` for `find` operations.
+
+- 2024-11-04: Always send a value for `bypassDocumentValidation` if it was specified.
+
+- 2024-11-01: Add hint to DistinctOptions
+
+- 2024-10-30: Document query limitations in `countDocuments`.
+
+- 2024-10-28: Clarified that generated identifiers should be prepended to documents.
+
+- 2024-10-01: Add sort option to `replaceOne` and `updateOne`.
+
+- 2024-09-12: Specify that explain helpers support maxTimeMS.
 
 - 2024-02-20: Migrated from reStructuredText to Markdown.
 
@@ -2383,20 +2540,17 @@ aforementioned allowance in the SemVer spec.
 
 - 2022-01-27: Use optional return types for write commands and findAndModify
 
-- 2022-01-19: Deprecate the maxTimeMS option and require that timeouts be applied\
-  per the client-side operations
-  timeout spec.
+- 2022-01-19: Deprecate the maxTimeMS option and require that timeouts be applied per the client-side operations timeout
+    spec.
 
 - 2022-01-14: Add let to ReplaceOptions
 
-- 2021-11-10: Revise rules for applying read preference for aggregations with\
-  $out and $merge. Add let to FindOptions,
-  UpdateOptions, DeleteOptions, FindOneAndDeleteOptions, FindOneAndReplaceOptions, FindOneAndUpdateOptions
+- 2021-11-10: Revise rules for applying read preference for aggregations with $out and $merge. Add let to FindOptions,
+    UpdateOptions, DeleteOptions, FindOneAndDeleteOptions, FindOneAndReplaceOptions, FindOneAndUpdateOptions
 
 - 2021-09-28: Support aggregations with $out and $merge on 5.0+ secondaries
 
-- 2021-08-31: Allow unacknowledged hints on write operations if supported by\
-  server (reverts previous change).
+- 2021-08-31: Allow unacknowledged hints on write operations if supported by server (reverts previous change).
 
 - 2021-06-02: Introduce WriteError.details and clarify WriteError construction
 
@@ -2404,13 +2558,11 @@ aforementioned allowance in the SemVer spec.
 
 - 2021-01-21: Update estimatedDocumentCount to use $collStats stage for servers >= 4.9
 
-- 2020-04-17: Specify that the driver must raise an error for unacknowledged\
-  hints on any write operation, regardless
-  of server version.
+- 2020-04-17: Specify that the driver must raise an error for unacknowledged hints on any write operation, regardless of
+    server version.
 
-- 2020-03-19: Clarify that unacknowledged update, findAndModify, and delete\
-  operations with a hint option should raise
-  an error on older server versions.
+- 2020-03-19: Clarify that unacknowledged update, findAndModify, and delete operations with a hint option should raise
+    an error on older server versions.
 
 - 2020-03-06: Added hint option for DeleteOne, DeleteMany, and FindOneAndDelete operations.
 
@@ -2422,8 +2574,7 @@ aforementioned allowance in the SemVer spec.
 
 - 2020-01-10: Clarify client-side error reporting for unsupported options
 
-- 2020-01-10: Error if hint specified for unacknowledged update using OP_UPDATE\
-  or OP_MSG for servers \< 4.2
+- 2020-01-10: Error if hint specified for unacknowledged update using OP_UPDATE or OP_MSG for servers < 4.2
 
 - 2019-10-28: Removed link to old language examples.
 
@@ -2443,15 +2594,13 @@ aforementioned allowance in the SemVer spec.
 
 - 2018-07-25: Added upsertedCount to UpdateResult.
 
-- 2018-06-07: Deprecated the count helper. Added the estimatedDocumentCount and\
-  countDocuments helpers.
+- 2018-06-07: Deprecated the count helper. Added the estimatedDocumentCount and countDocuments helpers.
 
 - 2018-03-05: Deprecate snapshot option
 
 - 2018-03-01: Deprecate maxScan query option.
 
-- 2018-02-06: Note that batchSize in FindOptions and AggregateOptions should also\
-  apply to getMore.
+- 2018-02-06: Note that batchSize in FindOptions and AggregateOptions should also apply to getMore.
 
 - 2018-01-26: Only send bypassDocumentValidation option if it's true, don't send false.
 
@@ -2459,14 +2608,12 @@ aforementioned allowance in the SemVer spec.
 
 - 2017-10-17: Document negative limit for FindOptions.
 
-- 2017-10-09: Bumped minimum server version to 2.6 and removed references to\
-  older versions in spec and tests.
+- 2017-10-09: Bumped minimum server version to 2.6 and removed references to older versions in spec and tests.
 
 - 2017-10-09: Prohibit empty insertMany() and bulkWrite() operations.
 
-- 2017-10-09: Split UpdateOptions and ReplaceOptions. Since replaceOne()\
-  previously used UpdateOptions, this may have
-  BC implications for drivers using option classes.
+- 2017-10-09: Split UpdateOptions and ReplaceOptions. Since replaceOne() previously used UpdateOptions, this may have BC
+    implications for drivers using option classes.
 
 - 2017-10-05: Removed useCursor option from AggregateOptions.
 
@@ -2486,12 +2633,10 @@ aforementioned allowance in the SemVer spec.
 
 - 2017-01-09: Removed modifiers from FindOptions and added in all options.
 
-- 2017-01-09: Changed the value type of FindOptions.skip and FindOptions.limit to\
-  Int64 with a note related to
-  calculating batchSize for opcode writes.
+- 2017-01-09: Changed the value type of FindOptions.skip and FindOptions.limit to Int64 with a note related to
+    calculating batchSize for opcode writes.
 
-- 2017-01-09: Reworded description of how default values are handled and when to\
-  send certain options.
+- 2017-01-09: Reworded description of how default values are handled and when to send certain options.
 
 - 2016-09-23: Included collation option in the bulk write models.
 
@@ -2501,8 +2646,7 @@ aforementioned allowance in the SemVer spec.
 
 - 2015-10-16: Added maxAwaitTimeMS to FindOptions.
 
-- 2015-10-01: Moved bypassDocumentValidation into BulkWriteOptions and removed it\
-  from the individual write models.
+- 2015-10-01: Moved bypassDocumentValidation into BulkWriteOptions and removed it from the individual write models.
 
 - 2015-09-16: Added bypassDocumentValidation.
 

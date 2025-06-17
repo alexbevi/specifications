@@ -6,6 +6,7 @@ runOnRequirements:
       - replicaset
       - sharded
       - load-balanced
+    serverless: forbid
 
 createEntities:
   - client:
@@ -206,6 +207,7 @@ tests:
                     multi: true
                 nsInfo:
                   - ns: *namespace
+                txnNumber: { $$exists: false }
   - description: "client bulkWrite with no multi: true operations succeeds after retryable writeConcernError"
     operations:
       - object: testRunner
@@ -371,6 +373,7 @@ tests:
                     multi: true
                 nsInfo:
                   - ns: *namespace
+                txnNumber: { $$exists: false }
   - description: "client bulkWrite with retryWrites: false does not retry"
     operations:
       - object: testRunner
@@ -410,3 +413,4 @@ tests:
                     document: { _id: 4, x: 44 }
                 nsInfo:
                   - ns: *namespace
+                txnNumber: { $$exists: false }
