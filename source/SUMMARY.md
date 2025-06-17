@@ -59,7 +59,7 @@
     - [Causal Consistency](causal-consistency/causal-consistency.md)
     - [Snapshot Reads](sessions/snapshot-sessions.md)
     - [Transactions](transactions/transactions.md)
-    - [Convenient Transactions API](transactions-convenient-api/transactions-convenient-api.md))
+    - [Convenient Transactions API](transactions-convenient-api/transactions-convenient-api.md)
 
 ---
 
@@ -85,14 +85,15 @@
 
 - [Security]()
   - [Client Side Encryption](client-side-encryption/client-side-encryption.md)
-  - [BSON Binary Subtype 6: Encrypted](bson-binary-encrypted/binary-encrypted.md))
+  - [BSON Binary Subtype 6: Encrypted](bson-binary-encrypted/binary-encrypted.md)
 
 ---
 
 - [Observability]()
-  - [Command Logging and Monitoring](command-logging-and-monitoring/command-logging-and-monitoring.md)
+  - [Command Logging and Monitoring](command-logging-and-monitoring/command-logging-and-monitoring.rst)
   - [SDAM Logging and Monitoring](server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.md)
   - [Standardized Logging](logging/logging.md)
+  - [Connection Pool Logging](connection-monitoring-and-pooling/connection-monitoring-and-pooling.md#connection-pool-monitoring-1)
 
 ---
 
@@ -103,4 +104,3 @@
   - [BSON Corpus](bson-corpus/bson-corpus.md)
   - [Replication Event Resilience](connections-survive-step-down/tests/README.md)
   - [FAAS Automated Testing](faas-automated-testing/faas-automated-testing.md)
-  - [Atlas Serverless Testing](serverless-testing/README.md)
