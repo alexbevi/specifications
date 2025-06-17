@@ -1618,6 +1618,20 @@ Because drivers do not consistently propagate errors encountered while closing a
 NOT specify any operations for a client entity or any entity descended from it following a <code>close</code> operation on it, as
 driver behavior when an operation is attempted on a closed client or one of its descendant objects is not consistent.</p>
 <p><span id="client_createChangeStream"></span></p>
+<h4 id="appendmetadata"><a class="header" href="#appendmetadata">appendMetadata</a></h4>
+<p>Appends client metadata to the client.</p>
+<p>The following arguments are supported:</p>
+<ul>
+<li><code>driverInfoOptions</code>: Required object with the following fields:
+<ul>
+<li><code>name</code>: Required string. The name of the wrapping library or framework.</li>
+<li><code>version</code>: Optional string. The version of the wrapping library or framework.</li>
+<li><code>platform</code>: Optional string. The platform of the wrapping library or framework.</li>
+</ul>
+</li>
+</ul>
+<p>See the <a href="../mongodb-handshake/handshake.html#metadata-updates-after-mongoclient-initialization">handshake spec</a> for more
+details.</p>
 <h4 id="createchangestream"><a class="header" href="#createchangestream">createChangeStream</a></h4>
 <p>Creates a cluster-level change stream and ensures that the server-side cursor has been created.</p>
 <p>This operation proxies the client's <code>watch</code> method and supports the same arguments and options. Test files SHOULD NOT
@@ -3222,6 +3236,9 @@ other specs <em>and</em> collating spec changes developed in parallel or during 
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
 <li>
+<p>2025-06-09: Add <code>appendMetadata</code> operation.</p>
+</li>
+<li>
 <p>2025-06-04: Deprecate the <code>serverless</code> runOnRequirement</p>
 </li>
 <li>
@@ -3471,7 +3488,7 @@ and <code>serverParameters</code> property for <code>runOnRequirements</code>.</
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../logging/logging.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -3485,7 +3502,7 @@ and <code>serverParameters</code> property for <code>runOnRequirements</code>.</
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../logging/logging.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 

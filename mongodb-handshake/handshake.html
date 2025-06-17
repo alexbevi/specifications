@@ -463,9 +463,22 @@ following class definition defines the options which MUST be supported:</p>
     platform: Optional&lt;String&gt;;
 }
 </code></pre>
-<p>Note that how these options are provided to a driver is left up to the implementer.</p>
-<p>If provided, these options MUST NOT replace the values used for metadata generation. The provided options MUST be
-appended to their respective fields, and be delimited by a <code>|</code> character. For example, when
+<p>Note that how these options are provided to a driver during <code>MongoClient</code> initialization is left up to the implementer.</p>
+<h3 id="metadata-updates-after-mongoclient-initialization"><a class="header" href="#metadata-updates-after-mongoclient-initialization">Metadata updates after MongoClient initialization</a></h3>
+<p>Drivers MUST provide an API that allows appending <code>DriverInfoOptions</code> to a <code>MongoClient</code> instance after initialization,
+adhering to the pattern described below while following idioms of the language of the driver:</p>
+<pre><code class="language-java">interface MongoClient { 
+  void appendMetadata(DriverInfoOptions driverInfoOptions);
+  // other existing members of MongoClient
+}
+</code></pre>
+<p>After client metadata update, drivers MUST apply updated metadata to newly created connections. Drivers MUST NOT apply
+updated metadata to already established connections, create new connections, or close existing connections solely for
+the purpose of transferring updated metadata.</p>
+<h3 id="appending-metadata"><a class="header" href="#appending-metadata">Appending metadata</a></h3>
+<p>If <code>DriverInfoOptions</code> are provided during or after <code>MongoClient</code> initialization, these options MUST NOT replace any
+existing metadata values, including driver-generated metadata and previously provided options. The provided options MUST
+be appended to their respective fields, and be delimited by a <code>|</code> character. For example, when
 <a href="https://www.mongodb.com/docs/drivers/motor/">Motor</a> wraps PyMongo, the following fields are updated to include Motor's
 "driver info":</p>
 <pre><code class="language-typescript">{
@@ -596,6 +609,7 @@ specification</li>
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2025-06-09: Add requirement to allow appending to client metadata after <code>MongoClient</code> initialization.</li>
 <li>2024-11-05: Move handshake prose tests from spec file to prose test file.</li>
 <li>2024-10-09: Clarify that FaaS and container metadata must both be populated when both are present.</li>
 <li>2024-08-16: Migrated from reStructuredText to Markdown.</li>

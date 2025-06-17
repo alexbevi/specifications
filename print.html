@@ -4285,9 +4285,22 @@ following class definition defines the options which MUST be supported:</p>
     platform: Optional&lt;String&gt;;
 }
 </code></pre>
-<p>Note that how these options are provided to a driver is left up to the implementer.</p>
-<p>If provided, these options MUST NOT replace the values used for metadata generation. The provided options MUST be
-appended to their respective fields, and be delimited by a <code>|</code> character. For example, when
+<p>Note that how these options are provided to a driver during <code>MongoClient</code> initialization is left up to the implementer.</p>
+<h3 id="metadata-updates-after-mongoclient-initialization"><a class="header" href="#metadata-updates-after-mongoclient-initialization">Metadata updates after MongoClient initialization</a></h3>
+<p>Drivers MUST provide an API that allows appending <code>DriverInfoOptions</code> to a <code>MongoClient</code> instance after initialization,
+adhering to the pattern described below while following idioms of the language of the driver:</p>
+<pre><code class="language-java">interface MongoClient { 
+  void appendMetadata(DriverInfoOptions driverInfoOptions);
+  // other existing members of MongoClient
+}
+</code></pre>
+<p>After client metadata update, drivers MUST apply updated metadata to newly created connections. Drivers MUST NOT apply
+updated metadata to already established connections, create new connections, or close existing connections solely for
+the purpose of transferring updated metadata.</p>
+<h3 id="appending-metadata"><a class="header" href="#appending-metadata">Appending metadata</a></h3>
+<p>If <code>DriverInfoOptions</code> are provided during or after <code>MongoClient</code> initialization, these options MUST NOT replace any
+existing metadata values, including driver-generated metadata and previously provided options. The provided options MUST
+be appended to their respective fields, and be delimited by a <code>|</code> character. For example, when
 <a href="https://www.mongodb.com/docs/drivers/motor/">Motor</a> wraps PyMongo, the following fields are updated to include Motor's
 "driver info":</p>
 <pre><code class="language-typescript">{
@@ -4418,6 +4431,7 @@ specification</li>
 </ul>
 <h2 id="changelog-11"><a class="header" href="#changelog-11">Changelog</a></h2>
 <ul>
+<li>2025-06-09: Add requirement to allow appending to client metadata after <code>MongoClient</code> initialization.</li>
 <li>2024-11-05: Move handshake prose tests from spec file to prose test file.</li>
 <li>2024-10-09: Clarify that FaaS and container metadata must both be populated when both are present.</li>
 <li>2024-08-16: Migrated from reStructuredText to Markdown.</li>
@@ -28112,464 +28126,9 @@ marking inadvertently being stored on a server – meaning that plaintext is st
 <li>2024-03-04: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter and create changelog.</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="command-logging-and-monitoring"><a class="header" href="#command-logging-and-monitoring">Command Logging and Monitoring</a></h1>
-<ul>
-<li>Status: Accepted</li>
-<li>Minimum Server Version: 2.4</li>
-</ul>
-<hr />
-<h2 id="specification-40"><a class="header" href="#specification-40">Specification</a></h2>
-<p>The command logging and monitoring specification defines a set of behaviour in the drivers for providing runtime
-information about commands in log messages as well as in events which users can consume programmatically, either
-directly or by integrating with third-party APM libraries.</p>
-<h3 id="definitions-11"><a class="header" href="#definitions-11">Definitions</a></h3>
-<h4 id="meta-43"><a class="header" href="#meta-43">META</a></h4>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-27"><a class="header" href="#terms-27">Terms</a></h4>
-<p><strong>Document</strong></p>
-<p>The term <code>Document</code> refers to the implementation in the driver's language of a BSON document.</p>
-<h3 id="guidance-5"><a class="header" href="#guidance-5">Guidance</a></h3>
-<h4 id="documentation-6"><a class="header" href="#documentation-6">Documentation</a></h4>
-<p>The documentation provided in code below is merely for driver authors and SHOULD NOT be taken as required documentation
-for the driver.</p>
-<h4 id="messages-and-events"><a class="header" href="#messages-and-events">Messages and Events</a></h4>
-<p>All drivers MUST implement the specified event types as well as log messages.</p>
-<p>Implementation details are noted in the comments when a specific implementation is required. Within each event and log
-message, all properties are REQUIRED unless noted otherwise.</p>
-<h4 id="naming-6"><a class="header" href="#naming-6">Naming</a></h4>
-<p>All drivers MUST name types, properties, and log message values as defined in the following sections. Exceptions to this
-rule are noted in the appropriate section. Class and interface names may vary according to the driver and language best
-practices.</p>
-<h4 id="publishing--subscribing"><a class="header" href="#publishing--subscribing">Publishing &amp; Subscribing</a></h4>
-<p>The driver SHOULD publish events in a manner that is standard to the driver's language publish/subscribe patterns and is
-not strictly mandated in this specification.</p>
-<p>Similarly, as described in the <a href="command-logging-and-monitoring/../logging/logging.html#implementation-requirements">logging specification</a> the driver
-SHOULD emit log messages in a manner that is standard for the language.</p>
-<h4 id="guarantees"><a class="header" href="#guarantees">Guarantees</a></h4>
-<p>The driver MUST guarantee that every <code>CommandStartedEvent</code> has either a correlating <code>CommandSucceededEvent</code> or
-<code>CommandFailedEvent</code>, and that every "command started" log message has either a correlating "command succeeded" log
-message or "command failed" log message.</p>
-<p>The driver MUST guarantee that the <code>requestId</code> of the <code>CommandStartedEvent</code> and the corresponding
-<code>CommandSucceededEvent</code> or <code>CommandFailedEvent</code> is the same, and that the <code>requestId</code> of the "command started" log
-message and the corresponding "command succeeded" or "command failed" log message is the same.</p>
-<h4 id="unacknowledgedacknowledged-writes"><a class="header" href="#unacknowledgedacknowledged-writes">Unacknowledged/Acknowledged Writes</a></h4>
-<p>Unacknowledged writes must provide a <code>CommandSucceededEvent</code> and a "command succeeded" log message with a <code>{ ok: 1 }</code>
-reply.</p>
-<p>A non-default write concern MUST be included in the published command. The default write concern is not required to be
-included.</p>
-<h4 id="succeeded-or-failed"><a class="header" href="#succeeded-or-failed">Succeeded or Failed</a></h4>
-<p>Commands that executed on the server and return a status of <code>{ ok: 1.0 }</code> are considered successful commands and MUST
-generate a <code>CommandSucceededEvent</code> and "command succeeded" log message. Commands that have write errors are included
-since the actual command did succeed, only writes failed.</p>
-<h4 id="error-handling-4"><a class="header" href="#error-handling-4">Error Handling</a></h4>
-<p>If an exception occurs while sending the operation to the server, the driver MUST generate a <code>CommandFailedEvent</code> and
-"command failed" log message with the exception or message, and re-raise the exception.</p>
-<h4 id="bulk-writes"><a class="header" href="#bulk-writes">Bulk Writes</a></h4>
-<p>This specification defines the monitoring and logging of individual commands and in that respect MUST generate events
-and log messages for each command a bulk write executes. Each of these commands, however, must be linked together via
-the same <code>operationId</code>.</p>
-<h4 id="implementation-notes-5"><a class="header" href="#implementation-notes-5">Implementation Notes</a></h4>
-<p>When a driver sends an OP_MSG with a document sequence, it MUST include the document sequence as a BSON array in
-<code>CommandStartedEvent.command</code>. The array's field name MUST be the OP_MSG sequence identifier. For example, if the driver
-sends an <code>update</code> command using OP_MSG, and sends a document sequence as a separate section of payload type 1 with
-identifier <code>updates</code>, the driver MUST include the documents as a BSON array in <code>CommandStartedEvent.command</code> with field
-name <code>updates</code>.</p>
-<p>See "Why are document sequences included as BSON arrays?" in the <a href="command-logging-and-monitoring/command-logging-and-monitoring.html#rationale">rationale</a>.</p>
-<h3 id="rationale-4"><a class="header" href="#rationale-4">Rationale</a></h3>
-<p><em>1. Why are commands with</em> <code>{ ok: 1 }</code> <em>treated as successful and</em> <code>{ ok: 0 }</code> <em>as failed?</em></p>
-<p>The specification is consistent with what the server deems as a successful or failed command and reports this as so.
-This also allows for server changes around this behaviour in the future to require no change in the drivers to continue
-to be compliant.</p>
-<p>The command listener API is responsible only for receiving and handling events sent from the lowest level of the driver,
-and is only about informing listeners about what commands are sent and what replies are received. As such, it would be
-innappropiate at this level for a driver to execute custom logic around particular commands to determine what failure or
-success means for a particular command. Implementers of the API are free to handle these events as they see fit, which
-may include code that further interprets replies to specific commands based on the presence or absence of other fields
-in the reply beyond the <code>ok</code> field.</p>
-<p><em>2. Why are document sequences included as BSON arrays?</em></p>
-<p>The OP_MSG wire protocol was introduced in MongoDB 3.6, with document sequences as an optimization for bulk writes. We
-have chosen to represent these OP_MSGs as single command documents for now, until a need for a more accurate (and
-perhaps better-performing) command monitoring API for document sequences has been demonstrated.</p>
-<p><em>3. Why is BSON serialization and deserialization optional to include in durations?</em></p>
-<p>Different drivers will serialize and deserialize BSON at different levels of the driver architecture. For example, some
-parts of a command (e.g. inserted document structs) could be pre-encoded early into a "raw" BSON form and the final
-command with late additions like a session ID could encoded just before putting it on the wire.</p>
-<p>Rather than specify a duration rule that would be hard to satisfy consistently, we allow duration to include BSON
-serialization/deserialization or not based on the architecture needs of each driver.</p>
-<h3 id="security"><a class="header" href="#security">Security</a></h3>
-<p>Some commands and replies will contain sensitive data relating to authentication.</p>
-<p>In order to not risk leaking this data to external sources or logs, for these commands:</p>
-<ul>
-<li>
-<p>The "command" field in <code>CommandStartedEvent</code> and "command started" log messages MUST be replaced with an empty BSON
-document.</p>
-</li>
-<li>
-<p>The "reply" field in <code>CommandSucceededEvent</code> and "command succeeded" log messages MUST be replaced with an empty BSON
-document.</p>
-</li>
-<li>
-<p>If the error is a server-side error, the "failure" field in <code>CommandFailedEvent</code> and "command failed" log messages
-MUST have all fields besides the following redacted:</p>
-<ul>
-<li><code>code</code></li>
-<li><code>codeName</code></li>
-<li><code>errorLabels</code></li>
-</ul>
-<p>The exact implementation of redaction is flexible depending on the type the driver uses to represent a failure in
-these events and log messages. For example, a driver could choose to set all properties besides these on an error
-object to null. Alternatively, a driver that uses strings to represent failures could replace relevant portions of
-the string with "REDACTED".</p>
-</li>
-</ul>
-<p>The list of sensitive commands is as follows:</p>
-<div class="table-wrapper"><table><thead><tr><th>Command</th></tr></thead><tbody>
-<tr><td><code>authenticate</code></td></tr>
-<tr><td><code>saslStart</code></td></tr>
-<tr><td><code>saslContinue</code></td></tr>
-<tr><td><code>getnonce</code></td></tr>
-<tr><td><code>createUser</code></td></tr>
-<tr><td><code>updateUser</code></td></tr>
-<tr><td><code>copydbgetnonce</code></td></tr>
-<tr><td><code>copydbsaslstart</code></td></tr>
-<tr><td><code>copydb</code></td></tr>
-<tr><td><code>hello</code> (or legacy hello) when <code>speculativeAuthenticate</code> is present</td></tr>
-</tbody></table>
-</div>
-<p>See the <a href="command-logging-and-monitoring/../mongodb-handshake/handshake.html">MongoDB Handshake spec</a> for more information on <code>hello</code> and legacy hello.
-Note that legacy hello has two different letter casings that must be taken into account. See the previously mentioned
-MongoDB Handshake spec for details.</p>
-<h3 id="events-api"><a class="header" href="#events-api">Events API</a></h3>
-<p>See the <a href="command-logging-and-monitoring/../load-balancers/load-balancers.html#events">Load Balancer Specification</a> for details on the <code>serviceId</code> field.</p>
-<pre><code class="language-typescript">interface CommandStartedEvent {
-
-  /**
-   * Returns the command.
-   */
-  command: Document;
-
-  /**
-   * Returns the database name.
-   */
-  databaseName: String;
-
-  /**
-   * Returns the command name.
-   */
-  commandName: String;
-
-  /**
-   * Returns the driver generated request id.
-   */
-  requestId: Int64;
-
-  /**
-   * Returns the driver generated operation id. This is used to link events together such
-   * as bulk write operations. OPTIONAL.
-   */
-  operationId: Int64;
-
-  /**
-   * Returns the connection id for the command. For languages that do not have this,
-   * this MUST return the driver equivalent which MUST include the server address and port.
-   * The name of this field is flexible to match the object that is returned from the driver.
-   */
-  connectionId: ConnectionId;
-
-  /**
-   * Returns the server connection id for the command. The server connection id is distinct from
-   * the connection id and is returned by the hello or legacy hello response as "connectionId"
-   * from the server on 4.2+. Drivers MUST use an Int64 to represent the server connection ID value.
-   */
-  serverConnectionId: Optional&lt;Int64&gt;;
-
-  /**
-   * Returns the service id for the command when the driver is in load balancer mode.
-   * For drivers that wish to include this in their ConnectionId object, this field is
-   * optional.
-   */
-  serviceId: Optional&lt;ObjectId&gt;;
-}
-
-interface CommandSucceededEvent {
-
-  /**
-   * Returns the execution time of the event in the highest possible resolution for the platform.
-   * The calculated value MUST be the time to send the message and receive the reply from the server
-   * and MAY include BSON serialization and/or deserialization. The name can imply the units in which the
-   * value is returned, i.e. durationMS, durationNanos.
-   */
-  duration: Int64;
-
-  /**
-   * Returns the command reply.
-   */
-  reply: Document;
-
-  /**
-   * Returns the command name.
-   */
-  commandName: String;
-
-  /**
-   * Returns the database name.
-   */
-  databaseName: String;
-
-  /**
-   * Returns the driver generated request id.
-   */
-  requestId: Int64;
-
-  /**
-   * Returns the driver generated operation id. This is used to link events together such
-   * as bulk write operations. OPTIONAL.
-   */
-  operationId: Int64;
-
-  /**
-   * Returns the connection id for the command. For languages that do not have this,
-   * this MUST return the driver equivalent which MUST include the server address and port.
-   * The name of this field is flexible to match the object that is returned from the driver.
-   */
-  connectionId: ConnectionId;
-
-  /**
-   * Returns the server connection id for the command. The server connection id is distinct from
-   * the connection id and is returned by the hello or legacy hello response as "connectionId"
-   * from the server on 4.2+. Drivers MUST use an Int64 to represent the server connection ID value.
-   */
-  serverConnectionId: Optional&lt;Int64&gt;;
-
-  /**
-   * Returns the service id for the command when the driver is in load balancer mode.
-   * For drivers that wish to include this in their ConnectionId object, this field is
-   * optional.
-   */
-  serviceId: Optional&lt;ObjectId&gt;;
-}
-
-interface CommandFailedEvent {
-
-  /**
-   * Returns the execution time of the event in the highest possible resolution for the platform.
-   * The calculated value MUST be the time to send the message and receive the reply from the server
-   * and MAY include BSON serialization and/or deserialization. The name can imply the units in which the
-   * value is returned, i.e. durationMS, durationNanos.
-   */
-  duration: Int64;
-
-  /**
-   * Returns the command name.
-   */
-  commandName: String;
-
-  /**
-   * Returns the database name.
-   */
-  databaseName: String;
-
-  /**
-   * Returns the failure. Based on the language, this SHOULD be a message string, exception
-   * object, or error document.
-   */
-  failure: String,Exception,Document;
-
-  /**
-   * Returns the client generated request id.
-   */
-  requestId: Int64;
-
-  /**
-   * Returns the driver generated operation id. This is used to link events together such
-   * as bulk write operations. OPTIONAL.
-   */
-  operationId: Int64;
-
-  /**
-   * Returns the connection id for the command. For languages that do not have this,
-   * this MUST return the driver equivalent which MUST include the server address and port.
-   * The name of this field is flexible to match the object that is returned from the driver.
-   */
-  connectionId: ConnectionId;
-
-  /**
-   * Returns the server connection id for the command. The server connection id is distinct from
-   * the connection id and is returned by the hello or legacy hello response as "connectionId"
-   * from the server on 4.2+. Drivers MUST use an Int64 to represent the server connection ID value.
-   */
-  serverConnectionId: Optional&lt;Int64&gt;;
-
-  /**
-   * Returns the service id for the command when the driver is in load balancer mode.
-   * For drivers that wish to include this in their ConnectionId object, this field is
-   * optional.
-   */
-  serviceId: Optional&lt;ObjectId&gt;;
-}
-</code></pre>
-<h3 id="log-messages-1"><a class="header" href="#log-messages-1">Log Messages</a></h3>
-<p>Please refer to the <a href="command-logging-and-monitoring/../logging/logging.html">logging specification</a> for details on logging implementations in general,
-including log levels, log components, and structured versus unstructured logging.</p>
-<p>Drivers MUST support logging of command information via the following types of log messages. These messages MUST be
-logged at <code>Debug</code> level and use the <code>command</code> log component.</p>
-<p>The log messages are intended to match the information contained in the events above. Drivers MAY implement command
-logging support via an event subscriber if it is convenient to do so.</p>
-<p>The types used in the structured message definitions below are demonstrative, and drivers MAY use similar types instead
-so long as the information is present (e.g. a double instead of an integer, or a string instead of an integer if the
-structured logging framework does not support numeric types.)</p>
-<p>Drivers MUST not emit command log messages for commands issued as part of the handshake with the server, or heartbeat
-commands issued by server monitors.</p>
-<h4 id="common-fields-2"><a class="header" href="#common-fields-2">Common Fields</a></h4>
-<p>The following key-value pairs MUST be included in all command messages:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
-<tr><td>commandName</td><td>String</td><td>The command name.</td></tr>
-<tr><td>databaseName</td><td>String</td><td>The database name.</td></tr>
-<tr><td>requestId</td><td>Int</td><td>The driver-generated request ID.</td></tr>
-<tr><td>operationId</td><td>Int</td><td>The driver-generated operation ID. Optional; only present if the driver generated operation IDs and this command has one.</td></tr>
-<tr><td>driverConnectionId</td><td>Int64</td><td>The driver's ID for the connection used for the command. Note this is NOT the same as <code>CommandStartedEvent.connectionId</code> defined above, but refers to the <code>connectionId</code> defined in the <a href="command-logging-and-monitoring/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">connection monitoring and pooling specification</a>. Unlike <code>CommandStartedEvent.connectionId</code> this field MUST NOT contain the host/port; that information MUST be in the following fields, <code>serverHost</code> and <code>serverPort</code>. This field is optional for drivers that do not implement CMAP if they do have an equivalent concept of a connection ID.</td></tr>
-<tr><td>serverHost</td><td>String</td><td>The hostname or IP address for the server the command is being run on.</td></tr>
-<tr><td>serverPort</td><td>Int</td><td>The port for the server the command is being run on. Optional; not present for Unix domain sockets. When the user does not specify a port and the default (27017) is used, the driver SHOULD include it here.</td></tr>
-<tr><td>serverConnectionId</td><td>Int64</td><td>The server's ID for the connection used for the command. Optional; only present for server versions 4.2+. NOTE: Existing drivers may represent this as an Int32 already. For strongly-typed languages, you may have to introduce a new Int64 field and deprecate the old Int32 field. The next major version should remove the old Int32 field.</td></tr>
-<tr><td>serviceId</td><td>String</td><td>The hex string representation of the service ID for the command. Optional; only present when the driver is in load balancer mode.</td></tr>
-</tbody></table>
-</div>
-<h4 id="command-started-message"><a class="header" href="#command-started-message">Command Started Message</a></h4>
-<p>In addition to the common fields, command started messages MUST contain the following key-value pairs:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
-<tr><td>message</td><td>String</td><td>"Command started"</td></tr>
-<tr><td>command</td><td>String</td><td>Relaxed extJSON representation of the command. This document MUST be truncated appropriately according to rules defined in the <a href="command-logging-and-monitoring/../logging/logging.html#configurable-max-document-length">logging specification</a>, and MUST be replaced with an empty document "{ }" if the command is considered sensitive.</td></tr>
-</tbody></table>
-</div>
-<p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
-placeholders as appropriate:</p>
-<blockquote>
-<p>Command "{{commandName}}" started on database "{{databaseName}}" using a connection with driver-generated ID
-{{driverConnectionId}} and server-generated ID {{serverConnectionId}} to {{serverHost}}:{{serverPort}} with service ID
-{{serviceId}}. The requestID is {{requestId}} and the operation ID is {{operationId}}. Command: {{command}}</p>
-</blockquote>
-<h4 id="command-succeeded-message"><a class="header" href="#command-succeeded-message">Command Succeeded Message</a></h4>
-<p>In addition to the common fields, command succeeded messages MUST contain the following key-value pairs:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
-<tr><td>message</td><td>String</td><td>"Command succeeded"</td></tr>
-<tr><td>durationMS</td><td>Int32/Int64/Double</td><td>The execution time for the command in milliseconds. The calculated value MUST be the time to send the message and receive the reply from the server and MAY include BSON serialization and/or deserialization.</td></tr>
-<tr><td>reply</td><td>String</td><td>Relaxed extJSON representation of the reply. This document MUST be truncated appropriately according to rules defined in the <a href="command-logging-and-monitoring/../logging/logging.html#configurable-max-document-length">logging specification</a>, and MUST be replaced with an empty document "{ }" if the command is considered sensitive.</td></tr>
-</tbody></table>
-</div>
-<p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
-placeholders as appropriate:</p>
-<blockquote>
-<p>Command "{{commandName}}" succeeded on database "{{databaseName}}" in {{durationMS}} ms using a connection with
-driver-generated ID {{driverConnectionId}} and server-generated ID {{serverConnectionId}} to
-{{serverHost}}:{{serverPort}} with service ID {{serviceId}}. The requestID is {{requestId}} and the operation ID is
-{{operationId}}. Command reply: {{command}}</p>
-</blockquote>
-<h4 id="command-failed-message"><a class="header" href="#command-failed-message">Command Failed Message</a></h4>
-<p>In addition to the common fields, command failed messages MUST contain the following key-value pairs:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
-<tr><td>message</td><td>String</td><td>"Command failed"</td></tr>
-<tr><td>durationMS</td><td>Int32/Int64/Double</td><td>The execution time for the command in milliseconds. The calculated value MUST be the time to send the message and receive the reply from the server and MAY include BSON serialization and/or deserialization.</td></tr>
-<tr><td>failure</td><td>Flexible</td><td>The error. The type and format of this value is flexible; see the <a href="command-logging-and-monitoring/../logging/logging.html#representing-errors-in-log-messages">logging specification</a> for details on representing errors in log messages. If the command is considered sensitive, the error MUST be redacted and replaced with a language-appropriate alternative for a redacted error, e.g. an empty string, empty document, or null.</td></tr>
-</tbody></table>
-</div>
-<p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
-placeholders as appropriate:</p>
-<blockquote>
-<p>Command "{{commandName}}" failed on database "{{databaseName}}" in {{durationMS}} ms using a connection with
-driver-generated ID {{driverConnectionId}} and server-generated ID {{serverConnectionId}} to
-{{serverHost}}:{{serverPort}} with service ID {{serviceId}}. The requestID is {{requestId}} and the operation ID is
-{{operationId}}. Error: {{error}}</p>
-</blockquote>
-<h3 id="testing"><a class="header" href="#testing">Testing</a></h3>
-<p>See the README in the test directory for requirements and guidance.</p>
-<h2 id="qa-12"><a class="header" href="#qa-12">Q&amp;A</a></h2>
-<h3 id="why-is-the-command-document-only-available-in-the-commandstartevent"><a class="header" href="#why-is-the-command-document-only-available-in-the-commandstartevent">Why is the command document only available in the <code>CommandStartEvent</code>?</a></h3>
-<p>Some drivers may realize the command document as raw BSON, treating it as a component of the message transmitted to the
-server and stored in an internal buffer. By the time the server's response is received, this buffer may have been
-released. Requiring the retention of this buffer until command completion could result in unacceptable performance
-penalties, particularly when event listeners are introduced.</p>
-<h2 id="changelog-45"><a class="header" href="#changelog-45">Changelog</a></h2>
-<ul>
-<li>
-<p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
-</li>
-<li>
-<p>2024-09-11: Migrated from reStructuredText to Markdown.</p>
-</li>
-<li>
-<p>2015-09-16: Removed <code>limit</code> from find test with options to support 3.2.<br />
-Changed find test read preference to <code>primaryPreferred</code>.</p>
-</li>
-<li>
-<p>2015-10-01: Changed find test with a kill cursors to not run on server versions<br />
-greater than 3.0. Added a find test with no kill cursors command which only runs on 3.1 and higher. Added notes on
-which tests should run based on server versions.</p>
-</li>
-<li>
-<p>2015-10-19: Changed batchSize in the 3.2 find tests to expect the remaining value.</p>
-</li>
-<li>
-<p>2015-10-31: Changed find test on 3.1 and higher to ignore being run on sharded clusters.</p>
-</li>
-<li>
-<p>2015-11-22: Specify how to merge OP_MSG document sequences into command-started events.</p>
-</li>
-<li>
-<p>2016-03-29: Added note on guarantee of the request ids.</p>
-</li>
-<li>
-<p>2016-11-02: Added clause for not upconverting commands larger than maxBsonSize.</p>
-</li>
-<li>
-<p>2018-04-16: Made inclusion of BSON serialization/deserialization in command<br />
-durations to be optional.</p>
-</li>
-<li>
-<p>2020-02-12: Added legacy hello <code>speculativeAuthenticate</code> to the list of<br />
-values that should be redacted.</p>
-</li>
-<li>
-<p>2021-04-15: Added <code>serviceId</code> field to events.</p>
-</li>
-<li>
-<p>2021-05-05: Updated to use hello and legacy hello.</p>
-</li>
-<li>
-<p>2021-08-30: Added <code>serverConnectionId</code> field to <code>CommandStartedEvent</code>,<br />
-<code>CommandSucceededEvent</code> and <code>CommandFailedEvent</code>.</p>
-</li>
-<li>
-<p>2022-05-18: Converted legacy tests to the unified test format.</p>
-</li>
-<li>
-<p>2022-09-02: Remove material that only applies to MongoDB versions &lt; 3.6.</p>
-</li>
-<li>
-<p>2022-10-05: Remove spec front matter and reformat changelog.</p>
-</li>
-<li>
-<p>2022-10-11: Add command logging information and tests.</p>
-</li>
-<li>
-<p>2022-11-16: Update sensitive command tests to only run on server versions where the commands are supported.</p>
-</li>
-<li>
-<p>2022-12-13: Updated log message <code>serverPort</code> field description to clarify drivers should populate it with the<br />
-default port 27017 when relevant. Updated suggested unstructured forms of log messages to more clearly label
-connection IDs and use more readable server address representations.</p>
-</li>
-<li>
-<p>2023-03-23: Updated <code>serverConnectionId</code> field to be Int64 as long-running servers can return Int64.</p>
-</li>
-<li>
-<p>2023-06-13: Added <code>databaseName</code> field to <code>CommandFailedEvent</code> and <code>CommandSucceededEvent</code>.<br />
-Updated suggested unstructured forms of log messages reflecting the changes.</p>
-</li>
-<li>
-<p>2023-10-19: Add Q&amp;A section</p>
-</li>
-</ul>
+<div style="break-before: page; page-break-before: always;"></div><p>.. note::
+This specification has been converted to Markdown and renamed to
+<code>command-logging-and-monitoring.md &lt;command-logging-and-monitoring.md&gt;</code>_.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="sdam-logging-and-monitoring-specification"><a class="header" href="#sdam-logging-and-monitoring-specification">SDAM Logging and Monitoring Specification</a></h1>
 <ul>
 <li>Status: Accepted</li>
@@ -28580,11 +28139,11 @@ Updated suggested unstructured forms of log messages reflecting the changes.</p>
 <p>The SDAM logging and monitoring specification defines a set of behaviors in the driver for providing runtime information
 about server discovery and monitoring (SDAM) in log messages, as well as in events that users can consume
 programmatically, either directly or by integrating with third-party APM libraries.</p>
-<h3 id="definitions-12"><a class="header" href="#definitions-12">Definitions</a></h3>
-<h4 id="meta-44"><a class="header" href="#meta-44">META</a></h4>
+<h3 id="definitions-11"><a class="header" href="#definitions-11">Definitions</a></h3>
+<h4 id="meta-43"><a class="header" href="#meta-43">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-28"><a class="header" href="#terms-28">Terms</a></h4>
+<h4 id="terms-27"><a class="header" href="#terms-27">Terms</a></h4>
 <p><code>ServerAddress</code></p>
 <blockquote>
 <p>The term <code>ServerAddress</code> refers to the implementation in the driver's language of a server host/port pair. This may be
@@ -28600,16 +28159,16 @@ etc.). This may be a string or object. The name of the object is NOT REQUIRED.</
 <p>The term <code>Server</code> refers to the implementation in the driver's language of an abstraction of a mongod or mongos
 process, or a load balancer, as defined by the <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#server">SDAM specification</a>.</p>
 </blockquote>
-<h3 id="specification-41"><a class="header" href="#specification-41">Specification</a></h3>
-<h3 id="guidance-6"><a class="header" href="#guidance-6">Guidance</a></h3>
-<h4 id="documentation-7"><a class="header" href="#documentation-7">Documentation</a></h4>
+<h3 id="specification-40"><a class="header" href="#specification-40">Specification</a></h3>
+<h3 id="guidance-5"><a class="header" href="#guidance-5">Guidance</a></h3>
+<h4 id="documentation-6"><a class="header" href="#documentation-6">Documentation</a></h4>
 <p>The documentation provided in the code below is merely for driver authors and SHOULD NOT be taken as required
 documentation for the driver.</p>
-<h4 id="messages-and-events-1"><a class="header" href="#messages-and-events-1">Messages and Events</a></h4>
+<h4 id="messages-and-events"><a class="header" href="#messages-and-events">Messages and Events</a></h4>
 <p>All drivers MUST implement the specified event types as well as log messages.</p>
 <p>Implementation details are noted below when a specific implementation is required. Within each event and log message,
 all properties are REQUIRED unless noted otherwise.</p>
-<h4 id="naming-7"><a class="header" href="#naming-7">Naming</a></h4>
+<h4 id="naming-6"><a class="header" href="#naming-6">Naming</a></h4>
 <p>All drivers MUST name types, properties, and log message values as defined in the following sections. Exceptions to this
 rule are noted in the appropriate section. Class and interface names may vary according to the driver and language best
 practices.</p>
@@ -28618,7 +28177,7 @@ practices.</p>
 not strictly mandated in this specification.</p>
 <p>Similarly, as described in the <a href="server-discovery-and-monitoring/../logging/logging.html#implementation-requirements">logging specification</a> the driver
 SHOULD emit log messages in a manner that is standard for the language.</p>
-<h3 id="guarantees-1"><a class="header" href="#guarantees-1">Guarantees</a></h3>
+<h3 id="guarantees"><a class="header" href="#guarantees">Guarantees</a></h3>
 <h4 id="event-order-and-concurrency"><a class="header" href="#event-order-and-concurrency">Event Order and Concurrency</a></h4>
 <p>Events and log messages MUST be published in the order that their corresponding changes are processed in the driver.
 Events MUST NOT be published concurrently for the same topology ID or server ID, but MAY be published concurrently for
@@ -28629,7 +28188,7 @@ differing topology IDs and server IDs.</p>
 has either a correlating "server heartbeat succeeded" or "server heartbeat failed" log message.</p>
 <p>Drivers that use the streaming heartbeat protocol MUST publish a <code>ServerHeartbeatStartedEvent</code> and "server heartbeat
 started" log message before attempting to read the next <code>hello</code> or legacy hello exhaust response.</p>
-<h4 id="error-handling-5"><a class="header" href="#error-handling-5">Error Handling</a></h4>
+<h4 id="error-handling-4"><a class="header" href="#error-handling-4">Error Handling</a></h4>
 <p>If an exception occurs while sending the <code>hello</code> or legacy hello operation to the server, the driver MUST generate a
 <code>ServerHeartbeatFailedEvent</code> and "server heartbeat failed" log message with the exception or message and re-raise the
 exception. The SDAM mandated retry of the <code>hello</code> or legacy hello call should be visible to consumers.</p>
@@ -28643,14 +28202,14 @@ previous description in the events and log messages will never be null.</p>
 <h4 id="initial-topology-description"><a class="header" href="#initial-topology-description">Initial Topology Description</a></h4>
 <p>The first <code>TopologyDescriptionChangedEvent</code> to be emitted from a monitored Topology MUST set its <code>previousDescription</code>
 property to be a <code>TopologyDescription</code> object in the "unknown" state.</p>
-<h3 id="events-api-1"><a class="header" href="#events-api-1">Events API</a></h3>
+<h3 id="events-api"><a class="header" href="#events-api">Events API</a></h3>
 <p>The first <code>TopologyDescriptionChangedEvent</code> to be emitted from a monitored Topology MUST set its <code>previousDescription</code>
 property to be a <code>TopologyDescription</code> object in the "unknown" state.</p>
 <h2 id="closing-topology-description"><a class="header" href="#closing-topology-description">Closing Topology Description</a></h2>
 <p>When a <code>Topology</code> object or equivalent is being shut-down or closed, the driver MUST change the <code>TopologyDescription</code> to
 an "unknown" state.</p>
 <hr />
-<h2 id="events-api-2"><a class="header" href="#events-api-2">Events API</a></h2>
+<h2 id="events-api-1"><a class="header" href="#events-api-1">Events API</a></h2>
 <p>This specification defines 9 main events that MUST be published in the scenarios described. 6 of these events are the
 core behaviour within the cluster lifecycle, and the remaining 3 server heartbeat events are fired from the server
 monitor and follow the guidelines for publishing in the command monitoring specification.</p>
@@ -28900,7 +28459,7 @@ preference is passed to <code>hasReadableServer</code>, the driver MUST default 
 <tr><td>LoadBalanced</td><td><code>true</code></td><td><code>true</code></td></tr>
 </tbody></table>
 </div>
-<h3 id="log-messages-2"><a class="header" href="#log-messages-2">Log Messages</a></h3>
+<h3 id="log-messages-1"><a class="header" href="#log-messages-1">Log Messages</a></h3>
 <p>Please refer to the <a href="server-discovery-and-monitoring/../logging/logging.html">logging specification</a> for details on logging implementations in general,
 including log levels, log components, and structured versus unstructured logging.</p>
 <p>Drivers MUST support logging of SDAM information via the following types of log messages. These messages MUST be logged
@@ -28913,7 +28472,7 @@ equivalent log message.</p>
 <p>The types used in the structured message definitions below are demonstrative, and drivers MAY use similar types instead
 so long as the information is present (e.g. a double instead of an integer, or a string instead of an integer if the
 structured logging framework does not support numeric types.)</p>
-<h4 id="common-fields-3"><a class="header" href="#common-fields-3">Common Fields</a></h4>
+<h4 id="common-fields-2"><a class="header" href="#common-fields-2">Common Fields</a></h4>
 <p>The following key-value pairs are common to all or several log messages and MUST be included in the "applicable
 messages":</p>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Applicable Messages</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
@@ -29045,7 +28604,7 @@ placeholders as appropriate:</p>
 </blockquote>
 <h3 id="tests-2"><a class="header" href="#tests-2">Tests</a></h3>
 <p>See the <a href="server-discovery-and-monitoring/tests/monitoring/README.html">README</a>.</p>
-<h2 id="changelog-46"><a class="header" href="#changelog-46">Changelog</a></h2>
+<h2 id="changelog-45"><a class="header" href="#changelog-45">Changelog</a></h2>
 <ul>
 <li>
 <p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
@@ -29092,11 +28651,11 @@ added requirements for SDAM log messages.</p>
 <hr />
 <h2 id="abstract-44"><a class="header" href="#abstract-44">Abstract</a></h2>
 <p>This specification defines requirements for drivers' logging configuration and behavior.</p>
-<h2 id="meta-45"><a class="header" href="#meta-45">META</a></h2>
+<h2 id="meta-44"><a class="header" href="#meta-44">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-42"><a class="header" href="#specification-42">Specification</a></h2>
-<h3 id="terms-29"><a class="header" href="#terms-29">Terms</a></h3>
+<h2 id="specification-41"><a class="header" href="#specification-41">Specification</a></h2>
+<h3 id="terms-28"><a class="header" href="#terms-28">Terms</a></h3>
 <p><strong>Structured logging</strong></p>
 <p>Structured logging refers to producing log messages in a structured format, i.e. a series of key-value pairs, which can
 be converted to external formats such as JSON.</p>
@@ -29414,7 +28973,7 @@ infinitely if each write to store a log message generates additional log message
 issue in drivers that already produce log messages, or with the command monitoring API, but if users start to run into
 this issue, we could try to address it at the specification level by e.g. requiring drivers to support disabling logging
 on individual clients or for particular namespaces.</p>
-<h2 id="changelog-47"><a class="header" href="#changelog-47">Changelog</a></h2>
+<h2 id="changelog-46"><a class="header" href="#changelog-46">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-03-06: Migrated from reStructuredText to Markdown.</p>
@@ -29441,6 +29000,7 @@ programmatically and write to a file themselves. Require that programmatic confi
 environment variables.</p>
 </li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="connection-pool-logging-1"><a class="header" href="#connection-pool-logging-1">Connection Pool Logging</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="unified-test-format"><a class="header" href="#unified-test-format">Unified Test Format</a></h1>
 <ul>
 <li>Status: Accepted</li>
@@ -29453,7 +29013,7 @@ environment variables.</p>
 deployment. By conforming various spec tests to a single schema, drivers can implement a single test runner to execute
 acceptance tests for multiple specifications, thereby reducing maintenance of existing specs and implementation time for
 new specifications.</p>
-<h2 id="meta-46"><a class="header" href="#meta-46">META</a></h2>
+<h2 id="meta-45"><a class="header" href="#meta-45">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <p>This document tends to use "SHOULD" more frequently than other specifications, but mainly in the context of providing
@@ -29474,8 +29034,8 @@ guidance on writing test files. This is discussed in more detail in <a href="uni
 </ul>
 <p>This is not an exhaustive list. Specifications that are known to not be supported by this format may be discussed under
 <a href="unified-test-format/unified-test-format.html#future-work">Future Work</a>.</p>
-<h2 id="specification-43"><a class="header" href="#specification-43">Specification</a></h2>
-<h3 id="terms-30"><a class="header" href="#terms-30">Terms</a></h3>
+<h2 id="specification-42"><a class="header" href="#specification-42">Specification</a></h2>
+<h3 id="terms-29"><a class="header" href="#terms-29">Terms</a></h3>
 <p><strong>Entity</strong> Any object or value that is indexed by a unique name and stored in the <a href="unified-test-format/unified-test-format.html#entity-map">Entity Map</a>. This will
 typically be a driver object (e.g. client, session) defined in <a href="unified-test-format/unified-test-format.html#createentities">createEntities</a> but may also be a
 <a href="unified-test-format/unified-test-format.html#operation_saveResultAsEntity">saved operation result</a>. A exhaustive list of supported types is presented in
@@ -30893,6 +30453,20 @@ Because drivers do not consistently propagate errors encountered while closing a
 NOT specify any operations for a client entity or any entity descended from it following a <code>close</code> operation on it, as
 driver behavior when an operation is attempted on a closed client or one of its descendant objects is not consistent.</p>
 <p><span id="client_createChangeStream"></span></p>
+<h4 id="appendmetadata"><a class="header" href="#appendmetadata">appendMetadata</a></h4>
+<p>Appends client metadata to the client.</p>
+<p>The following arguments are supported:</p>
+<ul>
+<li><code>driverInfoOptions</code>: Required object with the following fields:
+<ul>
+<li><code>name</code>: Required string. The name of the wrapping library or framework.</li>
+<li><code>version</code>: Optional string. The version of the wrapping library or framework.</li>
+<li><code>platform</code>: Optional string. The platform of the wrapping library or framework.</li>
+</ul>
+</li>
+</ul>
+<p>See the <a href="unified-test-format/../mongodb-handshake/handshake.html#metadata-updates-after-mongoclient-initialization">handshake spec</a> for more
+details.</p>
 <h4 id="createchangestream"><a class="header" href="#createchangestream">createChangeStream</a></h4>
 <p>Creates a cluster-level change stream and ensures that the server-side cursor has been created.</p>
 <p>This operation proxies the client's <code>watch</code> method and supports the same arguments and options. Test files SHOULD NOT
@@ -32494,8 +32068,11 @@ CRUD spec and this spec and its schema.</p>
 <p>As discussed in <a href="unified-test-format/unified-test-format.html#executing-an-operation">Executing an Operation</a>, test runners MUST raise errors for unsupported
 operations and arguments. This is a concession until such time that better processes can be established for versioning
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
-<h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
+<h2 id="changelog-47"><a class="header" href="#changelog-47">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-06-09: Add <code>appendMetadata</code> operation.</p>
+</li>
 <li>
 <p>2025-06-04: Deprecate the <code>serverless</code> runOnRequirement</p>
 </li>
@@ -32785,7 +32362,7 @@ MongoClient using a valid connection string without auth credentials and execute
 <p>Test that the driver can establish a connection with Atlas Data Lake with authentication. For these tests, create a
 MongoClient using a valid connection string with SCRAM-SHA-1 and credentials from the drivers-evergreen-tools ADL
 configuration and execute a ping command. Repeat this test using SCRAM-SHA-256.</p>
-<h2 id="changelog-49"><a class="header" href="#changelog-49">Changelog</a></h2>
+<h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-03-08: Convert legacy ADL tests to unified format. Convert test README from reStructuredText to Markdown.</p>
@@ -33372,7 +32949,7 @@ minimize disk I/O impact?); same AWS zone as client</p>
 <p>TBD: spec system to hold scores over time</p>
 <h3 id="datasets"><a class="header" href="#datasets">Datasets</a></h3>
 <p>TBD: generated datasets should be park in S3 or somewhere for retrieval by URL</p>
-<h2 id="changelog-50"><a class="header" href="#changelog-50">Changelog</a></h2>
+<h2 id="changelog-49"><a class="header" href="#changelog-49">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-12-23: Add Client and Collection BulkWrite benchmarks</p>
@@ -33428,7 +33005,7 @@ iterations in a reasonable time (e.g. file sizes and number of documents in cert
 <p>The official BSON specification does not include test data, so this pseudo-specification describes tests for BSON
 encoding and decoding. It also includes tests for MongoDB's "Extended JSON" specification (hereafter abbreviated as
 <code>extjson</code>).</p>
-<h2 id="meta-47"><a class="header" href="#meta-47">Meta</a></h2>
+<h2 id="meta-46"><a class="header" href="#meta-46">Meta</a></h2>
 <p>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="motivation-for-change-18"><a class="header" href="#motivation-for-change-18">Motivation for Change</a></h2>
@@ -33452,7 +33029,7 @@ pseudo-specification provides such tests.</p>
 <li>Replace or extend the official BSON spec at <a href="https://bsonspec.org">https://bsonspec.org</a>.</li>
 <li>Provide a formal specification for <code>extjson</code>.</li>
 </ul>
-<h2 id="specification-44"><a class="header" href="#specification-44">Specification</a></h2>
+<h2 id="specification-43"><a class="header" href="#specification-43">Specification</a></h2>
 <p>The specification for BSON lives at <a href="https://bsonspec.org">https://bsonspec.org</a>. The <code>extjson</code> format specification is
 <a href="bson-corpus/../extended-json/extended-json.html">here</a>.</p>
 <h2 id="test-plan-34"><a class="header" href="#test-plan-34">Test Plan</a></h2>
@@ -33659,7 +33236,7 @@ creating raw BSON bytes or constructing BSON-specific type classes):</p>
 <p>Depending on how drivers implement BSON encoding, they MAY expect an error when constructing a type class (e.g. BSON
 Document or Regex class) or when encoding a language representation to BSON (e.g. converting a dictionary, which might
 allow null bytes in its keys, to raw BSON bytes).</p>
-<h2 id="implementation-notes-6"><a class="header" href="#implementation-notes-6">Implementation Notes</a></h2>
+<h2 id="implementation-notes-5"><a class="header" href="#implementation-notes-5">Implementation Notes</a></h2>
 <h3 id="a-tool-for-visualizing-bson"><a class="header" href="#a-tool-for-visualizing-bson">A tool for visualizing BSON</a></h3>
 <p>The test directory includes a Perl script <code>bsonview</code>, which will decompose and highlight elements of a BSON document. It
 may be used like this:</p>
@@ -33710,7 +33287,7 @@ to the Extended JSON Specification.</p>
 different in different cases, but the <code>canonical_bson</code> field is the same. This is by design so that each case stands
 alone and can be confirmed to be internally consistent via the assertions. This makes for easier and safer test case
 development.</p>
-<h2 id="changelog-51"><a class="header" href="#changelog-51">Changelog</a></h2>
+<h2 id="changelog-50"><a class="header" href="#changelog-50">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-01-22: Migrated from reStructuredText to Markdown.</p>
@@ -33885,11 +33462,11 @@ communication.</p>
 <h2 id="abstract-48"><a class="header" href="#abstract-48">Abstract</a></h2>
 <p>This specification is about the ability for drivers to automate tests for "Functions as a Service" from continuous
 integration.</p>
-<h2 id="meta-48"><a class="header" href="#meta-48">META</a></h2>
+<h2 id="meta-47"><a class="header" href="#meta-47">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-45"><a class="header" href="#specification-45">Specification</a></h2>
-<h3 id="terms-31"><a class="header" href="#terms-31">Terms</a></h3>
+<h2 id="specification-44"><a class="header" href="#specification-44">Specification</a></h2>
+<h3 id="terms-30"><a class="header" href="#terms-30">Terms</a></h3>
 <h4 id="faas-2"><a class="header" href="#faas-2">FaaS</a></h4>
 <p>"Function as a Service", such as AWS Lambda.</p>
 <h3 id="implementing-automated-faas-tests"><a class="header" href="#implementing-automated-faas-tests">Implementing Automated FaaS Tests</a></h3>
@@ -34134,113 +33711,13 @@ limit. The variant itself MUST have the SAM CLI installed.</p>
 <li>Calls the frozen lambda function again.</li>
 <li>Deletes the Lambda function.</li>
 </ul>
-<h2 id="changelog-52"><a class="header" href="#changelog-52">Changelog</a></h2>
+<h2 id="changelog-51"><a class="header" href="#changelog-51">Changelog</a></h2>
 <ul>
 <li>2024-02-27: Migrated from reStructuredText to Markdown.</li>
 <li>2023-08-21: Drivers MUST assert that the streaming protocol is disabled in the Lambda function.</li>
 <li>2023-08-17: Fixed URI typo, added host note, increase assume role duration.</li>
 <li>2023-06-22: Updated evergreen configuration to use task groups.</li>
 <li>2023-04-14: Added list of supported variants, added additional template config.</li>
-</ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="atlas-serverless-tests"><a class="header" href="#atlas-serverless-tests">Atlas Serverless Tests</a></h1>
-<ul>
-<li>Status: Obsolete</li>
-<li>Minimum Server Version: N/A</li>
-</ul>
-<hr />
-<h2 id="obsolescence-notice"><a class="header" href="#obsolescence-notice">Obsolescence Notice</a></h2>
-<p>This document is obsolete and there is no longer a requirement for drivers to test against Atlas Serverless. The
-specification is preserved for historical purposes only.</p>
-<h2 id="introduction-2"><a class="header" href="#introduction-2">Introduction</a></h2>
-<p>This file describes a subset of existing tests that drivers MUST use to assert compatibility with Atlas Serverless.</p>
-<h2 id="serverless-configuration"><a class="header" href="#serverless-configuration">Serverless Configuration</a></h2>
-<p>These tests MUST be run against a live Atlas Serverless instance. A new instance MUST be created each time the test
-suite is run, and that instance MUST be used for all of the tests required by this specification. Once the tests are
-finished, the instance MUST be deleted regardless of the outcome of the tests. The
-<a href="https://github.com/mongodb-labs/drivers-evergreen-tools/tree/master/.evergreen/serverless">serverless directory in the drivers-evergreen-tools repository</a>
-contains scripts for creating and deleting Atlas Serverless instances, and the <code>config.yml</code> contains an example
-Evergreen configuration that uses them to run the tests. It can take up to 15 minutes or so to provision a new Atlas
-Serverless instance, so it is recommended to create one manually via the scripts in drivers-evergreen-tools that can be
-reused for the initial implementation of the tests before moving to Evergreen patches.</p>
-<p>Drivers MUST use the
-<a href="https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/serverless/create-instance.sh">create-instance.sh</a>
-script in <code>drivers-evergreen-tools</code> to create a new Atlas Serverless instance for Evergreen tasks. The script writes a
-URI for the newly created instance to a YAML expansions file:</p>
-<ul>
-<li><code>SERVERLESS_URI</code> An SRV connection string to a load balancer fronting a single Atlas Serverless proxy.</li>
-</ul>
-<p>The <code>expansions.update</code> Evergreen command can be used to read this file and copy the URI into a <code>SERVERLESS_URI</code>
-environment variable.</p>
-<h2 id="test-runner-configuration"><a class="header" href="#test-runner-configuration">Test Runner Configuration</a></h2>
-<p>All tests MUST be run with wire protocol compression and authentication enabled.</p>
-<p>In contrast to the <a href="serverless-testing/../load-balancers/tests/README.html">Load Balancer testing</a>, which has separate URIs for load
-balancers fronting a single or multiple servers, there is only a single URI for Atlas Serverless testing (i.e.
-<code>SERVERLESS_URI</code>).</p>
-<p>The TXT record for <code>SERVERLESS_URI</code> already specifies <code>loadBalanced=true</code> so drivers need not add that.</p>
-<p><code>SERVERLESS_URI</code> does not include authentication credentials. Drivers MUST specify a username and password (see:
-<a href="serverless-testing/index.html#required-variables">Required Variables</a>) when connecting to <code>SERVERLESS_URI</code>.</p>
-<p>Drivers MUST use <code>SERVERLESS_URI</code> to configure both internal clients and clients under test (as described in the
-<a href="serverless-testing/../unified-test-format/unified-test-format.html">Unified Test Format spec</a>).</p>
-<h3 id="required-variables"><a class="header" href="#required-variables">Required Variables</a></h3>
-<p>Managing the Atlas Serverless instances and connecting to them requires a few variables to be specified. The variables
-marked "private" are confidential and MUST be specified as private Evergreen variables or used only in private Evergreen
-projects. If using a public Evergreen project, xtrace MUST be disabled when using these variables to help prevent
-accidental leaks.</p>
-<ul>
-<li><code>${SERVERLESS_DRIVERS_GROUP}</code>: Contains the ID of the Atlas group dedicated to drivers testing of Atlas Serverless.
-The backing multi-tenant MongoDB (MTM) MUST have the <code>SINGLE_TARGET_SERVERLESS_DEPLOYMENT</code> feature flag enabled
-(<a href="https://jira.mongodb.org/browse/CLOUDP-117288">CLOUDP-117288</a>).</li>
-<li><code>${SERVERLESS_API_PUBLIC_KEY}</code>: The public key required to use the Atlas API for managing Atlas Serverless instances.</li>
-<li><code>${SERVERLESS_API_PRIVATE_KEY}</code>: (private) The private key required to use the Atlas API for managing Atlas Serverless
-instances.</li>
-<li><code>${SERVERLESS_ATLAS_USER}</code>: (private) The SCRAM username used to authenticate to any Atlas Serverless instance created
-in the drivers testing Atlas group.</li>
-<li><code>${SERVERLESS_ATLAS_PASSWORD}</code>: (private) The SCRAM password used to authenticate to any Atlas Serverless instance
-created in the drivers testing Atlas group.</li>
-</ul>
-<h2 id="existing-spec-tests"><a class="header" href="#existing-spec-tests">Existing Spec Tests</a></h2>
-<p>Unified spec tests from all specifications MUST be run against Atlas Serverless. Since schema version 1.4, unified tests
-can specify Atlas Serverless compatibility in their <code>runOnRequirements</code>.</p>
-<p>Any prose and legacy spec tests defined in the following specifications MUST be included in a driver's Atlas Serverless
-testing suite:</p>
-<ul>
-<li>CRUD</li>
-<li>Load Balancer</li>
-<li>Retryable Reads</li>
-<li>Retryable Writes</li>
-<li>Sessions</li>
-<li>Transactions (excluding convenient API)
-<ul>
-<li>Note: the killAllSessions command is not supported on Serverless, so the transactions tests may hang if an
-individual test leaves a transaction open when it finishes
-(<a href="https://jira.mongodb.org/browse/CLOUDP-84298">CLOUDP-84298</a>).</li>
-</ul>
-</li>
-<li>Versioned/Stable API</li>
-<li>Client Side Encryption
-<ul>
-<li>Drivers MUST test with a version of the <code>crypt_shared</code> shared library that matches the MongoDB Server version
-running in Serverless. See
-<a href="serverless-testing/../client-side-encryption/client-side-encryption.html#enabling-crypt_shared">Using crypt_shared</a>.</li>
-</ul>
-</li>
-</ul>
-<p>Note that the legacy JSON/YAML test formats for these specifications were updated to include a new <code>runOnRequirement</code>
-specifically for Atlas Serverless testing. To ensure these requirements are enforced properly, the runner MUST be
-informed that it is running against an Atlas Serverless instance through some indicator (e.g. an environment variable).</p>
-<p>Note that since Atlas Serverless testing uses a load balancer fronting a single Atlas Serverless proxy, the connection
-string cannot be modified for <code>useMultipleMongoses</code>. Drivers SHOULD ignore <code>useMultipleMongoses</code> for purposes of Atlas
-Serverless testing.</p>
-<h2 id="other-tests"><a class="header" href="#other-tests">Other Tests</a></h2>
-<p>Any other existing tests for cursor behavior that a driver may have implemented independently of any spec requirements
-SHOULD also be included in the driver's Atlas Serverless testing suite. Note that change streams are not supported by
-the proxy, so their spec and prose tests MUST be skipped.</p>
-<h2 id="changelog-53"><a class="header" href="#changelog-53">Changelog</a></h2>
-<ul>
-<li>2024-09-02: Migrated from reStructuredText to Markdown.</li>
-<li>2022-10-05: Add spec front matter</li>
-<li>2022-04-22: Testing uses a load balancer fronting a single proxy.</li>
-<li>2021-08-25: Update tests for load balanced serverless instances.</li>
 </ul>
 
                     </main>
