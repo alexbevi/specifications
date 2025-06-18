@@ -334,11 +334,6 @@ operation.</p>
 <p>See <a href="#cursor-operations">Cursor Operations</a> for a list of operations.</p>
 </li>
 <li>
-<p>Event list. See <a href="#entity_client_storeEventsAsEntities">storeEventsAsEntities</a>. The event list MUST store BSON
-documents. The type of the list itself is not prescribed by this specification. Test runner MAY use a BSON array or
-a thread-safe list data structure to implement the event list.</p>
-</li>
-<li>
 <p>All known BSON types and/or equivalent language types for the target driver. For the present version of the spec, the
 following BSON types are known: 0x01-0x13, 0x7F, 0xFF.</p>
 <p>Tests SHOULD NOT utilize deprecated types (e.g. 0x0E: Symbol), since they may not be supported by all drivers and
@@ -623,21 +618,6 @@ ignored. Authentication SHOULD be disabled when this property is true, i.e. <a h
 be false for each <code>runOnRequirement</code>. See
 <a href="#rationale_observeSensitiveCommands">rationale_observeSensitiveCommands</a>.</li>
 </ul>
-<p><span id="entity_client_storeEventsAsEntities"></span></p>
-<ul>
-<li>
-<p><code>storeEventsAsEntities</code>: Optional array of one or more <a href="#storeeventsasentity">storeEventsAsEntity</a> objects. Each
-object denotes an entity name and one or more events to be collected and stored in that entity. See
-<a href="#storeeventsasentity">storeEventsAsEntity</a> for implementation details.</p>
-<p>Note: the implementation of <code>storeEventsAsEntities</code> is wholly independent from <code>observeEvents</code> and
-<code>ignoreCommandMonitoringEvents</code>.</p>
-<p>Example option value:</p>
-<pre><code class="language-yaml">storeEventsAsEntities:
-  - id: client0_events
-    events: [PoolCreatedEvent, ConnectionCreatedEvent, CommandStartedEvent]
-</code></pre>
-</li>
-</ul>
 <p><span id="entity_client_observeLogMessages"></span></p>
 <ul>
 <li><code>observeLogMessages</code>: Optional object where the key names are log <a href="../logging/logging.html#components">components</a> and
@@ -821,52 +801,6 @@ waiting for operations to be dispatched to it later on by <a href="#runonthread"
 </ul>
 </li>
 </ul>
-<h4 id="storeeventsasentity"><a class="header" href="#storeeventsasentity">storeEventsAsEntity</a></h4>
-<p>A list of one or more events that will be observed on a client and collectively stored within an entity. This object is
-used within <a href="#entity_client_storeEventsAsEntities">storeEventsAsEntities</a>.</p>
-<p>The structure of this object is as follows:</p>
-<ul>
-<li><code>id</code>: Required string. Unique name for this entity.</li>
-<li><code>events</code>: Required array of one or more strings, which denote the events to be collected. Currently, only the
-following <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">CMAP</a> and
-<a href="../command-logging-and-monitoring/command-logging-and-monitoring.html">command monitoring</a> events MUST be supported:
-<ul>
-<li>PoolCreatedEvent</li>
-<li>PoolReadyEvent</li>
-<li>PoolClearedEvent</li>
-<li>PoolClosedEvent</li>
-<li>ConnectionCreatedEvent</li>
-<li>ConnectionReadyEvent</li>
-<li>ConnectionClosedEvent</li>
-<li>ConnectionCheckOutStartedEvent</li>
-<li>ConnectionCheckOutFailedEvent</li>
-<li>ConnectionCheckedOutEvent</li>
-<li>ConnectionCheckedInEvent</li>
-<li>CommandStartedEvent</li>
-<li>CommandSucceededEvent</li>
-<li>CommandFailedEvent</li>
-</ul>
-</li>
-</ul>
-<p>For the specified entity name, the test runner MUST create the respective entity with a type of "event list", as
-described in <a href="#supported-entity-types">Supported Entity Types</a>. If the entity already exists (such as from a previous
-<a href="#storeeventsasentity">storeEventsAsEntity</a> object) the test runner MUST raise an error.</p>
-<p>The test runner MUST set up an event subscriber for each event named. The event subscriber MUST serialize the events it
-receives into a document, using the documented properties of the event as field names, and append the document to the
-list stored in the specified entity. Additionally, the following fields MUST be stored with each event document:</p>
-<ul>
-<li><code>name</code>: The name of the event (e.g. <code>PoolCreatedEvent</code>). The name of the event MUST be the name used in the respective
-specification that defines the event in question.</li>
-<li><code>observedAt</code>: The time, as the floating-point number of seconds since the Unix epoch, when the event was observed by
-the test runner.</li>
-</ul>
-<p>The test runner MAY omit the <code>command</code> field for CommandStartedEvent and <code>reply</code> field for CommandSucceededEvent.</p>
-<p>If an event field in the driver is of a type that does not directly map to a BSON type (e.g. <code>Exception</code> for the
-<code>failure</code> field of CommandFailedEvent) the test runner MUST convert values of that field to one of the BSON types. For
-example, a test runner MAY store the exception's error message string as the <code>failure</code> field of CommandFailedEvent.</p>
-<p>If the specification defining an event permits deviation in field names, such as <code>connectionId</code> field for
-CommandStartedEvent, the test runner SHOULD use the field names used in the specification when serializing events to
-documents even if the respective field name is different in the driver's event object.</p>
 <h4 id="serverapi"><a class="header" href="#serverapi">serverApi</a></h4>
 <p>Declares an API version for a <a href="#entity_client">client entity</a>.</p>
 <p>The structure of this object is as follows:</p>
@@ -2255,108 +2189,6 @@ referenced entities are defined before any of their dependent entities.</li>
           client: *client0
           databaseName: &amp;database0Name test
 </code></pre>
-<h4 id="loop"><a class="header" href="#loop">loop</a></h4>
-<p>The <code>loop</code> operation executes sub-operations in a loop.</p>
-<p>The following arguments are supported:</p>
-<ul>
-<li>
-<p><code>operations</code>: Required array of <a href="#operation">operation</a> objects. List of operations (henceforth referred to as
-sub-operations) to run on each loop iteration. Each sub-operation must be a valid operation as described in
-<a href="#entity-test-operations">Entity Test Operations</a>.</p>
-<p>Sub-operations SHOULD NOT include the <code>loop</code> operation.</p>
-<p>If, in the course of executing sub-operations, a sub-operation yields an error or failure, the test runner MUST NOT
-execute subsequent sub-operations in the same loop iteration. If <code>storeErrorsAsEntity</code> and/or
-<code>storeFailuresAsEntity</code> options are specified, the loop MUST store the error/failure accordingly and continue to the
-next iteration (i.e. the error/failure will not interrupt the test). If neither <code>storeErrorsAsEntity</code> nor
-<code>storeFailuresAsEntity</code> are specified, the loop MUST terminate and raise the error/failure (i.e. the error/failure
-will interrupt the test).</p>
-</li>
-<li>
-<p><code>storeErrorsAsEntity</code>: Optional string. If specified, the runner MUST capture errors arising during sub-operation
-execution and append a document with error information to the array stored in the specified entity.</p>
-<p>If this option is specified, the test runner MUST check the existence and the type of the entity with the specified
-name before executing the loop. If the entity does not exist, the test runner MUST create it with the type of BSON
-array. If the entity exists and is of type BSON array, the test runner MUST do nothing. If the entity exists and is
-of a different type, the test runner MUST raise an error.</p>
-<p>If this option is specified and <code>storeFailuresAsEntity</code> is not, failures MUST also be captured and appended to the
-array.</p>
-<p>Documents appended to the array MUST contain the following fields:</p>
-<ul>
-<li><code>error</code>: the textual description of the error encountered.</li>
-<li><code>time</code>: the number of (floating-point) seconds since the Unix epoch when the error was encountered.</li>
-</ul>
-</li>
-<li>
-<p><code>storeFailuresAsEntity</code>: Optional string. If specified, the runner MUST capture failures arising during sub-operation
-execution and append a document with failure information to the array stored in the specified entity.</p>
-<p>If this option is specified, the test runner MUST check the existence and the type of the entity with the specified
-name before executing the loop. If the entity does not exist, the test runner MUST create it with the type of BSON
-array. If the entity exists and is of type BSON array, the test runner MUST do nothing. If the entity exists and is
-of a different type, the test runner MUST raise an error.</p>
-<p>If this option is specified and <code>storeErrorsAsEntity</code> is not, errors MUST also be captured and appended to the array.</p>
-<p>Documents appended to the array MUST contain the following fields:</p>
-<ul>
-<li><code>error</code>: the textual description of the failure encountered.</li>
-<li><code>time</code>: the number of (floating-point) seconds since the Unix epoch when the failure was encountered.</li>
-</ul>
-</li>
-<li>
-<p><code>storeSuccessesAsEntity</code>: Optional string. If specified, the runner MUST keep track of the number of sub-operations
-that completed successfully, and store that number in the specified entity. For example, if the loop contains two
-sub-operations, and they complete successfully, each loop execution would increment the number of successes by two.</p>
-<p>If the entity of the specified name already exists, the test runner MUST raise an error.</p>
-</li>
-<li>
-<p><code>storeIterationsAsEntity</code>: Optional string. If specified, the runner MUST keep track of the number of iterations of
-the loop performed, and store that number in the specified entity. The number of loop iterations is counted
-irrespective of whether sub-operations within the iteration succeed or fail.</p>
-<p>If the entity of the specified name already exists, the test runner MUST raise an error.</p>
-</li>
-</ul>
-<p>A <em>failure</em> is when the result or outcome of an operation executed by the test runner differs from its expected outcome.
-For example, an <code>expectResult</code> assertion failing to match a BSON document or an <code>expectError</code> assertion failing to match
-an error message would be considered a failure. An <em>error</em> is any other type of error raised by the test runner. For
-example, an unsupported operation or inability to resolve an entity name would be considered an error.</p>
-<p>This specification permits the test runner to report some failures as errors and some errors as failures. When the test
-runner stores errors and failures as entities it MAY classify conditions as errors and failures in the same way as it
-would when used in the driver's test suite. This includes reporting all errors as failures or all failures as errors.</p>
-<p>If the test runner does not distinguish errors and failures in its reporting, it MAY report both conditions under either
-category, but it MUST report any given condition in at most one category.</p>
-<p>The following termination behavior MUST be implemented by the test runner:</p>
-<ul>
-<li>The test runner MUST provide a way to request termination of loops. This request will be made by the
-<a href="https://mongodb-labs.github.io/drivers-atlas-testing/spec-workload-executor.html">Atlas testing workload executor</a>
-in response to receiving the termination signal from Astrolabe.</li>
-<li>When the termination request is received, the test runner MUST stop looping. If the test runner is looping when the
-termination request is received, the current loop iteration MUST complete to its natural conclusion (success or
-failure). If the test runner is not looping when the termination request is received, it MUST NOT start any new loop
-iterations in either the current test or subsequent tests for the lifetime of the test runner.</li>
-<li>The termination request MUST NOT affect non-loop operations, including any operations after the loop. The tests SHOULD
-NOT be written in such a way that the success or failure of operations that follow loops depends on how many loop
-iterations were performed.</li>
-<li>Receiving the termination request MUST NOT by itself be considered an error or a failure by the test runner.</li>
-</ul>
-<p>The exact mechanism by which the workload executor requests termination of the loop in the test runner, including the
-respective API, is left to the driver.</p>
-<p>Tests SHOULD NOT include multiple loop operations (nested or sequential).</p>
-<p>An example of this operation follows:</p>
-<pre><code class="language-yaml">- name: loop
-  object: testRunner
-  arguments:
-    storeErrorsAsEntity: errors
-    storeFailuresAsEntity: failures
-    storeSuccessesAsEntity: successes
-    storeIterationsAsEntity: iterations
-    operations:
-      - name: find
-        object: *collection0
-        arguments:
-          filter: { _id: { $gt: 1 }}
-          sort: { _id: 1 }
-        expectResult:
-          - _id: 2, x: 22
-          - _id: 3, x: 33
-</code></pre>
 <h4 id="assertnumberconnectionscheckedout"><a class="header" href="#assertnumberconnectionscheckedout">assertNumberConnectionsCheckedOut</a></h4>
 <p>The <code>assertNumberConnectionsCheckedOut</code> operation instructs the test runner to assert that the given number of
 connections are currently checked out for the specified client entity. This operation only applies to drivers that
@@ -3224,6 +3056,11 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-06-10: <strong>Schema version 1.24.</strong></p>
+<p>Deprecate <code>storeEventsAsEntities</code> option for client entities and <code>loop</code> operation in the schema and remove them from
+this spec.</p>
+</li>
 <li>
 <p>2025-06-09: Add <code>appendMetadata</code> operation.</p>
 </li>
