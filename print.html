@@ -555,13 +555,24 @@ subsection below, they MAY decide that <code>from_vector</code> that has a singl
 End Function
 </code></pre>
 <h4 id="validation"><a class="header" href="#validation">Validation</a></h4>
-<p>Drivers MUST validate vector metadata and raise an error if any invariant is violated:</p>
+<p>Drivers MUST validate vector metadata and raise an exception if any invariant is violated:</p>
 <ul>
-<li>Padding MUST be 0 for all dtypes where padding doesn’t apply, and MUST be within [0, 7] for PACKED_BIT.</li>
-<li>A PACKED_BIT vector MUST NOT be empty if padding is in the range [1, 7].</li>
-<li>For a PACKED_BIT vector, ignored bits must be zero.</li>
 <li>When unpacking binary data into a FLOAT32 Vector structure, the length of the binary data following the dtype and
 padding MUST be a multiple of 4 bytes.</li>
+<li>Padding MUST be 0 for all dtypes where padding doesn’t apply, and MUST be within [0, 7] for PACKED_BIT.</li>
+<li>A PACKED_BIT vector MUST NOT be empty if padding is in the range [1, 7].
+<ul>
+<li>For a PACKED_BIT vector with non-zero padding, ignored bits SHOULD be zero.
+<ul>
+<li>When encoding, if ignored bits aren't zero, drivers SHOULD raise an exception, but drivers MAY leave them as-is if
+backwards-compatibility is a concern.</li>
+<li>When decoding, drivers SHOULD raise an exception if decoding non-zero ignored bits, but drivers MAY choose not to
+for backwards compatibility.</li>
+<li>Drivers SHOULD use the next major release to conform to ignored bits being zero.</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <p>Drivers MUST perform this validation when a numeric vector and padding are provided through the API, and when unpacking
 binary data (BSON or similar) into a Vector structure.</p>
@@ -622,7 +633,7 @@ example in Python, see
 </ul>
 </li>
 <li>
-<p>In PACKED_BIT, why are ignored bits required to be zero?</p>
+<p>In PACKED_BIT, why are ignored bits recommended to be zero?</p>
 <ul>
 <li>To ensure the same data representation has the same encoding. For drivers supporting comparison operations, this
 avoids comparing different unused bits.</li>
@@ -631,6 +642,9 @@ avoids comparing different unused bits.</li>
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-06-23: In PACKED_BIT vectors, ignored bits MAY be zero for backwards-compatibility. Prose tests added.</p>
+</li>
 <li>
 <p>2025-04-08: In PACKED_BIT vectors, ignored bits must be zero.</p>
 </li>
