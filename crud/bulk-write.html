@@ -450,6 +450,16 @@ to return an error if any other entries in the replacement document are atomic m
     comment: Optional&lt;BSON value&gt;;
 
     /**
+     * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+     * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+     *
+     * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+     *
+     * @since MongoDB 8.2
+     */
+    rawData: Optional&lt;Boolean&gt;;
+
+    /**
      * Whether detailed results for each successful operation should be included in the returned
      * BulkWriteResult.
      *
@@ -659,6 +669,7 @@ type for indexes for this type (e.g. <code>usize</code> in Rust). If no standard
     "bypassDocumentValidation": Optional&lt;Boolean&gt;,
     "comment": Optional&lt;BSON value&gt;,
     "let": Optional&lt;Document&gt;,
+    "rawData": Optional&lt;Boolean&gt;,
     ...additional operation-agnostic fields
 }
 </code></pre>
@@ -948,6 +959,9 @@ The requirement has since been removed. Checking size limits complicates some dr
 error in this specific situation does not seem helpful enough to require size checks.</p>
 <h2 id="changelog"><a class="header" href="#changelog"><strong>Changelog</strong></a></h2>
 <ul>
+<li>
+<p>2025-06-27: Added <code>rawData</code> option.</p>
+</li>
 <li>
 <p>2024-11-05: Updated the requirements regarding the size validation.</p>
 </li>

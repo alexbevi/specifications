@@ -18214,6 +18214,16 @@ interface CreateIndexOptions {
   maxTimeMS: Optional&lt;Int64&gt;;
 
   /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
+ 
+  /**
    * Enables users to specify an arbitrary comment to help trace the operation through
    * the database profiler, currentOp and logs. The default is to not send a value.
    *
@@ -18237,6 +18247,16 @@ interface DropIndexOptions {
   maxTimeMS: Optional&lt;Int64&gt;;
 
   /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
+
+/**
    * Enables users to specify an arbitrary comment to help trace the operation through
    * the database profiler, currentOp and logs. The default is to not send a value.
    *
@@ -18694,6 +18714,16 @@ interface ListIndexesOptions {
    * @note drivers MAY chose to support batchSize on the ListIndexesOptions.
    */
   batchSize: Optional&lt;Int32&gt;;
+
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 </code></pre>
 <h3 id="enumerating-indexes"><a class="header" href="#enumerating-indexes">Enumerating Indexes</a></h3>
@@ -18983,6 +19013,9 @@ internally by the server on those versions, and its value could have adverse eff
 from mistakenly specifying this option, drivers manually verify it is only sent to 4.4+ servers.</p>
 <h4 id="changelog-34"><a class="header" href="#changelog-34">Changelog</a></h4>
 <ul>
+<li>
+<p>2025-06-27: Added <code>rawData</code> option to CreateIndexOptions, DropIndexOptions and ListIndexesOptions.</p>
+</li>
 <li>
 <p>2024-09-05: Moved options in SearchIndexModel to SearchIndexOptions for consistency with IndexModel and IndexOptions.</p>
 </li>
@@ -19339,6 +19372,16 @@ class AggregateOptions {
    * @see https://www.mongodb.com/docs/manual/reference/command/aggregate/
    */
   let: Optional&lt;Document&gt;;
+
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 
 class CountOptions {
@@ -19391,6 +19434,16 @@ class CountOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
+
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 
 class EstimatedDocumentCountOptions {
@@ -19415,6 +19468,16 @@ class EstimatedDocumentCountOptions {
    * comment may result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
+  
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 
 class DistinctOptions {
@@ -19459,6 +19522,16 @@ class DistinctOptions {
    * @see https://www.mongodb.com/docs/manual/reference/command/find/
    */
   hint: Optional&lt;(String | Document)&gt;;
+  
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 
 enum CursorType {
@@ -19733,6 +19806,16 @@ class FindOptions {
    * @see https://www.mongodb.com/docs/manual/reference/command/find/
    */
   let: Optional&lt;Document&gt;;
+  
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 
 type FindOneOptions = Omit&lt;FindOptions, 'batchSize' | 'cursorType' | 'limit' | 'noCursorTimeout'&gt;;
@@ -19974,6 +20057,16 @@ class BulkWriteOptions {
    * The value of let will be passed to all update and delete, but not insert, commands.
    */
   let: Optional&lt;Document&gt;;
+  
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 
 class InsertOneOptions {
@@ -19996,6 +20089,16 @@ class InsertOneOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
+  
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 
 class InsertManyOptions {
@@ -20025,6 +20128,16 @@ class InsertManyOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
+  
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 
 class UpdateOptions {
@@ -20116,6 +20229,16 @@ class UpdateOptions {
    * @see https://www.mongodb.com/docs/manual/reference/command/update/
    */
   sort: Optional&lt;Document&gt;;
+  
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 
 class ReplaceOptions {
@@ -20195,6 +20318,16 @@ class ReplaceOptions {
    * @see https://www.mongodb.com/docs/manual/reference/command/update/
    */
   sort: Optional&lt;Document&gt;;
+  
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 
 class DeleteOptions {
@@ -20245,6 +20378,16 @@ class DeleteOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
+  
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 </code></pre>
 <h6 id="bulk-write-models"><a class="header" href="#bulk-write-models">Bulk Write Models</a></h6>
@@ -20975,6 +21118,16 @@ class FindOneAndDeleteOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
+  
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 
 class FindOneAndReplaceOptions {
@@ -21083,6 +21236,16 @@ class FindOneAndReplaceOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
+  
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 
 class FindOneAndUpdateOptions {
@@ -21200,6 +21363,16 @@ class FindOneAndUpdateOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
+  
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional&lt;Boolean&gt;;
 }
 </code></pre>
 <h5 id="update-vs-replace-validation"><a class="header" href="#update-vs-replace-validation">Update vs. Replace Validation</a></h5>
@@ -21409,6 +21582,9 @@ the Stable API, it was decided that this change was acceptable to make in minor 
 aforementioned allowance in the SemVer spec.</p>
 <h2 id="changelog-35"><a class="header" href="#changelog-35">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-06-27: Added <code>rawData</code> options.</p>
+</li>
 <li>
 <p>2024-11-13: Define <code>findOne</code> operation as optional, and add guidance on <code>limit</code> and <code>batchSize</code> for <code>find</code> operations.</p>
 </li>
@@ -22498,6 +22674,16 @@ to return an error if any other entries in the replacement document are atomic m
     comment: Optional&lt;BSON value&gt;;
 
     /**
+     * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+     * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+     *
+     * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+     *
+     * @since MongoDB 8.2
+     */
+    rawData: Optional&lt;Boolean&gt;;
+
+    /**
      * Whether detailed results for each successful operation should be included in the returned
      * BulkWriteResult.
      *
@@ -22707,6 +22893,7 @@ type for indexes for this type (e.g. <code>usize</code> in Rust). If no standard
     "bypassDocumentValidation": Optional&lt;Boolean&gt;,
     "comment": Optional&lt;BSON value&gt;,
     "let": Optional&lt;Document&gt;,
+    "rawData": Optional&lt;Boolean&gt;,
     ...additional operation-agnostic fields
 }
 </code></pre>
@@ -22996,6 +23183,9 @@ The requirement has since been removed. Checking size limits complicates some dr
 error in this specific situation does not seem helpful enough to require size checks.</p>
 <h2 id="changelog-38"><a class="header" href="#changelog-38"><strong>Changelog</strong></a></h2>
 <ul>
+<li>
+<p>2025-06-27: Added <code>rawData</code> option.</p>
+</li>
 <li>
 <p>2024-11-05: Updated the requirements regarding the size validation.</p>
 </li>
@@ -29487,7 +29677,13 @@ fields:
 <li><code>bypassAutoEncryption</code>: Optional, a boolean to indicate whether or not auto encryption should be bypassed.</li>
 <li><code>schemaMap</code>: Optional object. Maps namespaces to CSFLE schemas.</li>
 <li><code>encryptedFieldsMap</code>: Optional object. Maps namespaces to QE schemas.</li>
-<li><code>extraOptions</code>: Optional object. Configuration options for the encryption library.</li>
+<li><code>extraOptions</code>: Optional object. Configuration options for the encryption library.
+<ul>
+<li>If <code>extraOptions</code> is not present or omits <code>cryptSharedLibPath</code>, test runners MAY set <code>cryptSharedLibPath</code> to the
+path of <a href="unified-test-format/../client-side-encryption/client-side-encryption.html#crypt_shared">crypt_shared</a> being tested. This
+can avoid test errors loading crypt_shared from different paths.</li>
+</ul>
+</li>
 <li><code>bypassQueryAnalysis</code>: Optional. Disables analysis of outgoing commands. Defaults to <code>false</code>.</li>
 <li><code>keyExpirationMS</code>: The same as in <a href="unified-test-format/unified-test-format.html#entity_clientEncryption"><code>clientEncryption</code></a>.</li>
 </ul>
@@ -31904,6 +32100,9 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog-47"><a class="header" href="#changelog-47">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-07-15: Clarify test runner may apply a default <code>cryptSharedLibPath</code>.</p>
+</li>
 <li>
 <p>2025-06-10: <strong>Schema version 1.24.</strong></p>
 <p>Deprecate <code>storeEventsAsEntities</code> option for client entities and <code>loop</code> operation in the schema and remove them from
