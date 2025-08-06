@@ -159,7 +159,7 @@
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
-<li>Current Schema Version: 1.19.0</li>
+<li>Current Schema Version: 1.25.0</li>
 </ul>
 <hr />
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -414,7 +414,7 @@ other.</li>
 and MUST NOT be used by test runners.</li>
 </ul>
 <h4 id="runonrequirement"><a class="header" href="#runonrequirement">runOnRequirement</a></h4>
-<p>A combination of server version and/or topology requirements for running the test(s).</p>
+<p>A combination of server version, topology, and/or dependency requirements for running the test(s).</p>
 <p>The format of server version strings is defined in <a href="#version-string">Version String</a>. When comparing server version
 strings, each component SHALL be compared numerically. For example, "4.0.10" is greater than "4.0.9" and "3.6" and less
 than "4.2.0".</p>
@@ -482,8 +482,8 @@ If set, tests MUST only run if the given string matches (case-insensitive) one o
 server parameter. If this field is omitted, there is no authentication mechanism requirement.</p>
 </li>
 <li>
-<p><code>csfle</code>: Optional boolean. If true, the tests MUST only run if the driver and server support Client-Side Field Level
-Encryption. CSFLE is supported when all of the following are true:</p>
+<p><code>csfle</code>: Optional object or boolean. If not false, tests MUST only run if the driver and server support Client-Side
+Field Level Encryption. CSFLE is supported when all of the following are true:</p>
 <ul>
 <li>Server version is 4.2.0 or higher</li>
 <li>Driver has libmongocrypt enabled</li>
@@ -491,6 +491,12 @@ Encryption. CSFLE is supported when all of the following are true:</p>
 <a href="../client-side-encryption/client-side-encryption.html#mongocryptd">mongocryptd</a> is available</li>
 </ul>
 <p>If false, tests MUST NOT run if CSFLE is supported. If this field is omitted, there is no CSFLE requirement.</p>
+<p>The structure of the <code>csfle</code> object is as follows:</p>
+<ul>
+<li><code>minLibmongocryptVersion</code>: Optional string. The minimum libmongocrypt (inclusive) required to successfully run the
+tests. If this field is omitted, there is no lower bound on the required libmongocrypt version. The format of this
+string is defined in <a href="#version-string">Version String</a>.</li>
+</ul>
 </li>
 </ul>
 <p>Test runners MAY evaluate these conditions in any order. For example, it may be more efficient to evaluate <code>serverless</code>
@@ -3062,6 +3068,11 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-07-28: <strong>Schema version 1.25.</strong></p>
+<p>Add alternate form of <code>csfle</code>. Previously it was only a bool. Now it can also be an object containing
+<code>minLibmongocryptVersion</code>.</p>
+</li>
 <li>
 <p>2025-07-15: Clarify test runner may apply a default <code>cryptSharedLibPath</code>.</p>
 </li>
