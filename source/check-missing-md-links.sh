@@ -3,11 +3,11 @@
 # check-missing-md-links.sh
 #
 # Scans a Markdown file for linked .md files and checks if:
-#   1. Each linked file exists on disk.
+#   1. Each linked file exists on disk (relative to base dir).
 #   2. There are any .md files on disk that are not referenced (orphans).
 #   3. Optionally filters out paths using one or more regexes.
 #
-# Fully compatible with macOS Bash 3.2.
+# Fully compatible with macOS Bash 3.2 — no Python or realpath needed.
 #
 # USAGE:
 #
@@ -42,31 +42,50 @@ while [[ $# -gt 0 ]]; do
 done
 
 BASE_DIR="$(cd "$BASE_DIR" && pwd)"
+SOURCE_DIR="$(cd "$(dirname "$SOURCE_FILE")" && pwd)"
 
 if [ ! -f "$SOURCE_FILE" ]; then
   echo "❗️ Source file not found: $SOURCE_FILE"
   exit 1
 fi
 
+# Pure Bash version of resolve_path
+resolve_path() {
+  local from_dir="$1"
+  local target="$2"
+  local base_dir="$3"
+
+  local abs_path
+  abs_path="$(cd "$from_dir" && cd "$(dirname "$target")" 2>/dev/null && echo "$(pwd -P)/$(basename "$target")")"
+
+  # If abs_path doesn't start with base_dir, treat as unresolved
+  if [[ "$abs_path" == "$base_dir"* ]]; then
+    echo "${abs_path#$base_dir/}"
+  else
+    echo "$abs_path"
+  fi
+}
+
 linked_files=()
 linked_lines=()
 linked_context=()
 
-# Extract .md links from source
+# Extract .md links and normalize
 lineno=0
 while IFS= read -r line || [ -n "$line" ]; do
   lineno=$((lineno + 1))
   temp="$line"
   while [[ $temp =~ \]\(([^\)]+\.md)\) ]]; do
-    file="${BASH_REMATCH[1]}"
-    linked_files+=("$file")
+    raw_link="${BASH_REMATCH[1]}"
+    rel_link=$(resolve_path "$SOURCE_DIR" "$raw_link" "$BASE_DIR")
+    linked_files+=("$rel_link")
     linked_lines+=("$lineno")
     linked_context+=("$line")
-    temp="${temp#*${file})}"
+    temp="${temp#*${raw_link})}"
   done
 done < "$SOURCE_FILE"
 
-# Deduplicate linked files
+# Deduplicate
 dedup_files=()
 dedup_lines=()
 dedup_context=()
@@ -81,13 +100,13 @@ for i in "${!linked_files[@]}"; do
   fi
 done
 
-# Build combined exclude regex if needed
+# Combine --exclude regexes
 EXCLUDE_REGEX=""
 if [ "${#EXCLUDE_PATTERNS[@]}" -gt 0 ]; then
   EXCLUDE_REGEX="$(IFS='|'; echo "${EXCLUDE_PATTERNS[*]}")"
 fi
 
-# Collect actual .md files (filtered once)
+# Find actual .md files (filter once)
 tmp_actual_files=()
 if [ -n "$EXCLUDE_REGEX" ]; then
   while IFS= read -r f; do tmp_actual_files+=("$f"); done < <(
@@ -125,7 +144,7 @@ if [ "$VERBOSE" = "1" ]; then
   echo ""
 fi
 
-# Check for missing linked files
+# Missing links
 echo "� Checking for missing linked markdown files..."
 missing=false
 for i in "${!dedup_files[@]}"; do
@@ -151,7 +170,7 @@ for af in "${actual_files[@]}"; do
   fi
 done
 
-# Final summary
+# Summary
 if ! $missing && ! $orphaned; then
   echo "✅ All linked files exist and no orphaned .md files found."
 fi
