@@ -33685,6 +33685,14 @@ follows:</p>
 <tr><td>AWS_SESSION_TOKEN</td><td>Assume role automatically sets this</td></tr>
 </tbody></table>
 </div>
+<p>The value for <code>LAMBDA_AWS_ROLE_ARN</code> MUST be stored in Evergreen project settings. The value can be found in the
+<code>drivers/atlas-qa</code> vault.</p>
+<p>The values for <code>DRIVERS_ATLAS_PUBLIC_API_KEY</code>, <code>DRIVERS_ATLAS_PRIVATE_API_KEY</code>, <code>DRIVERS_ATLAS_LAMBDA_USER</code>,
+<code>DRIVERS_ATLAS_LAMBDA_PASSWORD</code> and <code>DRIVERS_ATLAS_GROUP_ID</code> can be obtained programmatically from the
+<code>drivers/atlas-qa</code> vault.</p>
+<p>See
+<a href="https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/secrets_handling/README.md">Secrets Handling README</a>
+for details on how to access the secrets.</p>
 <p>Supported Evergreen variants that have the AWS SAM CLI installed:</p>
 <ul>
 <li>ubuntu2204</li>
@@ -33762,6 +33770,7 @@ limit. The variant itself MUST have the SAM CLI installed.</p>
 </ul>
 <h2 id="changelog-51"><a class="header" href="#changelog-51">Changelog</a></h2>
 <ul>
+<li>2025-08-07: Added instructions for accessing secrets from the vault.</li>
 <li>2024-02-27: Migrated from reStructuredText to Markdown.</li>
 <li>2023-08-21: Drivers MUST assert that the streaming protocol is disabled in the Lambda function.</li>
 <li>2023-08-17: Fixed URI typo, added host note, increase assume role duration.</li>
