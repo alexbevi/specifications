@@ -590,7 +590,7 @@ false.</li>
      * The results of each individual write operation that was successfully performed.
      *
      * This value will only be populated if the verboseResults option was set to true.
-     */ 
+     */
     verboseResults: Optional&lt;VerboseResults&gt;;
 
     /* rest of fields */
@@ -673,7 +673,9 @@ type for indexes for this type (e.g. <code>usize</code> in Rust). If no standard
     ...additional operation-agnostic fields
 }
 </code></pre>
-<p>Drivers MUST use document sequences (<a href="../message/OP_MSG.html"><code>OP_MSG</code></a> payload type 1) for the <code>ops</code> and <code>nsInfo</code> fields.</p>
+<p>If auto-encryption is not enabled, drivers MUST use document sequences (<a href="../message/OP_MSG.html"><code>OP_MSG</code></a> payload type 1)
+for the <code>ops</code> and <code>nsInfo</code> fields. If auto-encryption is enabled, drivers MUST NOT use document sequences and MUST
+append the <code>ops</code> and <code>nsInfo</code> fields to the <code>bulkWrite</code> command document.</p>
 <p>The <code>bulkWrite</code> command is executed on the "admin" database.</p>
 <h3 id="operations"><a class="header" href="#operations">Operations</a></h3>
 <p>The <code>ops</code> field is a list of write operation documents. The first entry in each document has the name of the operation
@@ -741,10 +743,6 @@ write concern containing the following message:</p>
 <blockquote>
 <p>Cannot request unacknowledged write concern and ordered writes</p>
 </blockquote>
-<h2 id="auto-encryption"><a class="header" href="#auto-encryption">Auto-Encryption</a></h2>
-<p>If <code>MongoClient.bulkWrite</code> is called on a <code>MongoClient</code> configured with <code>AutoEncryptionOpts</code>, drivers MUST return an
-error with the message: "bulkWrite does not currently support automatic encryption".</p>
-<p>This is expected to be removed once <a href="https://jira.mongodb.org/browse/DRIVERS-2888">DRIVERS-2888</a> is implemented.</p>
 <h2 id="command-batching"><a class="header" href="#command-batching">Command Batching</a></h2>
 <p>Drivers MUST accept an arbitrary number of operations as input to the <code>MongoClient.bulkWrite</code> method. Because the server
 imposes restrictions on the size of write operations, this means that a single call to <code>MongoClient.bulkWrite</code> may
@@ -759,8 +757,9 @@ referenced in the <code>ops</code> array for that batch.</p>
 <p><code>maxWriteBatchSize</code> defines the total number of writes allowed in one command. Drivers MUST split a bulk write into
 multiple commands if the user provides more than <code>maxWriteBatchSize</code> operations in the argument for <code>models</code>.</p>
 <h3 id="total-message-size"><a class="header" href="#total-message-size">Total Message Size</a></h3>
-<p>Drivers MUST ensure that the total size of the <code>OP_MSG</code> built for each <code>bulkWrite</code> command does not exceed
-<code>maxMessageSizeBytes</code>.</p>
+<h4 id="unencrypted-bulk-writes"><a class="header" href="#unencrypted-bulk-writes">Unencrypted bulk writes</a></h4>
+<p>When auto-encryption is not enabled, drivers MUST ensure that the total size of the <code>OP_MSG</code> built for each <code>bulkWrite</code>
+command does not exceed <code>maxMessageSizeBytes</code>.</p>
 <p>The upper bound for the size of an <code>OP_MSG</code> includes opcode-related bytes (e.g. the <code>OP_MSG</code> header) and
 operation-agnostic command field bytes (e.g. <code>txnNumber</code>, <code>lsid</code>). Drivers MUST limit the combined size of the
 <code>bulkWrite</code> command document (excluding command-agnostic fields), <code>ops</code> document sequence, and <code>nsInfo</code> document
@@ -808,6 +807,10 @@ while (writeModels.hasNext()) {
 <p>See <a href="#how-was-the-op_msg-overhead-allowance-determined">this Q&amp;A entry</a> for more details on how the overhead allowance
 was determined.</p>
 <p>Drivers MUST return an error if there is not room to add at least one operation to <code>ops</code>.</p>
+<h4 id="auto-encrypted-bulk-writes"><a class="header" href="#auto-encrypted-bulk-writes">Auto-encrypted bulk writes</a></h4>
+<p>Drivers MUST use the reduced size limit defined in
+<a href="../client-side-encryption/client-side-encryption.html#size-limits-for-write-commands">Size limits for Write Commands</a> for
+the size of the <code>bulkWrite</code> command document when auto-encryption is enabled.</p>
 <h2 id="handling-the-bulkwrite-server-response"><a class="header" href="#handling-the-bulkwrite-server-response">Handling the <code>bulkWrite</code> Server Response</a></h2>
 <p>The server's response to <code>bulkWrite</code> has the following format:</p>
 <pre><code class="language-javascript">{
@@ -908,6 +911,12 @@ specification.</p>
 <p>When a <code>getMore</code> fails with a retryable error when attempting to iterate the results cursor, drivers could retry the
 entire <code>bulkWrite</code> command to receive a fresh cursor and retry iteration. This work was omitted to minimize the scope of
 the initial implementation and testing of the new bulk write API, but may be revisited in the future.</p>
+<h3 id="use-document-sequences-for-auto-encrypted-bulk-writes"><a class="header" href="#use-document-sequences-for-auto-encrypted-bulk-writes">Use document sequences for auto-encrypted bulk writes</a></h3>
+<p>Auto-encryption does not currently support document sequences. This specification should be updated when
+<a href="https://jira.mongodb.org/browse/DRIVERS-2859">DRIVERS-2859</a> is completed to require use of document sequences for <code>ops</code>
+and <code>nsInfo</code> when auto-encryption is enabled.</p>
+<p>Drivers requiring significant changes to pass a bulkWrite command to libmongocrypt are recommended to wait until
+<a href="https://jira.mongodb.org/browse/DRIVERS-2859">DRIVERS-2859</a> is implemented before supporting automatic encryption.</p>
 <h2 id="qa"><a class="header" href="#qa">Q&amp;A</a></h2>
 <h3 id="is-bulkwrite-supported-on-atlas-serverless"><a class="header" href="#is-bulkwrite-supported-on-atlas-serverless">Is <code>bulkWrite</code> supported on Atlas Serverless?</a></h3>
 <p>No. See <a href="https://jira.mongodb.org/browse/CLOUDP-256344">CLOUDP-256344</a></p>
@@ -959,6 +968,9 @@ The requirement has since been removed. Checking size limits complicates some dr
 error in this specific situation does not seem helpful enough to require size checks.</p>
 <h2 id="changelog"><a class="header" href="#changelog"><strong>Changelog</strong></a></h2>
 <ul>
+<li>
+<p>2025-08-13: Removed the requirement to error when QE is enabled.</p>
+</li>
 <li>
 <p>2025-06-27: Added <code>rawData</code> option.</p>
 </li>
