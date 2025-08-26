@@ -73,7 +73,7 @@
     - [CRUD](crud/crud.md)
     - [Collation](collation/collation.md)
     - [Write Commands](server_write_commands/server_write_commands.md)
-    - [Bulk API](driver-bulk-update.md)
+    - [Bulk API](driver-bulk-update.rst)
     - [Bulk Write](crud/bulk-write.md)
     - [R/W Concern](read-write-concern/read-write-concern.md)
   - [Cursors]()
