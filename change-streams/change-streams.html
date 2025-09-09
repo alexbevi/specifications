@@ -862,8 +862,18 @@ saved from the original aggregation.</li>
 <p>When <code>resumeAfter</code> is specified the <code>ChangeStream</code> will return notifications starting with the oplog entry immediately
 <em>after</em> the provided token.</p>
 <p>If the server supports sessions, the resume attempt MUST use the same session as the previous attempt's command.</p>
-<p>A driver MUST ensure that consecutive resume attempts can succeed, even in the absence of any changes received by the
-cursor between resume attempts.</p>
+<p>A driver MUST only attempt to resume once from a resumable error. However, if the <code>aggregate</code> for that resume succeeds,
+a driver MUST ensure that following resume attempts can succeed, even in the absence of any changes received by the
+cursor between resume attempts. For example:</p>
+<ol>
+<li><code>aggregate</code> (succeeds)</li>
+<li><code>getMore</code> (fails with resumable error)</li>
+<li><code>aggregate</code> (succeeds)</li>
+<li><code>getMore</code> (fails with resumable error)</li>
+<li><code>aggregate</code> (succeeds)</li>
+<li><code>getMore</code> (succeeds)</li>
+<li>change stream document received</li>
+</ol>
 <p>A driver SHOULD attempt to kill the cursor on the server on which the cursor is opened during the resume process, and
 MUST NOT attempt to kill the cursor on any other server. Any exceptions or errors that occur during the process of
 killing the cursor should be suppressed, including both errors returned by the <code>killCursor</code> command and exceptions
@@ -1070,6 +1080,9 @@ unnecessary scanning of unmatched oplog entries.</p>
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-09-08: Clarify resume behavior.</p>
+</li>
 <li>
 <p>2025-03-31: Update for expanded field visibility in server 8.2+</p>
 </li>
