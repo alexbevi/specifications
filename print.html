@@ -18137,7 +18137,7 @@ operations that return cursors MUST support the timeout options documented in th
 
   /**
    * Creates multiple indexes in the collection.
-   * 
+   *
    * In all server versions, this MUST execute a createIndexes command.
    *
    * @return The names of all the indexes that were created.
@@ -18182,7 +18182,7 @@ operations that return cursors MUST support the timeout options documented in th
   dropIndexes(options: Optional&lt;DropIndexesOptions&gt;): Result;
 
   /**
-   * Gets index information for all indexes in the collection. The behavior for 
+   * Gets index information for all indexes in the collection. The behavior for
    * enumerating indexes is described in the :ref:`Enumerating Indexes` section.
    *
    */
@@ -18217,12 +18217,19 @@ interface CreateIndexOptions {
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
    *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
+   *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
    * @since MongoDB 8.2
    */
   rawData: Optional&lt;Boolean&gt;;
- 
+
   /**
    * Enables users to specify an arbitrary comment to help trace the operation through
    * the database profiler, currentOp and logs. The default is to not send a value.
@@ -18249,6 +18256,13 @@ interface DropIndexOptions {
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -18367,8 +18381,8 @@ interface IndexView extends Iterable&lt;Document&gt; {
    * For drivers that cannot make IndexView iterable, they MUST implement this method to
    * return a list of indexes. In the case of async drivers, this MAY return a Future&lt;Cursor&gt;
    *  or language/implementation equivalent.
-   * 
-   *  If drivers are unable to make the IndexView iterable, they MAY opt to provide the options for 
+   *
+   *  If drivers are unable to make the IndexView iterable, they MAY opt to provide the options for
    *  listing search indexes via the `list` method instead of the `Collection.indexes` method.
 
    */
@@ -18405,7 +18419,7 @@ interface IndexView extends Iterable&lt;Document&gt; {
    *
    * @note Each specification document becomes the "key" field in the document that
    *   is inserted or the command.
-   *   
+   *
    */
   createMany(models: Iterable&lt;IndexModel&gt;, options: Optional&lt;CreateManyIndexesOptions&gt;): Iterable&lt;String&gt;;
 
@@ -18579,7 +18593,7 @@ interface IndexOptions {
    * @example For an index of name: 1, age: -1, the generated name would be "name_1_age_-1".
    */
   name: String;
-  
+
   /**
    * Optionally tells the index to only reference documents with the specified field in
    * the index.
@@ -18710,7 +18724,7 @@ interface ListIndexesOptions {
 
   /**
    * Configures the batch size of the cursor returned from the ``listIndexes`` command.
-   * 
+   *
    * @note drivers MAY chose to support batchSize on the ListIndexesOptions.
    */
   batchSize: Optional&lt;Int32&gt;;
@@ -18718,6 +18732,13 @@ interface ListIndexesOptions {
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -18829,10 +18850,10 @@ interface SearchIndexOptions {
 }
 
 /**
- * The following interfaces are empty but are provided as placeholders for drivers that cannot 
+ * The following interfaces are empty but are provided as placeholders for drivers that cannot
  * add options in a non-breaking manner, if options are added in the future.
  */
-interface CreateSearchIndexOptions {} 
+interface CreateSearchIndexOptions {}
 interface UpdateSearchIndexOptions {}
 interface ListSearchIndexOptions {}
 interface DropSearchIndexOptions {}
@@ -18841,22 +18862,22 @@ interface DropSearchIndexOptions {}
 <pre><code class="language-typescript">interface Collection {
   /**
    * Convenience method for creating a single search index.
-   * 
+   *
    * @return The name of the created search index
-   * 
+   *
    * @note Drivers MAY opt to implement this method signature, the signature that
    *   takes an SearchIndexModel as a parameter, or for those languages with method
    *   overloading MAY decide to implement both.
-   *   
+   *
    * @note Drivers MAY combine the `indexOptions` with the `createSearchIndexOptions`, if that is idiomatic for their language.
    */
   createSearchIndex(definition: Document, indexOptions: Optional&lt;SearchIndexOptions&gt;, createSearchIndexOptions: Optional&lt;CreateSearchIndexOptions&gt;): String;
 
   /**
    * Convenience method for creating a single index.
-   * 
+   *
    * @return The name of the created search index
-   * 
+   *
    * @note Drivers MAY opt to implement this method signature, the signature that
    *   takes an name and a definition as parameters, or for those languages with method
    *   overloading MAY decide to implement both.
@@ -18865,13 +18886,13 @@ interface DropSearchIndexOptions {}
 
   /**
    * Creates multiple search indexes on the collection.
-   * 
+   *
    * @return An iterable of the newly created index names.
    */
   createSearchIndexes(models: Iterable&lt;SearchIndexModel&gt;, options: CreateSearchIndexOptions): Iterable&lt;String&gt;;
 
   /**
-   * Updates the search index with the given name to use the provided 
+   * Updates the search index with the given name to use the provided
    * definition.
    */
   updateSearchIndex(name: String, definition: Document, options: Optional&lt;UpdateSearchIndexOptions&gt;): void;
@@ -18899,7 +18920,7 @@ interface DropSearchIndexOptions {}
 
 interface SearchIndexView extends Iterable&lt;Document&gt; {
   /**
-   * Enumerates the index information for all search indexes in the collection. 
+   * Enumerates the index information for all search indexes in the collection.
    *
    * @note For drivers that cannot make the IndexView iterable, they MUST implement a list
    *   method. See below.
@@ -18910,8 +18931,8 @@ interface SearchIndexView extends Iterable&lt;Document&gt; {
    * For drivers that cannot make SearchIndexView iterable, they MUST implement this method to
    * return a list of indexes. In the case of async drivers, this MAY return a Future&lt;Cursor&gt;
    *  or language/implementation equivalent.
-   *  
-   *  If drivers are unable to make the SearchIndexView iterable, they MAY opt to provide the options for 
+   *
+   *  If drivers are unable to make the SearchIndexView iterable, they MAY opt to provide the options for
    *  listing search indexes via the `list` method instead of the `Collection.searchIndexes` method.
    */
   list(): Cursor&lt;Document&gt;;
@@ -18925,7 +18946,7 @@ interface SearchIndexView extends Iterable&lt;Document&gt; {
    * @note Drivers MAY opt to implement this method signature, the signature that
    *   takes an SearchIndexModel as a parameter, or for those languages with method
    *   overloading MAY decide to implement both.
-   *   
+   *
    * @note Drivers MAY combine the `indexOptions` with the `createSearchIndexOptions`, if that is idiomatic for their language.
    */
   createOne(definition: Document, indexOptions: Optional&lt;SearchIndexOptions&gt;, createSearchIndexOptions: Optional&lt;CreateSearchIndexOptions&gt;): String;
@@ -19013,6 +19034,9 @@ internally by the server on those versions, and its value could have adverse eff
 from mistakenly specifying this option, drivers manually verify it is only sent to 4.4+ servers.</p>
 <h4 id="changelog-34"><a class="header" href="#changelog-34">Changelog</a></h4>
 <ul>
+<li>
+<p>2025-09-09: Clarify that <code>rawData</code> is for internal use only.</p>
+</li>
 <li>
 <p>2025-06-27: Added <code>rawData</code> option to CreateIndexOptions, DropIndexOptions and ListIndexesOptions.</p>
 </li>
@@ -19376,6 +19400,13 @@ class AggregateOptions {
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -19437,7 +19468,13 @@ class CountOptions {
 
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
-   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -19468,10 +19505,17 @@ class EstimatedDocumentCountOptions {
    * comment may result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
-  
+
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -19522,10 +19566,17 @@ class DistinctOptions {
    * @see https://www.mongodb.com/docs/manual/reference/command/find/
    */
   hint: Optional&lt;(String | Document)&gt;;
-  
+
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -19806,10 +19857,17 @@ class FindOptions {
    * @see https://www.mongodb.com/docs/manual/reference/command/find/
    */
   let: Optional&lt;Document&gt;;
-  
+
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -20057,10 +20115,17 @@ class BulkWriteOptions {
    * The value of let will be passed to all update and delete, but not insert, commands.
    */
   let: Optional&lt;Document&gt;;
-  
+
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -20089,10 +20154,17 @@ class InsertOneOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
-  
+
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -20128,10 +20200,17 @@ class InsertManyOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
-  
+
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -20229,10 +20308,17 @@ class UpdateOptions {
    * @see https://www.mongodb.com/docs/manual/reference/command/update/
    */
   sort: Optional&lt;Document&gt;;
-  
+
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -20318,10 +20404,17 @@ class ReplaceOptions {
    * @see https://www.mongodb.com/docs/manual/reference/command/update/
    */
   sort: Optional&lt;Document&gt;;
-  
+
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -20378,10 +20471,17 @@ class DeleteOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
-  
+
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -21118,10 +21218,17 @@ class FindOneAndDeleteOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
-  
+
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -21236,10 +21343,17 @@ class FindOneAndReplaceOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
-  
+
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -21363,10 +21477,17 @@ class FindOneAndUpdateOptions {
    * and providing one will result in a server-side error.
    */
   comment: Optional&lt;any&gt;;
-  
+
   /**
    * This option MAY be implemented by drivers that need to grant access to underlying namespaces
    * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
    *
    * @note This option MUST NOT be sent when connected to pre-8.2 servers.
    *
@@ -21434,7 +21555,7 @@ specifically. An example, using Node, might look like:</p>
 <pre><code class="language-typescript">collection.find({ name: 'john doe' }).explain({ maxTimeMS: 1000 });
 
 // sends:
-{ 
+{
   explain: { find: &lt;collection&gt;, query: { name: 'john doe' } },
   maxTimeMS: 1000
 }
@@ -21442,7 +21563,7 @@ specifically. An example, using Node, might look like:</p>
 collection.find({ name: 'john doe' }).explain({ timeoutMS: 1000 });
 
 // sends:
-{ 
+{
   explain: { find: &lt;collection&gt;, query: { name: 'john doe' } },
   maxTimeMS: &lt;1000 - min rtt&gt;
 }
@@ -21582,6 +21703,9 @@ the Stable API, it was decided that this change was acceptable to make in minor 
 aforementioned allowance in the SemVer spec.</p>
 <h2 id="changelog-35"><a class="header" href="#changelog-35">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-09-09: Clarify that <code>rawData</code> is for internal use only.</p>
+</li>
 <li>
 <p>2025-06-27: Added <code>rawData</code> options.</p>
 </li>
@@ -24090,6 +24214,13 @@ to return an error if any other entries in the replacement document are atomic m
      * This option MAY be implemented by drivers that need to grant access to underlying namespaces
      * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
      *
+     * This option is intended for internal use by MongoDB teams and should be discouraged for
+     * general application use. It may be changed or removed in any release without notice.
+     *
+     * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+     *   - Marking it as deprecated, experimental, or internal in their language's idioms
+     *   - Excluding it from primary documentation
+     *
      * @note This option MUST NOT be sent when connected to pre-8.2 servers.
      *
      * @since MongoDB 8.2
@@ -24605,6 +24736,9 @@ The requirement has since been removed. Checking size limits complicates some dr
 error in this specific situation does not seem helpful enough to require size checks.</p>
 <h2 id="changelog-39"><a class="header" href="#changelog-39"><strong>Changelog</strong></a></h2>
 <ul>
+<li>
+<p>2025-09-09: Clarify that <code>rawData</code> is for internal use only.</p>
+</li>
 <li>
 <p>2025-08-13: Removed the requirement to error when QE is enabled.</p>
 </li>
