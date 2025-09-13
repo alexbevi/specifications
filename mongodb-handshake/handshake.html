@@ -301,8 +301,8 @@ values.</p>
 <p>Drivers MUST NOT provide a default value for this key.</p>
 <h4 id="clientdrivername"><a class="header" href="#clientdrivername">client.driver.name</a></h4>
 <p>This value is required and is not application configurable.</p>
-<p>The internal driver name. For drivers written on-top of other core drivers, the underlying driver will typically expose
-a function to append additional name to this field.</p>
+<p>The internal driver name. For drivers written on-top of other core drivers, the <code>appendMetadata()</code> method can be used to
+add package information to an existing MongoClient.</p>
 <p>Example:</p>
 <pre><code class="language-text">- "pymongo"
 - "mongoc / phongo"
@@ -310,7 +310,7 @@ a function to append additional name to this field.</p>
 <h4 id="clientdriverversion"><a class="header" href="#clientdriverversion">client.driver.version</a></h4>
 <p>This value is required and is not application configurable.</p>
 <p>The internal driver version. The version formatting is not defined. For drivers written on-top of other core drivers,
-the underlying driver will typically expose a function to append additional name to this field.</p>
+the <code>appendMetadata()</code> method can be used to add package information to an existing MongoClient.</p>
 <p>Example:</p>
 <pre><code class="language-text">- "1.1.2-beta0"
 - "1.4.1 / 1.2.0"
@@ -452,6 +452,9 @@ following class definition defines the options which MUST be supported:</p>
     platform: Optional&lt;String&gt;;
 }
 </code></pre>
+<p>Two <code>DriverInfoOptions</code> objects are considered equal if they would result in the same metadata in the client handshake.
+In practice, this means if a field is the empty string (<code>""</code>), treat it as unset. Assert that each field is strictly
+equal with case sensitive string comparison.</p>
 <p>Note that how these options are provided to a driver during <code>MongoClient</code> initialization is left up to the implementer.</p>
 <h3 id="metadata-updates-after-mongoclient-initialization"><a class="header" href="#metadata-updates-after-mongoclient-initialization">Metadata updates after MongoClient initialization</a></h3>
 <p>Drivers MUST provide an API that allows appending <code>DriverInfoOptions</code> to a <code>MongoClient</code> instance after initialization,
@@ -479,6 +482,11 @@ be appended to their respective fields, and be delimited by a <code>|</code> cha
     }
 }
 </code></pre>
+<p>Some client libraries provide APIs that accept a pre-initialized MongoClient as an argument. In these circumstances, it
+is possible for multiple library objects to be associated with the same MongoClient, which could result in the same
+metadata being appended multiple times. Drivers MUST ensure that any duplicate <code>DriverInfoOptions</code> objects provided to a
+MongoClient or appended to a MongoClient do not result in additional metadata being appended. See
+<a href="#supporting-wrapping-libraries">Supporting Wrapping Libraries</a>.</p>
 <p><strong>NOTE:</strong> All strings provided as part of the driver info MUST NOT contain the delimiter used for metadata concatention.
 Drivers MUST throw an error if any of these strings contains that character.</p>
 <h3 id="deviations"><a class="header" href="#deviations">Deviations</a></h3>
@@ -598,6 +606,7 @@ specification</li>
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2025-09-04: Clarify that drivers do not append the same metadata multiple times.</li>
 <li>2025-06-09: Add requirement to allow appending to client metadata after <code>MongoClient</code> initialization.</li>
 <li>2024-11-05: Move handshake prose tests from spec file to prose test file.</li>
 <li>2024-10-09: Clarify that FaaS and container metadata must both be populated when both are present.</li>
