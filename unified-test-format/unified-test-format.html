@@ -159,7 +159,7 @@
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
-<li>Current Schema Version: 1.25.0</li>
+<li>Current Schema Version: 1.26.0</li>
 </ul>
 <hr />
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -656,6 +656,16 @@ can avoid test errors loading crypt_shared from different paths.</li>
 <li><code>keyExpirationMS</code>: The same as in <a href="#entity_clientEncryption"><code>clientEncryption</code></a>.</li>
 </ul>
 </li>
+</ul>
+<p><span id="entity_client_awaitMinPoolSizeMS"></span></p>
+<ul>
+<li><code>awaitMinPoolSizeMS</code>: Optional, integer. When specified, this parameter defines the maximum duration (in
+milliseconds) that the test runner MUST wait for each connection pool to be populated with <code>minPoolSize</code> URI
+option. Only connection pools for data-bearing nodes should be considered. If any connection pool is not populated
+within the specified timeframe, the test runner MUST raise an error and mark the test as failed. Any CMAP and SDAM
+event/log listeners configured on the client should ignore any events that occur before the pool is being
+populated. If the parameter is omitted or if <code>minPoolSize</code> URI option is set to 0, no waiting is required for a
+specific pool state prior to test execution.</li>
 </ul>
 </li>
 </ul>
@@ -2857,7 +2867,6 @@ to a sharded cluster, each mongos server.</p>
 impossible to guarantee that an existing transaction will not block test execution. To work around this, test runners
 SHOULD either ignore Unauthorized(13) command failures or avoid calling <code>killAllSessions</code> altogether when connected to
 Atlas (e.g. by detecting <code>mongodb.net</code> in the hostname or allowing the test runner to be configured externally).</p>
-<p>Test runners MUST NOT execute <code>killAllSessions</code> when connected to Atlas Data Lake.</p>
 <h5 id="migrationconflict-errors-on-sharded-clusters"><a class="header" href="#migrationconflict-errors-on-sharded-clusters">MigrationConflict Errors on Sharded Clusters</a></h5>
 <p>Following <a href="https://jira.mongodb.org/browse/SERVER-82353">SERVER-82353</a>, drivers may encounter MigrationConflict errors
 when executing transactions on sharded clusters due to an outdated cluster time. For example:</p>
@@ -3068,6 +3077,12 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-09-16: <strong>Schema version 1.26.</strong> Add <code>awaitMinPoolSize</code> client parameter to await on connection pool population.</p>
+</li>
+<li>
+<p>2025-09-15: Remove note about Atlas Data Lake since Atlas Data Lake testing is removed.</p>
+</li>
 <li>
 <p>2025-08-20: Fix typo <code>_enxcol</code> =&gt; <code>enxcol_</code></p>
 </li>

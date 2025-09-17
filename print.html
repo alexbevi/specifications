@@ -9961,6 +9961,8 @@ has been at least 100ms since the last callback invocation, to avoid overloading
       if e.code == 18:
         invalidate(access_token)
         access_token, _ = get_access_token()
+      else:
+        raise e # Raise other errors.
 
   connection.oidc_cache.access_token = access_token
   sasl_start(connection, payload={"jwt": access_token})
@@ -30834,7 +30836,7 @@ environment variables.</p>
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
-<li>Current Schema Version: 1.25.0</li>
+<li>Current Schema Version: 1.26.0</li>
 </ul>
 <hr />
 <h2 id="abstract-45"><a class="header" href="#abstract-45">Abstract</a></h2>
@@ -31331,6 +31333,16 @@ can avoid test errors loading crypt_shared from different paths.</li>
 <li><code>keyExpirationMS</code>: The same as in <a href="unified-test-format/unified-test-format.html#entity_clientEncryption"><code>clientEncryption</code></a>.</li>
 </ul>
 </li>
+</ul>
+<p><span id="entity_client_awaitMinPoolSizeMS"></span></p>
+<ul>
+<li><code>awaitMinPoolSizeMS</code>: Optional, integer. When specified, this parameter defines the maximum duration (in
+milliseconds) that the test runner MUST wait for each connection pool to be populated with <code>minPoolSize</code> URI
+option. Only connection pools for data-bearing nodes should be considered. If any connection pool is not populated
+within the specified timeframe, the test runner MUST raise an error and mark the test as failed. Any CMAP and SDAM
+event/log listeners configured on the client should ignore any events that occur before the pool is being
+populated. If the parameter is omitted or if <code>minPoolSize</code> URI option is set to 0, no waiting is required for a
+specific pool state prior to test execution.</li>
 </ul>
 </li>
 </ul>
@@ -33532,7 +33544,6 @@ to a sharded cluster, each mongos server.</p>
 impossible to guarantee that an existing transaction will not block test execution. To work around this, test runners
 SHOULD either ignore Unauthorized(13) command failures or avoid calling <code>killAllSessions</code> altogether when connected to
 Atlas (e.g. by detecting <code>mongodb.net</code> in the hostname or allowing the test runner to be configured externally).</p>
-<p>Test runners MUST NOT execute <code>killAllSessions</code> when connected to Atlas Data Lake.</p>
 <h5 id="migrationconflict-errors-on-sharded-clusters"><a class="header" href="#migrationconflict-errors-on-sharded-clusters">MigrationConflict Errors on Sharded Clusters</a></h5>
 <p>Following <a href="https://jira.mongodb.org/browse/SERVER-82353">SERVER-82353</a>, drivers may encounter MigrationConflict errors
 when executing transactions on sharded clusters due to an outdated cluster time. For example:</p>
@@ -33743,6 +33754,12 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-09-16: <strong>Schema version 1.26.</strong> Add <code>awaitMinPoolSize</code> client parameter to await on connection pool population.</p>
+</li>
+<li>
+<p>2025-09-15: Remove note about Atlas Data Lake since Atlas Data Lake testing is removed.</p>
+</li>
 <li>
 <p>2025-08-20: Fix typo <code>_enxcol</code> =&gt; <code>enxcol_</code></p>
 </li>
@@ -34007,63 +34024,7 @@ Testing.</p>
 and <code>serverParameters</code> property for <code>runOnRequirements</code>.</p>
 </li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="atlas-data-lake-tests"><a class="header" href="#atlas-data-lake-tests">Atlas Data Lake Tests</a></h1>
-<h2 id="introduction-1"><a class="header" href="#introduction-1">Introduction</a></h2>
-<p>The YAML and JSON files in this directory are platform-independent tests that drivers can use to assert compatibility
-with <a href="https://www.mongodb.com/docs/datalake/">Atlas Data Lake</a>. These tests utilize the
-<a href="atlas-data-lake-testing/tests/../../unified-test-format/unified-test-format.html">Unified Test Format</a>.</p>
-<p>Several prose tests, which are not easily expressed in YAML, are also presented in this file. Those tests will need to
-be manually implemented by each driver.</p>
-<h2 id="test-considerations"><a class="header" href="#test-considerations">Test Considerations</a></h2>
-<p>Running these integration tests will require a running <code>mongohoused</code> with data available in its <code>test.driverdata</code>
-collection. See the
-<a href="https://github.com/mongodb-labs/drivers-evergreen-tools/tree/master/.evergreen/atlas_data_lake">ADL directory in drivers-evergreen-tools</a>
-and <a href="https://github.com/10gen/mongohouse/blob/master/README.md">10gen/mongohouse README</a> for more information.</p>
-<p>The test runner for Atlas Data Lake testing MUST NOT drop the collection and/or database under test. In contrast to most
-other tests, which insert their own data fixtures into an empty collection, the data for these tests is specified in the
-<code>mongohoused</code> configuration file.</p>
-<p>Additionally, the test runner MUST NOT execute <code>killAllSessions</code> (see:
-<a href="atlas-data-lake-testing/tests/../../unified-test-format/unified-test-format.html#terminating-open-transactions">Terminating Open Transactions</a>) when
-connected to Atlas Data Lake.</p>
-<h2 id="prose-tests-1"><a class="header" href="#prose-tests-1">Prose Tests</a></h2>
-<p>The following tests MUST be implemented to fully test compatibility with Atlas Data Lake.</p>
-<h3 id="1-support-for-killcursors-command"><a class="header" href="#1-support-for-killcursors-command">1. Support for <code>killCursors</code> command</a></h3>
-<p>Test that the driver properly constructs and issues a
-<a href="https://www.mongodb.com/docs/manual/reference/command/killCursors/">killCursors</a> command to Atlas Data Lake. For this
-test, configure an APM listener on a client and execute a query on the <code>test.driverdata</code> collection that will leave a
-cursor open on the server (e.g. specify <code>batchSize=2</code> for a query that would match 3+ documents). Drivers MAY iterate
-the cursor if necessary to execute the initial <code>find</code> command but MUST NOT iterate further to avoid executing a
-<code>getMore</code>.</p>
-<p>Observe the CommandSucceededEvent event for the <code>find</code> command and extract the cursor's ID and namespace from the
-response document's <code>cursor.id</code> and <code>cursor.ns</code> fields, respectively. Destroy the cursor object and observe a
-CommandStartedEvent and CommandSucceededEvent for the <code>killCursors</code> command. Assert that the cursor ID and target
-namespace in the outgoing command match the values from the <code>find</code> command's CommandSucceededEvent. When matching the
-namespace, note that the <code>killCursors</code> field will contain the collection name and the database may be inferred from
-either the <code>$db</code> field or accessed via the CommandStartedEvent directly. Finally, assert that the <code>killCursors</code>
-CommandSucceededEvent indicates that the expected cursor was killed in the <code>cursorsKilled</code> field.</p>
-<p>Note: this test assumes that drivers only issue a <code>killCursors</code> command internally when destroying a cursor that may
-still exist on the server. If a driver constructs and issues <code>killCursors</code> commands in other ways (e.g. public API),
-this test MUST be adapted to test all such code paths.</p>
-<h3 id="2-connect-without-authentication"><a class="header" href="#2-connect-without-authentication">2. Connect without authentication</a></h3>
-<p>Test that the driver can establish a connection with Atlas Data Lake without authentication. For these tests, create a
-MongoClient using a valid connection string without auth credentials and execute a ping command.</p>
-<h3 id="3-connect-with-authentication"><a class="header" href="#3-connect-with-authentication">3. Connect with authentication</a></h3>
-<p>Test that the driver can establish a connection with Atlas Data Lake with authentication. For these tests, create a
-MongoClient using a valid connection string with SCRAM-SHA-1 and credentials from the drivers-evergreen-tools ADL
-configuration and execute a ping command. Repeat this test using SCRAM-SHA-256.</p>
-<h2 id="changelog-49"><a class="header" href="#changelog-49">Changelog</a></h2>
-<ul>
-<li>
-<p>2024-03-08: Convert legacy ADL tests to unified format. Convert test README from reStructuredText to Markdown.</p>
-</li>
-<li>
-<p>2022-10-05: Add spec front matter</p>
-</li>
-<li>
-<p>2020-07-15: Link to CRUD test runner implementation and note that the collection under test must not be dropped before
-each test.</p>
-</li>
-</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="atlas-data-federation-testing"><a class="header" href="#atlas-data-federation-testing">Atlas Data Federation Testing</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="performance-benchmarking"><a class="header" href="#performance-benchmarking">Performance Benchmarking</a></h1>
 <ul>
 <li>Status: Accepted</li>
@@ -34638,7 +34599,7 @@ minimize disk I/O impact?); same AWS zone as client</p>
 <p>TBD: spec system to hold scores over time</p>
 <h3 id="datasets"><a class="header" href="#datasets">Datasets</a></h3>
 <p>TBD: generated datasets should be park in S3 or somewhere for retrieval by URL</p>
-<h2 id="changelog-50"><a class="header" href="#changelog-50">Changelog</a></h2>
+<h2 id="changelog-49"><a class="header" href="#changelog-49">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-12-23: Add Client and Collection BulkWrite benchmarks</p>
@@ -34910,7 +34871,7 @@ successfully converted to a binary Decimal128 value and that parsing the string 
 <p>The corpus files for deprecated types are provided for informational purposes. Implementations MAY ignore or modify them
 to match legacy treatment of deprecated types. The <code>converted_bson</code> and <code>converted_extjson</code> fields MAY be used to test
 conversion to a standard type or MAY be ignored.</p>
-<h2 id="prose-tests-2"><a class="header" href="#prose-tests-2">Prose Tests</a></h2>
+<h2 id="prose-tests-1"><a class="header" href="#prose-tests-1">Prose Tests</a></h2>
 <p>The following tests have not yet been automated, but MUST still be tested.</p>
 <h3 id="1-prohibit-null-bytes-in-null-terminated-strings-when-encoding-bson"><a class="header" href="#1-prohibit-null-bytes-in-null-terminated-strings-when-encoding-bson">1. Prohibit null bytes in null-terminated strings when encoding BSON</a></h3>
 <p>The BSON spec uses null-terminated strings to represent document field names and regex components (i.e. pattern and
@@ -34976,7 +34937,7 @@ to the Extended JSON Specification.</p>
 different in different cases, but the <code>canonical_bson</code> field is the same. This is by design so that each case stands
 alone and can be confirmed to be internally consistent via the assertions. This makes for easier and safer test case
 development.</p>
-<h2 id="changelog-51"><a class="header" href="#changelog-51">Changelog</a></h2>
+<h2 id="changelog-50"><a class="header" href="#changelog-50">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-01-22: Migrated from reStructuredText to Markdown.</p>
@@ -35408,7 +35369,7 @@ limit. The variant itself MUST have the SAM CLI installed.</p>
 <li>Calls the frozen lambda function again.</li>
 <li>Deletes the Lambda function.</li>
 </ul>
-<h2 id="changelog-52"><a class="header" href="#changelog-52">Changelog</a></h2>
+<h2 id="changelog-51"><a class="header" href="#changelog-51">Changelog</a></h2>
 <ul>
 <li>2025-08-07: Added instructions for accessing secrets from the vault.</li>
 <li>2024-02-27: Migrated from reStructuredText to Markdown.</li>
