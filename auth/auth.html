@@ -983,6 +983,12 @@ else // the valid host string contains no periods and is not "aws.amazonaws.com"
 <p>AWS_SESSION_TOKEN</p>
 <p>Drivers MUST allow the user to specify an AWS session token for authentication with temporary credentials.</p>
 </li>
+<li>
+<p>AWS_CREDENTIAL_PROVIDER</p>
+<p>An AWS <a href="#custom-credential-providers">Custom Credential Provider</a> that returns AWS credentials. Drivers MAY allow
+the user to specify an object or function, depending on what is idiomatic for the driver. This property MUST
+follow the same API as the driver language's AWS SDK credential provider.</p>
+</li>
 </ul>
 </li>
 </ul>
@@ -1024,8 +1030,8 @@ client.</p>
 <p>The order in which Drivers MUST search for credentials is:</p>
 <ol>
 <li>The URI</li>
-<li>Environment variables</li>
 <li>A custom AWS credential provider if the driver supports it.</li>
+<li>Environment variables</li>
 <li>Using <code>AssumeRoleWithWebIdentity</code> if <code>AWS_WEB_IDENTITY_TOKEN_FILE</code> and <code>AWS_ROLE_ARN</code> are set.</li>
 <li>The ECS endpoint if <code>AWS_CONTAINER_CREDENTIALS_RELATIVE_URI</code> is set. Otherwise, the EC2 endpoint.</li>
 </ol>
@@ -1974,6 +1980,9 @@ practice to avoid this. (See
 <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html">IAM Roles for Tasks</a>)</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-09-10: Update precedence of MONGODB-AWS credential fetching behaviour.</p>
+</li>
 <li>
 <p>2025-01-29: Add support for custom AWS credential providers.</p>
 </li>
