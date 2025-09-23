@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Minimum Server Version: N/A
-- Current Schema Version: 1.25.0
+- Current Schema Version: 1.27.0
 
 ______________________________________________________________________
 
@@ -523,6 +523,15 @@ The structure of this object is as follows:
         Messages for unspecified components and/or with lower severity levels than those specified MUST be ignored by this
         client's log collector(s) and SHOULD NOT be included in [test.expectLogMessages](#test_expectLogMessages) for this
         client.
+
+    - `observeTracingMessages`: Optional object that configures tracing behavior for the client. The structure of this
+        object is as follows:
+
+        - `enableCommandPayload`: Optional boolean. When set to `true`, enables capturing of command payload details in
+            tracing spans.
+            - If `true`, the test runner SHOULD capture detailed command payload information in tracing spans.
+            - If `false` or omitted, the test runner SHOULD exclude command payload details.
+
     - `serverApi`: Optional [serverApi](#serverapi) object.
 
     <span id="entity_client_autoEncryptOpts"></span>
@@ -541,6 +550,16 @@ The structure of this object is as follows:
                 can avoid test errors loading crypt_shared from different paths.
         - `bypassQueryAnalysis`: Optional. Disables analysis of outgoing commands. Defaults to `false`.
         - `keyExpirationMS`: The same as in [`clientEncryption`](#entity_clientEncryption).
+
+    <span id="entity_client_awaitMinPoolSizeMS"></span>
+
+    - `awaitMinPoolSizeMS`: Optional, integer. When specified, this parameter defines the maximum duration (in
+        milliseconds) that the test runner MUST wait for each connection pool to be populated with `minPoolSize` URI
+        option. Only connection pools for data-bearing nodes should be considered. If any connection pool is not populated
+        within the specified timeframe, the test runner MUST raise an error and mark the test as failed. Any CMAP and SDAM
+        event/log listeners configured on the client should ignore any events that occur before the pool is being
+        populated. If the parameter is omitted or if `minPoolSize` URI option is set to 0, no waiting is required for a
+        specific pool state prior to test execution.
 
 <span id="entity_clientEncryption"></span>
 
@@ -763,6 +782,26 @@ The structure of this object is as follows:
 
     Tests SHOULD NOT specify multiple [expectedLogMessagesForClient](#expectedlogmessagesforclient) objects for a single
     client entity.
+
+<span id="expectTracingMessages"></span>
+
+- `expectTracingMessages`: Optional object that defines expected tracing [spans](../open-telemetry/open-telemetry.md)
+    for a test. The structure of this object is as follows:
+
+    - `client`: Required string. The ID of the client entity associated with these tracing spans.
+
+    - `ignoreExtraSpans`: Optional boolean.
+
+        - If `true`, additional unexpected spans are allowed.
+        - If `false` or omitted, the test runner MUST fail if any unexpected spans are detected.
+
+    - `spans`: Required array of span objects. Each span describes an expected tracing event.
+
+        Span object properties:
+
+        - `name`: Required string. The name of the tracing span.
+        - `attributes`: Required object. Key-value pairs describing span metadata.
+        - `nested`: Optional array of nested span objects, following the same structure.
 
 <span id="test_outcome"></span>
 
@@ -3148,8 +3187,6 @@ impossible to guarantee that an existing transaction will not block test executi
 SHOULD either ignore Unauthorized(13) command failures or avoid calling `killAllSessions` altogether when connected to
 Atlas (e.g. by detecting `mongodb.net` in the hostname or allowing the test runner to be configured externally).
 
-Test runners MUST NOT execute `killAllSessions` when connected to Atlas Data Lake.
-
 ##### MigrationConflict Errors on Sharded Clusters
 
 Following [SERVER-82353](https://jira.mongodb.org/browse/SERVER-82353), drivers may encounter MigrationConflict errors
@@ -3421,6 +3458,15 @@ operations and arguments. This is a concession until such time that better proce
 other specs *and* collating spec changes developed in parallel or during the same release cycle.
 
 ## Changelog
+
+- 2025-09-17: **Schema version 1.27.**
+
+    Add `observeTracingMessages` configuration for clients and `expectTracingMessages` for test expectations. This allows
+    capturing and validating detailed tracing information during test execution.
+
+- 2025-09-16: **Schema version 1.26.** Add `awaitMinPoolSize` client parameter to await on connection pool population.
+
+- 2025-09-15: Remove note about Atlas Data Lake since Atlas Data Lake testing is removed.
 
 - 2025-08-20: Fix typo `_enxcol` => `enxcol_`
 
