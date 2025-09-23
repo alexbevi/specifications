@@ -90,6 +90,7 @@
 ---
 
 - [Observability]()
+  - [Open Telemetry](open-telemetry/open-telemetry.md)
   - [Command Logging and Monitoring](command-logging-and-monitoring/command-logging-and-monitoring.rst)
   - [SDAM Logging and Monitoring](server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.md)
   - [Standardized Logging](logging/logging.md)
