@@ -73,7 +73,7 @@
     - [CRUD](crud/crud.md)
     - [Collation](collation/collation.md)
     - [Write Commands](server_write_commands/server_write_commands.md)
-    - [Bulk API](driver-bulk-update.rst)
+    - [Bulk API](driver-bulk-update.md)
     - [Bulk Write](crud/bulk-write.md)
     - [R/W Concern](read-write-concern/read-write-concern.md)
   - [Cursors]()
@@ -91,7 +91,7 @@
 
 - [Observability]()
   - [Open Telemetry](open-telemetry/open-telemetry.md)
-  - [Command Logging and Monitoring](command-logging-and-monitoring/command-logging-and-monitoring.rst)
+  - [Command Logging and Monitoring](command-logging-and-monitoring/command-logging-and-monitoring.md)
   - [SDAM Logging and Monitoring](server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.md)
   - [Standardized Logging](logging/logging.md)
   # - [Connection Pool Logging](connection-monitoring-and-pooling/connection-monitoring-and-pooling.md)
