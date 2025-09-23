@@ -22522,1420 +22522,7 @@ paragraphs; re-ordered the response field sections.</p>
 <p>2014-05-14: First public version</p>
 </li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1>=============
-Bulk API Spec</h1>
-<p>:Status: Deprecated
-:Minimum Server Version: 2.4</p>
-<p>.. contents::</p>
-<h1 id="bulk-operation-builder"><a class="header" href="#bulk-operation-builder">Bulk Operation Builder</a></h1>
-<p>Starting a bulk operation can be done in two ways.</p>
-<p>.. code:: javascript</p>
-<pre><code>initializeUnorderedBulkOp()     -&gt; Bulk   - Initialize an unordered bulk
-initializeOrderedBulkOp()       -&gt; Bulk   - Initialize an ordered bulk
-</code></pre>
-<h2 id="operations-possible-on-bulk-instance"><a class="header" href="#operations-possible-on-bulk-instance">Operations Possible On Bulk Instance</a></h2>
-<p>Available operations follow the fluent API for insert, update and
-remove.</p>
-<p>.. code:: javascript</p>
-<pre><code>/**
- * Update one document matching the selector
- */
-bulk.find({a : 1}).updateOne({$inc : { x : 1 }});
-
-/**
- * Update all documents matching the selector
- */
-bulk.find({a : 2}).update({$inc : { x : 2 }});
-
-/**
- * Update all documents
- * Note that find() is prohibited; the query is required
- */
-bulk.find({}).update({$inc : { x : 2 }});
-
-/**
- * Replace entire document (update with whole doc replace)
- */
-bulk.find({a : 3}).replaceOne({ x : 3 });
-
-/**
- * Update one document matching the selector or upsert
- */
-bulk.find({a : 1}).upsert().updateOne({$inc : { x : 1 }});
-
-/**
- * Update all documents matching the selector or upsert
- */
-bulk.find({a : 2}).upsert().update({$inc : { x : 2 }});
-
-/**
- * Replaces a single document matching the selector or upsert
- */
-bulk.find({a : 3}).upsert().replaceOne({ x : 3 });
-
-/**
- * Remove a single document matching the selector
- */
-bulk.find({a : 4}).removeOne();
-
-/**
- * Remove all documents matching the selector
- */
-bulk.find({a : 5}).remove();
-
-/**
- * Remove all documents
- * Note that find() is prohibited; the query is required
- */
-bulk.find({}).remove();
-
-/**
- * Insert a document
- */
-bulk.insert({ x : 4 });
-
-/**
- * Execute the bulk operation, with an optional writeConcern
- * overwriting the default w:1. A descriptive error should be
- * raised if execute is called more than once or before any
- * operations have been added.
- */
-writeConcern = { w: 1, wtimeout: 100 }
-bulk.execute(writeConcern);
-</code></pre>
-<h1 id="current-shell-implementation"><a class="header" href="#current-shell-implementation">Current shell implementation</a></h1>
-<p>The shell implementation serves as a guide only. One main difference between the shell implementation and a proper driver implementation
-is that unordered bulk operations are not optimized by re-ordering the writes; only the execution semantics are kept correct.
-You can find it here:</p>
-<p>https://github.com/mongodb/mongo/blob/master/src/mongo/shell/bulk_api.js</p>
-<p>If you need more information about the actual write command you can find the specification at the following location</p>
-<p>server_write_commands.md</p>
-<h2 id="modes-of-execution"><a class="header" href="#modes-of-execution">Modes of Execution</a></h2>
-<p>The write commands have a new option called <strong>ordered</strong> that is a boolean. <strong>ordered</strong> replaces <strong>continueOnError</strong> but with slightly different semantics.</p>
-<h3 id="ordered--true"><a class="header" href="#ordered--true">ordered = true</a></h3>
-<p>If the driver sets <strong>ordered = true</strong> all operations will be executed serially in the write command and the operation will abort on the first error. So given the 3 following operations.</p>
-<p>.. code:: javascript</p>
-<pre><code>bulk.insert({a:1})
-bulk.insert({a:2})
-bulk.find({a:2}).update({$set: {a:1}}) // Clashes with unique index
-bulk.find({a:1}).remove()
-</code></pre>
-<p>With <strong>ordered = true</strong> the bulk operation will terminate after the update as it errors out. With <strong>ordered = true</strong> the driver will receive only a single error.</p>
-<h3 id="ordered--false"><a class="header" href="#ordered--false">ordered = false</a></h3>
-<p>If the driver sets <strong>ordered = false</strong> all operations might be applied in parallel by the server. The server will execute all the operations and return all errors created by the operations. So given the 4 following operations.</p>
-<p>.. code:: javascript</p>
-<pre><code>bulk.insert({a:1})
-bulk.insert({a:2})
-bulk.find({a:2}).update({$set: {a:1}}) // Might clash with unique index
-bulk.find({a:3}).remove
-bulk.find({a:2}.update({$set: {a:1}}) // Might clash with unique index
-</code></pre>
-<p>Due to the write operations potentially happening concurrently there is no way to determine the final state of the bulk operation above. If <strong>insert({a:1})</strong> happens before the two updates we will get 2 duplicate key index errors from the two update operations. If one of the updates happen first the insert will error out. By setting <strong>ordered</strong> to false we are trading off guaranteed order of execution for increased parallelization.</p>
-<h2 id="ordered-bulk-operations"><a class="header" href="#ordered-bulk-operations">Ordered Bulk Operations</a></h2>
-<p>To start the ordered bulk operation call.</p>
-<p>.. code:: javascript</p>
-<pre><code>initializeOrderedBulkOp() -&gt; bulk
-</code></pre>
-<p>The ordered bulk operation guarantees the order of writes for a mixed set of operations. This means the driver needs to ensure that all operations are performed in the order they were added.</p>
-<p>Consider the following set of operations:</p>
-<p>.. code:: javascript</p>
-<pre><code>var bulk = db.c.initializeOrderedBulkOp()
-bulk.insert({a : 1})
-bulk.insert({a : 2})
-bulk.insert({a : 3})
-bulk.find({a : 2}).upsert().updateOne({$set : { a : 4 }});
-bulk.find({a : 1}).removeOne();
-bulk.insert({a : 5})
-bulk.execute({w : 1})
-</code></pre>
-<p>This will generate the following sequence of writes to the server.</p>
-<ol>
-<li>Insert write command</li>
-<li>Update write command</li>
-<li>Remove write command</li>
-<li>Insert write command</li>
-</ol>
-<p>One thing to note is that if a write command goes over the maximum number of documents or maxBSONMessageSize for an individual write command it needs to be split into multiple as for unordered bulks.</p>
-<p>.. NOTE::
-<strong>ContinueOnError</strong> Ordered operations are synonymous with
-continueOnError = false. There is no way to specify a different
-value for continueOnError.</p>
-<h2 id="unordered-bulk-operations"><a class="header" href="#unordered-bulk-operations">Unordered Bulk Operations</a></h2>
-<p>To start the unordered bulk operation call:</p>
-<p>.. code:: javascript</p>
-<pre><code>initializeUnorderedBulkOp() -&gt; bulk
-</code></pre>
-<p>The unordered bulk operation does not guarantee order of execution of any added write operations. If you have the following code.</p>
-<p>.. code:: javascript</p>
-<pre><code>var bulk = db.c.initializeUnorderedBulkOp()
-bulk.insert({_id : 1})
-bulk.find({_id : 2}).updateOne({$inc : { x : 1 }});
-bulk.find({_id : 3}).removeOne();
-bulk.insert({_id : 4})
-bulk.find({_id : 5}).updateOne({$inc : { x : 1 }});
-bulk.find({_id : 6}).removeOne();
-bulk.execute({w:1})
-</code></pre>
-<p>Internally the driver will execute 3 write commands. One each for the inserts, updates and removes. It's important to note that the write commands could be executed in any order.</p>
-<p>.. NOTE::
-<strong>ContinueOnError</strong> Unordered operations are synonymous with
-continueOnError = true. There is no way to specify a different
-value for continueOnError.</p>
-<h2 id="request-size-limits-1"><a class="header" href="#request-size-limits-1">Request Size Limits</a></h2>
-<p>Supporting unlimited batch sizes poses two problems - the BSONObj internal size limit is 16 MiB + small overhead (for commands), and a small write operation may have a much larger response.  In order to ensure a batch can be correctly processed, two limits must be respected.</p>
-<p>Both of these limits can be found using hello or legacy hello:</p>
-<ul>
-<li>
-<p><code>maxBsonObjectSize</code> : currently 16 MiB, this is the maximum size of writes (excepting command overhead)
-that should be sent to the server.  Documents to be inserted, query documents for updates and
-deletes, and update expression documents must be &lt;= this size.</p>
-<p>Batches containing more than one insert, update, or delete must be less than <code>maxBsonObjectSize</code>.
-Note that this means a single-item batch can exceed <code>maxBsonObjectSize</code>.  The additional overhead of
-the command itself is guaranteed not to trigger an error from the server, except in the case of
-<code>SERVER-12305 &lt;https://jira.mongodb.org/browse/SERVER-12305&gt;</code>_.</p>
-</li>
-<li>
-<p><code>maxWriteBatchSize</code> : currently 100,000 (as of MongoDB 3.6 via <code>SERVER-13061 &lt;https://jira.mongodb.org/browse/SERVER-13061&gt;</code>__), this is the maximum number of inserts, updates, or deletes that
-can be included in a write batch.  If more than this number of writes are included, the server cannot
-guarantee space in the response document to reply to the batch.</p>
-</li>
-</ul>
-<p>If the batch is too large in size or bytes, the command may fail. The bulk API should ensure that this does not happen by splitting a batch into multiple batches of the same type if any of the limits are hit.</p>
-<h2 id="on-bulk-execution"><a class="header" href="#on-bulk-execution">On Bulk Execution</a></h2>
-<p>A descriptive error should be raised if <code>execute</code> is called more than once.</p>
-<p>A descriptive error should be raise if <code>execute</code> is called before any operations have been added.</p>
-<h2 id="possible-implementation"><a class="header" href="#possible-implementation">Possible Implementation</a></h2>
-<p>One possible solution for serialization of bulk operations is to serialize some preamble and then to incrementally serialize and append each document to the collected message. The command wrapper has the array argument last so that the programmer can append to it. As you incrementally serialize, first check the collected size plus the incremental size.</p>
-<p>If it is less than maxBsonObjectSize (incorporate additional headroom for your implementation), you can safely append and the message will be accepted by the server. If it exceeds maxBsonObjectSize, you should "finish" (without appending, updating the BSON array and document sizes) and execute the collected message. A new write command message will be serialized.</p>
-<p>The un-appended incremental serialization from before will be appended on the new message. Continue incremental serialization, appending, and execution as above until the bulk operation is completed. Your implementation may need additional headroom for whatever is not already in the preamble, e.g., write concern, finish bytes, etc.</p>
-<p>There are two maximum write command sizes a driver needs to take into account. The first one is <strong>maxBsonObjectSize</strong> that defines the maximum size of a single write command. The current tolerance is <strong>maxBsonObjectSize</strong> + 16K. If the driver sends a message that overflows this tolerance the server will respond with an error.</p>
-<p>The second value is the <strong>maxWriteBatchSize</strong> value which specifies the maximum number of operations allowed in a single write command. In 2.6 this is currently set to <strong>1000</strong> operations. If the driver sends a write command with more than <strong>maxWriteBatchSize</strong> operations in it, the server will error out.</p>
-<p>To avoid these errors the driver needs to split write commands if they overflow the two cases into one or more new write commands.</p>
-<h1 id="on-errors"><a class="header" href="#on-errors">On Errors</a></h1>
-<p>It's important to understand the way the processing of commands happens on the server to understand the possible error scenarios. Let's look at the processing pipeline.</p>
-<p>Validate BSON/Auth -&gt; Write Operations -&gt; Apply Write Concern</p>
-<p>The first step will abort the operation completely with no changes applied to Mongo. An error at this stage will be top level an will mean no attempt was made to process the command. This also uniquely sets <strong>ok</strong> to <strong>0</strong>.</p>
-<p>.. code:: javascript</p>
-<p>{
-"ok" : 0,
-"code" : 13,
-"errmsg": "Authentication error"
-}</p>
-<p>If the first step passes with no errors there might be a command level error such as a duplicate key error. This is a write error and will return an error results containing the <strong>writeErrors</strong> field.</p>
-<p>.. code:: javascript</p>
-<p>{
-"ok" : 1,
-"n" : 0,
-"writeErrors" : [
-{
-"index" : 0,
-"code" : 11000,
-"errmsg" : "DuplicateKey insertDocument :: caused by :: 11000 E11000 duplicate key error index: test.test.$a_1  dup key: { : 1 }"
-}
-],
-}</p>
-<p>In the case of an <strong>ordered</strong> bulk operation you'll only ever get a single write error as the execution of the command will stop at the first error. In an <strong>unordered</strong> bulk operation you might have more than one.</p>
-<p>The last step of applying the write concern can also cause an error. Given a write concern <strong>{w:5, wtimeout:1000}</strong> where there is only 3 servers in the replicaset, the write concern can never be fulfilled and will return an error. An example server response might be:</p>
-<p>.. code:: javascript</p>
-<p>{
-"ok" : 1,
-"n" : 1,
-"writeConcernError" : {
-"code" : 64,
-"errmsg" : "...."
-}
-}</p>
-<p>Notice how write concern is just a single error for the whole command. Getting a writeConcernError does not mean the items were not applied, it means the write concern could not be fulfilled. In the example above <strong>n</strong> is still <strong>1</strong>.</p>
-<p>It's fair to consider the server response field <strong>writeErrors</strong> to be hard errors while <strong>writeConcernError</strong> is a soft error.</p>
-<h1 id="merging-results"><a class="header" href="#merging-results">Merging Results</a></h1>
-<h2 id="handling-errors"><a class="header" href="#handling-errors">Handling errors</a></h2>
-<p>Handling the merging of errors is most easily expressed with some examples.</p>
-<p>Handling Write Errors</p>
-<pre><code>
-Consider the following following bulk write operation:
-
-.. code:: javascript
-
-  collection.ensureIndex({a:1}, {unique:true})
-  var bulk = collection.initializeOrderedBulkOp()
-  bulk.insert({a:1})
-  bulk.insert({a:2})
-  bulk.find({a:2}).upsert().update({$set:{a:1}})
-  bulk.insert({a:3})
-  bulk.execute()
-
-This operation will only execute the three first operations (the first two inserts and an upsert)
-before stopping due to a duplicate key error. The merged result would look something like this:
-
-.. code:: javascript
-
-  {
-    "nInserted" : 2,
-    "nUpserted" : 0,
-    "nMatched" : 0,
-    "nModified" : 0,
-    "nRemoved" : 1,
-    "upserted" : [ ]
-    "writeErrors" : [
-      {
-        "index" : 2,
-        "code" : 11000,
-        "errmsg" : "DuplicateKey insertDocument :: caused by :: 11000 E11000 duplicate key error index: test.test.$a_1  dup key: { : 1 }"
-      }
-    ]
-    "writeConcernErrors": []
-  }
-
-In this situation the client should throw a single error and stop processing.
-
-Handling Write Concern Errors
-</code></pre>
-<p>Write concern is applied after the server side execution of the write operations.</p>
-<p>This means that replication failure or other forms of writeConcernErrors should not affect the execution of the batch
-but simply serve as an indication that the write concern has not been met.</p>
-<p>If there is no write concern error the bulk result's "writeConcernErrors" array is empty.</p>
-<p>When the bulk operation is implemented using legacy opcodes, no server error
-code is available. The server's getlasterror response is like:</p>
-<p>.. code:: javascript</p>
-<p>{
-"ok" : 1,
-"wtimeout": true,
-"err": "timeout"
-}</p>
-<p>In this case the driver must construct a writeConcernErrors array containing one error document with code 64,
-and the "err" field from the getlasterror response as the errmsg.</p>
-<p>An example with "w: 5" and fewer than 5 replicas:</p>
-<p>.. code:: javascript</p>
-<p>var bulk = collection.initializeOrderedBulkOp()
-bulk.insert({a:1})
-bulk.execute({w:5, wtimeout:1})</p>
-<p>The expected result from these operations are.</p>
-<p>.. code:: javascript</p>
-<p>{
-"nInserted" : 1,
-"nUpserted" : 0,
-"nMatched" : 0,
-"nModified" : 0,
-"nRemoved" : 0,
-"upserted" : [ ]
-"writeErrors" : [ ],
-"writeConcernErrors": [{
-"code": 64,
-"waiting for replication timed out",
-}]
-}</p>
-<p>.. note:: The example output is from MongoDB 2.6. In MongoDB 2.4 the driver supplies the error code 64, and the error message is "timeout". Starting in MongoDB 3.0, the writeConcernError code is 100 and the message is "Not enough data-bearing nodes".</p>
-<h2 id="general-rule-of-handling-errors"><a class="header" href="#general-rule-of-handling-errors">General rule of handling errors</a></h2>
-<ol>
-<li>A top level error means the whole command failed and should cause a command failure error.</li>
-<li>For unordered bulk operations all write Errors should be rewritten and merged together.</li>
-<li>For ordered bulk operations the returned write Error should be rewritten and returned.</li>
-<li>Write Concern errors should not halt the processing of <strong>ordered</strong> bulk operations.</li>
-</ol>
-<h2 id="merging-write-errors"><a class="header" href="#merging-write-errors">Merging write errors</a></h2>
-<p>A bulk operation might involve multiple write commands.  Each write command could potentially return write errors and/or a write concern error. Each error in the <strong>writeErrors</strong> array contains an index pointing to the original document position in the write command document that caused it.</p>
-<p>Consider the following bulk operation</p>
-<p>.. code:: javascript</p>
-<pre><code>collection.ensureIndex({a:1}, {unique:true})
-var bulk = db.c.initializeOrderedBulkOp()
-bulk.insert({a:1})
-bulk.insert({a:2})
-bulk.find({a:2}).updateOne({$set : { a : 1 }});
-bulk.find({a:4}).removeOne();
-bulk.execute({w:1})
-</code></pre>
-<p>The operation</p>
-<p>.. code:: javascript</p>
-<pre><code>bulk.find({a:2}).updateOne({$set : { a : 1 }});
-</code></pre>
-<p>causes an error</p>
-<p>.. code:: javascript</p>
-<p>{
-"ok" : 1,
-"nModified" : 0,
-"n" : 0,
-"writeErrors" : [
-{
-"index" : 0,
-"code" : 11000,
-"errmsg" : "DuplicateKey insertDocument :: caused by :: 11000 E11000 duplicate key error index: test.test.$a_1  dup key: { : 1 }"
-}
-]
-}</p>
-<p>In the returned result, the <strong>index</strong> variable of the error points to document <strong>0</strong> from the update where it failed during execution. However in the original chain of operations the <strong>update</strong> operation is the third (<strong>index 2</strong>). To correctly correlate the errors to the user-provided order we need to rewrite the error to point to the correct index so the user can identify what document caused the error. So in this the error aspect of the final result will look like.</p>
-<p>.. code:: javascript</p>
-<p>{
-"ok" : 1,
-"nModified" : 0,
-"n" : 2,
-"writeErrors" : [
-{
-"index" : 2,
-"code" : 11000,
-"errmsg" : "DuplicateKey insertDocument :: caused by :: 11000 E11000 duplicate key error index: test.test.$a_1  dup key: { : 1 }"
-}
-]
-}</p>
-<p>Notice the <strong>index: 2</strong> correctly pointing to the original document.</p>
-<p>To correctly handle the merging the driver needs to keep track of the original indexes and how they map to the errors returned by the write commands. There might be a need to keep an index in memory to be able to correctly handle the mapping.</p>
-<h2 id="write-concern-errors"><a class="header" href="#write-concern-errors">Write concern errors</a></h2>
-<p>Each writeConcernError document received from a server operation (either a write command or legacy write) is appended to the bulk result's "writeConcernErrors" array:</p>
-<p>.. code:: javascript</p>
-<pre><code>var bulk = db.c.initializeOrderedBulkOp()
-bulk.insert({a:1})
-bulk.insert({a:2})
-bulk.find({a:1}).remove()
-bulk.execute({w:5, wtimeout:100})
-</code></pre>
-<p>The outcome on MongoDB 2.6 with fewer than 5 replicas is similar to:</p>
-<p>.. code:: javascript</p>
-<p>{
-"nInserted" : 2,
-"nUpserted" : 0,
-"nMatched" : 0,
-"nModified" : 0,
-"nRemoved" : 1,
-"upserted" : [ ]
-"writeErrors" : [ ],
-"writeConcernErrors": [{
-"code": 64,
-"waiting for replication timed out",
-}, {
-"code": 64,
-"waiting for replication timed out",
-}]
-}</p>
-<p>If there is no write concern error the bulk result's "writeConcernErrors" array is empty.</p>
-<p>.. note:: Previous versions of this spec were ambiguous about reporting writeConcernErrors. Some clients include a singular field "writeConcernError" in bulk results; the singular form is now deprecated and an array called "writeConcernErrors" is required.</p>
-<h2 id="handling-upserts"><a class="header" href="#handling-upserts">Handling upserts</a></h2>
-<p>When performing updates with upsert true the write command might return an upserted field. If it's a single document update command that causes an upsert it will look like.</p>
-<p>.. code:: javascript</p>
-<pre><code>{
-    ok: 1
-  , nModified: 0
-  , n: 1      
-  , upserted: {index:0, _id:ObjectId(".....")}
-}
-</code></pre>
-<p>On the other hand if we are upserting a series of documents the <strong>upserted</strong>  field will contain an array of the results. Given an update command that causes 2 upserts the result will look like.</p>
-<p>.. code:: javascript</p>
-<pre><code>{
-    ok: 1
-  , nModified: 0
-  , n: 2
-  , upserted: [
-      {index:0, _id:ObjectId(".....")}
-    , {index:1, _id:ObjectId(".....")}
-  ]
-}
-</code></pre>
-<p>As in the case of errors the driver needs to rewrite the indexes for the upserted values to merge the results together into the final result so they reflect the initial order of the updates in the user specified batch.</p>
-<h1 id="reporting-errors"><a class="header" href="#reporting-errors">Reporting Errors</a></h1>
-<h2 id="exceptions"><a class="header" href="#exceptions">Exceptions</a></h2>
-<p>Depending on the language and platform there are different semantics on how to raise errors. For languages that usually raise exceptions it's recommended that an exception be raised when an ordered bulk operation fails.</p>
-<p>Given the following scenario</p>
-<p>.. code:: javascript</p>
-<p>collection.ensureIndex({a:1}, {unique:true})
-var bulk = collection.initializeOrderedBulkOp()
-bulk.insert({a:1})
-bulk.insert({a:1})
-bulk.execute({w:5, wtimeout:1})</p>
-<p>In languages where the rule is to report errors by throwing an exception the duplicate insert should cause an exception to be raised when execute is called.</p>
-<p>In the case of an unordered bulk operation the exception should be raised after the bulk has finished executing. It's important to differentiate between a <strong>write</strong> error and <strong>write concern</strong> error if exceptions are used to differentiate between the <strong>hard</strong> error of a write error and the <strong>soft</strong> error caused by a write concern error.</p>
-<h2 id="callbacks"><a class="header" href="#callbacks">Callbacks</a></h2>
-<p>Callback based languages or platform should return a results object containing the aggregated state of the bulk operations. Some platforms like Node.js supports callbacks with the format <strong>function(err, object)</strong>. In this case the result object should be returned as the err field if it contains any errors, only returning in the object field if no write or write concern errors happened.</p>
-<h1 id="results-object"><a class="header" href="#results-object">Results Object</a></h1>
-<p>The shell and <strong>Node.js</strong> implements the result as a custom object wrapping the results. This is to simplify the access to the internal state of the merged results. It serves mostly as an example as different languages might implement the results differently depending on their chosen error mechanism. F.ex it might make sense to throw an exception if the command fails at the authentication stage versus a duplicate key error on one of the operations in a bulk operation.</p>
-<p>It keeps track of several aggregated values</p>
-<p>========= =============================================================
-field     description
-========= =============================================================
-nInserted Number of inserted documents
-nUpserted Number of upserted documents
-nMatched  Number of documents matched for update
-nModified Number of documents actually changed by update
-nRemoved  Number of documents removed
-========= =============================================================</p>
-<p>nMatched is equivalent to the "n" field in the getLastError response after a legacy update. nModified is quite different from "n". nModified is incremented only when an update operation actually changes a document.</p>
-<p>For example, if a document has <code>x: 1</code> and we update it with <code>{$set: {x: 1}}</code>, nModified is not incremented for that document.</p>
-<p>The WriteError's are wrapped in their own wrapper that also contains the operation that caused the error to happen. Similarly the WriteConcernError is a simple wrapper around the result to ensure it's read only.</p>
-<p>A client may optionally provide a method to merge writeConcernErrors into one, analogous to how mongos does.</p>
-<p>.. code:: javascript</p>
-<p>var WRITE_CONCERN_ERROR = 64;</p>
-<p>/**</p>
-<ul>
-<li>Wraps the error
-*/
-var WriteError = function(err) {
-if(!(this instanceof WriteError)) return new WriteError(err);</li>
-</ul>
-<pre><code>// Define properties
-defineReadOnlyProperty(this, "code", err.code);
-defineReadOnlyProperty(this, "index", err.index);
-defineReadOnlyProperty(this, "errmsg", err.errmsg);
-
-//
-// Define access methods
-this.getOperation = function() {
-  return err.op;
-}
-</code></pre>
-<p>}</p>
-<p>/**</p>
-<ul>
-<li>Wraps a write concern error
-*/
-var WriteConcernError = function(err) {
-if(!(this instanceof WriteConcernError)) return new WriteConcernError(err);</li>
-</ul>
-<pre><code>// Define properties
-defineReadOnlyProperty(this, "code", err.code);
-defineReadOnlyProperty(this, "errmsg", err.errmsg);
-</code></pre>
-<p>}</p>
-<p>/**</p>
-<ul>
-<li>Wraps the result for the commands
-*/
-var BulkWriteResult = function(bulkResult) {
-// Define properties
-defineReadOnlyProperty(this, "ok", bulkResult.ok);
-defineReadOnlyProperty(this, "nInserted", bulkResult.nInserted);
-defineReadOnlyProperty(this, "nUpserted", bulkResult.nUpserted);
-defineReadOnlyProperty(this, "nMatched", bulkResult.nMatched);
-defineReadOnlyProperty(this, "nModified", bulkResult.nModified);
-defineReadOnlyProperty(this, "nRemoved", bulkResult.nRemoved);</li>
-</ul>
-<pre><code>//
-// Define access methods
-this.getUpsertedIds = function() {
-  return bulkResult.upserted;
-}
-
-this.getUpsertedIdAt = function(index) {
-  return bulkResult.upserted[index];
-}
-
-this.getRawResponse = function() {
-  return bulkResult;
-}
-
-this.hasWriteErrors = function() {
-  return bulkResult.writeErrors.length &gt; 0;
-}
-
-this.getWriteErrorCount = function() {
-  return bulkResult.writeErrors.length;
-}
-
-this.getWriteErrorAt = function(index) {
-  if(index &lt; bulkResult.writeErrors.length) {
-    return bulkResult.writeErrors[index];
-  }
-  return null;
-}
-
-this.hasWriteConcernError = function() {
-  return bulkResult.writeConcernErrors.length &gt; 0;
-}
-
-//
-// Determine if we have any errors
-this.hasErrors = function() {
-  return this.hasWriteErrors() || this.hasWriteConcernError();
-}
-
-//
-// Get all errors
-this.getWriteErrors = function() {
-  return bulkResult.writeErrors;
-}
-
-this.getWriteConcernError = function() {
-  if(bulkResult.writeConcernErrors.length == 0) {
-    return null;
-  } else if(bulkResult.writeConcernErrors.length == 1) {
-    // Return the error
-    bulkResult.writeConcernErrors[0];
-  } else {
-
-    // Combine the errors
-    var errmsg = "";
-    for(var i = 0; i &lt; bulkResult.writeConcernErrors.length; i++) {
-      var err = bulkResult.writeConcernErrors[i];
-      if (i != 0) {
-        errmsg = errmsg + " and ";
-      }
-
-      errmsg = errmsg + '"' + err.errmsg + '"';
-    }
-
-    return new WriteConcernError({ errmsg : errmsg, code : WRITE_CONCERN_ERROR });
-  }
-}
-
-this.isOK = function() {
-  return bulkResult.ok == 1;
-}
-</code></pre>
-<p>}</p>
-<h1 id="pre-26-support"><a class="header" href="#pre-26-support">Pre 2.6 Support</a></h1>
-<p>The batch API is required to work with pre <strong>2.6</strong>. This means detecting in the driver if the server supports the new write commands and downgrading to existing <strong>OP_INSERT/OP_UPDATE/OP_REMOVE</strong> if it does not.</p>
-<p>Legacy servers don't report nModified for updates, and it is impossible for the driver to simulate it: nModified must be equal to the number of documents that are actually different after an update, but legacy servers only report the number of documents matched. The driver must therefore set the result's nModified field to null, or omit the field, when it executes a bulk operation against a legacy server. In static languages where nModified is an integer-type property on bulk results, an exception must be thrown if a user accesses the nModified property after executing a bulk operation on a legacy server.</p>
-<p>One important aspect to keep in mind is that the existing <strong>bulk</strong> insert operation cannot be used as you need to retrieve the <strong>getLastError</strong> results for each individual operation. Thus the driver must execute inserts one by one.</p>
-<p>Another important aspect to keep in mind is that a replication error can be signaled several ways by the <strong>getLastError</strong> result. The following error codes for the field code are an indicator of a replication error.</p>
-<p>========= =============================================================
-Code      Description
-========= =============================================================
-50        Operation exceeded time limit.
-13475     Operation exceeded time limit.
-16986     Operation exceeded time limit.
-16712     Operation exceeded time limit.
-========= =============================================================</p>
-<p>Thee are also some some errors only detectable by inspecting the <strong>errmsg</strong> field.</p>
-<p>====================  =============================================================
-ErrMsg                Description
-====================  =============================================================
-exceeded time limit   Operation exceeded time limit.
-execution terminated  Operation exceeded time limit.
-====================  =============================================================</p>
-<p>If an error does not return a code the driver can set the returned value to <strong>8</strong> (unknown error).  A BSON serializing error should be marked with <strong>22</strong> (illegal BSON).</p>
-<p>There are some codes that don't match up between the <strong>2.6</strong> and existing servers. The suggestion is to not attempt to rewrite these errors as it will make the code very brittle. Some slight differences in error codes
-and error messages between the write commands and the legacy operations are acceptable.</p>
-<h2 id="nmodified"><a class="header" href="#nmodified">nModified</a></h2>
-<p>The 2.6 server includes "nModified" in its response to an "update" command. The server increments nModified only when an "update" command has actually changed a document.
-For example, if a document already has <code>x: 1</code> and you update it with <code>{$set: {x: 1}}</code>,
-nModified is not incremented.
-nModified is impossible to simulate with OP_UPDATE, which returns only "n",
-the number of matched documents.</p>
-<p><strong>Legacy writes</strong>: The result of a bulk operation that uses legacy opcodes must set
-nModified to NULL, or omit the field.
-If your language is constrained such that you must include the field,
-then user code should get an exception when accessing the field if you're talking to a legacy server.</p>
-<p><strong>Mixed-version sharded cluster</strong>:
-When a client executes an "update" command on a 2.6 mongos,
-and mongos executes it against some 2.4 mongods,
-mongos omits nModified from the response, or sets nModified to NULL.
-(We don't yet know which: <code>SERVER-13001</code>_)
-If the client does a series of "update" commands within the same bulk operation against the same mongos,
-some responses could include nModified and some won't,
-depending on which mongods the mongos sent the operation to.
-The driver algorithm for merging results, when using write commands, in pseudocode:</p>
-<p>.. code:: javascript</p>
-<pre><code>full_result = {
-    "writeErrors": [],
-    "writeConcernErrors": [],
-    "nInserted": 0,
-    "nUpserted": 0,
-    "nMatched": 0,
-    "nModified": 0,
-    "nRemoved": 0,
-    "upserted": [],
-}
-</code></pre>
-<p>::</p>
-<pre><code>for each server response in all bulk operations' responses:
-    if the operation is an update:
-        if the response has a non-NULL nModified:
-            if full_result has a non-NULL nModified:
-                full_result['nModified'] += response['nModified']
-        else:
-            # If any call does not return nModified we can't report
-            # a valid final count so omit the field completely.
-            remove nModified from full_result, or set to NULL
-</code></pre>
-<p>.. _SERVER-13001: https://jira.mongodb.org/browse/SERVER-13001</p>
-<h1 id="questions--answers"><a class="header" href="#questions--answers">Questions &amp; Answers</a></h1>
-<p><strong>Question:</strong> I'm writing my own driver should I support legacy downgrading.
-<strong>Answer:</strong> Legacy downgrading is explained to help people support pre 2.6 servers but is not mandated for anything but the official drivers.</p>
-<p><strong>Answer:</strong> Changes where made to GLE in 2.6 that makes the error reporting more consistent. Downgrading will only correctly work against 2.4.X or earlier.</p>
-<p><strong>Question:</strong> My downgrading code breaks with 2.6</p>
-<p><strong>Answer:</strong> Changes where made to GLE in 2.6 that makes the error reporting more consistent. Downgrading will only correctly work against 2.4.X or earlier.</p>
-<p><strong>Question:</strong> Will there be any way for a user to set the number of wire operations a bulk operation will take (for debugging purposes).</p>
-<p><strong>Answer:</strong> No.</p>
-<p><strong>Question:</strong> Will there be support for .explain() with the bulk
-interface?</p>
-<p><strong>Answer:</strong> Not for 2.6. It may be added with a later release along with
-server support for mixed operations in a single bulk command</p>
-<p><strong>Question:</strong> The definition for unordered introduces indeterminism to the operation.
-For example, what is the state of the collection after:</p>
-<p>.. code:: javascript</p>
-<pre><code>var bulk = db.c.initializeBulkOp()
-bulk.insert({_id : 1, x : 1})
-bulk.find({_id : 1}).updateOne({$inc : { x : 1 }});
-bulk.find({_id : 1}).removeOne();
-bulk.execute({w:1})
-</code></pre>
-<p>You could end up with either {_id : 1, x : 1}, {_id : 1, x : 2}, or no document at all,
-depending on the order that the operations are performed in.</p>
-<p><strong>Answer:</strong> This is by design and definition. If the order matters then don't use an unordered bulk operation. No order will be defined or respected in an unordered operation.</p>
-<p><strong>Question:</strong> What should the driver do when an <strong>ordered</strong> bulk command is split into multiple write commands and an error happens?</p>
-<p><strong>Answer:</strong> If it's an <strong>ordered</strong> bulk command that is split into multiple write commands the driver should not send any remaining write commands after encountering the first error.</p>
-<p><strong>Question:</strong> What should the driver do when an <strong>unordered</strong> bulk command is split into multiple write commands and an error happens?</p>
-<p><strong>Answer:</strong> It's important to note that if the command is an <strong>unordered</strong> bulk command and it's split into multiple write command it should continue processing all the write commands even if there are errors.</p>
-<p><strong>Question:</strong> Does the driver need to merge errors from split write commands?</p>
-<p><strong>Answer:</strong> Yes</p>
-<p><strong>Question:</strong> Is find() with no argument allowed?</p>
-<p><strong>Answer:</strong> No, a selector is required for find() in the Bulk API.</p>
-<p><strong>Question:</strong> Is find({}) with an empty selector allowed?</p>
-<p><strong>Answer:</strong> Yes, updating or removing all documents using find({}) is allowed.</p>
-<p><strong>Question:</strong> My unordered bulk operation got split into multiple batches that all reported a write concern error. Should I report all of the write concern errors ?</p>
-<p><strong>Answer:</strong> Yes, combined into an array called "writeConcernErrors".</p>
-<h1 id="detailed-test-cases"><a class="header" href="#detailed-test-cases">Detailed Test Cases</a></h1>
-<p>These Test cases in this section serve the purpose of helping you validate the correctness of your <strong>Bulk API</strong> implementation.</p>
-<h2 id="insert-1"><a class="header" href="#insert-1">INSERT</a></h2>
-<p>Test Case 1:
-Dynamic languages: raise error if wrong arg type
-initializeUnorderedBulkOp().insert('foo') throws a reasonable error</p>
-<pre><code>    initializeUnorderedBulkOp().insert([{}, {}]) throws a reasonable error: we can’t do a bulk insert with an array
-    
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 2:
-Insert not allowed with find({}):
-initializeUnorderedBulkOp().find({}).insert({}) is a type error.</p>
-<pre><code>    Same for initializeOrderedBulkOp().    
-</code></pre>
-<p>Test Case 3: <em>Removed</em></p>
-<p>Test Case 4:
-Inserting a document succeeds and returns 'nInserted’ of 1:
-Empty collection.</p>
-<pre><code>    .. code:: javascript
-
-        batch = initializeUnorderedBulkOp()
-        batch.insert({_id: 1})
-        batch.execute() == {
-            "writeErrors" : [ ],
-            "writeConcernErrors" : [ ],
-            "nInserted" : 1,
-            "nUpserted" : 0,
-            "nMatched" : 0,
-            "nModified" : 0,
-            "nRemoved" : 0,
-            "upserted" : [ ]
-        }
-
-    Collection contains only {_id: 1}.
-    
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 5:
-The driver generates _id client-side for inserted documents:
-Empty collection.</p>
-<pre><code>    .. code:: javascript
-
-        batch = initializeUnorderedBulkOp()
-        batch.insert({})
-        batch.execute() == {
-            "writeErrors" : [ ],
-            "writeConcernErrors" : [ ],
-            "nInserted" : 1,
-            "nUpserted" : 0,
-            "nMatched" : 0,
-            "nModified" : 0,
-            "nRemoved" : 0,
-            "upserted" : [ ]
-        }
-
-        _id = collection.findOne()._id
-        // pid = bytes 7 and 8 (counting from zero) of _id, as big-endian unsigned short
-        pid == my PID
-
-    Alternatively, just watch the server log or mongosniff and manually verify the _id was sent to the server.
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 6:
-Insert doesn’t accept an array of documents:
-initializeUnorderedBulkOp().insert([{}, {}]) throws</p>
-<pre><code>    Same for initializeOrderedBulkOp().  
-</code></pre>
-<h2 id="find"><a class="header" href="#find">FIND</a></h2>
-<p>Test Case 1:
-Dynamic languages: find() with no args is prohibited:
-.. code:: javascript</p>
-<pre><code>        batch = initializeUnorderedBulkOp()
-        batch.find() raises error immediately
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<h2 id="update-1"><a class="header" href="#update-1">UPDATE</a></h2>
-<p>Test Case 1:
-Dynamic languages: raise error if wrong arg type
-.. code:: javascript</p>
-<pre><code>        initializeUnorderedBulkOp().find({}).update('foo') throws a reasonable error
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 2:
-Dynamic languages: Update requires find() first:
-.. code:: javascript</p>
-<pre><code>        initializeUnorderedBulkOp().update({$set: {x: 1}}) is a type error
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 3:
-Key validation, all top-level keys must be $-operators:
-These throw errors, even without calling execute():</p>
-<pre><code>    .. code:: javascript
-
-        initializeUnorderedBulkOp().find({}).update({key: 1})
-        initializeUnorderedBulkOp().find({}).update({key: 1, $key: 1})
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 4:
-update() updates all matching documents, and reports nMatched correctly:
-Collection has {key: 1}, {key: 2}.</p>
-<pre><code>    .. code:: javascript
-
-        batch = initializeUnorderedBulkOp()
-        batch.find({}).update({$set: {x: 3}})
-        batch.execute() == {
-            "writeErrors" : [ ],
-            "writeConcernErrors" : [ ],
-            "nInserted" : 0,
-            "nUpserted" : 0,
-            "nMatched" : 2,
-            "nModified" : 2,
-            "nRemoved" : 0,
-            "upserted" : [ ]
-        }
-
-    nModified is NULL or omitted if legacy server.
-    
-    Collection has:
-        .. code:: javascript
-
-            {key: 1, x: 3}
-            {key: 2, x: 3}
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 5:
-update() only affects documents that match the preceding find():
-Collection has {key: 1}, {key: 2}.</p>
-<pre><code>    .. code:: javascript
-
-        batch = initializeUnorderedBulkOp()
-        batch.find({key: 1}).update({$set: {x: 1}})
-        batch.find({key: 2}).update({$set: {x: 2}})
-        batch.execute() == {
-            "writeErrors" : [ ],
-            "writeConcernErrors" : [ ],
-            "nInserted" : 0,
-            "nUpserted" : 0,
-            "nMatched" : 2,
-            "nModified" : 2,
-            "nRemoved" : 0,
-            "upserted" : [ ]
-        }
-
-    nModified is NULL or omitted if legacy server.
-
-    Collection has:
-        .. code:: javascript
-
-            {key: 1, x: 1}
-            {key: 2, x: 2}
-</code></pre>
-<h2 id="update_one"><a class="header" href="#update_one">UPDATE_ONE</a></h2>
-<p>Test Case 1:
-Dynamic languages: raise error if wrong arg type
-initializeUnorderedBulkOp().find({}).updateOne('foo') throws a reasonable error</p>
-<pre><code>    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 2:
-Dynamic languages: Update requires find() first:
-initializeUnorderedBulkOp().updateOne({$set: {x: 1}}) is a type error</p>
-<pre><code>    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 3:
-Key validation:
-These throw errors; all top-level keys must be $-operators:</p>
-<pre><code>    .. code:: javascript
-
-        initializeUnorderedBulkOp().find({}).updateOne({key: 1})
-        initializeUnorderedBulkOp().find({}).updateOne({key: 1, $key: 1})
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 4:
-Basic:
-Collection has {key: 1}, {key: 2}.</p>
-<pre><code>    .. code:: javascript
-
-        batch = initializeUnorderedBulkOp()
-        batch.find({}).updateOne({}, {$set: {key: 3}})
-        batch.execute() == {
-            "writeErrors" : [ ],
-            "writeConcernErrors" : [ ],
-            "nInserted" : 0,
-            "nUpserted" : 0,
-            "nMatched" : 1,
-            "nModified" : 1,
-            "nRemoved" : 0,
-            "upserted" : [ ]
-        }
-
-    nModified is NULL or omitted if legacy server.
-
-    .. code:: javascript
-
-        collection.find({key: 3}).count() == 1.
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<h2 id="replace"><a class="header" href="#replace">REPLACE</a></h2>
-<p>Test Case 1:
-Dynamic languages: There is no replace.
-initializeUnorderedBulkOp().find({}).replace() is a type error</p>
-<pre><code>    Same for initializeOrderedBulkOp().
-</code></pre>
-<h2 id="replace_one"><a class="header" href="#replace_one">REPLACE_ONE</a></h2>
-<p>Test Case 1:
-Dynamic languages: raise error if wrong arg type
-initializeUnorderedBulkOp().find({}).replaceOne('foo') throws a reasonable error</p>
-<pre><code>    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 2:
-Dynamic languages: replaceOne requires find() first:
-initializeUnorderedBulkOp().replaceOne({key: 1}) is a type error</p>
-<pre><code>    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 3:
-Key validation:
-These throw errors; no top-level keys can be $-operators:</p>
-<pre><code>    .. code:: javascript
-
-        initializeUnorderedBulkOp().find({}).replaceOne({$key: 1})
-        initializeUnorderedBulkOp().find({}).replaceOne({$key: 1, key: 1})
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 4:
-If find() matches multiple documents, replaceOne() replaces exactly one of them:
-Collection has {key: 1}, {key: 1}.</p>
-<pre><code>    .. code:: javascript
-
-        batch = initializeUnorderedBulkOp()
-        batch.find({key: 1}).replaceOne({key: 3})
-        batch.execute() == {
-            "writeErrors" : [ ],
-            "writeConcernErrors" : [ ],
-            "nInserted" : 0,
-            "nUpserted" : 0,
-            "nMatched" : 1,
-            "nModified" : 1,
-            "nRemoved" : 0,
-            "upserted" : [ ]
-        }
-
-    nModified is NULL or omitted if legacy server.
-
-    .. code:: javascript
-
-        collection.distinct('key') == [1, 3].
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<h2 id="upsert-update"><a class="header" href="#upsert-update">UPSERT-UPDATE</a></h2>
-<p>Test Case 1:
-upsert() requires find() first:
-initializeOrderedBulkOp().upsert() is a type error</p>
-<pre><code>    upsert().update() upserts a document, and doesn’t affect non-upsert updates in the same bulk operation. 'nUpserted’ is set:
-
-    Empty collection.
-
-    .. code:: javascript
-
-        batch = initializeUnorderedBulkOp()
-        batch.find({key: 1}).update({$set: {x: 1}})  // not an upsert
-        batch.find({key: 2}).upsert().update({$set: {x: 2}})
-        batch.execute() == {
-            "writeErrors" : [ ],
-            "writeConcernErrors" : [ ],
-            "nInserted" : 0,
-            "nUpserted" : 1,
-            "nMatched" : 0,
-            "nModified" : 0,
-            "nRemoved" : 0,
-            "upserted" : [{ "index" : 1, "_id" : ObjectId(...)}]
-        }
-
-    nModified is NULL or omitted if legacy server.
-    
-    collection has only {_id: ObjectId(...), key: 2, x: 2}.
-
-    Repeat the whole batch. Now nMatched == 1, nUpserted == 0.
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 2:
-upsert().update() updates all matching documents:
-Collection starts with {key: 1}, {key: 1}.</p>
-<pre><code>    .. code:: javascript
-
-        batch = initializeUnorderedBulkOp()
-        batch.find({key: 1}).upsert().update({$set: {x: 1}})
-        batch.execute() == {
-            "writeErrors" : [ ],
-            "writeConcernErrors" : [ ],
-            "nInserted" : 0,
-            "nUpserted" : 0,
-            "nMatched" : 2,
-            "nModified" : 2,
-            "nRemoved" : 0,
-            "upserted" : [ ]
-        }
-
-    nModified is NULL or omitted if legacy server.
-    
-    collection has only {key: 1, x: 1}, {key: 1, x: 1}.
-
-    Same for initializeOrderedBulkOp().
-
-    We can upsert() a 16 MiB document—the driver can make a command document slightly larger than the max document size.
-
-    Empty collection.
-    
-    .. code:: javascript
-
-        var bigstring = "string of length 16 MiB - 30 bytes"
-        batch = initializeUnorderedBulkOp()
-        batch.find({key: 1}).upsert().update({$set: {x: bigstring}})
-        batch.execute() succeeds.
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<h2 id="upsert-update_one"><a class="header" href="#upsert-update_one">UPSERT-UPDATE_ONE</a></h2>
-<p>Test Case 1:
-upsert().updateOne() upserts a document, and doesn’t affect non-upsert updateOnes in the same bulk operation. 'nUpserted’ is set:
-Empty collection.</p>
-<pre><code>    .. code:: javascript
-
-        batch = initializeUnorderedBulkOp()
-        batch.find({key: 1}).updateOne({$set: {x: 1}})  // not an upsert
-        batch.find({key: 2}).upsert().updateOne({$set: {x: 2}})
-        batch.execute() == {
-            "writeErrors" : [ ],
-            "writeConcernErrors" : [ ],
-            "nInserted" : 0,
-            "nUpserted" : 1,
-            "nMatched" : 0,
-            "nModified" : 0,
-            "nRemoved" : 0,
-            "upserted" : [{ "index" : 1, "_id" : ObjectId(...)} ]
-        }
-
-    nModified is NULL or omitted if legacy server.
-
-    collection contains only {key: 2, x: 2}.
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 2:
-upsert().updateOne() only updates one matching document:
-Collection starts with {key: 1}, {key: 1}.</p>
-<pre><code>    .. code:: javascript
-
-        batch = initializeUnorderedBulkOp()
-        batch.find({key: 1}).upsert().updateOne({$set: {x: 1}})
-        batch.execute() == {
-            "writeErrors" : [ ],
-            "writeConcernErrors" : [ ],
-            "nInserted" : 0,
-            "nUpserted" : 0,
-            "nMatched" : 1,
-            "nModified" : 1,
-            "nRemoved" : 0,
-            "upserted" : [ ]
-        }
-
-    nModified is NULL or omitted if legacy server.
-
-    collection has only {key: 1, x: 1}, {key: 1}.
-</code></pre>
-<h2 id="upsert-replace_one"><a class="header" href="#upsert-replace_one">UPSERT-REPLACE_ONE</a></h2>
-<p>Test Case 1:
-upsert().replaceOne() upserts a document, and doesn’t affect non-upsert replaceOnes in the same bulk operation. 'nUpserted’ is set:
-Empty collection.</p>
-<pre><code>    .. code:: javascript
-
-        batch = initializeUnorderedBulkOp()
-        batch.find({key: 1}).replaceOne({x: 1})  // not an upsert
-        batch.find({key: 2}).upsert().replaceOne({x: 2})
-
-        batch.execute() == {
-            "writeErrors" : [ ],
-            "writeConcernErrors" : [ ],
-            "nInserted" : 0,
-            "nUpserted" : 1,
-            "nMatched" : 0,
-            "nModified" : 0,
-            "nRemoved" : 0,
-            "upserted" : [{ "index" : 1, "_id" : ObjectId(...)}  ]
-        }
-
-    nModified is NULL or omitted if legacy server.
-    
-    collection contains {x: 2}.
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 2:
-upsert().replaceOne() only replaces one matching document:
-Collection starts with {key: 1}, {key: 1}.</p>
-<pre><code>    .. code:: javascript
-
-      batch = initializeUnorderedBulkOp()
-      batch.find({key: 1}).upsert().replaceOne({x: 1})
-      batch.execute() == {
-          "writeErrors" : [ ],
-          "writeConcernErrors" : [ ],
-          "nInserted" : 0,
-          "nUpserted" : 0,
-          "nMatched" : 1,
-          "nModified" : 1,
-          "nRemoved" : 0,
-          "upserted" : []
-      }
-
-    nModified is NULL or omitted if legacy server.
-
-    collection has only {x: 1}, {key: 1}.
-</code></pre>
-<h2 id="remove-1"><a class="header" href="#remove-1">REMOVE</a></h2>
-<p>Test Case 1:
-remove() requires find() first:
-initializeUnorderedBulkOp().remove() is a type error</p>
-<pre><code>    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 1:
-Remove() with empty selector removes all documents:
-Collection starts with {key: 1}, {key: 1}.</p>
-<pre><code>    .. code:: javascript
-
-        batch = initializeUnorderedBulkOp()
-        batch.find({}).remove()
-        batch.execute() == {
-            "writeErrors" : [ ],
-            "writeConcernErrors" : [ ],
-            "nInserted" : 0,
-            "nUpserted" : 0,
-            "nMatched" : 0,
-            "nModified" : 0,
-            "nRemoved" : 2,
-            "upserted" : [ ]
-        }
-
-    nModified is NULL or omitted if legacy server.
-
-    Collection is now empty.
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 2:
-Remove() with empty selector removes only matching documents:
-Collection starts with {key: 1}, {key: 2}.</p>
-<pre><code>    .. code:: javascript
-
-        batch = initializeUnorderedBulkOp()
-        batch.find({key: 1}).remove()
-        batch.execute() == {
-            "writeErrors" : [ ],
-            "writeConcernErrors" : [ ],
-            "nInserted" : 0,
-            "nUpserted" : 0,
-            "nMatched" : 0,
-            "nModified" : 0,
-            "nRemoved" : 1,
-            "upserted" : [ ]
-        }
-
-    nModified is NULL or omitted if legacy server.
-
-    Collection contains only {key: 2}.
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<h2 id="remove_one"><a class="header" href="#remove_one">REMOVE_ONE</a></h2>
-<p>Test Case 1:
-removeOne() requires find() first:
-initializeUnorderedBulkOp().removeOne() is a type error</p>
-<pre><code>    Same for initializeOrderedBulkOp().
-</code></pre>
-<p>Test Case 2:
-If several documents match find(), removeOne() removes one:
-Collection has {key: 1}, {key: 1}.</p>
-<pre><code>    .. code:: javascript
-
-        batch = initializeUnorderedBulkOp()
-        batch.find({}).removeOne()
-        batch.execute() == {
-            "writeErrors" : [ ],
-            "writeConcernErrors" : [ ],
-            "nInserted" : 0,
-            "nUpserted" : 0,
-            "nMatched" : 0,
-            "nModified" : 0,
-            "nRemoved" : 1,
-            "upserted" : [ ]
-        }
-
-    nModified is NULL or omitted if legacy server.
-
-    collection.count() == 1.
-
-    Same for initializeOrderedBulkOp().
-</code></pre>
-<h2 id="mixed-operations-unordered"><a class="header" href="#mixed-operations-unordered">MIXED OPERATIONS, UNORDERED</a></h2>
-<p>nMatched, nModified, nUpserted, nInserted, nRemoved are properly counted with an unordered bulk operation. The list of upserted documents is returned, with upserts’ indexes correctly rewritten.
-Collection contains {a: 1}, {a: 2}.</p>
-<p>.. code:: javascript</p>
-<pre><code>batch = initializeUnorderedBulkOp()
-batch.find({a: 1}).update({$set: {b: 1}})
-batch.find({a: 2}).remove()
-batch.insert({a: 3})
-batch.find({a: 4}).upsert().updateOne({$set: {b: 4}})
-result = batch.execute()
-
-result['nMatched'] == 1
-result['nModified'] == 1 // (nModified is NULL or omitted if legacy server.)
-result['nUpserted'] == 1
-result['nInserted'] == 1
-result['nRemoved'] == 1
-
-result['upserted'].length == 1 and result['upserted'][0]['index'] == 3.
-result['upserted'][0]['_id'] is an ObjectId.
-</code></pre>
-<h2 id="mixed-operations-ordered"><a class="header" href="#mixed-operations-ordered">MIXED OPERATIONS, ORDERED</a></h2>
-<p>nMatched, nModified, nUpserted, nInserted, nRemoved are properly counted with an unordered bulk operation. The list of upserted documents is returned, with upserts’ indexes correctly rewritten.</p>
-<p>Empty collection.</p>
-<p>.. code:: javascript</p>
-<pre><code>batch = initializeOrderedBulkOp()
-batch.insert({a: 1})
-batch.find({a: 1}).updateOne({$set: {b: 1}})
-batch.find({a: 2}).upsert().updateOne({$set: {b: 2}})
-batch.insert({a: 3})
-batch.find({a: 3}).remove()
-result = batch.execute()
-
-result['nInserted'] == 2
-result['nUpserted'] == 1
-result['nMatched'] == 1
-result['nModified'] == 1 (nModified is NULL or omitted if legacy server.)
-result['nRemoved'] == 1
-
-result['upserted'].length == 1 and result['upserted'][0]['index'] == 2.
-result['upserted'][0]['_id'] is an ObjectId.
-</code></pre>
-<h2 id="mixed-operations-auth"><a class="header" href="#mixed-operations-auth">MIXED OPERATIONS, AUTH</a></h2>
-<p>Verify that auth failures are handled gracefully, especially in conjunction with other errors, such as write concern or normal write errors.</p>
-<p>Example: Using user defined roles (UDR) create a user who can do insert but not remove and run an ordered batch performing both of these operations.</p>
-<p>An ordered batch is expected to stop executing when the error is encountered, then raise the appropriate authentication error. If there have been write concern errors they may be lost. The behavior of an unordered batch is unspecified in the face of auth failure.</p>
-<h2 id="unordered-batch-with-errors"><a class="header" href="#unordered-batch-with-errors">UNORDERED BATCH WITH ERRORS</a></h2>
-<p>nMatched, nModified, nUpserted, nInserted, nRemoved are properly counted with an unordered bulk operation that includes a write error. The list of upserted documents is returned, with upserts’ indexes correctly rewritten.</p>
-<p>Empty collection, unique index on 'a’.</p>
-<p>.. code:: javascript</p>
-<pre><code>batch = initializeUnorderedBulkOp()
-batch.insert({b: 1, a: 1})
-// one or two of these upserts fails:
-batch.find({b: 2}).upsert().updateOne({$set: {a: 1}})
-batch.find({b: 3}).upsert().updateOne({$set: {a: 2}})
-batch.find({b: 2}).upsert().updateOne({$set: {a: 1}})
-batch.insert({b: 4, a: 3})
-// this and / or the first insert fails:
-batch.insert({b: 5, a: 1})
-
-batch.execute() should raise an error with some details:
-error_details['nInserted'] == 2
-error_details['nUpserted'] == 1
-nMatched, nModified, nRemoved are 0.
-(nModified is NULL or omitted if legacy server.)
-
-error_details['upserted'].length == 1
-error_details['upserted'][0]['index'] == 2
-error_details['upserted'][0]['_id'] is an ObjectId
-error_details['writeErrors'].length == 3
-collection.distinct('a') == [1, 2, 3]
-</code></pre>
-<h2 id="ordered-batch-with-errors"><a class="header" href="#ordered-batch-with-errors">ORDERED BATCH WITH ERRORS</a></h2>
-<p>nMatched, nModified, nUpserted, nInserted, nRemoved are properly counted with an ordered bulk operation that includes a write error. The list of upserted documents is returned, with upserts’ indexes correctly rewritten.</p>
-<p>Empty collection, unique index on 'a’.</p>
-<p>.. code:: javascript</p>
-<pre><code>batch = initializeOrderedBulkOp()
-batch.insert({b: 1, a: 1})
-batch.find({b: 2}).upsert().updateOne({$set: {a: 1}})
-batch.find({b: 3}).upsert().updateOne({$set: {a: 2}})
-batch.find({b: 2}).upsert().updateOne({$set: {a: 1}})  // will fail
-batch.insert({b: 4, a: 3})
-batch.insert({b: 5, a: 1})
-
-batch.execute() should raise an error with some details:
-nUpserted, nMatched, nModified, nRemoved are 0
-error_details['nInserted'] == 1
-error_details['writeErrors'].length == 1
-error = error_details['writeErrors'][0]
-error['code'] == 11000
-error['errmsg'] is a string.
-error['index'] == 1
-error['op'] == {q: {b: 2}, u: {$set: {a: 1}}, upsert: true}
-collection.count() == 1  // subsequent inserts weren’t attempted
-</code></pre>
-<h2 id="batch-splitting-maxbsonobjectsize"><a class="header" href="#batch-splitting-maxbsonobjectsize">BATCH SPLITTING: maxBsonObjectSize</a></h2>
-<p>More than 16 MiB worth of inserts are split into multiple messages, and error indexes are rewritten. An unordered batch continues on error and returns the error after all messages are sent.</p>
-<p>Empty collection.</p>
-<p>.. code:: javascript</p>
-<pre><code>// Verify that the driver splits inserts into 16-MiB messages:
-batch = initializeOrderedBulkOp()
-for (i = 0; i &lt; 6; i++) {
-batch.insert({_id: i, a: '4 MiB STRING'});
-}
-
-batch.insert({_id: 0})  // will fail
-batch.insert({_id: 100})
-
-batch.execute() fails with error details
-
-error_details['nInserted'] == 6
-error_details['writeErrors'].length == 1
-error = error_details['writeErrors'][0]
-error['code'] == 11000  // duplicate key
-error['errmsg'] is a string.
-error['index'] == 6  // properly rewritten error index
-
-collection.count() == 6
-</code></pre>
-<p>Same for initializeUnorderedBulkOp, except:</p>
-<p>.. code:: javascript</p>
-<pre><code>error_details['nInserted'] == 7
-collection.count() == 7
-</code></pre>
-<h2 id="batch-splitting-maxwritebatchsize"><a class="header" href="#batch-splitting-maxwritebatchsize">BATCH SPLITTING: maxWriteBatchSize</a></h2>
-<p>More than 1000 documents to be inserted, updated, or removed are split into multiple messages, and error indexes are rewritten. An unordered batch continues on error and returns the error after all messages are sent. Similar test to the maxBsonObjectSize test. Note the server doesn’t yet enforce the maxWriteBatchSize limit, so incorrect code will appear to succeed.</p>
-<h2 id="re-running-a-batch"><a class="header" href="#re-running-a-batch">RE-RUNNING A BATCH</a></h2>
-<p>A batch can only be executed once.</p>
-<p>.. code:: javascript</p>
-<pre><code>batch = initializeOrderedBulkOp()
-batch.insert({})
-batch.execute()
-batch.execute() a second time raises reasonable error.
-</code></pre>
-<p>Same for initializeUnorderedBulkOp().</p>
-<h2 id="empty-batch"><a class="header" href="#empty-batch">EMPTY BATCH</a></h2>
-<p>execute() throws if the batch is empty.</p>
-<p>.. code:: javascript</p>
-<pre><code>batch = initializeOrderedBulkOp()
-batch.execute() with no operations raises a reasonable error.
-</code></pre>
-<p>Same for initializeUnorderedBulkOp().</p>
-<h2 id="no-journal"><a class="header" href="#no-journal">NO JOURNAL</a></h2>
-<p>Attempting the 'j’ write concern with a write command on mongod 2.6 is an error if mongod is started with --nojournal. This applies to bulk operations with mongod 2.4 as well, even though it returns {ok: 1, jnote: "journaling not enabled on this server"}; the driver must detect this message and turn it into an error.</p>
-<p>mongod started with --nojournal.</p>
-<p>.. code:: javascript</p>
-<pre><code>batch = initializeOrderedBulkOp()
-batch.insert({})
-batch.execute({j: 1}) raises error.
-</code></pre>
-<p>Same for initializeUnorderedBulkOp().</p>
-<h2 id="w--1-against-standalone"><a class="header" href="#w--1-against-standalone">W &gt; 1 AGAINST STANDALONE</a></h2>
-<p>On both 2.4 and 2.6, attempting write concern w &gt; 1 against a non-replica-set mongod is an error.</p>
-<p>Standalone mongod.</p>
-<p>.. code:: javascript</p>
-<pre><code>batch = initializeOrderedBulkOp()
-batch.insert({})
-batch.execute({w: 2}) raises error.
-</code></pre>
-<p>Same for initializeUnorderedBulkOp().</p>
-<h2 id="wtimeout-plus-duplicate-key-error"><a class="header" href="#wtimeout-plus-duplicate-key-error">WTIMEOUT PLUS DUPLICATE KEY ERROR</a></h2>
-<p>A single unordered batch can report both writeErrors and writeConcernErrors.</p>
-<p>2-node replica set.</p>
-<p>Empty collection.</p>
-<p>.. code:: javascript</p>
-<pre><code>batch = initializeUnorderedBulkOp()   
-batch.insert({_id: 1})
-batch.insert({_id: 1})
-batch.execute({w: 3, wtimeout: 1}) raises error with details.
-error_details['nInserted'] == 1
-error_details['writeErrors'].length == 1
-error_details['writeErrors'][0]['index'] == 1
-// code 64, "timed out" in 2.4
-// code 64, "waiting for replication timed out" in 2.6
-// code 100, "Not enough data-bearing nodes" in 3.0
-error_details['writeConcernErrors'][0]['code'] either 64 or 100
-error_details['writeConcernErrors'][0]['errmsg'] not empty
-</code></pre>
-<h2 id="wtimeout-with-multiple-operations"><a class="header" href="#wtimeout-with-multiple-operations">WTIMEOUT WITH MULTIPLE OPERATIONS</a></h2>
-<p>Multiple write concern errors are all reported.</p>
-<p>2-node replica set.</p>
-<p>Empty collection.</p>
-<p>.. code:: javascript</p>
-<pre><code>batch = initializeOrderedBulkOp()
-batch.insert({_id: 1})
-batch.find({}).remove()
-batch.execute({w: 3, wtimeout: 1}) raises error with details.
-error_details['nInserted'] == 1
-error_details['nRemoved'] == 1
-error_details['writeErrors'].length == 0
-// code 64, "timed out" in 2.4
-// code 64, "waiting for replication timed out" in 2.6
-// code 100, "Not enough data-bearing nodes" in 3.0
-
-wc_errors = error_details['writeConcernErrors']
-wc_errors.length == 2
-for (i = 0; i &lt; 2; i++) {
-  wc_errors[i]['code'] either 64 or 100
-  wc_errors[i]['errmsg'] is not empty
-}
-</code></pre>
-<h2 id="w--0"><a class="header" href="#w--0">W = 0</a></h2>
-<p>A batch with w: 0 doesn’t report write errors.</p>
-<p>Empty collection.</p>
-<p>.. code:: javascript</p>
-<pre><code>batch = initializeOrderedBulkOp()
-batch.insert({_id: 1})
-batch.insert({_id: 1})
-batch.execute({w: 0}) raises no error.
-collection.count() == 1.
-</code></pre>
-<p>Same for initializeUnorderedBulkOp(), except collection.count() == 2.</p>
-<h2 id="failover-with-mixed-versions"><a class="header" href="#failover-with-mixed-versions">FAILOVER WITH MIXED VERSIONS</a></h2>
-<p>The driver detects when the primary’s max wire protocol version increases or decreases, and the driver correctly switches between using write commands and using legacy write operations.</p>
-<p>2-node replica set. One node runs 2.4, the other runs 2.6.</p>
-<p>.. code:: javascript</p>
-<pre><code>client = MongoReplicaSetClient()
-// Switch primary:
-client.admin.command({replSetStepDown: 5})  // can’t be primary for 5 seconds
-
-batch = client.db.collection.initializeOrderedBulkOp()
-batch.insert({_id: 1})
-batch.execute() should succeed
-</code></pre>
-<p>sleep 6 seconds</p>
-<p>.. code:: javascript</p>
-<pre><code>// Switch back to original primary
-client.admin.command({replSetStepDown: 5})
-batch = client.db.collection.initializeOrderedBulkOp()
-batch.insert({_id: 2}).execute() should succeed
-</code></pre>
-<h1 id="changelog-38"><a class="header" href="#changelog-38">Changelog</a></h1>
-<p>:2023-10-17: Updated <code>maxWriteBatchSize</code> default to 100,000 from 1000
-:2022-10-05: Remove spec front matter and reformat changelog. Consolidated
-changelog entries prior to the first published version of this
-document, since exact dates were unavailable.
-:2021-05-27: Removed "Test Case 3: Key validation, no $-prefixed keys allowed"
-for insert.
-:2015-10-23: Clarify that "writeConcernErrors" field is plural
-:2015-05-22: * First public version of the specification.
-* Deprecated this specification in favor of CRUD API.
-* Merged in Test Cases from QA tickets.
-* Specification cleanup and increased precision.
-* Suggested error handling for languages using commonly raising
-exceptions.
-* Narrowed writeConcern reporting requirement.
-* Renamed nUpdated to nMatched as to reflect that it's the number
-of matched documents not the number of modified documents.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bulk-api"><a class="header" href="#bulk-api">Bulk API</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bulk-write"><a class="header" href="#bulk-write">Bulk Write</a></h1>
 <ul>
 <li>Status: Accepted</li>
@@ -24469,7 +23056,7 @@ append the <code>ops</code> and <code>nsInfo</code> fields to the <code>bulkWrit
 <p>The <code>ops</code> field is a list of write operation documents. The first entry in each document has the name of the operation
 (i.e. "insert", "update", or "delete") as its key and the index in the <code>nsInfo</code> array of the namespace on which the
 operation should be performed as its value. The documents have the following format:</p>
-<h4 id="insert-2"><a class="header" href="#insert-2">Insert</a></h4>
+<h4 id="insert-1"><a class="header" href="#insert-1">Insert</a></h4>
 <pre><code class="language-javascript">{
     "insert": &lt;Int32&gt;,
     "document": &lt;Document&gt;
@@ -24477,7 +23064,7 @@ operation should be performed as its value. The documents have the following for
 </code></pre>
 <p>If the document to be inserted does not contain an <code>_id</code> field, drivers MUST generate a new
 <a href="crud/../bson-objectid/objectid.html"><code>ObjectId</code></a> and add it as the <code>_id</code> field at the beginning of the document.</p>
-<h4 id="update-2"><a class="header" href="#update-2">Update</a></h4>
+<h4 id="update-1"><a class="header" href="#update-1">Update</a></h4>
 <pre><code class="language-javascript">{
     "update": &lt;Int32&gt;,
     "filter": &lt;Document&gt;,
@@ -24663,7 +23250,7 @@ recording the <code>_id</code> field present in the user's insert document or cr
 these <code>insertedId</code> values in a <code>BulkWriteResult</code> when a successful response for the insert operation (i.e.
 <code>{ "ok": 1, "n": 1 }</code>) is received in the results cursor. This ensures that drivers only report an <code>insertedId</code> when it
 is confirmed that the insert succeeded.</p>
-<h2 id="handling-errors-1"><a class="header" href="#handling-errors-1">Handling Errors</a></h2>
+<h2 id="handling-errors"><a class="header" href="#handling-errors">Handling Errors</a></h2>
 <h3 id="top-level-errors"><a class="header" href="#top-level-errors">Top-Level Errors</a></h3>
 <p>A top-level error is any error that occurs that is not the result of a single write operation failing or a write concern
 error. Examples include network errors that occur when communicating with the server, command errors (<code>{ "ok": 0 }</code>)
@@ -24679,7 +23266,7 @@ means that drivers MUST NOT attempt to retrieve more responses from the cursor o
 batches and MUST immediately throw an exception. If the results cursor has not been exhausted on the server when a
 top-level error occurs, drivers MUST send the <code>killCursors</code> command to attempt to close it. The result returned from the
 <code>killCursors</code> command MAY be ignored.</p>
-<h3 id="write-concern-errors-1"><a class="header" href="#write-concern-errors-1">Write Concern Errors</a></h3>
+<h3 id="write-concern-errors"><a class="header" href="#write-concern-errors">Write Concern Errors</a></h3>
 <p>Write concern errors are recorded in the <code>writeConcernErrors</code> field on <code>BulkWriteException</code>. When a write concern error
 is encountered, it should not terminate execution of the bulk write for either ordered or unordered bulk writes.
 However, drivers MUST throw an exception at the end of execution if any write concern errors were observed.</p>
@@ -24754,7 +23341,7 @@ drivers should rely on the server to return errors about exceeded size limits. S
 unacknowledged writes. This specification previously required drivers to check size limits for unacknowledged writes.
 The requirement has since been removed. Checking size limits complicates some driver implementations. Returning a driver
 error in this specific situation does not seem helpful enough to require size checks.</p>
-<h2 id="changelog-39"><a class="header" href="#changelog-39"><strong>Changelog</strong></a></h2>
+<h2 id="changelog-38"><a class="header" href="#changelog-38"><strong>Changelog</strong></a></h2>
 <ul>
 <li>
 <p>2025-09-09: Clarify that <code>rawData</code> is for internal use only.</p>
@@ -25224,7 +23811,7 @@ set differently. While this setting does not currently exist for <code>ReadConce
 costs a driver nothing to be prepared for it. Second, it makes sense that if a user doesn't specify a <code>ReadConcern</code>, we
 don't send one and if a user does specify a <code>ReadConcern</code>, we do send one. If the user specifies level="local", for
 instance, we send it.</p>
-<h2 id="changelog-40"><a class="header" href="#changelog-40">Changelog</a></h2>
+<h2 id="changelog-39"><a class="header" href="#changelog-39">Changelog</a></h2>
 <ul>
 <li>
 <p>2025-02-25: Rename WriteConcernFailed to WriteConcernTimeout</p>
@@ -26228,7 +24815,7 @@ unnecessary scanning of unmatched oplog entries.</p>
 <li>PYTHON (PYTHON-1338)</li>
 <li>RUBY (RUBY-1228)</li>
 </ul>
-<h2 id="changelog-41"><a class="header" href="#changelog-41">Changelog</a></h2>
+<h2 id="changelog-40"><a class="header" href="#changelog-40">Changelog</a></h2>
 <ul>
 <li>
 <p>2025-09-08: Clarify resume behavior.</p>
@@ -26418,7 +25005,7 @@ for the driver.</p>
 <li>MUST NOT use OP_QUERY except to execute commands.</li>
 </ul>
 <h2 id="commands"><a class="header" href="#commands">Commands</a></h2>
-<h3 id="find-1"><a class="header" href="#find-1">find</a></h3>
+<h3 id="find"><a class="header" href="#find">find</a></h3>
 <p>The <a href="https://www.mongodb.com/docs/manual/reference/command/find/">find</a> command replaces the query functionality of the
 OP_QUERY wire protocol message but cannot execute queries against special collections. Unlike the legacy OP_QUERY wire
 protocol message, the <strong>find</strong> command cannot be used to execute other commands.</p>
@@ -26725,7 +25312,7 @@ Information about the command can be found in the
 <p>This format is general for all commands when executing against a Mongos proxy.</p>
 <p>More in depth information about passing read preferences to Mongos can be found in the Server Selection Specification
 <a href="find_getmore_killcursors_commands/../server-selection/server-selection.html#passing-read-preference-to-mongos">Server Selection Specification</a>.</p>
-<h2 id="changelog-42"><a class="header" href="#changelog-42">Changelog</a></h2>
+<h2 id="changelog-41"><a class="header" href="#changelog-41">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-07-30: Migrated from reStructuredText to Markdown.</p>
@@ -27605,7 +26192,7 @@ instead.</p>
 <p>The ability to alter or append to existing GridFS files has been cited as something that would greatly improve the
 system. While this functionality is not in-scope for this spec (see "Why can"t I alter documents once they are in the
 system?") it is a potential area of growth for the future.</p>
-<h2 id="changelog-43"><a class="header" href="#changelog-43">Changelog</a></h2>
+<h2 id="changelog-42"><a class="header" href="#changelog-42">Changelog</a></h2>
 <ul>
 <li>2024-10-30: Add <code>delete_by_name</code> and <code>rename_by_name</code></li>
 <li>2024-10-28: Removed deprecated fields from tests: <code>md5</code>, <code>contentType</code>, <code>aliases</code></li>
@@ -29696,7 +28283,7 @@ libmongocrypt would create multiple OP_MSGs to send.</p>
 <p>Key management functions currently assume there are no concurrent accesses of the key vault collection being operated
 on. To support concurrent access of the key vault collection, the key management functions may be overloaded to take an
 explicit session parameter as described in the <a href="client-side-encryption/../sessions/driver-sessions.html">Drivers Sessions Specification</a>.</p>
-<h2 id="changelog-44"><a class="header" href="#changelog-44">Changelog</a></h2>
+<h2 id="changelog-43"><a class="header" href="#changelog-43">Changelog</a></h2>
 <ul>
 <li>
 <p>2025-08-06: Add <code>TextPreview</code> algorithm.</p>
@@ -29962,29 +28549,814 @@ validate that the underlying encrypted BSON type is correct.</p>
 <p>It would be a very bad security flaw if intent-to-encrypt markings were confused with ciphertexts. This could lead to a
 marking inadvertently being stored on a server – meaning that plaintext is stored where ciphertext should have been.</p>
 <p>Therefore, the leading byte of the BSON binary subtype distinguishes between marking and ciphertext.</p>
-<h2 id="changelog-45"><a class="header" href="#changelog-45">Changelog</a></h2>
+<h2 id="changelog-44"><a class="header" href="#changelog-44">Changelog</a></h2>
 <ul>
 <li>2024-03-04: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter and create changelog.</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><p>.. note::
-This specification has been converted to Markdown and renamed to
-<code>command-logging-and-monitoring.md &lt;command-logging-and-monitoring.md&gt;</code>_.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="opentelemetry"><a class="header" href="#opentelemetry">OpenTelemetry</a></h1>
+<ul>
+<li>Title: OpenTelemetry</li>
+<li>Status: Accepted</li>
+<li>Minimum Server Version: N/A</li>
+</ul>
+<hr />
+<h2 id="abstract-43"><a class="header" href="#abstract-43">Abstract</a></h2>
+<p>This specification defines requirements for drivers' OpenTelemetry integration and behavior. Drivers will trace database
+commands and driver operations with a pre-defined set of attributes when OpenTelemetry is enabled and configured in an
+application.</p>
+<h2 id="meta-43"><a class="header" href="#meta-43">META</a></h2>
+<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<h2 id="specification-40"><a class="header" href="#specification-40">Specification</a></h2>
+<h3 id="terms-27"><a class="header" href="#terms-27">Terms</a></h3>
+<p><strong>Host Application</strong></p>
+<p>An application that uses the MongoDB driver.</p>
+<p><strong>Span</strong></p>
+<p>A Span represents a single operation within a trace. Spans can be nested to form a trace tree. Each trace contains a
+root span, which typically describes the entire operation and, optionally, one or more sub-spans for its sub-operations.</p>
+<p>Spans encapsulate:</p>
+<ul>
+<li>The span name</li>
+<li>An immutable SpanContext that uniquely identifies the Span</li>
+<li>A parent span in the form of a Span, SpanContext, or null</li>
+<li>A SpanKind</li>
+<li>A start timestamp</li>
+<li>An end timestamp</li>
+<li>Attributes</li>
+<li>A list of links to other Spans</li>
+<li>A list of timestamped Events</li>
+<li>A Status</li>
+</ul>
+<h3 id="implementation-requirements-1"><a class="header" href="#implementation-requirements-1">Implementation Requirements</a></h3>
+<h4 id="external-dependencies"><a class="header" href="#external-dependencies">External Dependencies</a></h4>
+<p><strong>OpenTelemetry API and SDK</strong></p>
+<p>OpenTelemetry offers two components for implementing instrumentation – API and SDK. The OpenTelemetry API provides all
+the necessary types and method signatures. If there is no OpenTelemetry SDK available at runtime, API methods are
+no-ops. OpenTelemetry SDK is an actual implementation of the API. If the SDK is available, API methods do work.</p>
+<p>Drivers MAY add a dependency to the corresponding OpenTelemetry API. This is the recommended way for implementing
+OpenTelemetry in libraries. Alternatively, drivers can implement OpenTelemetry support using any suitable tools within
+the driver ecosystem. Drivers MUST NOT add a dependency to OpenTelemetry SDK.</p>
+<h4 id="enabling-disabling-and-configuring-opentelemetry"><a class="header" href="#enabling-disabling-and-configuring-opentelemetry">Enabling, Disabling, and Configuring OpenTelemetry</a></h4>
+<p>OpenTelemetry SHOULD be disabled by default.</p>
+<p>Drivers SHOULD support configuring OpenTelemetry on multiple levels.</p>
+<ul>
+<li><strong>MongoClient Level</strong>: Drivers SHOULD provide a configuration option for <code>MongoClient</code>'s Configuration/Settings that
+enables or disables tracing for operations and commands executed with this client. This option MUST override
+settings on higher levels. This configuration can be implemented with a <code>MongoClient</code> option. See
+<a href="open-telemetry/open-telemetry.html#client-options">Client Options</a> section below.</li>
+<li><strong>Driver Level</strong>: Drivers SHOULD provide a global setting that enables or disables OpenTelemetry for all <code>MongoClient</code>
+instances (excluding those that explicitly override the setting). This configuration SHOULD be implemented with an
+environment variable <code>OTEL_#{LANG}_INSTRUMENTATION_MONGODB_ENABLED</code>. Drivers MAY provide other means to globally
+disable OpenTelemetry that are more suitable for their language ecosystem. This option MUST override settings on the
+higher level.</li>
+<li><strong>Host Application Level</strong>: If the host application enables OpenTelemetry for all available instrumentations (e.g.,
+Ruby), and a driver can detect this, OpenTelemetry SHOULD be enabled in the driver.</li>
+</ul>
+<p>Drivers MUST NOT try to detect whether the OpenTelemetry SDK library is available, and enable tracing based on this.
+Drivers MUST NOT add means that configure OpenTelemetry SDK (e.g., setting a specific exporter). Drivers MUST NOT add
+means that configure OpenTelemetry on the host application level (e.g., setting a specific sampler).</p>
+<p><span id="client-options"></span></p>
+<h5 id="mongoclient-options-for-configuring-opentelemetry-on-the-client-level"><a class="header" href="#mongoclient-options-for-configuring-opentelemetry-on-the-client-level"><code>MongoClient</code> Options for configuring OpenTelemetry on the client level</a></h5>
+<p>Drivers SHOULD add new options to <code>MongoClient</code> for configuring OpenTelemetry as described above. These options SHOULD
+be a dictionary that groups all OpenTelemetry-related options, the name of the dictionary SHOULD be <code>tracing</code>. The
+dictionary SHOULD contain at least the following options:</p>
+<ul>
+<li><code>enabled</code>: A boolean that enables or disables OpenTelemetry for this <code>MongoClient</code> instance. Default is <code>false</code> (i.e.,
+use the driver-level setting).</li>
+<li><code>query_text_max_length</code>: An integer that sets the maximum length of the <code>db.query.text</code> attribute of command spans.
+Default is <code>0</code> (i.e., do not add the attribute).</li>
+</ul>
+<h4 id="environment-variables-for-configuring-opentelemetry"><a class="header" href="#environment-variables-for-configuring-opentelemetry">Environment Variables for configuring OpenTelemetry</a></h4>
+<p>Drivers SHOULD support configuration of OpenTelemetry on the driver level via at least the following environment
+variables:</p>
+<ul>
+<li><code>OTEL_#{LANG}_INSTRUMENTATION_MONGODB_ENABLED</code>: enables OpenTelemetry when set to <code>1</code>, <code>true</code>, <code>yes</code>.</li>
+<li><code>OTEL_#{LANG}_INSTRUMENTATION_MONGODB_QUERY_TEXT_MAX_LENGTH</code>: An integer that sets the maximum length of the
+<code>db.query.text</code> attribute of command spans. Default is <code>0</code> (i.e., do not add the attribute).</li>
+</ul>
+<h4 id="tracer-attributes"><a class="header" href="#tracer-attributes">Tracer Attributes</a></h4>
+<p>If a driver creates a Tracer using OpenTelemetry API, drivers MUST use the following attributes:</p>
+<ul>
+<li><code>name</code>: A string that identifies the driver. It can be the name of a driver's component (e.g., "mongo", "PyMongo") or
+a package name (e.g., "com.mongo.Driver"). Drivers SHOULD select a name that is idiomatic for their language and
+ecosystem. Drivers SHOULD follow the Instrumentation Scope guidance.</li>
+<li><code>version</code>: A string that represents internal driver version. The version formatting is not defined; drivers SHOULD
+apply the same formatting as the use for <code>client.driver.version</code> attribute of the
+<a href="https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.md#clientdriverversion">handshake</a>.</li>
+</ul>
+<h4 id="instrumenting-driver-operations"><a class="header" href="#instrumenting-driver-operations">Instrumenting Driver Operations</a></h4>
+<p>When a user calls the driver's public API, the driver MUST create a span for every driver operation. Drivers MUST start
+the span as soon as possible so that the span’s duration reflects all activities made by the driver, such as server
+selection and serialization/deserialization.</p>
+<p>The span for the operation MUST be created within the current span of the host application, with the exceptions listed
+below.</p>
+<h5 id="transactions-2"><a class="header" href="#transactions-2">Transactions</a></h5>
+<p>When a user starts a transaction with <code>startTransaction</code>, the driver SHOULD create a span for the pseudo operation
+<code>transaction</code>. This span MUST have only one attribute <code>db.system</code> with the value <code>mongodb</code>. All operations executed
+within the transaction SHOULD be nested to the <code>transaction</code> span.</p>
+<p>When a user commits or aborts a transaction with <code>commitTransaction</code> or <code>abortTransaction</code>, the driver SHOULD finish the
+<code>transaction</code> span.</p>
+<h5 id="withtransaction"><a class="header" href="#withtransaction"><code>withTransaction</code></a></h5>
+<p>In case of <code>withTransaction</code> operation spans for operations that are executed inside the callbacks SHOULD be nested into
+the <code>withTransaction</code> span.</p>
+<h5 id="operation-span-name"><a class="header" href="#operation-span-name">Operation Span Name</a></h5>
+<p>The span name SHOULD be:</p>
+<ul>
+<li><code>driver_operation_name db.collection_name</code> if the operation is executed on a collection (e.g.,
+<code>collection.findOneAndDelete(filter)</code> will report <code>findAndModify warehouse_db.users_coll</code>).</li>
+</ul>
+<p><strong>Note</strong>: since the <code>findOneAndDelete</code> operation is implemented as a <code>findAndModify</code> command, the operation name in the
+span is <code>findAndModify</code>. This ensures consistency between drivers when naming operations. See the
+<a href="open-telemetry/open-telemetry.html#covered-operations">covered operations</a> table below for mapping of public API methods to operation names.</p>
+<ul>
+<li><code>driver_operation_name db</code> if there is no specific collection for the operation (e.g., <code>runCommand warehouse</code>).</li>
+</ul>
+<h5 id="operation-span-kind"><a class="header" href="#operation-span-kind">Operation Span Kind</a></h5>
+<p>Span kind MUST be "client".</p>
+<h5 id="operation-span-attributes"><a class="header" href="#operation-span-attributes">Operation Span Attributes</a></h5>
+<p>Spans SHOULD have the following attributes:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Attribute</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th><th style="text-align: left">Requirement Level</th></tr></thead><tbody>
+<tr><td style="text-align: left"><code>db.system</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be 'mongodb'</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.namespace</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The database name</td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.collection.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The collection being accessed within the database stated in <code>db.namespace</code></td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.operation.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the driver operation being executed</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.operation.summary</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Equivalent to span name</td><td style="text-align: left">Required</td></tr>
+</tbody></table>
+</div>
+<p>Not all attributes are available at the moment of span creation. Drivers need to add attributes at later stages, which
+requires an operation span to be available throughout the complete operation lifecycle.</p>
+<h6 id="dbnamespace"><a class="header" href="#dbnamespace">db.namespace</a></h6>
+<p>This attribute SHOULD be set to current database name except for operations executing against admin db ex: (transaction,
+client <code>bulkWrite</code>) operations.</p>
+<p>Examples:</p>
+<ul>
+<li><code>find</code> on <code>test.users</code> → <code>test</code></li>
+<li><code>runCommand</code> on <code>admin</code> → <code>admin</code></li>
+<li><code>commitTransaction</code> → <code>admin</code></li>
+<li><code>abortTransaction</code> → <code>admin</code></li>
+<li>client <code>bulkWrite</code> → <code>admin</code></li>
+</ul>
+<p>The name of this attribute is defined in the
+<a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/db/#db-namespace">OpenTelemetry Specifications</a>. In
+order to be compliant with these, we use this name even though the term <code>namespace</code> has a different
+<a href="https://www.mongodb.com/docs/manual/reference/glossary/">meaning</a> for MongoDB.</p>
+<h6 id="dbcollectionname"><a class="header" href="#dbcollectionname">db.collection.name</a></h6>
+<p>This attribute should be set to the user's collection if the operation is executing against a collection, this field is
+omitted for commands running against <code>admin</code> database or commands that do not target a specific collection.</p>
+<p>Examples:</p>
+<ul>
+<li><code>find</code> on <code>test.users</code> → <code>users</code></li>
+<li><code>runCommand</code> on <code>admin</code> → <em>omitted</em></li>
+<li><code>commitTransaction</code> → <em>omitted</em></li>
+<li><code>abortTransaction</code> → <em>omitted</em></li>
+<li>client <code>bulkWrite</code> → <em>omitted</em></li>
+</ul>
+<h5 id="exceptions"><a class="header" href="#exceptions">Exceptions</a></h5>
+<p>If the driver operation fails with an exception, drivers MUST record an exception to the current operation span. This
+does not relate to exceptions that happen on the server command level (see below). Those exceptions MUST be recorded to
+the corresponding command span.</p>
+<p>When recording an exception, drivers SHOULD add the following attributes to the span, when the content for the attribute
+if available:</p>
+<ul>
+<li><code>exception.message</code></li>
+<li><code>exception.type</code></li>
+<li><code>exception.stacktrace</code></li>
+</ul>
+<h4 id="instrumenting-server-commands"><a class="header" href="#instrumenting-server-commands">Instrumenting Server Commands</a></h4>
+<p>Drivers MUST create a span for every server command sent to the server as a result of a public API call, except for
+sensitive commands as listed in the command logging and monitoring specification.</p>
+<p>Spans for commands MUST be nested to the span for the corresponding driver operation span. If the command is being
+retried, the driver MUST create a separate span for each retry; all the retries MUST be nested to the same operation
+span.</p>
+<h5 id="command-span-name"><a class="header" href="#command-span-name">Command Span Name</a></h5>
+<p>The span name SHOULD be the command name. For example, <code>find</code>, <code>insert</code>, <code>update</code>, etc.</p>
+<h5 id="command-span-kind"><a class="header" href="#command-span-kind">Command Span Kind</a></h5>
+<p>Span kind MUST be "client".</p>
+<h5 id="command-span-attributes"><a class="header" href="#command-span-attributes">Command Span Attributes</a></h5>
+<p>Spans SHOULD have the following attributes:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Attribute</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th><th style="text-align: left">Requirement Level</th></tr></thead><tbody>
+<tr><td style="text-align: left"><code>db.system</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be 'mongodb'</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.namespace</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The database name</td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.collection.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The collection being accessed within the database stated in <code>db.namespace</code></td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.command.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the server command being executed</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.response.status_code</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MongoDB error code represented as a string. This attribute should be added only if an error happens.</td><td style="text-align: left">Required if an error happens</td></tr>
+<tr><td style="text-align: left"><code>server.port</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Server port number</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>server.address</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Name of the database host, or IP address if name is not known</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>network.transport</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be 'tcp' or 'unix' depending on the protocol</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.query.summary</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">(see explanation below)</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.mongodb.server_connection_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Server connection id</td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.mongodb.driver_connection_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Local connection id</td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.query.text</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Database command that was sent to the server. Content should be equivalent to the <code>document</code> field of the CommandStartedEvent of the command monitoring.</td><td style="text-align: left">Conditional</td></tr>
+<tr><td style="text-align: left"><code>db.mongodb.cursor_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">If a cursor is created or used in the operation</td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.mongodb.lsid</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Logical session id</td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.mongodb.txn_number</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Transaction number</td><td style="text-align: left">Required if available</td></tr>
+</tbody></table>
+</div>
+<p>Besides the attributes listed in the table above, drivers MAY add other attributes from the
+<a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/db/">Semantic Conventions for Databases</a> that are
+applicable to MongoDB.</p>
+<h6 id="dbnamespace-1"><a class="header" href="#dbnamespace-1">db.namespace</a></h6>
+<p>This attribute SHOULD be set to current database name except for operations executing against admin db ex: (transaction,
+client <code>bulkWrite</code>) operations.</p>
+<p>Examples:</p>
+<ul>
+<li><code>find</code> on <code>test.users</code> → <code>test</code></li>
+<li><code>runCommand</code> on <code>admin</code> → <code>admin</code></li>
+<li><code>commitTransaction</code> → <code>admin</code></li>
+<li><code>abortTransaction</code> → <code>admin</code></li>
+<li>client <code>bulkWrite</code> → <code>admin</code></li>
+</ul>
+<p>The name of this attribute is defined in the
+<a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/db/#db-namespace">OpenTelemetry Specifications</a>. In
+order to be compliant with these, we use this name even though the term <code>namespace</code> has a different
+<a href="https://www.mongodb.com/docs/manual/reference/glossary/">meaning</a> for MongoDB.</p>
+<h6 id="dbcollectionname-1"><a class="header" href="#dbcollectionname-1">db.collection.name</a></h6>
+<p>This attribute should be set to the user's collection if the operation is executing against a collection, this field is
+omitted for commands running against <code>admin</code> database or commands that do not target a specific collection.</p>
+<p>Examples:</p>
+<ul>
+<li><code>find</code> on <code>test.users</code> → <code>users</code></li>
+<li><code>runCommand</code> on <code>admin</code> → <em>omitted</em></li>
+<li><code>commitTransaction</code> → <em>omitted</em></li>
+<li><code>abortTransaction</code> → <em>omitted</em></li>
+<li>client <code>bulkWrite</code> → <em>omitted</em></li>
+</ul>
+<h6 id="dbquerysummary"><a class="header" href="#dbquerysummary">db.query.summary</a></h6>
+<p>This attribute SHOULD contain:</p>
+<ul>
+<li><code>command_name db.collection_name</code> if the command is executed on a collection.</li>
+<li><code>command_name db</code> if there is no specific collection for the command.</li>
+<li><code>command_name admin</code> in other cases (e.g., commands executed against <code>admin</code> database, transaction or client
+<code>bulkWrite</code>).</li>
+</ul>
+<h6 id="dbquerytext"><a class="header" href="#dbquerytext">db.query.text</a></h6>
+<p>This attribute contains the full database command executed serialized to extended JSON. If not truncated, the content of
+this attribute SHOULD be equivalent to the <code>document</code> field of the CommandStartedEvent of the command monitoring
+excluding the following fields: <code>lsid</code>, <code>$db</code>, <code>$clusterTime</code>, <code>signature</code>.</p>
+<p>Drivers MUST NOT add this attribute by default. Drivers MUST provide a toggle to enable this attribute. This
+configuration can be implemented with an environment variable
+<code>OTEL_#{LANG}_INSTRUMENTATION_MONGODB_QUERY_TEXT_MAX_LENGTH</code> set to a positive integer value. The attribute will be
+added and truncated to the provided value (similar to the Logging specification).</p>
+<p>On the <code>MongoClient</code> level this configuration can be implemented with a <code>MongoClient</code> option, for example,
+<code>tracing.query_text_max_length</code>.</p>
+<h6 id="dbmongodbcursor_id"><a class="header" href="#dbmongodbcursor_id">db.mongodb.cursor_id</a></h6>
+<p>If the command returns a cursor, or uses a cursor, the <code>cursor_id</code> attribute SHOULD be added.</p>
+<h5 id="exceptions-1"><a class="header" href="#exceptions-1">Exceptions</a></h5>
+<p>If the server command fails with an exception, drivers MUST record an exception to the current command span. When
+recording an exception, drivers SHOULD add the following attributes to the span, when the content for the attribute if
+available:</p>
+<ul>
+<li><code>exception.message</code></li>
+<li><code>exception.type</code></li>
+<li><code>exception.stacktrace</code></li>
+</ul>
+<h2 id="motivation-for-change-17"><a class="header" href="#motivation-for-change-17">Motivation for Change</a></h2>
+<p>A common complaint from our support team is that they don't know how to easily get debugging information from drivers.
+Some drivers provide debug logging, but others do not. For drivers that do provide it, the log messages produced and the
+mechanisms for enabling debug logging are inconsistent.</p>
+<p>OpenTelemetry is currently the industry standard for instrumenting, generating, and collecting telemetry data (metrics,
+logs, and traces). By instrumenting our drivers natively, we allow our end users to collect traces in a
+batteries-included way, with the additional benefits that the tracing is developed and maintained in-house, and conforms
+to the open-source standard for tracing. This also ensures that traces generated on the client-side on driver operations
+can tie into other traces, thus giving our end users a broader picture of the network hops that a single request might
+take.</p>
+<h2 id="test-plan-33"><a class="header" href="#test-plan-33">Test Plan</a></h2>
+<p>See <a href="open-telemetry/tests/README.html">OpenTelemetry Tests</a> for the test plan.</p>
+<h2 id="covered-operations"><a class="header" href="#covered-operations">Covered operations</a></h2>
+<p>The OpenTelemetry specification covers all driver operations including but not limited to the following operations:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Operation</th><th style="text-align: left">Test</th></tr></thead><tbody>
+<tr><td style="text-align: left"><code>aggregate</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/aggregate.yml">tests/operation/aggregate.yml</a></td></tr>
+<tr><td style="text-align: left"><code>findAndModify</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/find_and_modify.yml">tests/operation/find_and_modify.yml</a></td></tr>
+<tr><td style="text-align: left"><code>bulkWrite</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/bulk_write.yml">tests/operation/bulk_write.yml</a></td></tr>
+<tr><td style="text-align: left"><code>commitTransaction</code></td><td style="text-align: left"><a href="open-telemetry/tests/transaction/core_api.yml">tests/transaction/core_api.yml</a></td></tr>
+<tr><td style="text-align: left"><code>abortTransaction</code></td><td style="text-align: left"><a href="open-telemetry/tests/transaction/core_api.yml">tests/transaction/core_api.yml</a></td></tr>
+<tr><td style="text-align: left"><code>withTransaction</code></td><td style="text-align: left"><a href="open-telemetry/tests/transaction/convenient.yml">tests/transaction/convenient.yml</a></td></tr>
+<tr><td style="text-align: left"><code>createCollection</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/create_collection.yml">tests/operation/create_collection.yml</a></td></tr>
+<tr><td style="text-align: left"><code>createIndexes</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/create_indexes.yml">tests/operation/create_indexes.yml</a></td></tr>
+<tr><td style="text-align: left"><code>distinct</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/distinct.yml">tests/operation/distinct.yml</a></td></tr>
+<tr><td style="text-align: left"><code>dropCollection</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/drop_collection.yml">tests/operation/drop_collection.yml</a></td></tr>
+<tr><td style="text-align: left"><code>dropIndexes</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/drop_indexes.yml">tests/operation/drop_indexes.yml</a></td></tr>
+<tr><td style="text-align: left"><code>find</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/find.yml">tests/operation/find.yml</a></td></tr>
+<tr><td style="text-align: left"><code>listCollections</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/list_collections.yml">tests/operation/list_collections.yml</a></td></tr>
+<tr><td style="text-align: left"><code>listDatabases</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/list_databases.yml">tests/operation/list_databases.yml</a></td></tr>
+<tr><td style="text-align: left"><code>listIndexes</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/list_indexes.yml">tests/operation/list_indexes.yml</a></td></tr>
+<tr><td style="text-align: left"><code>mapReduce</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/map_reduce.yml">tests/operation/map_reduce.yml</a></td></tr>
+<tr><td style="text-align: left"><code>estimatedDocumentCount</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/count.yml">tests/operation/count.yml</a></td></tr>
+<tr><td style="text-align: left"><code>insert</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/insert.yml">tests/operation/insert.yml</a></td></tr>
+<tr><td style="text-align: left"><code>delete</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/delete.yml">tests/operation/delete.yml</a></td></tr>
+<tr><td style="text-align: left"><code>update</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/update.yml">tests/operation/update.yml</a></td></tr>
+<tr><td style="text-align: left"><code>createSearchIndexes</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/atlas_search.yml">tests/operation/atlas_search.yml</a></td></tr>
+<tr><td style="text-align: left"><code>dropSearchIndex</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/atlas_search.yml">tests/operation/atlas_search.yml</a></td></tr>
+<tr><td style="text-align: left"><code>updateSearchIndex</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/delete.yml">tests/operation/delete.yml</a></td></tr>
+<tr><td style="text-align: left"><code>delete</code></td><td style="text-align: left"><a href="open-telemetry/tests/operation/atlas_search.yml">tests/operation/atlas_search.yml</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="backwards-compatibility-27"><a class="header" href="#backwards-compatibility-27">Backwards Compatibility</a></h2>
+<p>Introduction of OpenTelemetry in new driver versions should not significantly affect existing applications that do not
+enable OpenTelemetry. However, since the no-op tracing operation may introduce some performance degradation (though it
+should be negligible), customers should be informed of this feature and how to disable it completely.</p>
+<p>If a driver is used in an application that has OpenTelemetry enabled, customers will see traces from the driver in their
+OpenTelemetry backends. This may be unexpected and MAY cause negative effects in some cases (e.g., the OpenTelemetry
+backend MAY not have enough capacity to process new traces). Customers should be informed of this feature and how to
+disable it completely.</p>
+<h2 id="security-implication-4"><a class="header" href="#security-implication-4">Security Implication</a></h2>
+<p>Drivers MUST take care to avoid exposing sensitive information (e.g. authentication credentials) in traces. Drivers
+SHOULD follow the
+<a href="https://github.com/mongodb/specifications/blob/master/source/command-logging-and-monitoring/command-logging-and-monitoring.md#security">Security</a>
+guidance of the Command Logging and Monitoring spec.</p>
+<h2 id="future-work-17"><a class="header" href="#future-work-17">Future Work</a></h2>
+<h3 id="query-parametrization"><a class="header" href="#query-parametrization">Query Parametrization</a></h3>
+<p>It might be beneficial to implement query parametrization for the <code>db.query.text</code> attribute.</p>
+<p>One might want to replace dynamic values in queries with placeholders. For example, the query</p>
+<pre><code class="language-json">{ find: "users", filter: { age: { $gt: 30 } } }
+</code></pre>
+<p>will be transformed to</p>
+<pre><code class="language-json">{ find: "users", filter: { age: { $gt: "?" } } }
+</code></pre>
+<p>for purposes of obfuscating queries in traces or query aggregation.</p>
+<p>In the case of CSFLE, the query might already have BSON binary values (with the encrypted subtype) by the time the query
+is sent along for tracing, which can also be considered a form of parameterization. In that case, a driver could easily
+replace those binary values with placeholders (assuming the encrypted blobs are irrelevant for logging).</p>
+<h2 id="design-rationale-27"><a class="header" href="#design-rationale-27">Design Rationale</a></h2>
+<h3 id="no-uri-options-1"><a class="header" href="#no-uri-options-1">No URI options</a></h3>
+<p>Enabling tracing may have performance and security implications. Copying and using a connection string that enables
+tracing may have unexpected negative outcome.</p>
+<p>Further, we already have two attributes that configure tracing, and we expect there might be more.</p>
+<p>A URI options can be added later if we realise our users need it, while the opposite is not easily accomplished.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="command-logging-and-monitoring"><a class="header" href="#command-logging-and-monitoring">Command Logging and Monitoring</a></h1>
+<ul>
+<li>Status: Accepted</li>
+<li>Minimum Server Version: 2.4</li>
+</ul>
+<hr />
+<h2 id="specification-41"><a class="header" href="#specification-41">Specification</a></h2>
+<p>The command logging and monitoring specification defines a set of behaviour in the drivers for providing runtime
+information about commands in log messages as well as in events which users can consume programmatically, either
+directly or by integrating with third-party APM libraries.</p>
+<h3 id="definitions-11"><a class="header" href="#definitions-11">Definitions</a></h3>
+<h4 id="meta-44"><a class="header" href="#meta-44">META</a></h4>
+<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<h4 id="terms-28"><a class="header" href="#terms-28">Terms</a></h4>
+<p><strong>Document</strong></p>
+<p>The term <code>Document</code> refers to the implementation in the driver's language of a BSON document.</p>
+<h3 id="guidance-5"><a class="header" href="#guidance-5">Guidance</a></h3>
+<h4 id="documentation-6"><a class="header" href="#documentation-6">Documentation</a></h4>
+<p>The documentation provided in code below is merely for driver authors and SHOULD NOT be taken as required documentation
+for the driver.</p>
+<h4 id="messages-and-events"><a class="header" href="#messages-and-events">Messages and Events</a></h4>
+<p>All drivers MUST implement the specified event types as well as log messages.</p>
+<p>Implementation details are noted in the comments when a specific implementation is required. Within each event and log
+message, all properties are REQUIRED unless noted otherwise.</p>
+<h4 id="naming-6"><a class="header" href="#naming-6">Naming</a></h4>
+<p>All drivers MUST name types, properties, and log message values as defined in the following sections. Exceptions to this
+rule are noted in the appropriate section. Class and interface names may vary according to the driver and language best
+practices.</p>
+<h4 id="publishing--subscribing"><a class="header" href="#publishing--subscribing">Publishing &amp; Subscribing</a></h4>
+<p>The driver SHOULD publish events in a manner that is standard to the driver's language publish/subscribe patterns and is
+not strictly mandated in this specification.</p>
+<p>Similarly, as described in the <a href="command-logging-and-monitoring/../logging/logging.html#implementation-requirements">logging specification</a> the driver
+SHOULD emit log messages in a manner that is standard for the language.</p>
+<h4 id="guarantees"><a class="header" href="#guarantees">Guarantees</a></h4>
+<p>The driver MUST guarantee that every <code>CommandStartedEvent</code> has either a correlating <code>CommandSucceededEvent</code> or
+<code>CommandFailedEvent</code>, and that every "command started" log message has either a correlating "command succeeded" log
+message or "command failed" log message.</p>
+<p>The driver MUST guarantee that the <code>requestId</code> of the <code>CommandStartedEvent</code> and the corresponding
+<code>CommandSucceededEvent</code> or <code>CommandFailedEvent</code> is the same, and that the <code>requestId</code> of the "command started" log
+message and the corresponding "command succeeded" or "command failed" log message is the same.</p>
+<h4 id="unacknowledgedacknowledged-writes"><a class="header" href="#unacknowledgedacknowledged-writes">Unacknowledged/Acknowledged Writes</a></h4>
+<p>Unacknowledged writes must provide a <code>CommandSucceededEvent</code> and a "command succeeded" log message with a <code>{ ok: 1 }</code>
+reply.</p>
+<p>A non-default write concern MUST be included in the published command. The default write concern is not required to be
+included.</p>
+<h4 id="succeeded-or-failed"><a class="header" href="#succeeded-or-failed">Succeeded or Failed</a></h4>
+<p>Commands that executed on the server and return a status of <code>{ ok: 1.0 }</code> are considered successful commands and MUST
+generate a <code>CommandSucceededEvent</code> and "command succeeded" log message. Commands that have write errors are included
+since the actual command did succeed, only writes failed.</p>
+<h4 id="error-handling-4"><a class="header" href="#error-handling-4">Error Handling</a></h4>
+<p>If an exception occurs while sending the operation to the server, the driver MUST generate a <code>CommandFailedEvent</code> and
+"command failed" log message with the exception or message, and re-raise the exception.</p>
+<h4 id="bulk-writes"><a class="header" href="#bulk-writes">Bulk Writes</a></h4>
+<p>This specification defines the monitoring and logging of individual commands and in that respect MUST generate events
+and log messages for each command a bulk write executes. Each of these commands, however, must be linked together via
+the same <code>operationId</code>.</p>
+<h4 id="implementation-notes-5"><a class="header" href="#implementation-notes-5">Implementation Notes</a></h4>
+<p>When a driver sends an OP_MSG with a document sequence, it MUST include the document sequence as a BSON array in
+<code>CommandStartedEvent.command</code>. The array's field name MUST be the OP_MSG sequence identifier. For example, if the driver
+sends an <code>update</code> command using OP_MSG, and sends a document sequence as a separate section of payload type 1 with
+identifier <code>updates</code>, the driver MUST include the documents as a BSON array in <code>CommandStartedEvent.command</code> with field
+name <code>updates</code>.</p>
+<p>See "Why are document sequences included as BSON arrays?" in the <a href="command-logging-and-monitoring/command-logging-and-monitoring.html#rationale">rationale</a>.</p>
+<h3 id="rationale-4"><a class="header" href="#rationale-4">Rationale</a></h3>
+<p><em>1. Why are commands with</em> <code>{ ok: 1 }</code> <em>treated as successful and</em> <code>{ ok: 0 }</code> <em>as failed?</em></p>
+<p>The specification is consistent with what the server deems as a successful or failed command and reports this as so.
+This also allows for server changes around this behaviour in the future to require no change in the drivers to continue
+to be compliant.</p>
+<p>The command listener API is responsible only for receiving and handling events sent from the lowest level of the driver,
+and is only about informing listeners about what commands are sent and what replies are received. As such, it would be
+innappropiate at this level for a driver to execute custom logic around particular commands to determine what failure or
+success means for a particular command. Implementers of the API are free to handle these events as they see fit, which
+may include code that further interprets replies to specific commands based on the presence or absence of other fields
+in the reply beyond the <code>ok</code> field.</p>
+<p><em>2. Why are document sequences included as BSON arrays?</em></p>
+<p>The OP_MSG wire protocol was introduced in MongoDB 3.6, with document sequences as an optimization for bulk writes. We
+have chosen to represent these OP_MSGs as single command documents for now, until a need for a more accurate (and
+perhaps better-performing) command monitoring API for document sequences has been demonstrated.</p>
+<p><em>3. Why is BSON serialization and deserialization optional to include in durations?</em></p>
+<p>Different drivers will serialize and deserialize BSON at different levels of the driver architecture. For example, some
+parts of a command (e.g. inserted document structs) could be pre-encoded early into a "raw" BSON form and the final
+command with late additions like a session ID could encoded just before putting it on the wire.</p>
+<p>Rather than specify a duration rule that would be hard to satisfy consistently, we allow duration to include BSON
+serialization/deserialization or not based on the architecture needs of each driver.</p>
+<h3 id="security"><a class="header" href="#security">Security</a></h3>
+<p>Some commands and replies will contain sensitive data relating to authentication.</p>
+<p>In order to not risk leaking this data to external sources or logs, for these commands:</p>
+<ul>
+<li>
+<p>The "command" field in <code>CommandStartedEvent</code> and "command started" log messages MUST be replaced with an empty BSON
+document.</p>
+</li>
+<li>
+<p>The "reply" field in <code>CommandSucceededEvent</code> and "command succeeded" log messages MUST be replaced with an empty BSON
+document.</p>
+</li>
+<li>
+<p>If the error is a server-side error, the "failure" field in <code>CommandFailedEvent</code> and "command failed" log messages
+MUST have all fields besides the following redacted:</p>
+<ul>
+<li><code>code</code></li>
+<li><code>codeName</code></li>
+<li><code>errorLabels</code></li>
+</ul>
+<p>The exact implementation of redaction is flexible depending on the type the driver uses to represent a failure in
+these events and log messages. For example, a driver could choose to set all properties besides these on an error
+object to null. Alternatively, a driver that uses strings to represent failures could replace relevant portions of
+the string with "REDACTED".</p>
+</li>
+</ul>
+<p>The list of sensitive commands is as follows:</p>
+<div class="table-wrapper"><table><thead><tr><th>Command</th></tr></thead><tbody>
+<tr><td><code>authenticate</code></td></tr>
+<tr><td><code>saslStart</code></td></tr>
+<tr><td><code>saslContinue</code></td></tr>
+<tr><td><code>getnonce</code></td></tr>
+<tr><td><code>createUser</code></td></tr>
+<tr><td><code>updateUser</code></td></tr>
+<tr><td><code>copydbgetnonce</code></td></tr>
+<tr><td><code>copydbsaslstart</code></td></tr>
+<tr><td><code>copydb</code></td></tr>
+<tr><td><code>hello</code> (or legacy hello) when <code>speculativeAuthenticate</code> is present</td></tr>
+</tbody></table>
+</div>
+<p>See the <a href="command-logging-and-monitoring/../mongodb-handshake/handshake.html">MongoDB Handshake spec</a> for more information on <code>hello</code> and legacy hello.
+Note that legacy hello has two different letter casings that must be taken into account. See the previously mentioned
+MongoDB Handshake spec for details.</p>
+<h3 id="events-api"><a class="header" href="#events-api">Events API</a></h3>
+<p>See the <a href="command-logging-and-monitoring/../load-balancers/load-balancers.html#events">Load Balancer Specification</a> for details on the <code>serviceId</code> field.</p>
+<pre><code class="language-typescript">interface CommandStartedEvent {
+
+  /**
+   * Returns the command.
+   */
+  command: Document;
+
+  /**
+   * Returns the database name.
+   */
+  databaseName: String;
+
+  /**
+   * Returns the command name.
+   */
+  commandName: String;
+
+  /**
+   * Returns the driver generated request id.
+   */
+  requestId: Int64;
+
+  /**
+   * Returns the driver generated operation id. This is used to link events together such
+   * as bulk write operations. OPTIONAL.
+   */
+  operationId: Int64;
+
+  /**
+   * Returns the connection id for the command. For languages that do not have this,
+   * this MUST return the driver equivalent which MUST include the server address and port.
+   * The name of this field is flexible to match the object that is returned from the driver.
+   */
+  connectionId: ConnectionId;
+
+  /**
+   * Returns the server connection id for the command. The server connection id is distinct from
+   * the connection id and is returned by the hello or legacy hello response as "connectionId"
+   * from the server on 4.2+. Drivers MUST use an Int64 to represent the server connection ID value.
+   */
+  serverConnectionId: Optional&lt;Int64&gt;;
+
+  /**
+   * Returns the service id for the command when the driver is in load balancer mode.
+   * For drivers that wish to include this in their ConnectionId object, this field is
+   * optional.
+   */
+  serviceId: Optional&lt;ObjectId&gt;;
+}
+
+interface CommandSucceededEvent {
+
+  /**
+   * Returns the execution time of the event in the highest possible resolution for the platform.
+   * The calculated value MUST be the time to send the message and receive the reply from the server
+   * and MAY include BSON serialization and/or deserialization. The name can imply the units in which the
+   * value is returned, i.e. durationMS, durationNanos.
+   */
+  duration: Int64;
+
+  /**
+   * Returns the command reply.
+   */
+  reply: Document;
+
+  /**
+   * Returns the command name.
+   */
+  commandName: String;
+
+  /**
+   * Returns the database name.
+   */
+  databaseName: String;
+
+  /**
+   * Returns the driver generated request id.
+   */
+  requestId: Int64;
+
+  /**
+   * Returns the driver generated operation id. This is used to link events together such
+   * as bulk write operations. OPTIONAL.
+   */
+  operationId: Int64;
+
+  /**
+   * Returns the connection id for the command. For languages that do not have this,
+   * this MUST return the driver equivalent which MUST include the server address and port.
+   * The name of this field is flexible to match the object that is returned from the driver.
+   */
+  connectionId: ConnectionId;
+
+  /**
+   * Returns the server connection id for the command. The server connection id is distinct from
+   * the connection id and is returned by the hello or legacy hello response as "connectionId"
+   * from the server on 4.2+. Drivers MUST use an Int64 to represent the server connection ID value.
+   */
+  serverConnectionId: Optional&lt;Int64&gt;;
+
+  /**
+   * Returns the service id for the command when the driver is in load balancer mode.
+   * For drivers that wish to include this in their ConnectionId object, this field is
+   * optional.
+   */
+  serviceId: Optional&lt;ObjectId&gt;;
+}
+
+interface CommandFailedEvent {
+
+  /**
+   * Returns the execution time of the event in the highest possible resolution for the platform.
+   * The calculated value MUST be the time to send the message and receive the reply from the server
+   * and MAY include BSON serialization and/or deserialization. The name can imply the units in which the
+   * value is returned, i.e. durationMS, durationNanos.
+   */
+  duration: Int64;
+
+  /**
+   * Returns the command name.
+   */
+  commandName: String;
+
+  /**
+   * Returns the database name.
+   */
+  databaseName: String;
+
+  /**
+   * Returns the failure. Based on the language, this SHOULD be a message string, exception
+   * object, or error document.
+   */
+  failure: String,Exception,Document;
+
+  /**
+   * Returns the client generated request id.
+   */
+  requestId: Int64;
+
+  /**
+   * Returns the driver generated operation id. This is used to link events together such
+   * as bulk write operations. OPTIONAL.
+   */
+  operationId: Int64;
+
+  /**
+   * Returns the connection id for the command. For languages that do not have this,
+   * this MUST return the driver equivalent which MUST include the server address and port.
+   * The name of this field is flexible to match the object that is returned from the driver.
+   */
+  connectionId: ConnectionId;
+
+  /**
+   * Returns the server connection id for the command. The server connection id is distinct from
+   * the connection id and is returned by the hello or legacy hello response as "connectionId"
+   * from the server on 4.2+. Drivers MUST use an Int64 to represent the server connection ID value.
+   */
+  serverConnectionId: Optional&lt;Int64&gt;;
+
+  /**
+   * Returns the service id for the command when the driver is in load balancer mode.
+   * For drivers that wish to include this in their ConnectionId object, this field is
+   * optional.
+   */
+  serviceId: Optional&lt;ObjectId&gt;;
+}
+</code></pre>
+<h3 id="log-messages-1"><a class="header" href="#log-messages-1">Log Messages</a></h3>
+<p>Please refer to the <a href="command-logging-and-monitoring/../logging/logging.html">logging specification</a> for details on logging implementations in general,
+including log levels, log components, and structured versus unstructured logging.</p>
+<p>Drivers MUST support logging of command information via the following types of log messages. These messages MUST be
+logged at <code>Debug</code> level and use the <code>command</code> log component.</p>
+<p>The log messages are intended to match the information contained in the events above. Drivers MAY implement command
+logging support via an event subscriber if it is convenient to do so.</p>
+<p>The types used in the structured message definitions below are demonstrative, and drivers MAY use similar types instead
+so long as the information is present (e.g. a double instead of an integer, or a string instead of an integer if the
+structured logging framework does not support numeric types.)</p>
+<p>Drivers MUST not emit command log messages for commands issued as part of the handshake with the server, or heartbeat
+commands issued by server monitors.</p>
+<h4 id="common-fields-2"><a class="header" href="#common-fields-2">Common Fields</a></h4>
+<p>The following key-value pairs MUST be included in all command messages:</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
+<tr><td>commandName</td><td>String</td><td>The command name.</td></tr>
+<tr><td>databaseName</td><td>String</td><td>The database name.</td></tr>
+<tr><td>requestId</td><td>Int</td><td>The driver-generated request ID.</td></tr>
+<tr><td>operationId</td><td>Int</td><td>The driver-generated operation ID. Optional; only present if the driver generated operation IDs and this command has one.</td></tr>
+<tr><td>driverConnectionId</td><td>Int64</td><td>The driver's ID for the connection used for the command. Note this is NOT the same as <code>CommandStartedEvent.connectionId</code> defined above, but refers to the <code>connectionId</code> defined in the <a href="command-logging-and-monitoring/../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">connection monitoring and pooling specification</a>. Unlike <code>CommandStartedEvent.connectionId</code> this field MUST NOT contain the host/port; that information MUST be in the following fields, <code>serverHost</code> and <code>serverPort</code>. This field is optional for drivers that do not implement CMAP if they do have an equivalent concept of a connection ID.</td></tr>
+<tr><td>serverHost</td><td>String</td><td>The hostname or IP address for the server the command is being run on.</td></tr>
+<tr><td>serverPort</td><td>Int</td><td>The port for the server the command is being run on. Optional; not present for Unix domain sockets. When the user does not specify a port and the default (27017) is used, the driver SHOULD include it here.</td></tr>
+<tr><td>serverConnectionId</td><td>Int64</td><td>The server's ID for the connection used for the command. Optional; only present for server versions 4.2+. NOTE: Existing drivers may represent this as an Int32 already. For strongly-typed languages, you may have to introduce a new Int64 field and deprecate the old Int32 field. The next major version should remove the old Int32 field.</td></tr>
+<tr><td>serviceId</td><td>String</td><td>The hex string representation of the service ID for the command. Optional; only present when the driver is in load balancer mode.</td></tr>
+</tbody></table>
+</div>
+<h4 id="command-started-message"><a class="header" href="#command-started-message">Command Started Message</a></h4>
+<p>In addition to the common fields, command started messages MUST contain the following key-value pairs:</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
+<tr><td>message</td><td>String</td><td>"Command started"</td></tr>
+<tr><td>command</td><td>String</td><td>Relaxed extJSON representation of the command. This document MUST be truncated appropriately according to rules defined in the <a href="command-logging-and-monitoring/../logging/logging.html#configurable-max-document-length">logging specification</a>, and MUST be replaced with an empty document "{ }" if the command is considered sensitive.</td></tr>
+</tbody></table>
+</div>
+<p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
+placeholders as appropriate:</p>
+<blockquote>
+<p>Command "{{commandName}}" started on database "{{databaseName}}" using a connection with driver-generated ID
+{{driverConnectionId}} and server-generated ID {{serverConnectionId}} to {{serverHost}}:{{serverPort}} with service ID
+{{serviceId}}. The requestID is {{requestId}} and the operation ID is {{operationId}}. Command: {{command}}</p>
+</blockquote>
+<h4 id="command-succeeded-message"><a class="header" href="#command-succeeded-message">Command Succeeded Message</a></h4>
+<p>In addition to the common fields, command succeeded messages MUST contain the following key-value pairs:</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
+<tr><td>message</td><td>String</td><td>"Command succeeded"</td></tr>
+<tr><td>durationMS</td><td>Int32/Int64/Double</td><td>The execution time for the command in milliseconds. The calculated value MUST be the time to send the message and receive the reply from the server and MAY include BSON serialization and/or deserialization.</td></tr>
+<tr><td>reply</td><td>String</td><td>Relaxed extJSON representation of the reply. This document MUST be truncated appropriately according to rules defined in the <a href="command-logging-and-monitoring/../logging/logging.html#configurable-max-document-length">logging specification</a>, and MUST be replaced with an empty document "{ }" if the command is considered sensitive.</td></tr>
+</tbody></table>
+</div>
+<p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
+placeholders as appropriate:</p>
+<blockquote>
+<p>Command "{{commandName}}" succeeded on database "{{databaseName}}" in {{durationMS}} ms using a connection with
+driver-generated ID {{driverConnectionId}} and server-generated ID {{serverConnectionId}} to
+{{serverHost}}:{{serverPort}} with service ID {{serviceId}}. The requestID is {{requestId}} and the operation ID is
+{{operationId}}. Command reply: {{command}}</p>
+</blockquote>
+<h4 id="command-failed-message"><a class="header" href="#command-failed-message">Command Failed Message</a></h4>
+<p>In addition to the common fields, command failed messages MUST contain the following key-value pairs:</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
+<tr><td>message</td><td>String</td><td>"Command failed"</td></tr>
+<tr><td>durationMS</td><td>Int32/Int64/Double</td><td>The execution time for the command in milliseconds. The calculated value MUST be the time to send the message and receive the reply from the server and MAY include BSON serialization and/or deserialization.</td></tr>
+<tr><td>failure</td><td>Flexible</td><td>The error. The type and format of this value is flexible; see the <a href="command-logging-and-monitoring/../logging/logging.html#representing-errors-in-log-messages">logging specification</a> for details on representing errors in log messages. If the command is considered sensitive, the error MUST be redacted and replaced with a language-appropriate alternative for a redacted error, e.g. an empty string, empty document, or null.</td></tr>
+</tbody></table>
+</div>
+<p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
+placeholders as appropriate:</p>
+<blockquote>
+<p>Command "{{commandName}}" failed on database "{{databaseName}}" in {{durationMS}} ms using a connection with
+driver-generated ID {{driverConnectionId}} and server-generated ID {{serverConnectionId}} to
+{{serverHost}}:{{serverPort}} with service ID {{serviceId}}. The requestID is {{requestId}} and the operation ID is
+{{operationId}}. Error: {{error}}</p>
+</blockquote>
+<h3 id="testing"><a class="header" href="#testing">Testing</a></h3>
+<p>See the README in the test directory for requirements and guidance.</p>
+<h2 id="qa-12"><a class="header" href="#qa-12">Q&amp;A</a></h2>
+<h3 id="why-is-the-command-document-only-available-in-the-commandstartevent"><a class="header" href="#why-is-the-command-document-only-available-in-the-commandstartevent">Why is the command document only available in the <code>CommandStartEvent</code>?</a></h3>
+<p>Some drivers may realize the command document as raw BSON, treating it as a component of the message transmitted to the
+server and stored in an internal buffer. By the time the server's response is received, this buffer may have been
+released. Requiring the retention of this buffer until command completion could result in unacceptable performance
+penalties, particularly when event listeners are introduced.</p>
+<h2 id="changelog-45"><a class="header" href="#changelog-45">Changelog</a></h2>
+<ul>
+<li>
+<p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
+</li>
+<li>
+<p>2024-09-11: Migrated from reStructuredText to Markdown.</p>
+</li>
+<li>
+<p>2015-09-16: Removed <code>limit</code> from find test with options to support 3.2.<br />
+Changed find test read preference to <code>primaryPreferred</code>.</p>
+</li>
+<li>
+<p>2015-10-01: Changed find test with a kill cursors to not run on server versions<br />
+greater than 3.0. Added a find test with no kill cursors command which only runs on 3.1 and higher. Added notes on
+which tests should run based on server versions.</p>
+</li>
+<li>
+<p>2015-10-19: Changed batchSize in the 3.2 find tests to expect the remaining value.</p>
+</li>
+<li>
+<p>2015-10-31: Changed find test on 3.1 and higher to ignore being run on sharded clusters.</p>
+</li>
+<li>
+<p>2015-11-22: Specify how to merge OP_MSG document sequences into command-started events.</p>
+</li>
+<li>
+<p>2016-03-29: Added note on guarantee of the request ids.</p>
+</li>
+<li>
+<p>2016-11-02: Added clause for not upconverting commands larger than maxBsonSize.</p>
+</li>
+<li>
+<p>2018-04-16: Made inclusion of BSON serialization/deserialization in command<br />
+durations to be optional.</p>
+</li>
+<li>
+<p>2020-02-12: Added legacy hello <code>speculativeAuthenticate</code> to the list of<br />
+values that should be redacted.</p>
+</li>
+<li>
+<p>2021-04-15: Added <code>serviceId</code> field to events.</p>
+</li>
+<li>
+<p>2021-05-05: Updated to use hello and legacy hello.</p>
+</li>
+<li>
+<p>2021-08-30: Added <code>serverConnectionId</code> field to <code>CommandStartedEvent</code>,<br />
+<code>CommandSucceededEvent</code> and <code>CommandFailedEvent</code>.</p>
+</li>
+<li>
+<p>2022-05-18: Converted legacy tests to the unified test format.</p>
+</li>
+<li>
+<p>2022-09-02: Remove material that only applies to MongoDB versions &lt; 3.6.</p>
+</li>
+<li>
+<p>2022-10-05: Remove spec front matter and reformat changelog.</p>
+</li>
+<li>
+<p>2022-10-11: Add command logging information and tests.</p>
+</li>
+<li>
+<p>2022-11-16: Update sensitive command tests to only run on server versions where the commands are supported.</p>
+</li>
+<li>
+<p>2022-12-13: Updated log message <code>serverPort</code> field description to clarify drivers should populate it with the<br />
+default port 27017 when relevant. Updated suggested unstructured forms of log messages to more clearly label
+connection IDs and use more readable server address representations.</p>
+</li>
+<li>
+<p>2023-03-23: Updated <code>serverConnectionId</code> field to be Int64 as long-running servers can return Int64.</p>
+</li>
+<li>
+<p>2023-06-13: Added <code>databaseName</code> field to <code>CommandFailedEvent</code> and <code>CommandSucceededEvent</code>.<br />
+Updated suggested unstructured forms of log messages reflecting the changes.</p>
+</li>
+<li>
+<p>2023-10-19: Add Q&amp;A section</p>
+</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="sdam-logging-and-monitoring-specification"><a class="header" href="#sdam-logging-and-monitoring-specification">SDAM Logging and Monitoring Specification</a></h1>
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 2.4</li>
 </ul>
 <hr />
-<h2 id="abstract-43"><a class="header" href="#abstract-43">Abstract</a></h2>
+<h2 id="abstract-44"><a class="header" href="#abstract-44">Abstract</a></h2>
 <p>The SDAM logging and monitoring specification defines a set of behaviors in the driver for providing runtime information
 about server discovery and monitoring (SDAM) in log messages, as well as in events that users can consume
 programmatically, either directly or by integrating with third-party APM libraries.</p>
-<h3 id="definitions-11"><a class="header" href="#definitions-11">Definitions</a></h3>
-<h4 id="meta-43"><a class="header" href="#meta-43">META</a></h4>
+<h3 id="definitions-12"><a class="header" href="#definitions-12">Definitions</a></h3>
+<h4 id="meta-45"><a class="header" href="#meta-45">META</a></h4>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h4 id="terms-27"><a class="header" href="#terms-27">Terms</a></h4>
+<h4 id="terms-29"><a class="header" href="#terms-29">Terms</a></h4>
 <p><code>ServerAddress</code></p>
 <blockquote>
 <p>The term <code>ServerAddress</code> refers to the implementation in the driver's language of a server host/port pair. This may be
@@ -30000,16 +29372,16 @@ etc.). This may be a string or object. The name of the object is NOT REQUIRED.</
 <p>The term <code>Server</code> refers to the implementation in the driver's language of an abstraction of a mongod or mongos
 process, or a load balancer, as defined by the <a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html#server">SDAM specification</a>.</p>
 </blockquote>
-<h3 id="specification-40"><a class="header" href="#specification-40">Specification</a></h3>
-<h3 id="guidance-5"><a class="header" href="#guidance-5">Guidance</a></h3>
-<h4 id="documentation-6"><a class="header" href="#documentation-6">Documentation</a></h4>
+<h3 id="specification-42"><a class="header" href="#specification-42">Specification</a></h3>
+<h3 id="guidance-6"><a class="header" href="#guidance-6">Guidance</a></h3>
+<h4 id="documentation-7"><a class="header" href="#documentation-7">Documentation</a></h4>
 <p>The documentation provided in the code below is merely for driver authors and SHOULD NOT be taken as required
 documentation for the driver.</p>
-<h4 id="messages-and-events"><a class="header" href="#messages-and-events">Messages and Events</a></h4>
+<h4 id="messages-and-events-1"><a class="header" href="#messages-and-events-1">Messages and Events</a></h4>
 <p>All drivers MUST implement the specified event types as well as log messages.</p>
 <p>Implementation details are noted below when a specific implementation is required. Within each event and log message,
 all properties are REQUIRED unless noted otherwise.</p>
-<h4 id="naming-6"><a class="header" href="#naming-6">Naming</a></h4>
+<h4 id="naming-7"><a class="header" href="#naming-7">Naming</a></h4>
 <p>All drivers MUST name types, properties, and log message values as defined in the following sections. Exceptions to this
 rule are noted in the appropriate section. Class and interface names may vary according to the driver and language best
 practices.</p>
@@ -30018,7 +29390,7 @@ practices.</p>
 not strictly mandated in this specification.</p>
 <p>Similarly, as described in the <a href="server-discovery-and-monitoring/../logging/logging.html#implementation-requirements">logging specification</a> the driver
 SHOULD emit log messages in a manner that is standard for the language.</p>
-<h3 id="guarantees"><a class="header" href="#guarantees">Guarantees</a></h3>
+<h3 id="guarantees-1"><a class="header" href="#guarantees-1">Guarantees</a></h3>
 <h4 id="event-order-and-concurrency"><a class="header" href="#event-order-and-concurrency">Event Order and Concurrency</a></h4>
 <p>Events and log messages MUST be published in the order that their corresponding changes are processed in the driver.
 Events MUST NOT be published concurrently for the same topology ID or server ID, but MAY be published concurrently for
@@ -30029,7 +29401,7 @@ differing topology IDs and server IDs.</p>
 has either a correlating "server heartbeat succeeded" or "server heartbeat failed" log message.</p>
 <p>Drivers that use the streaming heartbeat protocol MUST publish a <code>ServerHeartbeatStartedEvent</code> and "server heartbeat
 started" log message before attempting to read the next <code>hello</code> or legacy hello exhaust response.</p>
-<h4 id="error-handling-4"><a class="header" href="#error-handling-4">Error Handling</a></h4>
+<h4 id="error-handling-5"><a class="header" href="#error-handling-5">Error Handling</a></h4>
 <p>If an exception occurs while sending the <code>hello</code> or legacy hello operation to the server, the driver MUST generate a
 <code>ServerHeartbeatFailedEvent</code> and "server heartbeat failed" log message with the exception or message and re-raise the
 exception. The SDAM mandated retry of the <code>hello</code> or legacy hello call should be visible to consumers.</p>
@@ -30043,14 +29415,14 @@ previous description in the events and log messages will never be null.</p>
 <h4 id="initial-topology-description"><a class="header" href="#initial-topology-description">Initial Topology Description</a></h4>
 <p>The first <code>TopologyDescriptionChangedEvent</code> to be emitted from a monitored Topology MUST set its <code>previousDescription</code>
 property to be a <code>TopologyDescription</code> object in the "unknown" state.</p>
-<h3 id="events-api"><a class="header" href="#events-api">Events API</a></h3>
+<h3 id="events-api-1"><a class="header" href="#events-api-1">Events API</a></h3>
 <p>The first <code>TopologyDescriptionChangedEvent</code> to be emitted from a monitored Topology MUST set its <code>previousDescription</code>
 property to be a <code>TopologyDescription</code> object in the "unknown" state.</p>
 <h2 id="closing-topology-description"><a class="header" href="#closing-topology-description">Closing Topology Description</a></h2>
 <p>When a <code>Topology</code> object or equivalent is being shut-down or closed, the driver MUST change the <code>TopologyDescription</code> to
 an "unknown" state.</p>
 <hr />
-<h2 id="events-api-1"><a class="header" href="#events-api-1">Events API</a></h2>
+<h2 id="events-api-2"><a class="header" href="#events-api-2">Events API</a></h2>
 <p>This specification defines 9 main events that MUST be published in the scenarios described. 6 of these events are the
 core behaviour within the cluster lifecycle, and the remaining 3 server heartbeat events are fired from the server
 monitor and follow the guidelines for publishing in the command monitoring specification.</p>
@@ -30300,7 +29672,7 @@ preference is passed to <code>hasReadableServer</code>, the driver MUST default 
 <tr><td>LoadBalanced</td><td><code>true</code></td><td><code>true</code></td></tr>
 </tbody></table>
 </div>
-<h3 id="log-messages-1"><a class="header" href="#log-messages-1">Log Messages</a></h3>
+<h3 id="log-messages-2"><a class="header" href="#log-messages-2">Log Messages</a></h3>
 <p>Please refer to the <a href="server-discovery-and-monitoring/../logging/logging.html">logging specification</a> for details on logging implementations in general,
 including log levels, log components, and structured versus unstructured logging.</p>
 <p>Drivers MUST support logging of SDAM information via the following types of log messages. These messages MUST be logged
@@ -30313,7 +29685,7 @@ equivalent log message.</p>
 <p>The types used in the structured message definitions below are demonstrative, and drivers MAY use similar types instead
 so long as the information is present (e.g. a double instead of an integer, or a string instead of an integer if the
 structured logging framework does not support numeric types.)</p>
-<h4 id="common-fields-2"><a class="header" href="#common-fields-2">Common Fields</a></h4>
+<h4 id="common-fields-3"><a class="header" href="#common-fields-3">Common Fields</a></h4>
 <p>The following key-value pairs are common to all or several log messages and MUST be included in the "applicable
 messages":</p>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Applicable Messages</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
@@ -30490,19 +29862,19 @@ added requirements for SDAM log messages.</p>
 <li>Minimum Server Version: N/A</li>
 </ul>
 <hr />
-<h2 id="abstract-44"><a class="header" href="#abstract-44">Abstract</a></h2>
+<h2 id="abstract-45"><a class="header" href="#abstract-45">Abstract</a></h2>
 <p>This specification defines requirements for drivers' logging configuration and behavior.</p>
-<h2 id="meta-44"><a class="header" href="#meta-44">META</a></h2>
+<h2 id="meta-46"><a class="header" href="#meta-46">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-41"><a class="header" href="#specification-41">Specification</a></h2>
-<h3 id="terms-28"><a class="header" href="#terms-28">Terms</a></h3>
+<h2 id="specification-43"><a class="header" href="#specification-43">Specification</a></h2>
+<h3 id="terms-30"><a class="header" href="#terms-30">Terms</a></h3>
 <p><strong>Structured logging</strong></p>
 <p>Structured logging refers to producing log messages in a structured format, i.e. a series of key-value pairs, which can
 be converted to external formats such as JSON.</p>
 <p><strong>Unstructured logging</strong></p>
 <p>Unstructured logging refers to producing string log messages which embed all attached information within that string.</p>
-<h3 id="implementation-requirements-1"><a class="header" href="#implementation-requirements-1">Implementation requirements</a></h3>
+<h3 id="implementation-requirements-2"><a class="header" href="#implementation-requirements-2">Implementation requirements</a></h3>
 <p>Drivers SHOULD implement support for logging in a manner that is idiomatic for their language and ecosystem.</p>
 <h4 id="minimizing-required-code-changes"><a class="header" href="#minimizing-required-code-changes">Minimizing Required Code Changes</a></h4>
 <p>If possible, drivers SHOULD support the following configuration requirements in a manner that does not require any
@@ -30692,11 +30064,11 @@ use.</p>
 configuration MUST take precedence over environment variables. Drivers supporting both forms of configuration MUST
 document this behavior and MUST provide an example of how users can implement custom logic to allow an environment
 variable to override a programmatic default, so that users who prefer the opposite behavior have a way to achieve it.</p>
-<h2 id="test-plan-33"><a class="header" href="#test-plan-33">Test Plan</a></h2>
+<h2 id="test-plan-34"><a class="header" href="#test-plan-34">Test Plan</a></h2>
 <p>Tests for logging behavior are defined in each corresponding specification. The
 <a href="logging/../unified-test-format/unified-test-format.html">unified test runner specification</a> has support for specifying logging
 expectations in tests.</p>
-<h2 id="motivation-for-change-17"><a class="header" href="#motivation-for-change-17">Motivation for Change</a></h2>
+<h2 id="motivation-for-change-18"><a class="header" href="#motivation-for-change-18">Motivation for Change</a></h2>
 <p>A common complaint from our support team is that they don't know how to easily get debugging information from drivers.
 Some drivers provide debug logging, but others do not. For drivers that do provide it, the log messages produced and the
 mechanisms for enabling debug logging are inconsistent.</p>
@@ -30706,7 +30078,7 @@ needed, and to remove the changes afterward. Additionally, there are useful scen
 existing events. Standardizing on debug log messages that drivers produce and how to enable/configure logging will
 provide TSEs, CEs, and MongoDB users an easier way to get debugging information out of our drivers, facilitate support
 of drivers for our internal teams, and improve our documentation around troubleshooting.</p>
-<h2 id="design-rationale-27"><a class="header" href="#design-rationale-27">Design Rationale</a></h2>
+<h2 id="design-rationale-28"><a class="header" href="#design-rationale-28">Design Rationale</a></h2>
 <h3 id="truncation-of-large-documents"><a class="header" href="#truncation-of-large-documents">Truncation of large documents</a></h3>
 <ol>
 <li>
@@ -30787,7 +30159,7 @@ override programmatic defaults), but if we went with the opposite default, it wo
 to override: not all languages will necessarily have an easy way to override/unset an environment variable from
 within application code.</li>
 </ol>
-<h2 id="backwards-compatibility-27"><a class="header" href="#backwards-compatibility-27">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-28"><a class="header" href="#backwards-compatibility-28">Backwards Compatibility</a></h2>
 <p>This specification takes the stance that the contents of log messages (both structured and unstructured) are <em>not</em>
 covered by semantic versioning, but that logging components <em>are</em>, since changing the name of a component or removing a
 component altogether has the potential to break user logging configuration and cause users to silently miss log
@@ -30801,11 +30173,11 @@ driver defines its own set of log levels in a public type, which do not match th
 the specification should be staged in via semantic versioning.</p>
 <h2 id="reference-implementation-25"><a class="header" href="#reference-implementation-25">Reference Implementation</a></h2>
 <p>Links to be added once Rust and C# implementations have been merged.</p>
-<h2 id="security-implication-4"><a class="header" href="#security-implication-4">Security Implication</a></h2>
+<h2 id="security-implication-5"><a class="header" href="#security-implication-5">Security Implication</a></h2>
 <p>Drivers must take care to avoid exposing sensitive information (e.g. authentication credentials) in log messages. It
 will be up to each individual specification that defines log messages to define which information should be redacted and
 add tests confirming its redaction.</p>
-<h2 id="future-work-17"><a class="header" href="#future-work-17">Future work</a></h2>
+<h2 id="future-work-18"><a class="header" href="#future-work-18">Future work</a></h2>
 <h3 id="additional-log-components"><a class="header" href="#additional-log-components">Additional Log Components</a></h3>
 <p>Additional log components may be added as logging is added to more specifications.</p>
 <h3 id="preventing-recursion-when-using-mongodb-as-a-log-sink"><a class="header" href="#preventing-recursion-when-using-mongodb-as-a-log-sink">Preventing Recursion When Using MongoDB as a Log Sink</a></h3>
@@ -30845,15 +30217,15 @@ environment variables.</p>
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
-<li>Current Schema Version: 1.26.0</li>
+<li>Current Schema Version: 1.27.0</li>
 </ul>
 <hr />
-<h2 id="abstract-45"><a class="header" href="#abstract-45">Abstract</a></h2>
+<h2 id="abstract-46"><a class="header" href="#abstract-46">Abstract</a></h2>
 <p>This project defines a unified schema for YAML and JSON specification tests, which run operations against a MongoDB
 deployment. By conforming various spec tests to a single schema, drivers can implement a single test runner to execute
 acceptance tests for multiple specifications, thereby reducing maintenance of existing specs and implementation time for
 new specifications.</p>
-<h2 id="meta-45"><a class="header" href="#meta-45">META</a></h2>
+<h2 id="meta-47"><a class="header" href="#meta-47">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <p>This document tends to use "SHOULD" more frequently than other specifications, but mainly in the context of providing
@@ -30874,8 +30246,8 @@ guidance on writing test files. This is discussed in more detail in <a href="uni
 </ul>
 <p>This is not an exhaustive list. Specifications that are known to not be supported by this format may be discussed under
 <a href="unified-test-format/unified-test-format.html#future-work">Future Work</a>.</p>
-<h2 id="specification-42"><a class="header" href="#specification-42">Specification</a></h2>
-<h3 id="terms-29"><a class="header" href="#terms-29">Terms</a></h3>
+<h2 id="specification-44"><a class="header" href="#specification-44">Specification</a></h2>
+<h3 id="terms-31"><a class="header" href="#terms-31">Terms</a></h3>
 <p><strong>Entity</strong> Any object or value that is indexed by a unique name and stored in the <a href="unified-test-format/unified-test-format.html#entity-map">Entity Map</a>. This will
 typically be a driver object (e.g. client, session) defined in <a href="unified-test-format/unified-test-format.html#createentities">createEntities</a> but may also be a
 <a href="unified-test-format/unified-test-format.html#operation_saveResultAsEntity">saved operation result</a>. A exhaustive list of supported types is presented in
@@ -31312,13 +30684,30 @@ be false for each <code>runOnRequirement</code>. See
 </ul>
 <p><span id="entity_client_observeLogMessages"></span></p>
 <ul>
-<li><code>observeLogMessages</code>: Optional object where the key names are log <a href="unified-test-format/../logging/logging.html#components">components</a> and
+<li>
+<p><code>observeLogMessages</code>: Optional object where the key names are log <a href="unified-test-format/../logging/logging.html#components">components</a> and
 the values are minimum <a href="unified-test-format/../logging/logging.html#log-severity-levels">log severity levels</a> indicating which
 components to collect log messages for and what the minimum severity level of collected messages should be.
 Messages for unspecified components and/or with lower severity levels than those specified MUST be ignored by this
 client's log collector(s) and SHOULD NOT be included in <a href="unified-test-format/unified-test-format.html#test_expectLogMessages">test.expectLogMessages</a> for this
-client.</li>
-<li><code>serverApi</code>: Optional <a href="unified-test-format/unified-test-format.html#serverapi">serverApi</a> object.</li>
+client.</p>
+</li>
+<li>
+<p><code>observeTracingMessages</code>: Optional object that configures tracing behavior for the client. The structure of this
+object is as follows:</p>
+<ul>
+<li><code>enableCommandPayload</code>: Optional boolean. When set to <code>true</code>, enables capturing of command payload details in
+tracing spans.
+<ul>
+<li>If <code>true</code>, the test runner SHOULD capture detailed command payload information in tracing spans.</li>
+<li>If <code>false</code> or omitted, the test runner SHOULD exclude command payload details.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><code>serverApi</code>: Optional <a href="unified-test-format/unified-test-format.html#serverapi">serverApi</a> object.</p>
+</li>
 </ul>
 <p><span id="entity_client_autoEncryptOpts"></span></p>
 <ul>
@@ -31594,6 +30983,34 @@ test-only option to MongoClient which enables the client to store its entity nam
 log message to enable filtering messages by client.</p>
 <p>Tests SHOULD NOT specify multiple <a href="unified-test-format/unified-test-format.html#expectedlogmessagesforclient">expectedLogMessagesForClient</a> objects for a single
 client entity.</p>
+</li>
+</ul>
+<p><span id="expectTracingMessages"></span></p>
+<ul>
+<li>
+<p><code>expectTracingMessages</code>: Optional object that defines expected tracing <a href="unified-test-format/../open-telemetry/open-telemetry.html">spans</a>
+for a test. The structure of this object is as follows:</p>
+<ul>
+<li>
+<p><code>client</code>: Required string. The ID of the client entity associated with these tracing spans.</p>
+</li>
+<li>
+<p><code>ignoreExtraSpans</code>: Optional boolean.</p>
+<ul>
+<li>If <code>true</code>, additional unexpected spans are allowed.</li>
+<li>If <code>false</code> or omitted, the test runner MUST fail if any unexpected spans are detected.</li>
+</ul>
+</li>
+<li>
+<p><code>spans</code>: Required array of span objects. Each span describes an expected tracing event.</p>
+<p>Span object properties:</p>
+<ul>
+<li><code>name</code>: Required string. The name of the tracing span.</li>
+<li><code>attributes</code>: Required object. Key-value pairs describing span metadata.</li>
+<li><code>nested</code>: Optional array of nested span objects, following the same structure.</li>
+</ul>
+</li>
+</ul>
 </li>
 </ul>
 <p><span id="test_outcome"></span></p>
@@ -32498,7 +31915,7 @@ driver's helper.</p>
 <p>This operations proxies the collection's <code>createSearchIndexes</code> helper with the same arguments.</p>
 <h4 id="dropsearchindex"><a class="header" href="#dropsearchindex">dropSearchIndex</a></h4>
 <p>This operation proxies the collection's <code>dropSearchIndex</code> helper with the same arguments.</p>
-<h4 id="find-2"><a class="header" href="#find-2">find</a></h4>
+<h4 id="find-1"><a class="header" href="#find-1">find</a></h4>
 <p>When executing a <code>find</code> operation, the test runner MUST fully iterate the result. This will ensure consistent behavior
 between drivers that eagerly create a server-side cursor and those that do so lazily when iteration begins.</p>
 <p>When evaluating the iterated result for <a href="unified-test-format/unified-test-format.html#operation_expectResult">expectResult</a>, the number of actual and expected
@@ -32540,7 +31957,7 @@ and any optional fields within, as in the following examples:</p>
 <li><a href="unified-test-format/../sessions/driver-sessions.html">Driver Sessions</a></li>
 </ul>
 <p>Session operations that require special handling or are not documented by an existing specification are described below.</p>
-<h4 id="withtransaction"><a class="header" href="#withtransaction">withTransaction</a></h4>
+<h4 id="withtransaction-1"><a class="header" href="#withtransaction-1">withTransaction</a></h4>
 <p>The <code>withTransaction</code> operation's <code>callback</code> parameter is a function and not easily expressed in YAML/JSON. For ease of
 testing, this parameter is expressed as an array of <a href="unified-test-format/unified-test-format.html#operation">operation</a> objects (analogous to
 <a href="unified-test-format/unified-test-format.html#test_operations">test.operations</a>). Test runners MUST evaluate error and result assertions when executing these
@@ -33702,7 +33119,7 @@ Each shard in the cluster is represented by a document in this collection. If th
 the <code>host</code> field will contain a single host. If the shard is backed by a replica set, the <code>host</code> field contain the name
 of the replica followed by a forward slash and a comma-delimited list of hosts.</p>
 <p>Note: MongoDB 3.6+ requires that all shard servers be replica sets.</p>
-<h2 id="design-rationale-28"><a class="header" href="#design-rationale-28">Design Rationale</a></h2>
+<h2 id="design-rationale-29"><a class="header" href="#design-rationale-29">Design Rationale</a></h2>
 <p>This specification was primarily derived from the test formats used by the
 <a href="unified-test-format/../transactions/transactions.html">Transactions</a> and <a href="unified-test-format/../crud/crud.html">CRUD</a> specs, which have served models or other
 specs.</p>
@@ -33731,7 +33148,7 @@ explicitly test sensitive commands via the <code>runCommand</code> helper.</p>
 <h2 id="breaking-changes"><a class="header" href="#breaking-changes">Breaking Changes</a></h2>
 <p>This section is reserved for future use. Any breaking changes to the test format SHOULD be described here in detail for
 historical reference, in addition to any shorter description that may be added to the <a href="unified-test-format/unified-test-format.html#changelog">Changelog</a>.</p>
-<h2 id="future-work-18"><a class="header" href="#future-work-18">Future Work</a></h2>
+<h2 id="future-work-19"><a class="header" href="#future-work-19">Future Work</a></h2>
 <h3 id="assert-expected-log-messages"><a class="header" href="#assert-expected-log-messages">Assert expected log messages</a></h3>
 <p>When drivers support standardized logging, the test format may need to support assertions for messages expected to be
 logged while executing operations. Since log messages are strings, this may require an operator to match regex patterns
@@ -33763,6 +33180,11 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-09-17: <strong>Schema version 1.27.</strong></p>
+<p>Add <code>observeTracingMessages</code> configuration for clients and <code>expectTracingMessages</code> for test expectations. This allows
+capturing and validating detailed tracing information during test execution.</p>
+</li>
 <li>
 <p>2025-09-16: <strong>Schema version 1.26.</strong> Add <code>awaitMinPoolSize</code> client parameter to await on connection pool population.</p>
 </li>
@@ -34039,7 +33461,7 @@ and <code>serverParameters</code> property for <code>runOnRequirements</code>.</
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-46"><a class="header" href="#abstract-46">Abstract</a></h2>
+<h2 id="abstract-47"><a class="header" href="#abstract-47">Abstract</a></h2>
 <p>This document describes a standard benchmarking suite for MongoDB drivers.</p>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <h3 id="name-and-purpose"><a class="header" href="#name-and-purpose">Name and purpose</a></h3>
@@ -34660,14 +34082,14 @@ iterations in a reasonable time (e.g. file sizes and number of documents in cert
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<h2 id="abstract-47"><a class="header" href="#abstract-47">Abstract</a></h2>
+<h2 id="abstract-48"><a class="header" href="#abstract-48">Abstract</a></h2>
 <p>The official BSON specification does not include test data, so this pseudo-specification describes tests for BSON
 encoding and decoding. It also includes tests for MongoDB's "Extended JSON" specification (hereafter abbreviated as
 <code>extjson</code>).</p>
-<h2 id="meta-46"><a class="header" href="#meta-46">Meta</a></h2>
+<h2 id="meta-48"><a class="header" href="#meta-48">Meta</a></h2>
 <p>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="motivation-for-change-18"><a class="header" href="#motivation-for-change-18">Motivation for Change</a></h2>
+<h2 id="motivation-for-change-19"><a class="header" href="#motivation-for-change-19">Motivation for Change</a></h2>
 <p>To ensure correct operation, we want drivers to implement identical tests for important features. BSON (and <code>extjson</code>)
 are critical for correct operation and data exchange, but historically had no common test corpus. This
 pseudo-specification provides such tests.</p>
@@ -34688,10 +34110,10 @@ pseudo-specification provides such tests.</p>
 <li>Replace or extend the official BSON spec at <a href="https://bsonspec.org">https://bsonspec.org</a>.</li>
 <li>Provide a formal specification for <code>extjson</code>.</li>
 </ul>
-<h2 id="specification-43"><a class="header" href="#specification-43">Specification</a></h2>
+<h2 id="specification-45"><a class="header" href="#specification-45">Specification</a></h2>
 <p>The specification for BSON lives at <a href="https://bsonspec.org">https://bsonspec.org</a>. The <code>extjson</code> format specification is
 <a href="bson-corpus/../extended-json/extended-json.html">here</a>.</p>
-<h2 id="test-plan-34"><a class="header" href="#test-plan-34">Test Plan</a></h2>
+<h2 id="test-plan-35"><a class="header" href="#test-plan-35">Test Plan</a></h2>
 <p>This test plan describes a general approach for BSON testing. Future BSON specifications (such as for new types like
 Decimal128) may specialize or alter the approach described below.</p>
 <h3 id="description-of-the-bson-corpus"><a class="header" href="#description-of-the-bson-corpus">Description of the BSON Corpus</a></h3>
@@ -34895,7 +34317,7 @@ creating raw BSON bytes or constructing BSON-specific type classes):</p>
 <p>Depending on how drivers implement BSON encoding, they MAY expect an error when constructing a type class (e.g. BSON
 Document or Regex class) or when encoding a language representation to BSON (e.g. converting a dictionary, which might
 allow null bytes in its keys, to raw BSON bytes).</p>
-<h2 id="implementation-notes-5"><a class="header" href="#implementation-notes-5">Implementation Notes</a></h2>
+<h2 id="implementation-notes-6"><a class="header" href="#implementation-notes-6">Implementation Notes</a></h2>
 <h3 id="a-tool-for-visualizing-bson"><a class="header" href="#a-tool-for-visualizing-bson">A tool for visualizing BSON</a></h3>
 <p>The test directory includes a Perl script <code>bsonview</code>, which will decompose and highlight elements of a BSON document. It
 may be used like this:</p>
@@ -34932,7 +34354,7 @@ of this spec.</p>
 this spec.</p>
 <h2 id="reference-implementation-26"><a class="header" href="#reference-implementation-26">Reference Implementation</a></h2>
 <p>The Java, C# and Perl drivers.</p>
-<h2 id="design-rationale-29"><a class="header" href="#design-rationale-29">Design Rationale</a></h2>
+<h2 id="design-rationale-30"><a class="header" href="#design-rationale-30">Design Rationale</a></h2>
 <h3 id="use-of-extjson"><a class="header" href="#use-of-extjson">Use of extjson</a></h3>
 <p>Testing conversion requires an "input" and an "output". With a BSON string as both input and output, we can only test
 that it roundtrips correctly --we can't test that the decoded value visible to the language is correct.</p>
@@ -35118,14 +34540,14 @@ communication.</p>
 <li>Minimum Server Version: 3.6</li>
 </ul>
 <hr />
-<h2 id="abstract-48"><a class="header" href="#abstract-48">Abstract</a></h2>
+<h2 id="abstract-49"><a class="header" href="#abstract-49">Abstract</a></h2>
 <p>This specification is about the ability for drivers to automate tests for "Functions as a Service" from continuous
 integration.</p>
-<h2 id="meta-47"><a class="header" href="#meta-47">META</a></h2>
+<h2 id="meta-49"><a class="header" href="#meta-49">META</a></h2>
 <p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification-44"><a class="header" href="#specification-44">Specification</a></h2>
-<h3 id="terms-30"><a class="header" href="#terms-30">Terms</a></h3>
+<h2 id="specification-46"><a class="header" href="#specification-46">Specification</a></h2>
+<h3 id="terms-32"><a class="header" href="#terms-32">Terms</a></h3>
 <h4 id="faas-2"><a class="header" href="#faas-2">FaaS</a></h4>
 <p>"Function as a Service", such as AWS Lambda.</p>
 <h3 id="implementing-automated-faas-tests"><a class="header" href="#implementing-automated-faas-tests">Implementing Automated FaaS Tests</a></h3>

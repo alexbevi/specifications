@@ -1,0 +1,545 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Open Telemetry - MongoDB Driver Specifications</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/pagetoc.css">
+        <link rel="stylesheet" href="../theme/whichlang.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">MongoDB Driver Specifications</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <div class="content-wrap">
+                            <h1 id="opentelemetry"><a class="header" href="#opentelemetry">OpenTelemetry</a></h1>
+<ul>
+<li>Title: OpenTelemetry</li>
+<li>Status: Accepted</li>
+<li>Minimum Server Version: N/A</li>
+</ul>
+<hr />
+<h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
+<p>This specification defines requirements for drivers' OpenTelemetry integration and behavior. Drivers will trace database
+commands and driver operations with a pre-defined set of attributes when OpenTelemetry is enabled and configured in an
+application.</p>
+<h2 id="meta"><a class="header" href="#meta">META</a></h2>
+<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
+<h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
+<p><strong>Host Application</strong></p>
+<p>An application that uses the MongoDB driver.</p>
+<p><strong>Span</strong></p>
+<p>A Span represents a single operation within a trace. Spans can be nested to form a trace tree. Each trace contains a
+root span, which typically describes the entire operation and, optionally, one or more sub-spans for its sub-operations.</p>
+<p>Spans encapsulate:</p>
+<ul>
+<li>The span name</li>
+<li>An immutable SpanContext that uniquely identifies the Span</li>
+<li>A parent span in the form of a Span, SpanContext, or null</li>
+<li>A SpanKind</li>
+<li>A start timestamp</li>
+<li>An end timestamp</li>
+<li>Attributes</li>
+<li>A list of links to other Spans</li>
+<li>A list of timestamped Events</li>
+<li>A Status</li>
+</ul>
+<h3 id="implementation-requirements"><a class="header" href="#implementation-requirements">Implementation Requirements</a></h3>
+<h4 id="external-dependencies"><a class="header" href="#external-dependencies">External Dependencies</a></h4>
+<p><strong>OpenTelemetry API and SDK</strong></p>
+<p>OpenTelemetry offers two components for implementing instrumentation – API and SDK. The OpenTelemetry API provides all
+the necessary types and method signatures. If there is no OpenTelemetry SDK available at runtime, API methods are
+no-ops. OpenTelemetry SDK is an actual implementation of the API. If the SDK is available, API methods do work.</p>
+<p>Drivers MAY add a dependency to the corresponding OpenTelemetry API. This is the recommended way for implementing
+OpenTelemetry in libraries. Alternatively, drivers can implement OpenTelemetry support using any suitable tools within
+the driver ecosystem. Drivers MUST NOT add a dependency to OpenTelemetry SDK.</p>
+<h4 id="enabling-disabling-and-configuring-opentelemetry"><a class="header" href="#enabling-disabling-and-configuring-opentelemetry">Enabling, Disabling, and Configuring OpenTelemetry</a></h4>
+<p>OpenTelemetry SHOULD be disabled by default.</p>
+<p>Drivers SHOULD support configuring OpenTelemetry on multiple levels.</p>
+<ul>
+<li><strong>MongoClient Level</strong>: Drivers SHOULD provide a configuration option for <code>MongoClient</code>'s Configuration/Settings that
+enables or disables tracing for operations and commands executed with this client. This option MUST override
+settings on higher levels. This configuration can be implemented with a <code>MongoClient</code> option. See
+<a href="#client-options">Client Options</a> section below.</li>
+<li><strong>Driver Level</strong>: Drivers SHOULD provide a global setting that enables or disables OpenTelemetry for all <code>MongoClient</code>
+instances (excluding those that explicitly override the setting). This configuration SHOULD be implemented with an
+environment variable <code>OTEL_#{LANG}_INSTRUMENTATION_MONGODB_ENABLED</code>. Drivers MAY provide other means to globally
+disable OpenTelemetry that are more suitable for their language ecosystem. This option MUST override settings on the
+higher level.</li>
+<li><strong>Host Application Level</strong>: If the host application enables OpenTelemetry for all available instrumentations (e.g.,
+Ruby), and a driver can detect this, OpenTelemetry SHOULD be enabled in the driver.</li>
+</ul>
+<p>Drivers MUST NOT try to detect whether the OpenTelemetry SDK library is available, and enable tracing based on this.
+Drivers MUST NOT add means that configure OpenTelemetry SDK (e.g., setting a specific exporter). Drivers MUST NOT add
+means that configure OpenTelemetry on the host application level (e.g., setting a specific sampler).</p>
+<p><span id="client-options"></span></p>
+<h5 id="mongoclient-options-for-configuring-opentelemetry-on-the-client-level"><a class="header" href="#mongoclient-options-for-configuring-opentelemetry-on-the-client-level"><code>MongoClient</code> Options for configuring OpenTelemetry on the client level</a></h5>
+<p>Drivers SHOULD add new options to <code>MongoClient</code> for configuring OpenTelemetry as described above. These options SHOULD
+be a dictionary that groups all OpenTelemetry-related options, the name of the dictionary SHOULD be <code>tracing</code>. The
+dictionary SHOULD contain at least the following options:</p>
+<ul>
+<li><code>enabled</code>: A boolean that enables or disables OpenTelemetry for this <code>MongoClient</code> instance. Default is <code>false</code> (i.e.,
+use the driver-level setting).</li>
+<li><code>query_text_max_length</code>: An integer that sets the maximum length of the <code>db.query.text</code> attribute of command spans.
+Default is <code>0</code> (i.e., do not add the attribute).</li>
+</ul>
+<h4 id="environment-variables-for-configuring-opentelemetry"><a class="header" href="#environment-variables-for-configuring-opentelemetry">Environment Variables for configuring OpenTelemetry</a></h4>
+<p>Drivers SHOULD support configuration of OpenTelemetry on the driver level via at least the following environment
+variables:</p>
+<ul>
+<li><code>OTEL_#{LANG}_INSTRUMENTATION_MONGODB_ENABLED</code>: enables OpenTelemetry when set to <code>1</code>, <code>true</code>, <code>yes</code>.</li>
+<li><code>OTEL_#{LANG}_INSTRUMENTATION_MONGODB_QUERY_TEXT_MAX_LENGTH</code>: An integer that sets the maximum length of the
+<code>db.query.text</code> attribute of command spans. Default is <code>0</code> (i.e., do not add the attribute).</li>
+</ul>
+<h4 id="tracer-attributes"><a class="header" href="#tracer-attributes">Tracer Attributes</a></h4>
+<p>If a driver creates a Tracer using OpenTelemetry API, drivers MUST use the following attributes:</p>
+<ul>
+<li><code>name</code>: A string that identifies the driver. It can be the name of a driver's component (e.g., "mongo", "PyMongo") or
+a package name (e.g., "com.mongo.Driver"). Drivers SHOULD select a name that is idiomatic for their language and
+ecosystem. Drivers SHOULD follow the Instrumentation Scope guidance.</li>
+<li><code>version</code>: A string that represents internal driver version. The version formatting is not defined; drivers SHOULD
+apply the same formatting as the use for <code>client.driver.version</code> attribute of the
+<a href="https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.md#clientdriverversion">handshake</a>.</li>
+</ul>
+<h4 id="instrumenting-driver-operations"><a class="header" href="#instrumenting-driver-operations">Instrumenting Driver Operations</a></h4>
+<p>When a user calls the driver's public API, the driver MUST create a span for every driver operation. Drivers MUST start
+the span as soon as possible so that the span’s duration reflects all activities made by the driver, such as server
+selection and serialization/deserialization.</p>
+<p>The span for the operation MUST be created within the current span of the host application, with the exceptions listed
+below.</p>
+<h5 id="transactions"><a class="header" href="#transactions">Transactions</a></h5>
+<p>When a user starts a transaction with <code>startTransaction</code>, the driver SHOULD create a span for the pseudo operation
+<code>transaction</code>. This span MUST have only one attribute <code>db.system</code> with the value <code>mongodb</code>. All operations executed
+within the transaction SHOULD be nested to the <code>transaction</code> span.</p>
+<p>When a user commits or aborts a transaction with <code>commitTransaction</code> or <code>abortTransaction</code>, the driver SHOULD finish the
+<code>transaction</code> span.</p>
+<h5 id="withtransaction"><a class="header" href="#withtransaction"><code>withTransaction</code></a></h5>
+<p>In case of <code>withTransaction</code> operation spans for operations that are executed inside the callbacks SHOULD be nested into
+the <code>withTransaction</code> span.</p>
+<h5 id="operation-span-name"><a class="header" href="#operation-span-name">Operation Span Name</a></h5>
+<p>The span name SHOULD be:</p>
+<ul>
+<li><code>driver_operation_name db.collection_name</code> if the operation is executed on a collection (e.g.,
+<code>collection.findOneAndDelete(filter)</code> will report <code>findAndModify warehouse_db.users_coll</code>).</li>
+</ul>
+<p><strong>Note</strong>: since the <code>findOneAndDelete</code> operation is implemented as a <code>findAndModify</code> command, the operation name in the
+span is <code>findAndModify</code>. This ensures consistency between drivers when naming operations. See the
+<a href="#covered-operations">covered operations</a> table below for mapping of public API methods to operation names.</p>
+<ul>
+<li><code>driver_operation_name db</code> if there is no specific collection for the operation (e.g., <code>runCommand warehouse</code>).</li>
+</ul>
+<h5 id="operation-span-kind"><a class="header" href="#operation-span-kind">Operation Span Kind</a></h5>
+<p>Span kind MUST be "client".</p>
+<h5 id="operation-span-attributes"><a class="header" href="#operation-span-attributes">Operation Span Attributes</a></h5>
+<p>Spans SHOULD have the following attributes:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Attribute</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th><th style="text-align: left">Requirement Level</th></tr></thead><tbody>
+<tr><td style="text-align: left"><code>db.system</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be 'mongodb'</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.namespace</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The database name</td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.collection.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The collection being accessed within the database stated in <code>db.namespace</code></td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.operation.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the driver operation being executed</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.operation.summary</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Equivalent to span name</td><td style="text-align: left">Required</td></tr>
+</tbody></table>
+</div>
+<p>Not all attributes are available at the moment of span creation. Drivers need to add attributes at later stages, which
+requires an operation span to be available throughout the complete operation lifecycle.</p>
+<h6 id="dbnamespace"><a class="header" href="#dbnamespace">db.namespace</a></h6>
+<p>This attribute SHOULD be set to current database name except for operations executing against admin db ex: (transaction,
+client <code>bulkWrite</code>) operations.</p>
+<p>Examples:</p>
+<ul>
+<li><code>find</code> on <code>test.users</code> → <code>test</code></li>
+<li><code>runCommand</code> on <code>admin</code> → <code>admin</code></li>
+<li><code>commitTransaction</code> → <code>admin</code></li>
+<li><code>abortTransaction</code> → <code>admin</code></li>
+<li>client <code>bulkWrite</code> → <code>admin</code></li>
+</ul>
+<p>The name of this attribute is defined in the
+<a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/db/#db-namespace">OpenTelemetry Specifications</a>. In
+order to be compliant with these, we use this name even though the term <code>namespace</code> has a different
+<a href="https://www.mongodb.com/docs/manual/reference/glossary/">meaning</a> for MongoDB.</p>
+<h6 id="dbcollectionname"><a class="header" href="#dbcollectionname">db.collection.name</a></h6>
+<p>This attribute should be set to the user's collection if the operation is executing against a collection, this field is
+omitted for commands running against <code>admin</code> database or commands that do not target a specific collection.</p>
+<p>Examples:</p>
+<ul>
+<li><code>find</code> on <code>test.users</code> → <code>users</code></li>
+<li><code>runCommand</code> on <code>admin</code> → <em>omitted</em></li>
+<li><code>commitTransaction</code> → <em>omitted</em></li>
+<li><code>abortTransaction</code> → <em>omitted</em></li>
+<li>client <code>bulkWrite</code> → <em>omitted</em></li>
+</ul>
+<h5 id="exceptions"><a class="header" href="#exceptions">Exceptions</a></h5>
+<p>If the driver operation fails with an exception, drivers MUST record an exception to the current operation span. This
+does not relate to exceptions that happen on the server command level (see below). Those exceptions MUST be recorded to
+the corresponding command span.</p>
+<p>When recording an exception, drivers SHOULD add the following attributes to the span, when the content for the attribute
+if available:</p>
+<ul>
+<li><code>exception.message</code></li>
+<li><code>exception.type</code></li>
+<li><code>exception.stacktrace</code></li>
+</ul>
+<h4 id="instrumenting-server-commands"><a class="header" href="#instrumenting-server-commands">Instrumenting Server Commands</a></h4>
+<p>Drivers MUST create a span for every server command sent to the server as a result of a public API call, except for
+sensitive commands as listed in the command logging and monitoring specification.</p>
+<p>Spans for commands MUST be nested to the span for the corresponding driver operation span. If the command is being
+retried, the driver MUST create a separate span for each retry; all the retries MUST be nested to the same operation
+span.</p>
+<h5 id="command-span-name"><a class="header" href="#command-span-name">Command Span Name</a></h5>
+<p>The span name SHOULD be the command name. For example, <code>find</code>, <code>insert</code>, <code>update</code>, etc.</p>
+<h5 id="command-span-kind"><a class="header" href="#command-span-kind">Command Span Kind</a></h5>
+<p>Span kind MUST be "client".</p>
+<h5 id="command-span-attributes"><a class="header" href="#command-span-attributes">Command Span Attributes</a></h5>
+<p>Spans SHOULD have the following attributes:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Attribute</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th><th style="text-align: left">Requirement Level</th></tr></thead><tbody>
+<tr><td style="text-align: left"><code>db.system</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be 'mongodb'</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.namespace</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The database name</td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.collection.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The collection being accessed within the database stated in <code>db.namespace</code></td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.command.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the server command being executed</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.response.status_code</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MongoDB error code represented as a string. This attribute should be added only if an error happens.</td><td style="text-align: left">Required if an error happens</td></tr>
+<tr><td style="text-align: left"><code>server.port</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Server port number</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>server.address</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Name of the database host, or IP address if name is not known</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>network.transport</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be 'tcp' or 'unix' depending on the protocol</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.query.summary</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">(see explanation below)</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.mongodb.server_connection_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Server connection id</td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.mongodb.driver_connection_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Local connection id</td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.query.text</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Database command that was sent to the server. Content should be equivalent to the <code>document</code> field of the CommandStartedEvent of the command monitoring.</td><td style="text-align: left">Conditional</td></tr>
+<tr><td style="text-align: left"><code>db.mongodb.cursor_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">If a cursor is created or used in the operation</td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.mongodb.lsid</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Logical session id</td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.mongodb.txn_number</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Transaction number</td><td style="text-align: left">Required if available</td></tr>
+</tbody></table>
+</div>
+<p>Besides the attributes listed in the table above, drivers MAY add other attributes from the
+<a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/db/">Semantic Conventions for Databases</a> that are
+applicable to MongoDB.</p>
+<h6 id="dbnamespace-1"><a class="header" href="#dbnamespace-1">db.namespace</a></h6>
+<p>This attribute SHOULD be set to current database name except for operations executing against admin db ex: (transaction,
+client <code>bulkWrite</code>) operations.</p>
+<p>Examples:</p>
+<ul>
+<li><code>find</code> on <code>test.users</code> → <code>test</code></li>
+<li><code>runCommand</code> on <code>admin</code> → <code>admin</code></li>
+<li><code>commitTransaction</code> → <code>admin</code></li>
+<li><code>abortTransaction</code> → <code>admin</code></li>
+<li>client <code>bulkWrite</code> → <code>admin</code></li>
+</ul>
+<p>The name of this attribute is defined in the
+<a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/db/#db-namespace">OpenTelemetry Specifications</a>. In
+order to be compliant with these, we use this name even though the term <code>namespace</code> has a different
+<a href="https://www.mongodb.com/docs/manual/reference/glossary/">meaning</a> for MongoDB.</p>
+<h6 id="dbcollectionname-1"><a class="header" href="#dbcollectionname-1">db.collection.name</a></h6>
+<p>This attribute should be set to the user's collection if the operation is executing against a collection, this field is
+omitted for commands running against <code>admin</code> database or commands that do not target a specific collection.</p>
+<p>Examples:</p>
+<ul>
+<li><code>find</code> on <code>test.users</code> → <code>users</code></li>
+<li><code>runCommand</code> on <code>admin</code> → <em>omitted</em></li>
+<li><code>commitTransaction</code> → <em>omitted</em></li>
+<li><code>abortTransaction</code> → <em>omitted</em></li>
+<li>client <code>bulkWrite</code> → <em>omitted</em></li>
+</ul>
+<h6 id="dbquerysummary"><a class="header" href="#dbquerysummary">db.query.summary</a></h6>
+<p>This attribute SHOULD contain:</p>
+<ul>
+<li><code>command_name db.collection_name</code> if the command is executed on a collection.</li>
+<li><code>command_name db</code> if there is no specific collection for the command.</li>
+<li><code>command_name admin</code> in other cases (e.g., commands executed against <code>admin</code> database, transaction or client
+<code>bulkWrite</code>).</li>
+</ul>
+<h6 id="dbquerytext"><a class="header" href="#dbquerytext">db.query.text</a></h6>
+<p>This attribute contains the full database command executed serialized to extended JSON. If not truncated, the content of
+this attribute SHOULD be equivalent to the <code>document</code> field of the CommandStartedEvent of the command monitoring
+excluding the following fields: <code>lsid</code>, <code>$db</code>, <code>$clusterTime</code>, <code>signature</code>.</p>
+<p>Drivers MUST NOT add this attribute by default. Drivers MUST provide a toggle to enable this attribute. This
+configuration can be implemented with an environment variable
+<code>OTEL_#{LANG}_INSTRUMENTATION_MONGODB_QUERY_TEXT_MAX_LENGTH</code> set to a positive integer value. The attribute will be
+added and truncated to the provided value (similar to the Logging specification).</p>
+<p>On the <code>MongoClient</code> level this configuration can be implemented with a <code>MongoClient</code> option, for example,
+<code>tracing.query_text_max_length</code>.</p>
+<h6 id="dbmongodbcursor_id"><a class="header" href="#dbmongodbcursor_id">db.mongodb.cursor_id</a></h6>
+<p>If the command returns a cursor, or uses a cursor, the <code>cursor_id</code> attribute SHOULD be added.</p>
+<h5 id="exceptions-1"><a class="header" href="#exceptions-1">Exceptions</a></h5>
+<p>If the server command fails with an exception, drivers MUST record an exception to the current command span. When
+recording an exception, drivers SHOULD add the following attributes to the span, when the content for the attribute if
+available:</p>
+<ul>
+<li><code>exception.message</code></li>
+<li><code>exception.type</code></li>
+<li><code>exception.stacktrace</code></li>
+</ul>
+<h2 id="motivation-for-change"><a class="header" href="#motivation-for-change">Motivation for Change</a></h2>
+<p>A common complaint from our support team is that they don't know how to easily get debugging information from drivers.
+Some drivers provide debug logging, but others do not. For drivers that do provide it, the log messages produced and the
+mechanisms for enabling debug logging are inconsistent.</p>
+<p>OpenTelemetry is currently the industry standard for instrumenting, generating, and collecting telemetry data (metrics,
+logs, and traces). By instrumenting our drivers natively, we allow our end users to collect traces in a
+batteries-included way, with the additional benefits that the tracing is developed and maintained in-house, and conforms
+to the open-source standard for tracing. This also ensures that traces generated on the client-side on driver operations
+can tie into other traces, thus giving our end users a broader picture of the network hops that a single request might
+take.</p>
+<h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
+<p>See <a href="tests/README.html">OpenTelemetry Tests</a> for the test plan.</p>
+<h2 id="covered-operations"><a class="header" href="#covered-operations">Covered operations</a></h2>
+<p>The OpenTelemetry specification covers all driver operations including but not limited to the following operations:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Operation</th><th style="text-align: left">Test</th></tr></thead><tbody>
+<tr><td style="text-align: left"><code>aggregate</code></td><td style="text-align: left"><a href="tests/operation/aggregate.yml">tests/operation/aggregate.yml</a></td></tr>
+<tr><td style="text-align: left"><code>findAndModify</code></td><td style="text-align: left"><a href="tests/operation/find_and_modify.yml">tests/operation/find_and_modify.yml</a></td></tr>
+<tr><td style="text-align: left"><code>bulkWrite</code></td><td style="text-align: left"><a href="tests/operation/bulk_write.yml">tests/operation/bulk_write.yml</a></td></tr>
+<tr><td style="text-align: left"><code>commitTransaction</code></td><td style="text-align: left"><a href="tests/transaction/core_api.yml">tests/transaction/core_api.yml</a></td></tr>
+<tr><td style="text-align: left"><code>abortTransaction</code></td><td style="text-align: left"><a href="tests/transaction/core_api.yml">tests/transaction/core_api.yml</a></td></tr>
+<tr><td style="text-align: left"><code>withTransaction</code></td><td style="text-align: left"><a href="tests/transaction/convenient.yml">tests/transaction/convenient.yml</a></td></tr>
+<tr><td style="text-align: left"><code>createCollection</code></td><td style="text-align: left"><a href="tests/operation/create_collection.yml">tests/operation/create_collection.yml</a></td></tr>
+<tr><td style="text-align: left"><code>createIndexes</code></td><td style="text-align: left"><a href="tests/operation/create_indexes.yml">tests/operation/create_indexes.yml</a></td></tr>
+<tr><td style="text-align: left"><code>distinct</code></td><td style="text-align: left"><a href="tests/operation/distinct.yml">tests/operation/distinct.yml</a></td></tr>
+<tr><td style="text-align: left"><code>dropCollection</code></td><td style="text-align: left"><a href="tests/operation/drop_collection.yml">tests/operation/drop_collection.yml</a></td></tr>
+<tr><td style="text-align: left"><code>dropIndexes</code></td><td style="text-align: left"><a href="tests/operation/drop_indexes.yml">tests/operation/drop_indexes.yml</a></td></tr>
+<tr><td style="text-align: left"><code>find</code></td><td style="text-align: left"><a href="tests/operation/find.yml">tests/operation/find.yml</a></td></tr>
+<tr><td style="text-align: left"><code>listCollections</code></td><td style="text-align: left"><a href="tests/operation/list_collections.yml">tests/operation/list_collections.yml</a></td></tr>
+<tr><td style="text-align: left"><code>listDatabases</code></td><td style="text-align: left"><a href="tests/operation/list_databases.yml">tests/operation/list_databases.yml</a></td></tr>
+<tr><td style="text-align: left"><code>listIndexes</code></td><td style="text-align: left"><a href="tests/operation/list_indexes.yml">tests/operation/list_indexes.yml</a></td></tr>
+<tr><td style="text-align: left"><code>mapReduce</code></td><td style="text-align: left"><a href="tests/operation/map_reduce.yml">tests/operation/map_reduce.yml</a></td></tr>
+<tr><td style="text-align: left"><code>estimatedDocumentCount</code></td><td style="text-align: left"><a href="tests/operation/count.yml">tests/operation/count.yml</a></td></tr>
+<tr><td style="text-align: left"><code>insert</code></td><td style="text-align: left"><a href="tests/operation/insert.yml">tests/operation/insert.yml</a></td></tr>
+<tr><td style="text-align: left"><code>delete</code></td><td style="text-align: left"><a href="tests/operation/delete.yml">tests/operation/delete.yml</a></td></tr>
+<tr><td style="text-align: left"><code>update</code></td><td style="text-align: left"><a href="tests/operation/update.yml">tests/operation/update.yml</a></td></tr>
+<tr><td style="text-align: left"><code>createSearchIndexes</code></td><td style="text-align: left"><a href="tests/operation/atlas_search.yml">tests/operation/atlas_search.yml</a></td></tr>
+<tr><td style="text-align: left"><code>dropSearchIndex</code></td><td style="text-align: left"><a href="tests/operation/atlas_search.yml">tests/operation/atlas_search.yml</a></td></tr>
+<tr><td style="text-align: left"><code>updateSearchIndex</code></td><td style="text-align: left"><a href="tests/operation/delete.yml">tests/operation/delete.yml</a></td></tr>
+<tr><td style="text-align: left"><code>delete</code></td><td style="text-align: left"><a href="tests/operation/atlas_search.yml">tests/operation/atlas_search.yml</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
+<p>Introduction of OpenTelemetry in new driver versions should not significantly affect existing applications that do not
+enable OpenTelemetry. However, since the no-op tracing operation may introduce some performance degradation (though it
+should be negligible), customers should be informed of this feature and how to disable it completely.</p>
+<p>If a driver is used in an application that has OpenTelemetry enabled, customers will see traces from the driver in their
+OpenTelemetry backends. This may be unexpected and MAY cause negative effects in some cases (e.g., the OpenTelemetry
+backend MAY not have enough capacity to process new traces). Customers should be informed of this feature and how to
+disable it completely.</p>
+<h2 id="security-implication"><a class="header" href="#security-implication">Security Implication</a></h2>
+<p>Drivers MUST take care to avoid exposing sensitive information (e.g. authentication credentials) in traces. Drivers
+SHOULD follow the
+<a href="https://github.com/mongodb/specifications/blob/master/source/command-logging-and-monitoring/command-logging-and-monitoring.md#security">Security</a>
+guidance of the Command Logging and Monitoring spec.</p>
+<h2 id="future-work"><a class="header" href="#future-work">Future Work</a></h2>
+<h3 id="query-parametrization"><a class="header" href="#query-parametrization">Query Parametrization</a></h3>
+<p>It might be beneficial to implement query parametrization for the <code>db.query.text</code> attribute.</p>
+<p>One might want to replace dynamic values in queries with placeholders. For example, the query</p>
+<pre><code class="language-json">{ find: "users", filter: { age: { $gt: 30 } } }
+</code></pre>
+<p>will be transformed to</p>
+<pre><code class="language-json">{ find: "users", filter: { age: { $gt: "?" } } }
+</code></pre>
+<p>for purposes of obfuscating queries in traces or query aggregation.</p>
+<p>In the case of CSFLE, the query might already have BSON binary values (with the encrypted subtype) by the time the query
+is sent along for tracing, which can also be considered a form of parameterization. In that case, a driver could easily
+replace those binary values with placeholders (assuming the encrypted blobs are irrelevant for logging).</p>
+<h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
+<h3 id="no-uri-options"><a class="header" href="#no-uri-options">No URI options</a></h3>
+<p>Enabling tracing may have performance and security implications. Copying and using a connection string that enables
+tracing may have unexpected negative outcome.</p>
+<p>Further, we already have two attributes that configure tracing, and we expect there might be more.</p>
+<p>A URI options can be added later if we realise our users need it, while the opposite is not easily accomplished.</p>
+
+                        </div>
+                        <div id="sidetoc">
+                            <nav id="pagetoc"></nav>
+                        </div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../bson-binary-encrypted/binary-encrypted.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../command-logging-and-monitoring/command-logging-and-monitoring.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../bson-binary-encrypted/binary-encrypted.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../command-logging-and-monitoring/command-logging-and-monitoring.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../theme/pagetoc.js"></script>
+        <script src="../theme/whichlang.js"></script>
+
+
+    </div>
+    </body>
+</html>

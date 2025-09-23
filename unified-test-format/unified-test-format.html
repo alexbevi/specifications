@@ -159,7 +159,7 @@
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
-<li>Current Schema Version: 1.26.0</li>
+<li>Current Schema Version: 1.27.0</li>
 </ul>
 <hr />
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -626,13 +626,30 @@ be false for each <code>runOnRequirement</code>. See
 </ul>
 <p><span id="entity_client_observeLogMessages"></span></p>
 <ul>
-<li><code>observeLogMessages</code>: Optional object where the key names are log <a href="../logging/logging.html#components">components</a> and
+<li>
+<p><code>observeLogMessages</code>: Optional object where the key names are log <a href="../logging/logging.html#components">components</a> and
 the values are minimum <a href="../logging/logging.html#log-severity-levels">log severity levels</a> indicating which
 components to collect log messages for and what the minimum severity level of collected messages should be.
 Messages for unspecified components and/or with lower severity levels than those specified MUST be ignored by this
 client's log collector(s) and SHOULD NOT be included in <a href="#test_expectLogMessages">test.expectLogMessages</a> for this
-client.</li>
-<li><code>serverApi</code>: Optional <a href="#serverapi">serverApi</a> object.</li>
+client.</p>
+</li>
+<li>
+<p><code>observeTracingMessages</code>: Optional object that configures tracing behavior for the client. The structure of this
+object is as follows:</p>
+<ul>
+<li><code>enableCommandPayload</code>: Optional boolean. When set to <code>true</code>, enables capturing of command payload details in
+tracing spans.
+<ul>
+<li>If <code>true</code>, the test runner SHOULD capture detailed command payload information in tracing spans.</li>
+<li>If <code>false</code> or omitted, the test runner SHOULD exclude command payload details.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><code>serverApi</code>: Optional <a href="#serverapi">serverApi</a> object.</p>
+</li>
 </ul>
 <p><span id="entity_client_autoEncryptOpts"></span></p>
 <ul>
@@ -908,6 +925,34 @@ test-only option to MongoClient which enables the client to store its entity nam
 log message to enable filtering messages by client.</p>
 <p>Tests SHOULD NOT specify multiple <a href="#expectedlogmessagesforclient">expectedLogMessagesForClient</a> objects for a single
 client entity.</p>
+</li>
+</ul>
+<p><span id="expectTracingMessages"></span></p>
+<ul>
+<li>
+<p><code>expectTracingMessages</code>: Optional object that defines expected tracing <a href="../open-telemetry/open-telemetry.html">spans</a>
+for a test. The structure of this object is as follows:</p>
+<ul>
+<li>
+<p><code>client</code>: Required string. The ID of the client entity associated with these tracing spans.</p>
+</li>
+<li>
+<p><code>ignoreExtraSpans</code>: Optional boolean.</p>
+<ul>
+<li>If <code>true</code>, additional unexpected spans are allowed.</li>
+<li>If <code>false</code> or omitted, the test runner MUST fail if any unexpected spans are detected.</li>
+</ul>
+</li>
+<li>
+<p><code>spans</code>: Required array of span objects. Each span describes an expected tracing event.</p>
+<p>Span object properties:</p>
+<ul>
+<li><code>name</code>: Required string. The name of the tracing span.</li>
+<li><code>attributes</code>: Required object. Key-value pairs describing span metadata.</li>
+<li><code>nested</code>: Optional array of nested span objects, following the same structure.</li>
+</ul>
+</li>
+</ul>
 </li>
 </ul>
 <p><span id="test_outcome"></span></p>
@@ -3077,6 +3122,11 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-09-17: <strong>Schema version 1.27.</strong></p>
+<p>Add <code>observeTracingMessages</code> configuration for clients and <code>expectTracingMessages</code> for test expectations. This allows
+capturing and validating detailed tracing information during test execution.</p>
+</li>
 <li>
 <p>2025-09-16: <strong>Schema version 1.26.</strong> Add <code>awaitMinPoolSize</code> client parameter to await on connection pool population.</p>
 </li>
