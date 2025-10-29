@@ -196,28 +196,33 @@ the <code>cursor</code> field in the response. For the distinct command the serv
 response. The <code>atClusterTime</code> field represents the timestamp of the read and is guaranteed to be majority committed.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <p>An application requests snapshot reads by creating a <code>ClientSession</code> with options that specify that snapshot reads are
-desired. An application then passes the session as an argument to methods in the <code>MongoDatabase</code> and <code>MongoCollection</code>
-classes. Read operations (find/aggregate/distinct) performed against that session will be read from the same snapshot.</p>
+desired and optionally specifying a <code>snapshotTime</code>. An application then passes the session as an argument to methods in
+the <code>MongoDatabase</code> and <code>MongoCollection</code> classes. Read operations (find/aggregate/distinct) performed against that
+session will be read from the same snapshot.</p>
 <h2 id="high-level-summary-of-the-api-changes-for-snapshot-reads"><a class="header" href="#high-level-summary-of-the-api-changes-for-snapshot-reads">High level summary of the API changes for snapshot reads</a></h2>
 <p>Snapshot reads are built on top of client sessions.</p>
-<p>Applications will start a new client session for snapshot reads like this:</p>
-<pre><code class="language-typescript">options = new SessionOptions(snapshot = true);
+<p>Applications will start a new client session for snapshot reads and possibly retrieve the snapshot time like this:</p>
+<pre><code class="language-typescript">options = new SessionOptions(snapshot = true, snapshotTime = timestampValue);
 session = client.startSession(options);
+snapshotTime = session.snapshotTime;
 </code></pre>
 <p>All read operations performed using this session will be read from the same snapshot.</p>
-<p>If no value is provided for <code>snapshot</code> a value of false is implied. There are no MongoDatabase, MongoClient, or
-MongoCollection API changes.</p>
+<p>If no value is provided for <code>snapshot</code> a value of false is implied. <code>snapshotTime</code> is an optional parameter and if not
+passed the snapshot time will be set internally after the first find/aggregate/distinct operation inside the session.</p>
+<p>There are no MongoDatabase, MongoClient, or MongoCollection API changes.</p>
 <h2 id="sessionoptions-changes"><a class="header" href="#sessionoptions-changes">SessionOptions changes</a></h2>
 <p><code>SessionOptions</code> change summary</p>
 <pre><code class="language-typescript">class SessionOptions {
     Optional&lt;bool&gt; snapshot;
+    Optional&lt;BsonTimestamp&gt; snapshotTime;
 
     // other options defined by other specs
 }
 </code></pre>
-<p>In order to support snapshot reads a new property named <code>snapshot</code> is added to <code>SessionOptions</code>. Applications set
-<code>snapshot</code> when starting a client session to indicate whether they want snapshot reads. All read operations performed
-using that client session will share the same snapshot.</p>
+<p>In order to support snapshot reads two properties called <code>snapshot</code> and <code>snapshotTime</code> are added to <code>SessionOptions</code>.
+Applications set <code>snapshot</code> when starting a client session to indicate whether they want snapshot reads and optionally
+set <code>snapshotTime</code> to specify the desired snapshot time beforehand. All read operations performed using that client
+session will share the same snapshot.</p>
 <p>Each new member is documented below.</p>
 <h3 id="snapshot"><a class="header" href="#snapshot">snapshot</a></h3>
 <p>Applications set <code>snapshot</code> when starting a session to indicate whether they want snapshot reads.</p>
@@ -225,7 +230,20 @@ using that client session will share the same snapshot.</p>
 <p>Snapshot reads and causal consistency are mutually exclusive. Therefore if <code>snapshot</code> is set to true,
 <code>causalConsistency</code> must be false. Client MUST throw an error if both <code>snapshot</code> and <code>causalConsistency</code> are set to
 true. Snapshot reads are supported on both primaries and secondaries.</p>
+<h3 id="snapshottime"><a class="header" href="#snapshottime">snapshotTime</a></h3>
+<p>Applications set <code>snapshotTime</code> when starting a snapshot session to specify the desired snapshot time.</p>
+<p>Note that the <code>snapshotTime</code> property is optional. The default value of this property is null.</p>
+<p>Client MUST throw an error if <code>snapshotTime</code> is set and <code>snapshot</code> is not set to true.</p>
 <h2 id="clientsession-changes"><a class="header" href="#clientsession-changes">ClientSession changes</a></h2>
+<p>A readonly property called <code>snapshotTime</code> will be added to <code>ClientSession</code> that allows applications to retrieve the
+snapshot time of the session:</p>
+<pre><code class="language-typescript">class ClientSession {
+    readonly Optional&lt;BsonTimestamp&gt; snapshotTime;
+
+    // other options defined by other specs
+}
+</code></pre>
+<p>Getting the value of <code>snapshotTime</code> on a non-snapshot session MUST raise an error.</p>
 <p>Transactions are not allowed with snapshot sessions. Calling <code>session.startTransaction(options)</code> on a snapshot session
 MUST raise an error.</p>
 <h2 id="readconcern-changes"><a class="header" href="#readconcern-changes">ReadConcern changes</a></h2>
@@ -233,9 +251,11 @@ MUST raise an error.</p>
 <h2 id="server-commands"><a class="header" href="#server-commands">Server Commands</a></h2>
 <p>There are no new server commands related to snapshot reads. Instead, snapshot reads are implemented by:</p>
 <ol>
-<li>Saving the <code>atClusterTime</code> returned by 5.0+ servers for the first find/aggregate/distinct operation in a private
-<code>snapshotTime</code> property of the <code>ClientSession</code> object. Drivers MUST save <code>atClusterTime</code> in the <code>ClientSession</code>
-object.</li>
+<li>If <code>snapshotTime</code> is specified in <code>SessionOptions</code>, saving the value in a <code>snapshotTime</code> property of the
+<code>ClientSession</code>.</li>
+<li>If <code>snapshotTime</code> is not specified in <code>SessionOptions</code>, saving the <code>atClusterTime</code> returned by 5.0+ servers for the
+first find/aggregate/distinct operation in a <code>snapshotTime</code> property of the <code>ClientSession</code> object. Drivers MUST
+save <code>atClusterTime</code> in the <code>ClientSession</code> object.</li>
 <li>Passing that <code>snapshotTime</code> in the <code>atClusterTime</code> field of the <code>readConcern</code> field for subsequent snapshot read
 operations (i.e. find/aggregate/distinct commands).</li>
 </ol>
@@ -323,6 +343,7 @@ Existing programs that don't use snapshot reads continue to compile and run corr
 <h2 id="qa"><a class="header" href="#qa">Q&amp;A</a></h2>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2025-09-23: Exposed snapshotTime to applications.</li>
 <li>2024-05-08: Migrated from reStructuredText to Markdown.</li>
 <li>2021-06-15: Initial version.</li>
 <li>2021-06-28: Raise client side error on &lt; 5.0.</li>

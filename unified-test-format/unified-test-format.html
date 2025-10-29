@@ -1908,6 +1908,11 @@ operations in the callback.</p>
 <a href="#operation_ignoreResultAndError">ignoreResultAndError</a> or <a href="#operation_expectError">expectError</a>. For example, if a
 callback operation raises an error, it should be possible to assert that error at both the callback operation and
 <code>withTransaction</code> level.</p>
+<h4 id="getsnapshottime"><a class="header" href="#getsnapshottime">getSnapshotTime</a></h4>
+<p>The operation <code>getSnapshotTime</code> returns the value of <code>snapshotTime</code> on the session, so that it can be used in subsequent
+operations.</p>
+<p>When parsing <code>snapshotTime</code> from <code>sessionOptions</code> for unified tests, the parsed string is the name of the key for the
+actual value of <code>snapshotTime</code> to be found in the <a href="#entity-map">Entity Map</a>.</p>
 <h3 id="bucket-operations"><a class="header" href="#bucket-operations">Bucket Operations</a></h3>
 <p>These operations and their arguments may be documented in the following specifications:</p>
 <ul>
@@ -3122,6 +3127,9 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-10-22: Added <code>getSnapshotTime</code> operation on sessions.</p>
+</li>
 <li>
 <p>2025-09-17: <strong>Schema version 1.27.</strong></p>
 <p>Add <code>observeTracingMessages</code> configuration for clients and <code>expectTracingMessages</code> for test expectations. This allows
