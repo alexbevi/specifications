@@ -1,0 +1,273 @@
+<!DOCTYPE HTML>
+<html lang="en" class="latte sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Specification Owners - MongoDB Driver Specifications</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css" id="highlight-css">
+        <link rel="stylesheet" href="tomorrow-night.css" id="tomorrow-night-css">
+        <link rel="stylesheet" href="ayu-highlight.css" id="ayu-highlight-css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="theme/catppuccin.css">
+        <link rel="stylesheet" href="theme/pagetoc.css">
+        <link rel="stylesheet" href="theme/whichlang.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "mocha" : "latte";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('latte')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="latte">Latte</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="frappe">Frappé</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="macchiato">Macchiato</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mocha">Mocha</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">MongoDB Driver Specifications</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <div class="content-wrap">
+                            <h1 id="specification-owners"><a class="header" href="#specification-owners">Specification Owners</a></h1>
+<p>This is very loosely based on GitHub's <a href="https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners">CODEOWNERS</a>.</p>
+<div class="table-wrapper"><table><thead><tr><th>Specification</th><th>DRI/Owner(s)</th><th>Last Updated</th></tr></thead><tbody>
+<tr><td><a href="auth/auth.html">Authentication</a></td><td><a href="https://github.com/blink1073">Steven Silvester</a><br/><a href="https://github.com/comandeo-mongo">Dmitry Rybakov</a></td><td>2025-09-30</td></tr>
+<tr><td><a href="bson-binary-encrypted/binary-encrypted.html">BSON Binary Subtype 6: Encrypted</a></td><td></td><td>2024-03-04</td></tr>
+<tr><td><a href="bson-binary-vector/bson-binary-vector.html">BSON Binary Subtype 9: Vector</a></td><td></td><td>2025-06-23</td></tr>
+<tr><td><a href="bson-corpus/bson-corpus.html">BSON Corpus</a></td><td></td><td>2024-01-22</td></tr>
+<tr><td><a href="driver-bulk-update.rst">Bulk API</a></td><td></td><td>2023-10-17</td></tr>
+<tr><td><a href="crud/bulk-write.html">Bulk Write</a></td><td></td><td>2025-09-09</td></tr>
+<tr><td><a href="causal-consistency/causal-consistency.html">Causal Consistency</a></td><td></td><td>2024-02-08</td></tr>
+<tr><td><a href="change-streams/change-streams.html">Change Streams</a></td><td><a href="https://github.com/abr-egn">Abraham Egnor</a></td><td>2025-09-08</td></tr>
+<tr><td><a href="client-side-encryption/client-side-encryption.html">Client Side Encryption</a></td><td><a href="https://github.com/kevinAlbs">Kevin Albertson</a><br/><a href="https://github.com/katcharov">Maxim Katcharov</a></td><td>2025-09-30</td></tr>
+<tr><td><a href="client-side-operations-timeout/client-side-operations-timeout.html">Client Side Operations Timeout (CSOT)</a></td><td><a href="https://github.com/ShaneHarvey">Shane Harvey</a><br/><a href="https://github.com/prestonvasquez">Preston Vasquez</a></td><td>2024-01-29</td></tr>
+<tr><td><a href="collation/collation.html">Collation</a></td><td></td><td>2024-02-15</td></tr>
+<tr><td><a href="run-command/run-command.html">Command Execution</a></td><td></td><td>2024-09-02</td></tr>
+<tr><td><a href="command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a></td><td><a href="https://github.com/durran">Durran Jordan</a></td><td>2025-01-22</td></tr>
+<tr><td><a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">Connection Monitoring and Pooling</a></td><td><a href="https://github.com/stIncMale">Valentin Kovalenko</a><br/><a href="https://github.com/baileympearson">Bailey Pearson</a></td><td></td></tr>
+<tr><td><a href="connection-string/connection-string-spec.html">Connection String</a></td><td></td><td>2024-05-29</td></tr>
+<tr><td><a href="transactions-convenient-api/transactions-convenient-api.html">Convenient Transactions API</a></td><td></td><td>2024-09-06</td></tr>
+<tr><td><a href="crud/crud.html">CRUD</a></td><td><a href="https://github.com/jmikola">Jeremy Mikola</a></td><td>2025-09-09</td></tr>
+<tr><td><a href="dbref/dbref.html">DBRef</a></td><td></td><td>2024-02-26</td></tr>
+<tr><td><a href="bson-decimal128/decimal128.html">Decimal128</a></td><td></td><td>2024-02-08</td></tr>
+<tr><td><a href="enumerate-collections/enumerate-collections.html">Enumerating Collections</a></td><td></td><td>2024-07-26</td></tr>
+<tr><td><a href="enumerate-databases/enumerate-databases.html">Enumerating Databases</a></td><td></td><td>2024-07-26</td></tr>
+<tr><td><a href="extended-json/extended-json.html">Extended JSON</a></td><td></td><td>2024-05-29</td></tr>
+<tr><td><a href="faas-automated-testing/faas-automated-testing.html">FAAS Automated Testing</a></td><td></td><td>2025-08-07</td></tr>
+<tr><td><a href="find_getmore_killcursors_commands/find_getmore_killcursors_commands.html"><code>find</code>/<code>getMore</code>/<code>killCursors</code></a></td><td></td><td>2024-07-30</td></tr>
+<tr><td><a href="gridfs/gridfs-spec.html">GridFS</a></td><td></td><td>2024-10-30</td></tr>
+<tr><td><a href="index-management/index-management.html">Index Management</a></td><td></td><td>2025-09-09</td></tr>
+<tr><td><a href="initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html">Initial DNS Seedlist Discovery</a></td><td></td><td>2024-09-24</td></tr>
+<tr><td><a href="mongodb-handshake/handshake.html">Initial Handshake</a></td><td></td><td>2025-09-04</td></tr>
+<tr><td><a href="load-balancers/load-balancers.html">Load Balancer Support</a></td><td></td><td>2024-04-25</td></tr>
+<tr><td><a href="max-staleness/max-staleness.html">Max Staleness</a></td><td></td><td>2024-08-09</td></tr>
+<tr><td><a href="bson-objectid/objectid.html">ObjectId</a></td><td></td><td>2024-07-30</td></tr>
+<tr><td><a href="ocsp-support/ocsp-support.html">OCSP</a></td><td></td><td>2024-08-20</td></tr>
+<tr><td><a href="open-telemetry/open-telemetry.html">Open Telemetry</a></td><td></td><td></td></tr>
+<tr><td><a href="message/OP_MSG.html"><code>OP_MSG</code></a></td><td></td><td>2024-04-30</td></tr>
+<tr><td><a href="benchmarking/benchmarking.html">Performance Benchmarking</a></td><td></td><td>2024-12-23</td></tr>
+<tr><td><a href="read-write-concern/read-write-concern.html">R/W Concern</a></td><td></td><td>2025-02-25</td></tr>
+<tr><td><a href="retryable-reads/retryable-reads.html">Retryable Reads</a></td><td><a href="https://github.com/isabelatkinson">Isabel Atkinson</a></td><td>2024-04-30</td></tr>
+<tr><td><a href="retryable-writes/retryable-writes.html">Retryable Writes</a></td><td><a href="https://github.com/isabelatkinson">Isabel Atkinson</a></td><td>2024-05-08</td></tr>
+<tr><td><a href="server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html">SDAM Logging and Monitoring</a></td><td></td><td>2025-01-22</td></tr>
+<tr><td><a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a></td><td><a href="https://github.com/ShaneHarvey">Shane Harvey</a></td><td></td></tr>
+<tr><td><a href="server-discovery-and-monitoring/server-monitoring.html">Server Monitoring</a></td><td></td><td>2025-01-22</td></tr>
+<tr><td><a href="server-selection/server-selection.html">Server Selection</a></td><td><a href="https://github.com/vector-of-bool">Colby Pike</a><br/><a href="https://github.com/NoahStapp">Noah Stapp</a></td><td>2025-02-25</td></tr>
+<tr><td><a href="sessions/driver-sessions.html">Sessions</a></td><td><a href="https://github.com/qingyang-hu">Qingyang Hu</a><br/><a href="https://github.com/sanych-sun">Oleksandr Poliakov</a></td><td>2025-02-24</td></tr>
+<tr><td><a href="sessions/snapshot-sessions.html">Snapshot Reads</a></td><td></td><td>2025-09-23</td></tr>
+<tr><td><a href="socks5-support/socks5.html">SOCKS5</a></td><td></td><td>2024-09-04</td></tr>
+<tr><td><a href="polling-srv-records-for-mongos-discovery/polling-srv-records-for-mongos-discovery.html"><code>SRV</code> Polling for <code>mongos</code> Discovery</a></td><td></td><td>2024-08-22</td></tr>
+<tr><td><a href="versioned-api/versioned-api.html">Stable API</a></td><td></td><td>2024-09-10</td></tr>
+<tr><td><a href="logging/logging.html">Standardized Logging</a></td><td><a href="https://github.com/BorisDog">Boris Dogadov</a></td><td>2024-03-06</td></tr>
+<tr><td><a href="transactions/transactions.html">Transactions</a></td><td><a href="https://github.com/durran">Durran Jordan</a><br/><a href="https://github.com/comandeo-mongo">Dmitry Rybakov</a></td><td>2024-11-01</td></tr>
+<tr><td><a href="unified-test-format/unified-test-format.html">Unified Test Format</a></td><td><a href="https://github.com/jmikola">Jeremy Mikola</a></td><td>2025-10-22</td></tr>
+<tr><td><a href="uri-options/uri-options.html">URI Options</a></td><td><a href="https://github.com/JamesKovacs">James Kovacs</a><br/><a href="https://github.com/alcaeus">Andreas Braun</a></td><td>2024-05-08</td></tr>
+<tr><td><a href="bson-binary-uuid/uuid.html">UUID</a></td><td></td><td>2024-08-01</td></tr>
+<tr><td><a href="compression/OP_COMPRESSED.html">Wire Compression</a></td><td></td><td>2024-02-16</td></tr>
+<tr><td><a href="server_write_commands/server_write_commands.html">Write Commands</a></td><td></td><td>2024-11-11</td></tr>
+</tbody></table>
+</div>
+                        </div>
+                        <div id="sidetoc">
+                            <nav id="pagetoc"></nav>
+                        </div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="driver-mantras.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="driver-mantras.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="theme/pagetoc.js"></script>
+        <script src="theme/whichlang.js"></script>
+
+
+    </div>
+    </body>
+</html>

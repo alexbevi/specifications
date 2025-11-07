@@ -1,0 +1,492 @@
+<!DOCTYPE HTML>
+<html lang="en" class="latte sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Server Selection Tests - MongoDB Driver Specifications</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css" id="highlight-css">
+        <link rel="stylesheet" href="../tomorrow-night.css" id="tomorrow-night-css">
+        <link rel="stylesheet" href="../ayu-highlight.css" id="ayu-highlight-css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/catppuccin.css">
+        <link rel="stylesheet" href="../theme/pagetoc.css">
+        <link rel="stylesheet" href="../theme/whichlang.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "mocha" : "latte";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('latte')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="latte">Latte</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="frappe">Frappé</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="macchiato">Macchiato</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mocha">Mocha</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">MongoDB Driver Specifications</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <div class="content-wrap">
+                            <h1 id="server-selection-test-plan"><a class="header" href="#server-selection-test-plan">Server Selection Test Plan</a></h1>
+<ul>
+<li>
+<p>Status: Accepted</p>
+</li>
+<li>
+<p>Minimum Server Version: 2.4</p>
+</li>
+</ul>
+<p>See also the YAML test files and their accompanying README in the "tests" directory.</p>
+<hr />
+<h2 id="readpreference-document-validation"><a class="header" href="#readpreference-document-validation">ReadPreference Document Validation</a></h2>
+<p>While there are no YAML tests for this section, clients implementing this spec SHOULD perform validations on
+ReadPreference documents provided by the user. Specifically, documents with the following values should raise an error:</p>
+<ul>
+<li>Mode PRIMARY and non-empty tag set</li>
+</ul>
+<h2 id="calculating-round-trip-time"><a class="header" href="#calculating-round-trip-time">Calculating Round Trip Time</a></h2>
+<p>Drivers implementing server selection MUST test that RTT values are calculated correctly. YAML tests for RTT
+calculations can be found in the "tests" directory and they test for correctness in the following scenarios:</p>
+<ul>
+<li>first RTT: new average RTT equals measurement</li>
+<li>subsequent measurements: new average RTT is calculated using the new measurement and the previous average as described
+in the spec.</li>
+</ul>
+<p>Additionally, drivers SHOULD ensure that their implementations reject negative RTT values.</p>
+<p>Lastly, drivers SHOULD ensure that average RTT for a given ServerDescription is reset to 0 if that server is
+disconnected (ie a network error occurs during a <code>hello</code> or legacy hello call). Upon reconnect, the first new RTT value
+should become the average RTT for this server.</p>
+<p>The RTT tests are intentionally simplified to test the implementation of the EWMA algorithm without imposing any
+additional conditions on drivers that might affect architecture. For some drivers, RTT tests might require mocks; for
+others, it might just require unit tests.</p>
+<h2 id="server-selection"><a class="header" href="#server-selection">Server Selection</a></h2>
+<p>The following test cases can be found in YAML form in the "tests" directory. Each test lists a TopologyDescription
+representing a set of servers, a ReadPreference document, and sets of servers returned at various stages of the server
+selection process. These sets are described below. Note that it is not required to test for correctness at every step.</p>
+<div class="table-wrapper"><table><thead><tr><th>Test Case</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>suitable_servers</code></td><td>the set of servers matching all server selection logic.</td></tr>
+<tr><td><code>in_latency_window</code></td><td>the subset of <code>suitable_servers</code> that falls within the allowable latency window (required). NOTE: tests use the default localThresholdMS of 15 ms.</td></tr>
+</tbody></table>
+</div>
+<p>Drivers implementing server selection MUST test that their implementations correctly return <strong>one</strong> of the servers in
+<code>in_latency_window</code>. Drivers SHOULD test against the full set of servers in <code>in_latency_window</code> and against
+<code>suitable_servers</code> if possible.</p>
+<h3 id="topology-type-single"><a class="header" href="#topology-type-single">Topology Type Single</a></h3>
+<ul>
+<li>The single server is always selected.</li>
+</ul>
+<h3 id="topology-type-replicasetnoprimary"><a class="header" href="#topology-type-replicasetnoprimary">Topology Type ReplicaSetNoPrimary</a></h3>
+<p><strong>Reads</strong></p>
+<ul>
+<li>PRIMARY
+<ul>
+<li>no server selected</li>
+</ul>
+</li>
+<li>PRIMARY_PREFERRED
+<ul>
+<li>Matching tags: select any eligible secondary</li>
+<li>Non-matching tags: no server selected</li>
+</ul>
+</li>
+<li>SECONDARY
+<ul>
+<li>Matching tags: select any eligible secondary</li>
+<li>Non-matching tags: no server selected</li>
+</ul>
+</li>
+<li>SECONDARY_PREFERRED
+<ul>
+<li>Matching tags: select any eligible secondary</li>
+<li>Non-matching tags: no server selected</li>
+</ul>
+</li>
+<li>NEAREST
+<ul>
+<li>Matching tags: select any eligible secondary</li>
+<li>Non-matching tags: no server selected</li>
+</ul>
+</li>
+</ul>
+<p><strong>Writes</strong></p>
+<ul>
+<li>Writes must go to a primary, no server can be selected.</li>
+</ul>
+<h3 id="topology-type-replicasetwithprimary"><a class="header" href="#topology-type-replicasetwithprimary">Topology Type ReplicaSetWithPrimary</a></h3>
+<p><strong>Reads</strong></p>
+<ul>
+<li>PRIMARY
+<ul>
+<li>primary is selected <strong>NOTE:</strong> it is an error to provide tags with mode PRIMARY. See "ReadPreference Document
+Validation."</li>
+</ul>
+</li>
+<li>PRIMARY_PREFERRED
+<ul>
+<li>Matching tags: primary is selected</li>
+<li>Non-matching tags: primary is selected</li>
+</ul>
+</li>
+<li>SECONDARY
+<ul>
+<li>Matching tags: select any eligible secondary</li>
+<li>Non-matching tags: no server selected</li>
+</ul>
+</li>
+<li>SECONDARY_PREFERRED
+<ul>
+<li>Matching tags: select any eligible secondary</li>
+<li>Non-matching tags: primary is selected</li>
+</ul>
+</li>
+<li>NEAREST
+<ul>
+<li>Matching tags: select any eligible server</li>
+<li>Non-matching tags: no server selected</li>
+</ul>
+</li>
+</ul>
+<p><strong>Writes</strong></p>
+<ul>
+<li>Primary is selected.</li>
+</ul>
+<h3 id="topology-type-sharded"><a class="header" href="#topology-type-sharded">Topology Type Sharded</a></h3>
+<p><strong>Reads</strong></p>
+<ul>
+<li>Select any mongos.</li>
+</ul>
+<p><strong>Writes</strong></p>
+<ul>
+<li>Select any mongos.</li>
+</ul>
+<h3 id="topology-type-unknown"><a class="header" href="#topology-type-unknown">Topology Type Unknown</a></h3>
+<p><strong>Reads</strong></p>
+<ul>
+<li>No server is selected.</li>
+</ul>
+<p><strong>Writes</strong></p>
+<ul>
+<li>No server is selected.</li>
+</ul>
+<h2 id="passing-readpreference-to-mongos"><a class="header" href="#passing-readpreference-to-mongos">Passing ReadPreference to Mongos</a></h2>
+<p>While there are no YAML tests for this, drivers are strongly encouraged to test in a way specific to their
+implementation that ReadPreference is correctly passed to Mongos in the following scenarios:</p>
+<ul>
+<li>PRIMARY
+<ul>
+<li>the SecondaryOk wire protocol flag is NOT set</li>
+<li>$readPreference is NOT used</li>
+</ul>
+</li>
+<li>PRIMARY_PREFERRED
+<ul>
+<li>the SecondaryOk wire protocol flag is set</li>
+<li>$readPreference is used</li>
+</ul>
+</li>
+<li>SECONDARY
+<ul>
+<li>the SecondaryOk wire protocol flag is set</li>
+<li>$readPreference is used</li>
+</ul>
+</li>
+<li>SECONDARY_PREFERRED
+<ul>
+<li>the SecondaryOk wire protocol flag is set</li>
+<li>if <code>tag_sets</code> or <code>hedge</code> are specified $readPreference is used, otherwise $readPreference is NOT used</li>
+</ul>
+</li>
+<li>NEAREST
+<ul>
+<li>the SecondaryOk wire protocol flag is set</li>
+<li>$readPreference is used</li>
+</ul>
+</li>
+</ul>
+<h2 id="random-selection-within-latency-window-single-threaded-drivers"><a class="header" href="#random-selection-within-latency-window-single-threaded-drivers">Random Selection Within Latency Window (single-threaded drivers)</a></h2>
+<p>The Server Selection spec mandates that single-threaded drivers select a server at random from the set of suitable
+servers that are within the latency window. Drivers implementing the spec SHOULD test their implementations in a
+language-specific way to confirm randomness.</p>
+<p>For example, the following topology description, operation, and read preference will return a set of three suitable
+servers within the latency window:</p>
+<pre><code class="language-yaml">    topology_description:
+      type: ReplicaSetWithPrimary
+      servers:
+      - &amp;secondary_1
+        address: b:27017
+        avg_rtt_ms: 5
+        type: RSSecondary
+        tags: {}
+      - &amp;secondary_2
+        address: c:27017
+        avg_rtt_ms: 10
+        type: RSSecondary
+        tags: {}
+      - &amp;primary
+        address: a:27017
+        avg_rtt_ms: 6
+        type: RSPrimary
+        tags: {}
+    operation: read
+    read_preference:
+      mode: Nearest
+      tags: {}
+    in_latency_window:
+    - *primary
+    - *secondary_1
+    - *secondary_2
+</code></pre>
+<p>Drivers SHOULD check that their implementation selects one of <code>primary</code>, <code>secondary_1</code>, and <code>secondary_2</code> at random.</p>
+<h2 id="operationcount-based-selection-within-latency-window-multi-threaded-or-async-drivers"><a class="header" href="#operationcount-based-selection-within-latency-window-multi-threaded-or-async-drivers">operationCount-based Selection Within Latency Window (multi-threaded or async drivers)</a></h2>
+<p>The Server Selection spec mandates that multi-threaded or async drivers select a server from within the latency window
+according to their operationCounts. There are YAML tests verifying that drivers implement this selection correctly which
+can be found in the <code>tests/in_window</code> directory. Multi-threaded or async drivers implementing the spec MUST use them to
+test their implementations.</p>
+<p>The YAML tests each include some information about the servers within the late ncy window. For each case, the driver
+passes this information into whatever function it uses to select from within the window. Because the selection algorithm
+relies on randomness, this process MUST be repeated 2000 times. Once the 2000 selections are complete, the runner
+tallies up the number of times each server was selected and compares those counts to the expected results included in
+the test case. Specifics of the test format and how to run the tests are included in the tests README.</p>
+<h3 id="prose-test"><a class="header" href="#prose-test">Prose Test</a></h3>
+<p>Multi-threaded and async drivers MUST also implement the following prose test:</p>
+<ol>
+<li>
+<p>Configure a sharded cluster with two mongoses. Use a 4.2.9 or newer server version.</p>
+</li>
+<li>
+<p>Enable the following failpoint against exactly one of the mongoses:</p>
+<pre><code class="language-javascript">{
+   configureFailPoint: "failCommand",
+   mode: { times: 10000 },
+   data: {
+       failCommands: ["find"],
+       blockConnection: true,
+       blockTimeMS: 500,
+       appName: "loadBalancingTest",
+   },
+}
+</code></pre>
+</li>
+<li>
+<p>Create a client with both mongoses' addresses in its seed list, appName="loadBalancingTest", and
+localThresholdMS=30000.</p>
+<ul>
+<li>localThresholdMS is set to a high value to help avoid a single mongos being selected too many times due to a random
+spike in latency in the other mongos.</li>
+</ul>
+</li>
+<li>
+<p>Using CMAP events, ensure the client's connection pools for both mongoses have been saturated, either via setting
+minPoolSize=maxPoolSize or executing operations.</p>
+<ul>
+<li>This helps reduce any noise introduced by connection establishment latency during the actual server selection
+tests.</li>
+</ul>
+</li>
+<li>
+<p>Start 10 concurrent threads / tasks that each run 10 <code>findOne</code> operations with empty filters using that client.</p>
+</li>
+<li>
+<p>Using command monitoring events, assert that fewer than 25% of the CommandStartedEvents occurred on the mongos that
+the failpoint was enabled on.</p>
+</li>
+<li>
+<p>Disable the failpoint.</p>
+</li>
+<li>
+<p>Start 10 concurrent threads / tasks that each run 100 <code>findOne</code> operations with empty filters using that client.</p>
+</li>
+<li>
+<p>Using command monitoring events, assert that each mongos was selected roughly 50% of the time (within +/- 10%).</p>
+</li>
+</ol>
+<h2 id="application-provided-server-selector"><a class="header" href="#application-provided-server-selector">Application-Provided Server Selector</a></h2>
+<p>The Server Selection spec allows drivers to configure registration of a server selector function that filters the list
+of suitable servers. Drivers implementing this part of the spec MUST test that:</p>
+<ul>
+<li>The application-provided server selector is executed as part of the server selection process when there is a nonzero
+number of candidate or eligible servers. For example, execute a test against a replica set: Register a server
+selector that selects the suitable server with the highest port number. Execute 10 queries with nearest read
+preference and, using command monitoring, assert that all the operations execute on the member with the highest port
+number.</li>
+</ul>
+
+                        </div>
+                        <div id="sidetoc">
+                            <nav id="pagetoc"></nav>
+                        </div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../max-staleness/max-staleness-tests.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../max-staleness/max-staleness-tests.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../theme/pagetoc.js"></script>
+        <script src="../theme/whichlang.js"></script>
+
+
+    </div>
+    </body>
+</html>

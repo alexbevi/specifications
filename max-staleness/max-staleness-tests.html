@@ -1,0 +1,297 @@
+<!DOCTYPE HTML>
+<html lang="en" class="latte sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Max Staleness Tests - MongoDB Driver Specifications</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css" id="highlight-css">
+        <link rel="stylesheet" href="../tomorrow-night.css" id="tomorrow-night-css">
+        <link rel="stylesheet" href="../ayu-highlight.css" id="ayu-highlight-css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/catppuccin.css">
+        <link rel="stylesheet" href="../theme/pagetoc.css">
+        <link rel="stylesheet" href="../theme/whichlang.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "mocha" : "latte";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('latte')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="latte">Latte</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="frappe">Frappé</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="macchiato">Macchiato</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mocha">Mocha</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">MongoDB Driver Specifications</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <div class="content-wrap">
+                            <h1 id="max-staleness-tests"><a class="header" href="#max-staleness-tests">Max Staleness Tests</a></h1>
+<p>These prose tests supplement the machine-readable YAML tests.</p>
+<h2 id="connection-string"><a class="header" href="#connection-string">Connection string</a></h2>
+<p>Tests of drivers' connection string parsing and validation.</p>
+<h3 id="basic"><a class="header" href="#basic">Basic</a></h3>
+<p>maxStalenessSeconds is set to 120 from this connection string:</p>
+<pre><code class="language-text">mongodb://host/?readPreference=secondary&amp;maxStalenessSeconds=120
+</code></pre>
+<h3 id="no-maxstalenessseconds-with-mode-primary"><a class="header" href="#no-maxstalenessseconds-with-mode-primary">No maxStalenessSeconds with mode "primary"</a></h3>
+<p>These connection strings are invalid because the mode is "primary", either by default or explicitly:</p>
+<pre><code class="language-text">mongodb://host/?maxStalenessSeconds=120
+mongodb://host/?readPreference=primary&amp;maxStalenessSeconds=120
+</code></pre>
+<h3 id="specifying-no-max-staleness-with--1"><a class="header" href="#specifying-no-max-staleness-with--1">Specifying "no max staleness" with "-1"</a></h3>
+<p>A MongoClient with this connection string has no max staleness, the same as if "maxStalenessSeconds" were omitted from
+the connection string:</p>
+<pre><code class="language-text">mongodb://host/?readPreference=secondary&amp;maxStalenessSeconds=-1
+</code></pre>
+<p>This connection string is valid and does not raise an error:</p>
+<pre><code class="language-text">mongodb://host/?readPreference=primary&amp;maxStalenessSeconds=-1&gt;
+</code></pre>
+<h3 id="no-validation"><a class="header" href="#no-validation">No validation</a></h3>
+<p>A MongoClient can be initialized with this connection string; the small maxStalenessSeconds value causes no error
+initially:</p>
+<pre><code class="language-text">mongodb://host/?readPreference=secondary&amp;maxStalenessSeconds=1
+</code></pre>
+<h2 id="heartbeatfrequencyms-is-configurable"><a class="header" href="#heartbeatfrequencyms-is-configurable">heartbeatFrequencyMS is configurable</a></h2>
+<p>Server Discovery and Monitoring was updated to accommodate the Max Staleness Spec: heartbeatFrequencyMS MUST now be
+configurable in all drivers, not just single-threaded drivers.</p>
+<p>Test that a user can set heartbeatFrequencyMS in the connection string:</p>
+<pre><code class="language-text">mongodb://host/?heartbeatFrequencyMS=500
+</code></pre>
+<p>Test that a client initialized with this string checks a standalone server roughly twice per second.</p>
+<h2 id="driver-tests"><a class="header" href="#driver-tests">Driver Tests</a></h2>
+<h3 id="parse-lastwritedate"><a class="header" href="#parse-lastwritedate">Parse lastWriteDate</a></h3>
+<p>Configure a client with heartbeatFrequencyMS of 500 milliseconds.</p>
+<p>Connect to a MongoDB replica set member with maxWireVersion at least 5. (Only replica set members with maxWireVersion 5
+have a lastWriteDate in the legacy hello reply.)</p>
+<p>Insert a document and wait one second.</p>
+<p>Get the client's ServerDescription for the server. It must have a non-zero lastWriteDate. Wait another second.<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup></p>
+<p>Insert a document and wait one second.</p>
+<p>Get the client's ServerDescription for the server. The ServerDescription's lastWriteDate must be greater than before,
+but less than 10 seconds greater.</p>
+<p>(This test is as lenient as possible, while still testing that the driver parses lastWriteDate and converts it to an
+appropriate unit.)</p>
+<h3 id="absent-lastwritedate"><a class="header" href="#absent-lastwritedate">Absent lastWriteDate</a></h3>
+<p>Connect to a MongoDB server with maxWireVersion less than 5. Check that the driver's ServerDescription for this server
+has no lastWriteDate, represented with null, zero, or however the driver represents a non-value.</p>
+<h3 id="direct-connection-to-mongos"><a class="header" href="#direct-connection-to-mongos">Direct connection to mongos</a></h3>
+<p>Initialize a MongoClient with this connection string:</p>
+<pre><code class="language-text">mongodb://mongos/?readPreference=secondary&amp;maxStalenessSeconds=120
+</code></pre>
+<p>Where "mongos" is the hostname and port of a mongos server running wire protocol version 5+. Execute a "findOne"
+operation. The MongoClient must include following read preference element with its "find" command:</p>
+<pre><code class="language-javascript">$readPreference: {
+    mode: "secondary",
+    maxStalenessSeconds: 120
+}
+</code></pre>
+<p>The "maxStalenessSeconds" element must be a BSON int32 or int64 type.</p>
+<p>Do the same test with this connection string:</p>
+<pre><code class="language-text">mongodb://mongos/?readPreference=secondary
+</code></pre>
+<p>The read preference element sent to mongos must omit "maxStalenessSeconds".</p>
+<h2 id="mongos"><a class="header" href="#mongos">Mongos</a></h2>
+<p>These tests MUST be added to the server code repository, validating mongos's maxStalenessSeconds implementation.</p>
+<h3 id="maxstalenessseconds-and-mode-primary"><a class="header" href="#maxstalenessseconds-and-mode-primary">maxStalenessSeconds and mode "primary"</a></h3>
+<p>mongos MUST reject a read with:</p>
+<pre><code class="language-javascript">$readPreference: {mode: "primary", maxStalenessSeconds: 120}
+</code></pre>
+<h3 id="validation"><a class="header" href="#validation">Validation</a></h3>
+<p>mongos MUST reject a read with <code>maxStalenessSeconds</code> that is not an int32 or int64.</p>
+<h3 id="maxstalenessseconds-too-small"><a class="header" href="#maxstalenessseconds-too-small">maxStalenessSeconds too small</a></h3>
+<p>The minimum value of maxStalenessSeconds is 90. mongos MUST reject a read with:</p>
+<pre><code class="language-javascript">$readPreference: {mode: "secondary", maxStalenessSeconds: 89}
+</code></pre>
+<p>The error code MUST be 160.</p>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
+<p>This ensures the next insert occurs at least one second after server selection (another write may have occurred from
+the noop writer just before server selection if mongod was configured with periodicNoopIntervalSecs=1). <a href="#fr-1-1">↩</a></p>
+</li>
+</ol>
+                        </div>
+                        <div id="sidetoc">
+                            <nav id="pagetoc"></nav>
+                        </div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../faas-automated-testing/faas-automated-testing.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../server-selection/server-selection-tests.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../faas-automated-testing/faas-automated-testing.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../server-selection/server-selection-tests.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../theme/pagetoc.js"></script>
+        <script src="../theme/whichlang.js"></script>
+
+
+    </div>
+    </body>
+</html>
