@@ -1,6 +1,7 @@
 # Summary
 
 [Introduction](README.md)
+[Specification Owners](CODEOWNERS.md)
 [Mantras](driver-mantras.md)
 [Wire Version Feature List](wireversion-featurelist/wireversion-featurelist.md)
 
@@ -73,7 +74,7 @@
     - [CRUD](crud/crud.md)
     - [Collation](collation/collation.md)
     - [Write Commands](server_write_commands/server_write_commands.md)
-    - [Bulk API](driver-bulk-update.md)
+    - [Bulk API](driver-bulk-update.rst)
     - [Bulk Write](crud/bulk-write.md)
     - [R/W Concern](read-write-concern/read-write-concern.md)
   - [Cursors]()
@@ -100,8 +101,9 @@
 
 - [Testability]()
   - [Unified Test Format](unified-test-format/unified-test-format.md)
-  - [Atlas Data Federation Testing](atlas-data-lake-testing/tests/README.md)
   - [Performance Benchmarking](benchmarking/benchmarking.md)
   - [BSON Corpus](bson-corpus/bson-corpus.md)
   - [Replication Event Resilience](connections-survive-step-down/tests/README.md)
   - [FAAS Automated Testing](faas-automated-testing/faas-automated-testing.md)
+  - [Max Staleness Tests](max-staleness/max-staleness-tests.md)
+  - [Server Selection Tests](server-selection/server-selection-tests.md)
