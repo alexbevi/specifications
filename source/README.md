@@ -6,7 +6,7 @@ Architecturally an implicit hierarchy exists within the drivers, so expressing d
 
 ## Layers of the Onion
 
-![](drivers-onion.png)
+![](onion.png)
 
 The _"drivers onion"_ is meant to represent how various concepts, components and APIs can be layered atop each other to build a MongoDB driver from the ground up, or to help understand how existing drivers have been structured. Hopefully this representation of MongoDB’s drivers helps provide some clarity, as the complexity of these libraries - like the onion above - could otherwise bring you to tears.
 
