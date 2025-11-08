@@ -17,7 +17,7 @@ This is very loosely based on GitHub's [CODEOWNERS](https://docs.github.com/en/r
 |[Collation](collation/collation.md)||2024-02-15|
 |[Command Execution](run-command/run-command.md)||2024-09-02|
 |[Command Logging and Monitoring](command-logging-and-monitoring/command-logging-and-monitoring.md)|[Durran Jordan](https://github.com/durran)|2025-01-22|
-|[Connection Monitoring and Pooling](connection-monitoring-and-pooling/connection-monitoring-and-pooling.md)|[Valentin Kovalenko](https://github.com/stIncMale)<br/>[Bailey Pearson](https://github.com/baileympearson)||2025-01-22
+|[Connection Monitoring and Pooling](connection-monitoring-and-pooling/connection-monitoring-and-pooling.md)|[Valentin Kovalenko](https://github.com/stIncMale)<br/>[Bailey Pearson](https://github.com/baileympearson)|2025-01-22|
 |[Connection String](connection-string/connection-string-spec.md)||2024-05-29|
 |[Convenient Transactions API](transactions-convenient-api/transactions-convenient-api.md)||2024-09-06|
 |[CRUD](crud/crud.md)|[Jeremy Mikola](https://github.com/jmikola)|2025-09-09|
@@ -43,7 +43,7 @@ This is very loosely based on GitHub's [CODEOWNERS](https://docs.github.com/en/r
 |[Retryable Reads](retryable-reads/retryable-reads.md)|[Isabel Atkinson](https://github.com/isabelatkinson)|2024-04-30|
 |[Retryable Writes](retryable-writes/retryable-writes.md)|[Isabel Atkinson](https://github.com/isabelatkinson)|2024-05-08|
 |[SDAM Logging and Monitoring](server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.md)||2025-01-22|
-|[Server Discovery and Monitoring](server-discovery-and-monitoring/server-discovery-and-monitoring.md)|[Shane Harvey](https://github.com/ShaneHarvey)||
+|[Server Discovery and Monitoring](server-discovery-and-monitoring/server-discovery-and-monitoring.md)|[Shane Harvey](https://github.com/ShaneHarvey)|2025-01-22|
 |[Server Monitoring](server-discovery-and-monitoring/server-monitoring.md)||2025-01-22|
 |[Server Selection](server-selection/server-selection.md)|[Colby Pike](https://github.com/vector-of-bool)<br/>[Noah Stapp](https://github.com/NoahStapp)|2025-02-25|
 |[Sessions](sessions/driver-sessions.md)|[Qingyang Hu](https://github.com/qingyang-hu)<br/>[Oleksandr Poliakov](https://github.com/sanych-sun)|2025-02-24|
