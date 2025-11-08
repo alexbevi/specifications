@@ -159,7 +159,7 @@
 <p>The modern MongoDB driver consists of a number of components, each of which are thoroughly documented in <a href="https://github.com/mongodb/specifications">this repository</a>. Though this information is readily available and extremely helpful, what it lacks is a high level overview to tie the specs together into a cohesive picture of what a MongoDB driver is.</p>
 <p>Architecturally an implicit hierarchy exists within the drivers, so expressing drivers in terms of an <a href="https://en.wikipedia.org/wiki/Onion_model">onion model</a> feels appropriate.</p>
 <h2 id="layers-of-the-onion"><a class="header" href="#layers-of-the-onion">Layers of the Onion</a></h2>
-<p><img src="drivers-onion.png" alt="" /></p>
+<p><img src="onion.png" alt="" /></p>
 <p>The <em>"drivers onion"</em> is meant to represent how various concepts, components and APIs can be layered atop each other to build a MongoDB driver from the ground up, or to help understand how existing drivers have been structured. Hopefully this representation of MongoDB’s drivers helps provide some clarity, as the complexity of these libraries - like the onion above - could otherwise bring you to tears.</p>
 <h3 id="serialization"><a class="header" href="#serialization">Serialization</a></h3>
 <p>At their lowest level all MongoDB drivers will need to know how to work with <a href="https://bsonspec.org/">BSON</a>. BSON (short for "Binary JSON") is a bin­ary-en­coded serialization of <a href="https://www.json.org/json-en.html">JSON</a>-like documents, and like JSON, it sup­ports the nesting of arrays and documents. BSON also contains extensions that al­low representation of data types that are not part of the <a href="https://datatracker.ietf.org/doc/html/rfc7159">JSON spec</a>.</p>
