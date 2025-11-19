@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,15 +159,15 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>As MongoDB moves toward more frequent releases (a.k.a. continuous delivery), we want to enable users to take advantage
 of our rapidly released features, without exposing applications to incompatible server changes due to automatic server
 upgrades. A stable API will help accomplish that goal.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<p>This document tends to use "SHOULD" more frequently than other specifications, but mainly in the context of providing
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>This document tends to use “SHOULD” more frequently than other specifications, but mainly in the context of providing
 guidance on writing test files. This is discussed in more detail in <a href="#design-rationale">Design Rationale</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="background"><a class="header" href="#background">Background</a></h3>
@@ -180,7 +179,7 @@ account.</p>
 <li>The client sends the specified API version to the server, causing the server to behave in a manner compatible with
 that API version.</li>
 <li>The driver will behave in a manner compatible with a server configured with that API version, regardless of the
-server's actual release version.</li>
+server’s actual release version.</li>
 </ul>
 <p>Presently there is no specification for how a driver must behave when a particular server API version is requested, or
 what driver operations are subject to API compatibility guarantees. Such requirements may be stipulated in subsequent
@@ -209,11 +208,11 @@ NOT allow specification of any stable API options via the connection string. See
 <h4 id="serverapiversion-enumeration"><a class="header" href="#serverapiversion-enumeration">ServerApiVersion enumeration</a></h4>
 <p>This specification and subsequent specifications will define the known API versions. Drivers SHOULD define an
 enumeration containing the known API versions, using the version identifiers given. Drivers MAY deviate from the version
-identifiers used in this and subsequent specifications if doing so is necessary given the driver's programming
-language's constraints. Drivers MUST ensure that adding new API versions to this enumeration does not result in backward
+identifiers used in this and subsequent specifications if doing so is necessary given the driver’s programming
+language’s constraints. Drivers MUST ensure that adding new API versions to this enumeration does not result in backward
 compatibility breaks in non-major releases. This can be the case in languages that allow exhaustive <code>switch</code> statements
 (e.g. Swift).</p>
-<p>Drivers for languages that don't have enums (e.g. PHP) MUST expose the version as a string, but SHOULD offer constants
+<p>Drivers for languages that don’t have enums (e.g. PHP) MUST expose the version as a string, but SHOULD offer constants
 to allow for IDE features such as code completion. In these cases, the driver MUST validate (e.g. when the application
 provides a version string to the <code>ServerApi</code> class) that the version string is valid and trigger a client-side error if
 an unknown API version was used.</p>
@@ -228,18 +227,24 @@ changes to the declared API version MUST be prohibited.</p>
 details.</p>
 <h3 id="sending-declared-api-version-to-the-server"><a class="header" href="#sending-declared-api-version-to-the-server">Sending Declared API Version to the Server</a></h3>
 <p>The declared API version MUST be sent to the server as part of every command request, with the exception of the cases
-listed below. Drivers MUST NOT use a server's reported <code>maxWireVersion</code> to decide whether it supports the stable API.
+listed below. Drivers MUST NOT use a server’s reported <code>maxWireVersion</code> to decide whether it supports the stable API.
 The server will reply with an error if the declared API version is not supported, or if the command does not support API
 versioning options. If the user does not declare an API version, the driver MUST NOT send any API versioning options to
 the server.</p>
 <p>If an API version is declared then the driver MUST use <code>OP_MSG</code> for all messages, including the initial handshake.</p>
 <h4 id="command-syntax"><a class="header" href="#command-syntax">Command Syntax</a></h4>
 <p>The options from the declared API version are mapped to the following command options:</p>
-<div class="table-wrapper"><table><thead><tr><th><strong>ServerApi field</strong></th><th><strong>Command option</strong></th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th><strong>ServerApi field</strong></th><th><strong>Command option</strong></th></tr>
+</thead>
+<tbody>
 <tr><td><code>version</code></td><td><code>apiVersion</code></td></tr>
 <tr><td><code>strict</code></td><td><code>apiStrict</code></td></tr>
 <tr><td><code>deprecationErrors</code></td><td><code>apiDeprecationErrors</code></td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>If an API version was declared, drivers MUST add the <code>apiVersion</code> option to every command that is sent to a server.
 Drivers MUST add the <code>apiStrict</code> and <code>apiDeprecationErrors</code> options if they were specified by the user, even when the
@@ -265,15 +270,15 @@ Drivers MUST document that the behaviour of the command helper is undefined in t
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
 <h3 id="no-uri-options"><a class="header" href="#no-uri-options">No URI Options</a></h3>
 <p>Since changing the API version can cause the application to behave differently, drivers MUST NOT allow users to change
-the declared API version without deploying code changes. This ensures that users don't copy a connection string with a
+the declared API version without deploying code changes. This ensures that users don’t copy a connection string with a
 declared API version that may be different from what their application expects. A URI option can be added later if we
 realise our users need it, while the opposite is not easily accomplished.</p>
-<h3 id="dont-allow-overriding-the-declared-api-version"><a class="header" href="#dont-allow-overriding-the-declared-api-version">Don't Allow Overriding the Declared API Version</a></h3>
+<h3 id="dont-allow-overriding-the-declared-api-version"><a class="header" href="#dont-allow-overriding-the-declared-api-version">Don’t Allow Overriding the Declared API Version</a></h3>
 <p>While users are used to overriding options like read preference, read concern, and write concern in <code>MongoDatabase</code> and
 <code>MongoCollection</code> objects, or on an operation level, we explicitly decided against this for the declared API version.
-With a single API version available to start, we can't anticipate what use cases users may have to override the API
+With a single API version available to start, we can’t anticipate what use cases users may have to override the API
 version. Not including this feature at the beginning allows us to gather feedback on use cases and add the features
-users are looking for. On the other hand, adding the ability to override the declared API version can't be undone until
+users are looking for. On the other hand, adding the ability to override the declared API version can’t be undone until
 a future major release, which is almost impossible to accomplish across all drivers.</p>
 <h3 id="generic-command-helper-behaviour"><a class="header" href="#generic-command-helper-behaviour">Generic Command Helper Behaviour</a></h3>
 <p>The runCommand helper is a way for the user to run a native command with the driver doing little to no inspection in the
@@ -282,10 +287,10 @@ are not supported by the driver version they are currently using. Commands run u
 <code>readConcern</code> or <code>writeConcern</code> options that may have been set on the <code>MongoClient</code> or <code>MongoDatabase</code> objects.</p>
 <p>However, the declared API version is a different case. We are introducing this feature to give users a certain peace of
 mind when upgrading driver or server versions, by ensuring that their code will continue to show the same behaviour
-they've gotten used to. This includes all commands run using the generic command helper. Thus, the helper will inherit
+they’ve gotten used to. This includes all commands run using the generic command helper. Thus, the helper will inherit
 the API version declared on the client.</p>
 <h3 id="hardcode-supported-versions-in-drivers"><a class="header" href="#hardcode-supported-versions-in-drivers">Hardcode supported versions in drivers</a></h3>
-<p>Since a new API version might require driver changes (e.g. to account for removed commands), we don't yet know what
+<p>Since a new API version might require driver changes (e.g. to account for removed commands), we don’t yet know what
 changes drivers must make for a future version. Until we do, we must prevent users from choosing any unknown API
 version.</p>
 <h2 id="backward-compatibility"><a class="header" href="#backward-compatibility">Backward Compatibility</a></h2>
@@ -311,12 +316,10 @@ include features that are part of the stable API. This is not covered in this sp
 <p>2022-02-24: Rename Versioned API to Stable API</p>
 </li>
 <li>
-<p>2022-01-14: Require <code>OP_MSG</code> for all messages including the initial step of<br />
-the handshake when using stable API.</p>
+<p>2022-01-14: Require <code>OP_MSG</code> for all messages including the initial step of<br>the handshake when using stable API.</p>
 </li>
 <li>
-<p>2021-05-05: Require sending stable API parameters with <code>getMore</code> and<br />
-transaction-continuing commands.</p>
+<p>2021-05-05: Require sending stable API parameters with <code>getMore</code> and<br>transaction-continuing commands.</p>
 </li>
 <li>
 <p>2021-04-20: Require using <code>hello</code> when using the stable API.</p>
@@ -334,27 +337,12 @@ transaction-continuing commands.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../transactions-convenient-api/transactions-convenient-api.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../enumerate-databases/enumerate-databases.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../transactions-convenient-api/transactions-convenient-api.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../enumerate-databases/enumerate-databases.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

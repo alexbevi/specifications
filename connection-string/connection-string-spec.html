@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,7 +159,7 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>The purpose of the Connection String is to provide a machine readable way of configuring a MongoClient, allowing users
 to configure and change the connection to their MongoDB system without requiring any application code changes.</p>
@@ -171,8 +170,8 @@ naming conventions for options, and standard data types.</p>
 <a href="http://tools.ietf.org/html/rfc3986">RFC 3986</a> and uses similar terminology, it does not conform to that specification.</p>
 <h3 id="definitions"><a class="header" href="#definitions">Definitions</a></h3>
 <h4 id="meta"><a class="header" href="#meta">META</a></h4>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="general-syntax"><a class="header" href="#general-syntax">General Syntax</a></h3>
 <p>In general we follow URI style conventions, however unlike a URI the connection string supports multiple hosts.</p>
 <pre><code class="language-text">mongodb://username:password@example.com:27017,example2.com:27017,...,example.comN:27017/database?key=value&amp;keyN=valueN
@@ -194,38 +193,38 @@ top of the connection string as documented in this specification.</p>
 <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html">Initial DNS Seedlist Discovery</a>, obtains
 information from DNS in addition to just the connection string.</p>
 <h3 id="userinfo-optional"><a class="header" href="#userinfo-optional">Userinfo (optional)</a></h3>
-<p>The user information if present, is followed by a commercial at-sign ("@") that delimits it from the host.</p>
-<p>A password may be supplied as part of the user information and is anything after the first colon (":") up until the end
+<p>The user information if present, is followed by a commercial at-sign (“@”) that delimits it from the host.</p>
+<p>A password may be supplied as part of the user information and is anything after the first colon (“:”) up until the end
 of the user information.</p>
 <p>RFC 3986 has guidance for encoding user information in
-<a href="https://tools.ietf.org/html/rfc3986#section-2.1">Section 2.1 ("Percent-Encoding")</a>,
-<a href="https://tools.ietf.org/html/rfc3986#section-2.2">Section 2.2 ("Reserved Characters")</a>, and
-<a href="https://tools.ietf.org/html/rfc3986#section-3.2.1">Section 3.2.1 ("User Information")</a>.</p>
+<a href="https://tools.ietf.org/html/rfc3986#section-2.1">Section 2.1 (“Percent-Encoding”)</a>,
+<a href="https://tools.ietf.org/html/rfc3986#section-2.2">Section 2.2 (“Reserved Characters”)</a>, and
+<a href="https://tools.ietf.org/html/rfc3986#section-3.2.1">Section 3.2.1 (“User Information”)</a>.</p>
 <p>Specifically, Section 3.2.1 provides for the following allowed characters:</p>
 <pre><code class="language-text">userinfo    = *( unreserved / pct-encoded / sub-delims / ":" )
 </code></pre>
-<p>If the user information contains an at-sign ("@"), more than one colon (":"), or a percent-sign ("%") that does not
-match the rules for "pct-encoded", then an exception MUST be thrown informing the user that the username and password
+<p>If the user information contains an at-sign (“@”), more than one colon (“:”), or a percent-sign (“%”) that does not
+match the rules for “pct-encoded”, then an exception MUST be thrown informing the user that the username and password
 must be URL encoded.</p>
-<p>Above and beyond that restriction, drivers SHOULD require connection string user information to follow the "userinfo"
+<p>Above and beyond that restriction, drivers SHOULD require connection string user information to follow the “userinfo”
 encoding rules of RFC 3986 and SHOULD throw an exception if disallowed characters are detected. However, for
-backwards-compatibility reasons, drivers MAY allow reserved characters other than "@" and ":" to be present in user
+backwards-compatibility reasons, drivers MAY allow reserved characters other than “@” and “:” to be present in user
 information without percent-encoding.</p>
 <h3 id="host-information"><a class="header" href="#host-information">Host Information</a></h3>
 <p>Unlike a standard URI, the connection string allows for identifying multiple hosts. The host information section of the
-connection string MAY be delimited by the trailing slash ("/") or end of string.</p>
+connection string MAY be delimited by the trailing slash (“/”) or end of string.</p>
 <p>The host information must contain at least one host identifier but may contain more (see the alternative hosts / ports
-in the general syntax diagram above). Multiple host identifiers are delimited by a comma (",").</p>
+in the general syntax diagram above). Multiple host identifiers are delimited by a comma (“,”).</p>
 <h4 id="host-identifier"><a class="header" href="#host-identifier">Host Identifier</a></h4>
 <p>A host identifier consists of a host and an optional port.</p>
 <h5 id="host"><a class="header" href="#host">Host</a></h5>
 <p>Identifies a server address to connect to. It can identify either a hostname, IP address, IP Literal, or UNIX domain
 socket. For definitions of hostname, IP address and IP Literal formats see
 <a href="http://tools.ietf.org/html/rfc3986#section-3.2.2">RFC 3986 Section 3.2.2</a> .</p>
-<p>UNIX domain sockets MUST end in ".sock" and MUST be URL encoded, for example:</p>
+<p>UNIX domain sockets MUST end in “.sock” and MUST be URL encoded, for example:</p>
 <pre><code class="language-text">mongodb://user:pass@%2Ftmp%2Fmongodb-27017.sock/authDB?replicaSet=rs
 </code></pre>
-<p>The host information cannot contain an unescaped slash ("/"), if it does then an exception MUST be thrown informing
+<p>The host information cannot contain an unescaped slash (“/”), if it does then an exception MUST be thrown informing
 users that paths must be URL encoded. For example:</p>
 <pre><code class="language-text">Unsupported host '/tmp/mongodb-27017.sock', UNIX socket domain paths must be URL encoded.
 </code></pre>
@@ -237,42 +236,42 @@ a socket path or hostname). It is merely concerned with extracting the host iden
 <p>The port is an integer between 1 and 65535 (inclusive) that identifies the port to connect to. See
 <a href="http://tools.ietf.org/html/rfc3986#section-3.2.3">RFC 3986 3.2.3</a>.</p>
 <h3 id="auth-database-optional"><a class="header" href="#auth-database-optional">Auth Database (optional)</a></h3>
-<p>The database to authenticate against. If provided it is everything after the Host Information (ending with "/") and up
-to the first question mark ("?") or end of string. The auth database MUST be URL decoded by the parser.</p>
-<p>The following characters MUST NOT appear in the database name, once it has been decoded: slash ("/"), backslash (""),
-space (" "), double-quote ("""), or dollar sign ("$"). The MongoDB Manual
-<a href="https://www.mongodb.com/docs/manual/reference/limits/#Restrictions-on-Field-Names">says that</a> period (".") is also
+<p>The database to authenticate against. If provided it is everything after the Host Information (ending with “/”) and up
+to the first question mark (“?”) or end of string. The auth database MUST be URL decoded by the parser.</p>
+<p>The following characters MUST NOT appear in the database name, once it has been decoded: slash (“/”), backslash (“”),
+space (“ “), double-quote (”“”), or dollar sign (“$”). The MongoDB Manual
+<a href="https://www.mongodb.com/docs/manual/reference/limits/#Restrictions-on-Field-Names">says that</a> period (“.”) is also
 prohibited, but drivers MAY allow periods in order to express a namespace (database and collection name, perhaps
 containing multiple periods) in this part of the URL.</p>
 <p>The presence of the auth database component without other credential data such as Userinfo or authentication parameters
 in connection options MUST NOT be interpreted as a request for authentication.</p>
 <h3 id="connection-options-optional"><a class="header" href="#connection-options-optional">Connection Options (optional)</a></h3>
 <p>Any extra options to configure the MongoClient connection can be specified in the connection options part of the
-connection string. If provided, it is everything after the Host Information (ending with "/"), optional auth database,
-and first question mark ("?") to the end of the string. Connection Options consist of an ordered list of Key Value Pairs
-that are delimited by an ampersand ("&amp;"). A delimiter of a semi colon (";") MAY also be supported for connection options
+connection string. If provided, it is everything after the Host Information (ending with “/”), optional auth database,
+and first question mark (“?”) to the end of the string. Connection Options consist of an ordered list of Key Value Pairs
+that are delimited by an ampersand (“&amp;”). A delimiter of a semi colon (“;”) MAY also be supported for connection options
 for legacy reasons.</p>
 <h4 id="key-value-pair"><a class="header" href="#key-value-pair">Key Value Pair</a></h4>
 <p>A key value pair represents the option key and its associated value. The key is everything up to the first equals sign
-("=") and the value is everything afterwards. Key values contain the following information:</p>
+(“=”) and the value is everything afterwards. Key values contain the following information:</p>
 <ul>
 <li>Key:</li>
 </ul>
-<p>The connection option's key string. Keys should be normalised and character case should be ignored.</p>
+<p>The connection option’s key string. Keys should be normalised and character case should be ignored.</p>
 <ul>
 <li>Value: (optional)</li>
 </ul>
 <p>The value if provided otherwise it defaults to an empty string.</p>
 <h3 id="defining-connection-options"><a class="header" href="#defining-connection-options">Defining connection options</a></h3>
 <p>Connection option key values MUST be defined in the relevant specification that describes the usage of the key and
-value. The value data type MUST also be defined there. The value's default value SHOULD also be defined if it is
+value. The value data type MUST also be defined there. The value’s default value SHOULD also be defined if it is
 relevant.</p>
 <h4 id="keys"><a class="header" href="#keys">Keys</a></h4>
 <p>Keys are strings and the character case must be normalized by lower casing the uppercase ASCII characters A through Z;
 other characters are left as-is.</p>
 <p>When defining and documenting keys, specifications should follow the camelCase naming convention with the first letter
-in lowercase, snake_case MUST not be used. Keys that aren't supported by a driver MUST be ignored.</p>
-<p>Keys that aren't supported by a driver MUST be ignored. A WARN level logging message MUST be issued for unsupported
+in lowercase, snake_case MUST not be used. Keys that aren’t supported by a driver MUST be ignored.</p>
+<p>Keys that aren’t supported by a driver MUST be ignored. A WARN level logging message MUST be issued for unsupported
 keys. For example:</p>
 <pre><code class="language-text">Unsupported option 'connectMS'.
 </code></pre>
@@ -291,12 +290,12 @@ keys. For example:</p>
 <p>Integer: The value parsed as a integer. If the value is the empty string, the key MUST be ignored.</p>
 </li>
 <li>
-<p>Boolean: "true" and "false" strings MUST be supported. If the value is the empty string, the key MUST be ignored.</p>
+<p>Boolean: “true” and “false” strings MUST be supported. If the value is the empty string, the key MUST be ignored.</p>
 <ul>
 <li>For legacy reasons it is RECOMMENDED that alternative values for true and false be supported:
 <ul>
-<li>true: "1", "yes", "y" and "t"</li>
-<li>false: "0", "-1", "no", "n" and "f".</li>
+<li>true: “1”, “yes”, “y” and “t”</li>
+<li>false: “0”, “-1”, “no”, “n” and “f”.</li>
 </ul>
 </li>
 </ul>
@@ -314,16 +313,16 @@ order as they appear in the Connection String. For example:</p>
 </li>
 <li>
 <p>Key value pairs: A value that represents one or more key and value pairs. Multiple key value pairs are delimited by a
-comma (","). The key is everything up to the first colon sign (":") and the value is everything afterwards.</p>
+comma (“,”). The key is everything up to the first colon sign (“:”) and the value is everything afterwards.</p>
 <p>For example:</p>
 <pre><code class="language-text">?readPreferenceTags=dc:ny,rack:1
 </code></pre>
-<p>Drivers MUST handle unencoded colon signs (":") within the value. For example, given the connection string option:</p>
+<p>Drivers MUST handle unencoded colon signs (“:”) within the value. For example, given the connection string option:</p>
 <pre><code class="language-text">authMechanismProperties=TOKEN_RESOURCE:mongodb://foo
 </code></pre>
 <p>the driver MUST interpret the key as <code>TOKEN_RESOURCE</code> and the value as <code>mongodb://foo</code>.</p>
 <p>For any option key-value pair that may contain a comma (such as <code>TOKEN_RESOURCE</code>), drivers MUST document that: a value
-containing a comma (",") MUST NOT be provided as part of the connection string. This prevents use of values that
+containing a comma (“,”) MUST NOT be provided as part of the connection string. This prevents use of values that
 would interfere with parsing.</p>
 </li>
 </ul>
@@ -335,7 +334,7 @@ would interfere with parsing.</p>
 used is undefined except where defined otherwise by the <a href="../uri-options/uri-options.html">URI options spec</a>.</p>
 <p>Where possible, a warning SHOULD be raised to inform the user that multiple options were found for the same value.</p>
 <h3 id="deprecated-key-value-pairs"><a class="header" href="#deprecated-key-value-pairs">Deprecated Key Value Pairs</a></h3>
-<p>If a key name was deprecated due to renaming it MUST still be supported. Users aren't expected to be vigilant on changes
+<p>If a key name was deprecated due to renaming it MUST still be supported. Users aren’t expected to be vigilant on changes
 to key names.</p>
 <p>If the renamed key is also defined in the connection string the deprecated key MUST NOT be applied and a WARN level
 message MUST be logged. For example:</p>
@@ -346,12 +345,12 @@ alternative key name. For example:</p>
 <pre><code class="language-text">Deprecated key "wtimeout" has been replaced with "wtimeoutms"
 </code></pre>
 <h3 id="legacy-support"><a class="header" href="#legacy-support">Legacy support</a></h3>
-<p>Semi colon (";") query parameter delimiters and alternative string representations of Boolean values MAY be supported
+<p>Semi colon (“;”) query parameter delimiters and alternative string representations of Boolean values MAY be supported
 only for legacy reasons.</p>
 <p>As these options are not standard they might not be supported across all drivers. As such, these alternatives MUST NOT
 be used as general examples or documentation.</p>
 <h3 id="language-specific-connection-options"><a class="header" href="#language-specific-connection-options">Language specific connection options</a></h3>
-<p>Connection strings are a mechanism to configure a MongoClient outside the user's application. As each driver may have
+<p>Connection strings are a mechanism to configure a MongoClient outside the user’s application. As each driver may have
 language specific configuration options, those options SHOULD also be supported via the connection string. Where
 suitable, specifications MUST be updated to reflect new options.</p>
 <p>Keys MUST follow existing connection option naming conventions as defined above. Values MUST also follow the existing,
@@ -382,7 +381,7 @@ compatibility breaks caused by this specification with regards to options.</p>
 such, it is currently only a recommendation.</p>
 <h3 id="reference-implementation"><a class="header" href="#reference-implementation">Reference Implementation</a></h3>
 <p>The Java driver implements a <code>ConnectionString</code> class for the parsing of the connection string; however, it does not
-support UNIX domain sockets. The Python driver's <code>uri_parser</code> module implements connection string parsing for both hosts
+support UNIX domain sockets. The Python driver’s <code>uri_parser</code> module implements connection string parsing for both hosts
 and UNIX domain sockets.</p>
 <p>The following example parses a connection string into its components and can be used as a guide.</p>
 <p>Given the string <code>mongodb://foo:bar%3A@mongodb.example.com,%2Ftmp%2Fmongodb-27018.sock/admin?w=1</code>:</p>
@@ -416,7 +415,7 @@ would be <code>foo</code> and <code>bar:</code>, respectively.</li>
 <li>Validate, split, and URL decode the connection options. In this example, the connection options are <code>{w: 1}</code>.</li>
 </ol>
 <h3 id="qa"><a class="header" href="#qa">Q&amp;A</a></h3>
-<p>Q: What about existing Connection Options that aren't currently defined in a specification</p>
+<p>Q: What about existing Connection Options that aren’t currently defined in a specification</p>
 <p>Ideally all MongoClient options would already belong in their relevant specifications. As we iterate and produce more
 specifications these options should be covered.</p>
 <p>Q: Why is it recommended that Connection Options take precedence over application set options</p>
@@ -438,7 +437,7 @@ given driver does not know is an option is specific to a different driver or is 
 only way to stay portable and support configuration of all options is to not throw an exception but rather log a
 warning.</p>
 <p>Q: How long should deprecation options be supported</p>
-<p>This is not declared in this specification. It's not deemed responsible to give a single timeline for how long
+<p>This is not declared in this specification. It’s not deemed responsible to give a single timeline for how long
 deprecated options should be supported. As such any specifications that deprecate options that do have the context of
 the decision should provide the timeline.</p>
 <p>Q: Why can I not use a standard URI parser</p>
@@ -447,7 +446,7 @@ the decision should provide the timeline.</p>
 <ol>
 <li>
 <p>Hosts</p>
-<p>The connection string allows for multiple hosts for high availability reasons but standard URI's only ever define a
+<p>The connection string allows for multiple hosts for high availability reasons but standard URI’s only ever define a
 single host.</p>
 </li>
 <li>
@@ -462,7 +461,7 @@ different ways and as such there is no such thing as a standard URI parser.</p>
 <p>The connection string can contain non-ASCII characters. The connection string is text, which can be encoded in any way
 appropriate for the application (e.g. the C Driver requires you to pass it a UTF-8 encoded connection string).</p>
 <p>Q: Why does reference implementation check for a <code>.sock</code> suffix when parsing a socket path and possible auth database</p>
-<p>To simplify parsing of a socket path followed by an auth database, we rely on MongoDB's
+<p>To simplify parsing of a socket path followed by an auth database, we rely on MongoDB’s
 <a href="https://www.mongodb.com/docs/manual/reference/limits/#naming-restrictions">naming restrictions</a>), which do not allow
 database names to contain a dot character, and the fact that socket paths must end with <code>.sock</code>. This allows us to
 differentiate the last part of a socket path from a database name. While we could immediately rule out an auth database
@@ -470,8 +469,8 @@ on the basis of the dot alone, this specification is primarily concerned with br
 (e.g. hosts, auth database, options) in a deterministic manner, rather than applying strict validation to those parts
 (e.g. host types, database names, allowed values for an option). Additionally, some drivers might allow a namespace
 (e.g. <code>"db.collection"</code>) for the auth database part, so we do not want to be more strict than is necessary for parsing.</p>
-<p>Q: Why throw an exception if the userinfo contains a percent sign ("%"), at-sign ("@"), or more than one colon (":")</p>
-<p>This is done to help users format the connection string correctly. Although at-signs ("@") or colons (":") in the
+<p>Q: Why throw an exception if the userinfo contains a percent sign (“%”), at-sign (“@”), or more than one colon (“:”)</p>
+<p>This is done to help users format the connection string correctly. Although at-signs (“@”) or colons (“:”) in the
 username must be URL encoded, users may not be aware of that requirement. Take the following example:</p>
 <pre><code class="language-text">mongodb://anne:bob:pass@localhost:27017
 </code></pre>
@@ -486,9 +485,9 @@ connection string so to be explicit about what forms the username and password.<
 <p>Is the host <code>/tmp/mongodb.sock</code> and the auth database <code>mongodb.sock</code> or does the connection string just contain the host
 <code>/tmp/mongodb.sock/mongodb.sock</code> and no auth database? By enforcing URL encoding on UNIX domain sockets it makes users
 be explicit about the host and the auth database. By requiring an exception to be thrown when the host contains a slash
-("/") users can be informed on how to migrate their connection strings.</p>
+(“/”) users can be informed on how to migrate their connection strings.</p>
 <p>Q: Why must the auth database be URL decoded by the parser</p>
-<p>On Linux systems database names can contain a question mark ("?"), in these rare cases the auth database must be URL
+<p>On Linux systems database names can contain a question mark (“?”), in these rare cases the auth database must be URL
 encoded. This disambiguates between the auth database and the connection options. Take the following example:</p>
 <pre><code class="language-text">mongodb://localhost/admin%3F?w=1
 </code></pre>
@@ -512,8 +511,8 @@ by default.</p>
 <p>2017-01-09: In Userinfo section, clarify that percent signs must be encoded.</p>
 </li>
 <li>
-<p>2017-06-10: In Userinfo section, require username and password to be fully URI encoded, not just "%", "@", and ":". In
-Auth Database, list the prohibited characters. In Reference Implementation, split at the first "/", not the last.</p>
+<p>2017-06-10: In Userinfo section, require username and password to be fully URI encoded, not just “%”, “@”, and “:”. In
+Auth Database, list the prohibited characters. In Reference Implementation, split at the first “/”, not the last.</p>
 </li>
 <li>
 <p>2018-01-09: Clarified that space characters should be encoded to <code>%20</code>.</p>
@@ -539,7 +538,7 @@ described here for certain options.</p>
 <p>2022-10-05: Remove spec front matter and reformat changelog.</p>
 </li>
 <li>
-<p>2022-12-27: Note that host information ends with a "/" character in connection options description.</p>
+<p>2022-12-27: Note that host information ends with a “/” character in connection options description.</p>
 </li>
 <li>
 <p>2023-08-02: Make delimiting slash between host information and connection options optional and update tests</p>
@@ -554,27 +553,12 @@ described here for certain options.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../run-command/run-command.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../uri-options/uri-options.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../run-command/run-command.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../uri-options/uri-options.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

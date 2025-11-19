@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,7 +159,7 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 2.6</li>
 </ul>
-<hr />
+<hr>
 <h2 id="goals"><a class="header" href="#goals">Goals</a></h2>
 <ul>
 <li>Method to do writes (insert/update/delete) that declares the write concern up front</li>
@@ -170,8 +169,8 @@
 </ul>
 <h2 id="non-goals"><a class="header" href="#non-goals">Non-Goals</a></h2>
 <ul>
-<li>We're not specifying nor building any generic mechanism for feature discovery here</li>
-<li>We're not specifying nor building any generic way to be backwards compatible</li>
+<li>We’re not specifying nor building any generic mechanism for feature discovery here</li>
+<li>We’re not specifying nor building any generic way to be backwards compatible</li>
 </ul>
 <h2 id="requests-format"><a class="header" href="#requests-format">Requests Format</a></h2>
 <p>We use a very similar request format for all insert, update, and delete commands, described below. A request contains
@@ -193,12 +192,12 @@ server can be set as a replica set configuration option, or if there is no repli
 <pre><code class="language-javascript">..., writeConcern: { w: 2 }, ...
 </code></pre>
 <p>Note that the write concern will be issued at the end of the batch application.</p>
-<p>We also support the "unusual" write concern: <code>{ w : 0 }</code>, which means the user is uninterested in the result of the
+<p>We also support the “unusual” write concern: <code>{ w : 0 }</code>, which means the user is uninterested in the result of the
 write at this time. In this protocol, there is no provision to ignore the response packet. The protocol, however, sends
 a very condensed response when it sees that write concern (e.g. omits everything but the <code>ok</code> field).</p>
 <ul>
-<li><code>ordered</code>: optional, with a boolean type. If true, applies the batch's items in the same order the items appear, ie.
-sequentially. If <code>ordered</code> is false, the server applies the batch items in no particular order -- possibly, in
+<li><code>ordered</code>: optional, with a boolean type. If true, applies the batch’s items in the same order the items appear, ie.
+sequentially. If <code>ordered</code> is false, the server applies the batch items in no particular order – possibly, in
 parallel. The default value is true, sequential. For example:</li>
 </ul>
 <pre><code class="language-javascript">..., ordered: false, ...
@@ -215,7 +214,7 @@ batches.</p>
 </li>
 </ul>
 <h3 id="batch-items-format"><a class="header" href="#batch-items-format">Batch Items Format</a></h3>
-<p>We describe the array of batch items to be applied according to which type of write operation we'd like to perform.</p>
+<p>We describe the array of batch items to be applied according to which type of write operation we’d like to perform.</p>
 <p><span id="insert"></span></p>
 <ul>
 <li>For inserts, <code>documents</code> array: mandatory, with an array of objects type. Objects must be valid for insertion. For
@@ -292,7 +291,7 @@ concern application (write concern error).</p>
 <p>The main body of a successful response is below:</p>
 <p><span id="ok"></span></p>
 <ul>
-<li><code>ok</code>: Mandatory field, (double)"1" if operation was executed. Does not mean successfully. For example, duplicate key
+<li><code>ok</code>: Mandatory field, (double)“1” if operation was executed. Does not mean successfully. For example, duplicate key
 error will still set ok = 1</li>
 </ul>
 <p><span id="n"></span></p>
@@ -320,7 +319,7 @@ response information, as described below.</p>
 <ul>
 <li><code>nModified</code>: Optional field, with a positive numeric type or zero. Zero is the default value. This field is only and
 always present for batch updates. <code>nModified</code> is the physical number of documents affected by an update, while <code>n</code>
-is the logical number of documents matched by the update's query. For example, if we have 100 documents like :</li>
+is the logical number of documents matched by the update’s query. For example, if we have 100 documents like :</li>
 </ul>
 <pre><code class="language-javascript">{ bizName: "McD", employees: ["Alice", "Bob", "Carol"] }
 </code></pre>
@@ -362,7 +361,7 @@ start with 0.</li>
 <h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
 <h3 id="successful-case"><a class="header" href="#successful-case">Successful case</a></h3>
 <p>Note that <code>ok: 1</code> by itself does <strong>not</strong> mean that an insert, update, or delete was executed successfully, just that the
-batch was processed successfully. <code>ok: 1</code> merely means "all operations executed". <code>n</code> reports how many items from that
+batch was processed successfully. <code>ok: 1</code> merely means “all operations executed”. <code>n</code> reports how many items from that
 batch were affected by the operation.</p>
 <h2 id="insert"><a class="header" href="#insert">Insert</a></h2>
 <p>Request:</p>
@@ -497,7 +496,7 @@ batch may or may not have been partially applied - there is no programmatic way 
 <p>Note that the field <code>n</code> in the response came back with 2, even though there are three items in the batch. This means
 that there must be an entry in <code>writeErrors</code> for the item that failed. Note also that the request turned off <code>ordered</code>,
 so the write concern error was hit when trying to replicate batch items 0 and 2.</p>
-<p>Just to illustrate the support for <code>{w:0}</code>, here's how the response would look, had the request asked for that write
+<p>Just to illustrate the support for <code>{w:0}</code>, here’s how the response would look, had the request asked for that write
 concern.</p>
 <p>Response:</p>
 <pre><code class="language-javascript">{ ok: 1 }
@@ -507,15 +506,15 @@ concern.</p>
 <p>Though drivers may expose configuration options to prevent this behavior, by default a new <code>ObjectId</code> value will be
 created client-side before an <code>insert</code> operation.</p>
 <p>This design decision primarily stems from the fact that MongoDB is a distributed database and the typical unique
-auto-incrementing scalar value most RDBMS' use for generating a primary key would not be robust enough, necessitating
+auto-incrementing scalar value most RDBMS’ use for generating a primary key would not be robust enough, necessitating
 the need for a more robust data type (<code>ObjectId</code> in this case). These <code>_id</code> values can be generated either on the client
-or the server, however when done client-side a new document's <code>_id</code> value is immediately available for use without the
+or the server, however when done client-side a new document’s <code>_id</code> value is immediately available for use without the
 need for a network round trip.</p>
 <p>Prior to MongoDB 3.6, an <code>insert</code> operation would use the <code>OP_INSERT</code> opcode of the wire protocol to send the operation,
 and retrieve the results subsequently with a <code>getLastError</code> command. If client-side <code>_id</code> values were omitted, this
-command response wouldn't contain the server-created <code>_id</code> values for new documents. Following MongoDB 3.6 when all
+command response wouldn’t contain the server-created <code>_id</code> values for new documents. Following MongoDB 3.6 when all
 commands would be issued using the <code>OP_MSG</code> wire protocol opcode (<code>insert</code> included), the response to the command still
-wouldn't contain the <code>_id</code> values for inserted documents.</p>
+wouldn’t contain the <code>_id</code> values for inserted documents.</p>
 <h3 id="can-a-driver-still-use-the-op_insert-op_delete-op_update"><a class="header" href="#can-a-driver-still-use-the-op_insert-op_delete-op_update">Can a driver still use the <code>OP_INSERT</code>, <code>OP_DELETE</code>, <code>OP_UPDATE</code>?</a></h3>
 <p>The
 <a href="https://www.mongodb.com/docs/manual/release-notes/6.0-compatibility/#legacy-opcodes-removed">legacy opcodes were removed in MongoDB 6.0</a>.
@@ -525,9 +524,9 @@ until 6.0 continued to support the legacy opcodes.</p>
 <h3 id="can-an-application-still-issue-requests-with-write-concerns-w-0"><a class="header" href="#can-an-application-still-issue-requests-with-write-concerns-w-0">Can an application still issue requests with write concerns {w: 0}?</a></h3>
 <p>Yes. The drivers are still required to serve a {w:0} write concern by returning the control to the application as soon
 as possible. But a driver should send the request to the server via a write command and should, therefore, take the
-corresponding response off the wire -- even if the caller is not interested in that result.</p>
+corresponding response off the wire – even if the caller is not interested in that result.</p>
 <h3 id="what-happens-if-a-driver-receives-a-write-request-against-an-old-server"><a class="header" href="#what-happens-if-a-driver-receives-a-write-request-against-an-old-server">What happens if a driver receives a write request against an old server?</a></h3>
-<p>It must convert that request into write operations + gle's and use the old op codes.</p>
+<p>It must convert that request into write operations + gle’s and use the old op codes.</p>
 <h3 id="are-we-discontinuing-the-use-of-getlasterror"><a class="header" href="#are-we-discontinuing-the-use-of-getlasterror">Are we discontinuing the use of getLastError?</a></h3>
 <p>Yes but as of 2.6 the existing getLastError behavior is supported for backward compatibility. Note also that
 <code>getLastError</code> was removed in server version 5.1.</p>
@@ -569,27 +568,12 @@ paragraphs; re-ordered the response field sections.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../collation/collation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../driver-bulk-update.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../collation/collation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../driver-bulk-update.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

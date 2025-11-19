@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,18 +159,18 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.6</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>This specification is about the ability for drivers to automatically retry any read operation that has not yet received
-any results—due to a transient network error, a "not writable primary" error after a replica set failover, etc.</p>
+any results—due to a transient network error, a “not writable primary” error after a replica set failover, etc.</p>
 <p>This specification will</p>
 <ul>
 <li>outline how an API for retryable read operations will be implemented in drivers</li>
 <li>define an option to enable retryable reads for an application.</li>
 </ul>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <h4 id="retryable-error"><a class="header" href="#retryable-error">Retryable Error</a></h4>
@@ -184,7 +183,12 @@ below.</p>
 <li>any network exception (e.g. socket timeout or error)</li>
 <li>a server error response with any the following codes:</li>
 </ul>
-<div class="table-wrapper"><table><thead><tr><th><strong>Error Name</strong></th><th><strong>Error Code</strong></th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th><strong>Error Name</strong></th><th><strong>Error Code</strong></th></tr>
+</thead>
+<tbody>
 <tr><td>ExceededTimeLimit</td><td>262</td></tr>
 <tr><td>InterruptedAtShutdown</td><td>11600</td></tr>
 <tr><td>InterruptedDueToReplStateChange</td><td>11602</td></tr>
@@ -198,7 +202,8 @@ below.</p>
 <tr><td>HostUnreachable</td><td>6</td></tr>
 <tr><td>NetworkTimeout</td><td>89</td></tr>
 <tr><td>SocketException</td><td>9001</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <ul>
 <li>a <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-errors">PoolClearedError</a></li>
@@ -211,9 +216,9 @@ example, a network error or ShutdownInProgress error encountered when running th
 <p>This boolean option determines whether retryable behavior will be applied to all read operations executed within the
 MongoClient. This option MUST default to true.
 <a href="../retryable-writes/retryable-writes.html#retrywrites">As with retryable writes</a>, this option MUST NOT be configurable at
-the level of an individual read operation, collection object, or database object. Drivers that expose a "high" and
-"core" API (e.g. Java and C# driver) MUST NOT expose a configurable option at the level of an individual read operation,
-collection object, or database object in "high", but MAY expose the option in "core."</p>
+the level of an individual read operation, collection object, or database object. Drivers that expose a “high” and
+“core” API (e.g. Java and C# driver) MUST NOT expose a configurable option at the level of an individual read operation,
+collection object, or database object in “high”, but MAY expose the option in “core.”</p>
 <h5 id="naming-deviations"><a class="header" href="#naming-deviations">Naming Deviations</a></h5>
 <p><a href="../retryable-writes/retryable-writes.html#retrywrites">As with retryable writes</a>, drivers MUST use the defined name of
 <code>retryReads</code> for the connection string parameter to ensure portability of connection strings across applications and
@@ -310,7 +315,7 @@ concerns) SHOULD implement retryability for the read-only command runner.</li>
 <ul>
 <li><code>Collection.mapReduce()</code>
 <ul>
-<li>This is due to the "Early Failure on Socket Disconnect" feature not supporting <code>mapReduce</code>.</li>
+<li>This is due to the “Early Failure on Socket Disconnect” feature not supporting <code>mapReduce</code>.</li>
 <li>N.B. If <code>mapReduce</code> is executed via a generic command runner for read commands, drivers SHOULD NOT inspect the
 command to prevent <code>mapReduce</code> from retrying.</li>
 </ul>
@@ -372,7 +377,7 @@ support a command equivalent to the initial command, drivers MUST NOT retry and 
 <p>The above requirement can be fulfilled in one of two ways:</p>
 <ol>
 <li>
-<p>During a retry attempt, the driver SHOULD recreate the command while adhering to that operation's specification's
+<p>During a retry attempt, the driver SHOULD recreate the command while adhering to that operation’s specification’s
 server/wire version requirements. If an error occurs while recreating the command, then the driver MUST raise the
 original retryable error.</p>
 <p>For example, if the wire version dips from <em>W</em><sub>0</sub> to <em>W</em><sub>1</sub> after server selection, and the spec
@@ -527,11 +532,11 @@ retry attempts for read operations. This specification does not define a format 
 <p><a href="../retryable-writes/retryable-writes.html#command-monitoring">As with retryable writes</a>, in accordance with the
 <a href="../command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a> specification,
 drivers MUST guarantee that each <code>CommandStartedEvent</code> has either a correlating <code>CommandSucceededEvent</code> or
-<code>CommandFailedEvent</code> and that every "command started" log message has either a correlating "command succeeded" log
-message or "command failed" log message. If the first attempt of a retryable read operation encounters a retryable
-error, drivers MUST fire a <code>CommandFailedEvent</code> and emit a "command failed" log message for the retryable error and fire
-a separate <code>CommandStartedEvent</code> and emit a separate "command started" log message when executing the subsequent retry
-attempt. Note that the second <code>CommandStartedEvent</code> and "command started" log message may have a different
+<code>CommandFailedEvent</code> and that every “command started” log message has either a correlating “command succeeded” log
+message or “command failed” log message. If the first attempt of a retryable read operation encounters a retryable
+error, drivers MUST fire a <code>CommandFailedEvent</code> and emit a “command failed” log message for the retryable error and fire
+a separate <code>CommandStartedEvent</code> and emit a separate “command started” log message when executing the subsequent retry
+attempt. Note that the second <code>CommandStartedEvent</code> and “command started” log message may have a different
 <code>connectionId</code>, since a server is reselected for a retry attempt.</p>
 <h3 id="documentation"><a class="header" href="#documentation">Documentation</a></h3>
 <ol>
@@ -543,7 +548,7 @@ application from inadvertently retrying for too long (see <a href="#backwards-co
 details).</li>
 <li>Drivers implementing retryability for their generic command runner for read commands MUST document that <code>mapReduce</code>
 will be retried if it is passed as a command to the command runner. These drivers also MUST document the potential
-for degraded performance given that "Early Failure on Socket Disconnect" feature does not support <code>mapReduce</code>.</li>
+for degraded performance given that “Early Failure on Socket Disconnect” feature does not support <code>mapReduce</code>.</li>
 </ol>
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
 <p>See the <a href="./tests/README.html">README</a> for tests.</p>
@@ -570,7 +575,7 @@ times and enables retryable reads, then the application could end up retrying re
 retryable reads.</p>
 <h3 id="rejected-designs"><a class="header" href="#rejected-designs">Rejected Designs</a></h3>
 <ol>
-<li>To improve performance on servers without "Early Failure on Socket Disconnect", we considered using <code>killSessions</code> to
+<li>To improve performance on servers without “Early Failure on Socket Disconnect”, we considered using <code>killSessions</code> to
 automatically kill the previous attempt before running a retry. We decided against this because after killing the
 session, parts of it still may be running if there are any errors. Additionally, killing sessions takes time
 because a kill has to talk to every non-config <code>mongod</code> in the cluster (i.e. all the primaries and secondaries of
@@ -606,15 +611,15 @@ the driver were to silently retry the <code>getMore()</code>, it is possible tha
 desired second batch.</p>
 <p>Furthermore, even if the driver could detect such a scenario, it is impossible to return previously iterated data from a
 cursor because the server currently only allows forward iteration.</p>
-<p>It is worth noting that the "Cursors survive primary stepdown" feature avoids this issue in certain common
+<p>It is worth noting that the “Cursors survive primary stepdown” feature avoids this issue in certain common
 circumstances, so that we may revisit this decision to disallow trying <code>getMore()</code> in the future.</p>
 <h3 id="why-are-read-operations-only-retried-once-by-default"><a class="header" href="#why-are-read-operations-only-retried-once-by-default">Why are read operations only retried once by default?</a></h3>
 <p><a href="../retryable-writes/retryable-writes.html#why-are-write-operations-only-retried-once-by-default">Read operations are only retried once for the same reasons that writes are also only retried once.</a>
-For convenience's sake, that reasoning has been adapted for reads and reproduced below:</p>
+For convenience’s sake, that reasoning has been adapted for reads and reproduced below:</p>
 <p>The spec concerns itself with retrying read operations that encounter a retryable error (i.e. no response due to network
 error or a response indicating that the node is no longer a primary). A retryable error may be classified as either a
 transient error (e.g. dropped connection, replica set failover) or persistent outage. If a transient error results in
-the server being marked as "unknown", a subsequent retry attempt will allow the driver to rediscover the primary within
+the server being marked as “unknown”, a subsequent retry attempt will allow the driver to rediscover the primary within
 the designated server selection timeout period (30 seconds by default). If server selection times out during this retry
 attempt, we can reasonably assume that there is a persistent outage. In the case of a persistent outage, multiple retry
 attempts are fruitless and would waste time. See
@@ -636,17 +641,17 @@ that does not. For example, a driver that creates a new wire protocol message co
 characteristics:</p>
 <ol>
 <li>The second attempt to send the read command could have a higher <code>$clusterTime</code>.</li>
-<li>If the initial attempt failed with a server error, then the session's <code>operationTime</code> would be advanced and the next
+<li>If the initial attempt failed with a server error, then the session’s <code>operationTime</code> would be advanced and the next
 read would include a larger <code>readConcern.afterClusterTime</code>.</li>
 </ol>
 <p>A driver that resends the same wire protocol message would not exhibit the above characteristics. Thus, in order to
 avoid this behavioral difference and not violate the rules about gossiping <code>$clusterTime</code>, drivers MUST not resend the
 same wire protocol message.</p>
-<h3 id="why-isnt-mongodb-42-required"><a class="header" href="#why-isnt-mongodb-42-required">Why isn't MongoDB 4.2 required?</a></h3>
+<h3 id="why-isnt-mongodb-42-required"><a class="header" href="#why-isnt-mongodb-42-required">Why isn’t MongoDB 4.2 required?</a></h3>
 <p>MongoDB 4.2 was initially considered as a requirement for retryable reads because MongoDB 4.2 implements support for
-"Early Failure on Socket Disconnect," changing the the semantics of socket disconnect to prevent ops from doing work
+“Early Failure on Socket Disconnect,” changing the the semantics of socket disconnect to prevent ops from doing work
 that no client is interested in. This prevents applications from seeing degraded performance when an expensive read is
-retried. Upon further discussion, we decided that "Early Failure on Socket Disconnect" should not be required to retry
+retried. Upon further discussion, we decided that “Early Failure on Socket Disconnect” should not be required to retry
 reads because the resilience benefit of retryable reads outweighs the minor risk of degraded performance. Additionally,
 any customers experiencing degraded performance can simply disable <code>retryableReads</code>.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
@@ -698,10 +703,12 @@ will always return an error code</p>
 </li>
 </ul>
 <hr>
-<ol class="footnote-definition"><li id="footnote-1">
+<ol class="footnote-definition">
+<li id="footnote-1">
 <p>The first and second commands will be identical unless variations in parameters exist between wire/server versions. <a href="#fr-1-1">↩</a></p>
 </li>
 </ol>
+
                         </div>
                         <div id="sidetoc">
                             <nav id="pagetoc"></nav>
@@ -710,27 +717,12 @@ will always return an error code</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../max-staleness/max-staleness.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../retryable-writes/retryable-writes.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../max-staleness/max-staleness.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../retryable-writes/retryable-writes.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

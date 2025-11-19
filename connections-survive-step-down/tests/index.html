@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../../highlight.css" id="highlight-css">
@@ -156,8 +155,8 @@
                     <main>
                         <div class="content-wrap">
                             <h1 id="connections-survive-primary-step-down-tests"><a class="header" href="#connections-survive-primary-step-down-tests">Connections Survive Primary Step Down Tests</a></h1>
-<p>These tests can be used to verify a driver's compliance with server discovery and monitoring requirements with respect
-to handling "not primary" and "node is shutting down" error responses from the server.</p>
+<p>These tests can be used to verify a driver’s compliance with server discovery and monitoring requirements with respect
+to handling “not primary” and “node is shutting down” error responses from the server.</p>
 <p>These tests apply only to replica set topologies.</p>
 <h2 id="server-fail-point"><a class="header" href="#server-fail-point">Server Fail Point</a></h2>
 <p>See: <a href="../../transactions/tests/legacy-test-format.html#server-fail-point">Server Fail Point</a> in the Transactions spec test
@@ -181,8 +180,8 @@ test.</p>
 <ul>
 <li>Create a <code>MongoClient</code> with <code>retryWrites=false</code></li>
 <li>Create a collection object from the <code>MongoClient</code>, using <code>step-down</code> for the database and collection name.</li>
-<li>Drop the test collection, using <code>writeConcern</code> "majority".</li>
-<li>Execute the "create" command to recreate the collection, using <code>writeConcern</code> "majority".</li>
+<li>Drop the test collection, using <code>writeConcern</code> “majority”.</li>
+<li>Execute the “create” command to recreate the collection, using <code>writeConcern</code> “majority”.</li>
 </ul>
 <p>The driver should implement the following tests:</p>
 <h3 id="getmore-iteration"><a class="header" href="#getmore-iteration">getMore Iteration</a></h3>
@@ -294,27 +293,12 @@ communication.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../bson-corpus/bson-corpus.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../../faas-automated-testing/faas-automated-testing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../bson-corpus/bson-corpus.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../../faas-automated-testing/faas-automated-testing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

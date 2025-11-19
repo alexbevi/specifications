@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,7 +159,7 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.6</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>As of version 3.6 of the MongoDB server a new <code>$changeStream</code> pipeline stage is supported in the aggregation framework.
 Specifying this stage first in an aggregation pipeline allows users to request that notifications are sent for all
@@ -169,8 +168,8 @@ as behavior during failure scenarios.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="definitions"><a class="header" href="#definitions">Definitions</a></h3>
 <h4 id="meta"><a class="header" href="#meta">META</a></h4>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h4 id="terms"><a class="header" href="#terms">Terms</a></h4>
 <h5 id="resumable-error"><a class="header" href="#resumable-error">Resumable Error</a></h5>
 <p>An error is considered resumable if it meets any of the criteria listed below. For any criteria with wire version
@@ -190,7 +189,12 @@ when checking these constraints.</p>
 </li>
 <li>
 <p>For servers with wire version less than 9, a server error with one of the following codes:</p>
-<div class="table-wrapper"><table><thead><tr><th>Error Name</th><th>Error Code</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Error Name</th><th>Error Code</th></tr>
+</thead>
+<tbody>
 <tr><td>HostUnreachable</td><td>6</td></tr>
 <tr><td>HostNotFound</td><td>7</td></tr>
 <tr><td>NetworkTimeout</td><td>89</td></tr>
@@ -208,8 +212,10 @@ when checking these constraints.</p>
 <tr><td>StaleConfig</td><td>13388</td></tr>
 <tr><td>RetryChangeStream</td><td>234</td></tr>
 <tr><td>FailedToSatisfyReadPreference</td><td>133</td></tr>
-</tbody></table>
-</div></li>
+</tbody>
+</table>
+</div>
+</li>
 </ul>
 <p>An error on an aggregate command is not a resumable error. Only errors on a getMore command may be considered resumable
 errors.</p>
@@ -700,7 +706,7 @@ NOT throw a custom exception if multiple <code>$changeStream</code> stages are p
 in the pipeline supplied to the helper), as the server will return an error.</p>
 <p>The helper methods MUST determine a read concern for the operation in accordance with the
 <a href="../read-write-concern/read-write-concern.html#via-code">Read and Write Concern specification</a>. The initial implementation
-of change streams on the server requires a 'majority' read concern or no read concern. Drivers MUST document this
+of change streams on the server requires a ‘majority’ read concern or no read concern. Drivers MUST document this
 requirement. Drivers SHALL NOT throw an exception if any other read concern is specified, but instead should depend on
 the server to return an error.</p>
 <p>The stage has the following shape:</p>
@@ -781,8 +787,8 @@ close method.</p>
 <p>A change stream MUST track the last resume token, per
 <a href="#updating-the-cached-resume-token">Updating the Cached Resume Token</a>.</p>
 <p>Drivers MUST raise an error on the first document received without a resume token (e.g. the user has removed <code>_id</code> with
-a pipeline stage), and close the change stream. The error message SHOULD resemble "Cannot provide resume functionality
-when the resume token is missing".</p>
+a pipeline stage), and close the change stream. The error message SHOULD resemble “Cannot provide resume functionality
+when the resume token is missing”.</p>
 <p>A change stream MUST attempt to resume a single time if it encounters any resumable error per
 <a href="#resumable-error">Resumable Error</a>. A change stream MUST NOT attempt to resume on any other type of error.</p>
 <p>In addition to tracking a resume token, change streams MUST also track the read preference specified when the change
@@ -861,7 +867,7 @@ saved from the original aggregation.</li>
 </ul>
 <p>When <code>resumeAfter</code> is specified the <code>ChangeStream</code> will return notifications starting with the oplog entry immediately
 <em>after</em> the provided token.</p>
-<p>If the server supports sessions, the resume attempt MUST use the same session as the previous attempt's command.</p>
+<p>If the server supports sessions, the resume attempt MUST use the same session as the previous attempt’s command.</p>
 <p>A driver MUST only attempt to resume once from a resumable error. However, if the <code>aggregate</code> for that resume succeeds,
 a driver MUST ensure that following resume attempts can succeed, even in the absence of any changes received by the
 cursor between resume attempts. For example:</p>
@@ -935,7 +941,7 @@ from <code>postBatchResumeToken</code>.</li>
 </li>
 <li>When returning a document to the user:
 <ul>
-<li>If it's the last document in the batch and a <code>postBatchResumeToken</code> is included, cache it.</li>
+<li>If it’s the last document in the batch and a <code>postBatchResumeToken</code> is included, cache it.</li>
 <li>Else, cache the <code>_id</code> of the document.</li>
 </ul>
 </li>
@@ -1005,10 +1011,10 @@ except Exception:
 </code></pre>
 <p>In this case the current change is always persisted locally, including the resume token, such that on restart the
 application can still process the change while ensuring that the change stream continues from the right logical time in
-the oplog. It is the application's responsibility to ensure that <code>processChange</code> is idempotent, this design merely makes
+the oplog. It is the application’s responsibility to ensure that <code>processChange</code> is idempotent, this design merely makes
 a reasonable effort to process each change <strong>at least</strong> once.</p>
 <h3 id="why-is-there-no-example-of-the-desired-user-experience"><a class="header" href="#why-is-there-no-example-of-the-desired-user-experience">Why is there no example of the desired user experience?</a></h3>
-<p>The specification used to include this overspecified example of the "desired user experience":</p>
+<p>The specification used to include this overspecified example of the “desired user experience”:</p>
 <pre><code class="language-python">try:
     for change in db.collection.watch(...):
         print(change)
@@ -1035,7 +1041,7 @@ to the allow list without requiring changes to drivers.</p>
 <p>With the exception of <code>CursorNotFound</code>, a server error on version 4.4 or higher is considered resumable if and only if
 it contains the <code>ResumableChangeStreamError</code> label. However, this label is only added by the server if the cursor being
 created or iterated is a change stream. <code>CursorNotFound</code> is returned when a <code>getMore</code> is done with a cursor ID that the
-server isn't aware of and therefore can't determine if the cursor is a change stream. Marking all <code>CursorNotFound</code>
+server isn’t aware of and therefore can’t determine if the cursor is a change stream. Marking all <code>CursorNotFound</code>
 errors resumable in the server regardless of cursor type could be confusing as a user could see the
 <code>ResumableChangeStreamError</code> label when iterating a non-change stream cursor. To workaround this, drivers always treat
 this error as resumable despite it not having the proper error label.</p>
@@ -1047,7 +1053,7 @@ resumeToken) is not available until a later point in time.</p>
 <li>A client creates a <code>ChangeStream</code>, and calls <code>watch</code></li>
 <li>The <code>ChangeStream</code> sends out the initial <code>aggregate</code> call, and receives a response with no initial values. Because
 there are no initial values, there is no latest resumeToken.</li>
-<li>The client's network is partitioned from the server, causing the client's <code>getMore</code> to time out</li>
+<li>The client’s network is partitioned from the server, causing the client’s <code>getMore</code> to time out</li>
 <li>Changes occur on the server.</li>
 <li>The network is unpartitioned</li>
 <li>The client attempts to resume the <code>ChangeStream</code></li>
@@ -1204,7 +1210,7 @@ unnecessary scanning of unmatched oplog entries.</p>
 <p>2018-04-17: Clarify that the initial aggregate should not be retried.</p>
 </li>
 <li>
-<p>2017-12-13: Default read concern is also accepted, not just "majority".</p>
+<p>2017-12-13: Default read concern is also accepted, not just “majority”.</p>
 </li>
 <li>
 <p>2017-11-06: Defer to Read and Write concern spec for determining a read concern for the helper method.</p>
@@ -1243,27 +1249,12 @@ unnecessary scanning of unmatched oplog entries.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../read-write-concern/read-write-concern.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../find_getmore_killcursors_commands/find_getmore_killcursors_commands.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../read-write-concern/read-write-concern.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../find_getmore_killcursors_commands/find_getmore_killcursors_commands.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,17 +159,17 @@
 <li>Status:</li>
 <li>Minimum Server Version: 3.6</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
-<p>This specification is about the ability for drivers to automate tests for "Functions as a Service" from continuous
+<p>This specification is about the ability for drivers to automate tests for “Functions as a Service” from continuous
 integration.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <h4 id="faas"><a class="header" href="#faas">FaaS</a></h4>
-<p>"Function as a Service", such as AWS Lambda.</p>
+<p>“Function as a Service”, such as AWS Lambda.</p>
 <h3 id="implementing-automated-faas-tests"><a class="header" href="#implementing-automated-faas-tests">Implementing Automated FaaS Tests</a></h3>
 <h4 id="aws-lambda"><a class="header" href="#aws-lambda">AWS Lambda</a></h4>
 <p>This section describes the required setup of an AWS Lambda function and the steps needed to automate the deployment and
@@ -193,13 +192,13 @@ execution of the function in Evergreen.</p>
 <p>Create the new project via SAM and follow the prompts:</p>
 <pre><code class="language-bash">sam init
 </code></pre>
-<p>For the template, select "AWS Quick Start Template".</p>
+<p>For the template, select “AWS Quick Start Template”.</p>
 <pre><code class="language-bash">Which template source would you like to use?
   1 - AWS Quick Start Templates
   2 - Custom Template Location
 Choice: 1
 </code></pre>
-<p>For the quick start template, select "Hello World Example".</p>
+<p>For the quick start template, select “Hello World Example”.</p>
 <pre><code class="language-bash">Choose an AWS Quick Start application template
   1 - Hello World Example
   2 - Multi-step workflow
@@ -216,7 +215,7 @@ Choice: 1
   13 - Machine Learning
 Template: 1
 </code></pre>
-<p>When prompted for language if the driver language is not Python, select "N".</p>
+<p>When prompted for language if the driver language is not Python, select “N”.</p>
 <pre><code class="language-text">Use the most popular runtime and package type? (Python and zip) [y/N]: n
 </code></pre>
 <p>Then select the runtime for your driver:</p>
@@ -301,8 +300,8 @@ with dependencies.</p>
 <pre><code class="language-bash">sam build
 sam local invoke --parameter-overrides "MongoDbUri=${MONGODB_URI}"
 </code></pre>
-<p><em>NOTE</em> "127.0.0.1" in the MONGODB_URI MUST be replaced with "host.docker.internal" to test a local MongoDB deployment.
-If "host.docker.internal" does not work (can occur on M1 machines), drivers MAY choose to use a
+<p><em>NOTE</em> “127.0.0.1” in the MONGODB_URI MUST be replaced with “host.docker.internal” to test a local MongoDB deployment.
+If “host.docker.internal” does not work (can occur on M1 machines), drivers MAY choose to use a
 <a href="https://docs.docker.com/network/bridge/">bridged docker container</a> to test locally.</p>
 <h6 id="implementing-the-function"><a class="header" href="#implementing-the-function">Implementing the Function</a></h6>
 <p>Drivers MUST setup the function as would be done in their appropriate language. In the function implementation the
@@ -322,7 +321,12 @@ is disabled (<a href="https://jira.mongodb.org/browse/DRIVERS-2578">DRIVERS-2578
 <p>Running in CI requires Evergreen to be setup to assume the appropriate role in AWS and then execute the script in
 drivers-evergreen-tools with the required environment variables. An explanation of the required environment is as
 follows:</p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>LAMBDA_AWS_ROLE_ARN</td><td>The role ARN to assume</td></tr>
 <tr><td>TEST_LAMBDA_DIRECTORY</td><td>The lambda function directory</td></tr>
 <tr><td>DRIVERS_TOOLS</td><td>Location of drivers-evergreen-tools</td></tr>
@@ -330,13 +334,14 @@ follows:</p>
 <tr><td>DRIVERS_ATLAS_PRIVATE_API_KEY</td><td>The Atlas private API key</td></tr>
 <tr><td>DRIVERS_ATLAS_LAMBDA_USER</td><td>The Atlas cluster user name</td></tr>
 <tr><td>DRIVERS_ATLAS_LAMBDA_PASSWORD</td><td>The Atlas cluster user password</td></tr>
-<tr><td>DRIVERS_ATLAS_GROUP_ID</td><td>The driver's Atlas group id</td></tr>
-<tr><td>LAMBDA_STACK_NAME</td><td>The driver's Lambda stack name</td></tr>
+<tr><td>DRIVERS_ATLAS_GROUP_ID</td><td>The driver’s Atlas group id</td></tr>
+<tr><td>LAMBDA_STACK_NAME</td><td>The driver’s Lambda stack name</td></tr>
 <tr><td>AWS_REGION</td><td>The function AWS region</td></tr>
 <tr><td>AWS_ACCESS_KEY_ID</td><td>Assume role automatically sets this</td></tr>
 <tr><td>AWS_SECRET_ACCESS_KEY</td><td>Assume role automatically sets this</td></tr>
 <tr><td>AWS_SESSION_TOKEN</td><td>Assume role automatically sets this</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>The value for <code>LAMBDA_AWS_ROLE_ARN</code> MUST be stored in Evergreen project settings. The value can be found in the
 <code>drivers/atlas-qa</code> vault.</p>
@@ -439,27 +444,12 @@ limit. The variant itself MUST have the SAM CLI installed.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../connections-survive-step-down/tests/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../max-staleness/max-staleness-tests.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../connections-survive-step-down/tests/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../max-staleness/max-staleness-tests.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

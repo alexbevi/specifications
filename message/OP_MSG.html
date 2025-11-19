@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -164,8 +163,8 @@
 <p><code>OP_MSG</code> is a bi-directional wire protocol opcode introduced in MongoDB 3.6 with the goal of replacing most existing
 opcodes, merging their use into one extendable opcode.</p>
 <h3 id="meta"><a class="header" href="#meta">META</a></h3>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="specification"><a class="header" href="#specification">Specification</a></h3>
 <h4 id="usage"><a class="header" href="#usage">Usage</a></h4>
 <p><code>OP_MSG</code> is only available in MongoDB 3.6 (<code>maxWireVersion &gt;= 6</code>) and later. MongoDB drivers MUST perform the MongoDB
@@ -177,14 +176,20 @@ and newer MAY default to using <code>OP_MSG</code>.</p>
 Authentication messages MUST also use <code>OP_MSG</code> when it is supported, but MUST NOT use <code>OP_COMPRESSED</code>.</p>
 <h4 id="op_msg-1"><a class="header" href="#op_msg-1">OP_MSG</a></h4>
 <p>Types used in this document</p>
-<div class="table-wrapper"><table><thead><tr><th>Type</th><th>Meaning</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Type</th><th>Meaning</th></tr>
+</thead>
+<tbody>
 <tr><td>document</td><td>A BSON document</td></tr>
 <tr><td>cstring</td><td>NULL terminated string</td></tr>
-<tr><td>int32</td><td>4 bytes (32-bit signed integer, two's complement)</td></tr>
+<tr><td>int32</td><td>4 bytes (32-bit signed integer, two’s complement)</td></tr>
 <tr><td>uint8</td><td>1 byte (8-bit unsigned integer)</td></tr>
 <tr><td>uint32</td><td>4 bytes (32-bit unsigned integer)</td></tr>
 <tr><td>union</td><td>One of the listed members</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>Elements inside brackets (<code>[</code> <code>]</code>) are optional parts of the message.</p>
 <ul>
@@ -221,11 +226,17 @@ struct OP_MSG {
 <code>Payload Type 1</code>, and MUST do so when the batch contains more than one entry.</p>
 <p>Sections may exist in any order. Each <code>OP_MSG</code> MAY contain a checksum, and MUST set the relevant <code>flagBits</code> when that
 field is included.</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>flagBits</td><td>Network level flags, such as signaling recipient that another message is incoming without any other actions in the meantime, and availability of message checksums</td></tr>
 <tr><td>sections</td><td>An array of one or more sections</td></tr>
 <tr><td>checksum</td><td>crc32c message checksum. When present, the appropriate flag MUST be set in the flagBits.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h5 id="flagbits"><a class="header" href="#flagbits">flagBits</a></h5>
 <p>flagBits contains a bit vector of specialized network flags. The low 16 bits declare what the current message contains,
@@ -235,11 +246,17 @@ current message and expectations of the recipient.</p>
 <p>Clients MUST error if any unsupported or undefined required bits are set to 1 and MUST ignore all undefined optional
 bits.</p>
 <p>The currently defined flags are:</p>
-<div class="table-wrapper"><table><thead><tr><th>Bit</th><th>Name</th><th>Request</th><th>Response</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Bit</th><th>Name</th><th>Request</th><th>Response</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>0</td><td>checksumPresent</td><td>x</td><td>x</td><td>Checksum present</td></tr>
 <tr><td>1</td><td>moreToCome</td><td>x</td><td>x</td><td>Sender will send another message and is not prepared for overlapping messages</td></tr>
 <tr><td>-16</td><td>exhaustAllowed</td><td>x</td><td></td><td>Client is prepared for multiple replies (using the moreToCome bit) to this request</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h5 id="checksumpresent"><a class="header" href="#checksumpresent">checksumPresent</a></h5>
 <p>This is a reserved field for future support of <code>crc32c</code> checksums.</p>
@@ -272,57 +289,93 @@ request has the <code>exhaustAllowed</code> bit set.</p>
 <p>Setting the <code>exhaustAllowed</code> bit on a request does not guarantee that the responses will have the <code>moreToCome</code> bit set.</p>
 <p>MongoDB server only handles the <code>exhaustAllowed</code> bit on the following operations. A driver MUST NOT set the
 <code>exhaustAllowed</code> bit on other operations.</p>
-<div class="table-wrapper"><table><thead><tr><th>Operation</th><th>Minimum MongoDB Version</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Operation</th><th>Minimum MongoDB Version</th></tr>
+</thead>
+<tbody>
 <tr><td>getMore</td><td>4.2</td></tr>
 <tr><td>hello (including legacy hello)</td><td>4.4 (discoverable via topologyVersion)</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h5 id="sections"><a class="header" href="#sections">sections</a></h5>
-<p>Each message contains one or more sections. A section is composed of an uint8 which determines the payload's type, and a
+<p>Each message contains one or more sections. A section is composed of an uint8 which determines the payload’s type, and a
 separate payload field. The payload size for payload type 0 and 1 is determined by the first 4 bytes of the payload
 field (includes the 4 bytes holding the size but not the payload type).</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>type</td><td>A byte indicating the layout and semantics of payload</td></tr>
 <tr><td>payload</td><td>The payload of a section can either be a single document, or a document sequence.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>When the Payload Type is 0, the content of the payload is:</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody>
-<tr><td>document</td><td>The BSON document. The payload size is inferred from the document's leading int32.</td></tr>
-</tbody></table>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>document</td><td>The BSON document. The payload size is inferred from the document’s leading int32.</td></tr>
+</tbody>
+</table>
 </div>
 <p>When the Payload Type is 1, the content of the payload is:</p>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>size</td><td>Payload size (includes this 4-byte field)</td></tr>
-<tr><td>identifier</td><td>A unique identifier (for this message). Generally the name of the "command argument" it contains the value for</td></tr>
+<tr><td>identifier</td><td>A unique identifier (for this message). Generally the name of the “command argument” it contains the value for</td></tr>
 <tr><td>documents</td><td>0 or more BSON documents. Each BSON document cannot be larger than <code>maxBSONObjectSize</code>.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>Any unknown Payload Types MUST result in an error and the socket MUST be closed. There is no ordering implied by payload
 types. A section with payload type 1 can be serialized before payload type 0.</p>
 <p>A fully constructed <code>OP_MSG</code> MUST contain exactly one <code>Payload Type 0</code>, and optionally any number of <code>Payload Type 1</code>
 where each identifier MUST be unique per message.</p>
 <h4 id="command-arguments-as-payload"><a class="header" href="#command-arguments-as-payload">Command Arguments As Payload</a></h4>
-<p>Certain commands support "pulling out" certain arguments to the command, and providing them as <code>Payload Type 1</code>, where
-the <code>identifier</code> is the command argument's name. Specifying a command argument as a separate payload removes the need to
+<p>Certain commands support “pulling out” certain arguments to the command, and providing them as <code>Payload Type 1</code>, where
+the <code>identifier</code> is the command argument’s name. Specifying a command argument as a separate payload removes the need to
 use a BSON Array. For example, <code>Payload Type 1</code> allows an array of documents to be specified as a sequence of BSON
 documents on the wire without the overhead of array keys.</p>
 <p>MongoDB 3.6 only allows certain command arguments to be provided this way. These are:</p>
-<div class="table-wrapper"><table><thead><tr><th>Command Name</th><th>Command Argument</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Command Name</th><th>Command Argument</th></tr>
+</thead>
+<tbody>
 <tr><td>insert</td><td>documents</td></tr>
 <tr><td>update</td><td>updates</td></tr>
 <tr><td>delete</td><td>deletes</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="global-command-arguments"><a class="header" href="#global-command-arguments">Global Command Arguments</a></h4>
 <p>The new opcode contains no field for providing the database name. Instead, the protocol now has the concept of global
 command arguments. These global command arguments can be passed to all MongoDB commands alongside the rest of the
 command arguments.</p>
 <p>Currently defined global arguments:</p>
-<div class="table-wrapper"><table><thead><tr><th>Argument Name</th><th>Default Value</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Argument Name</th><th>Default Value</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>$db</td><td></td><td>The database name to execute the command on. MUST be provided and be a valid database name.</td></tr>
-<tr><td><code>$readPreference</code></td><td><code>{ "mode": "primary" }</code></td><td>Determines server selection, and also whether a secondary server permits reads or responds "not writable primary". See Server Selection Spec for rules about when read preference must or must not be included, and for rules about when read preference "primaryPreferred" must be added automatically.</td></tr>
-</tbody></table>
+<tr><td><code>$readPreference</code></td><td><code>{ "mode": "primary" }</code></td><td>Determines server selection, and also whether a secondary server permits reads or responds “not writable primary”. See Server Selection Spec for rules about when read preference must or must not be included, and for rules about when read preference “primaryPreferred” must be added automatically.</td></tr>
+</tbody>
+</table>
 </div>
 <p>Additional global arguments are likely to be introduced in the future and defined in their own specs.</p>
 <h3 id="user-originating-commands"><a class="header" href="#user-originating-commands">User originating commands</a></h3>
@@ -356,7 +409,7 @@ documents: {"_id": "Document#1", "example": 1}{"_id": "Document#2", "example": 2
 <p>Note that the BSON documents are placed immediately after each other, not with any separator. The writeConcern is also
 left intact as a command argument in the <code>Payload Type 0</code> section. The command name MUST continue to be the first key of
 the command arguments in the <code>Payload Type 0</code> section.</p>
-<hr />
+<hr>
 <p>An update can for example be represented like:</p>
 <pre><code class="language-javascript">{
    "update": "collectionName",
@@ -384,7 +437,7 @@ would then be:</p>
 documents: {"q": {"example": 1}, "u": { "$set": { "example": 4}}}{"q": {"example": 2}, "u": { "$set": { "example": 5}}}
 </code></pre>
 <p>Note that the BSON documents are placed immediately after each other, not with any separator.</p>
-<hr />
+<hr>
 <p>A delete can for example be represented like:</p>
 <pre><code class="language-javascript">{
    "delete": "collectionName",
@@ -503,27 +556,12 @@ helper, rather then adding wire protocol headers as options to the existing <cod
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../extended-json/extended-json.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../run-command/run-command.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../extended-json/extended-json.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../run-command/run-command.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

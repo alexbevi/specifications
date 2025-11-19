@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -162,11 +161,11 @@
 </ul>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>The official BSON specification does not include test data, so this pseudo-specification describes tests for BSON
-encoding and decoding. It also includes tests for MongoDB's "Extended JSON" specification (hereafter abbreviated as
+encoding and decoding. It also includes tests for MongoDB’s “Extended JSON” specification (hereafter abbreviated as
 <code>extjson</code>).</p>
 <h2 id="meta"><a class="header" href="#meta">Meta</a></h2>
-<p>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="motivation-for-change"><a class="header" href="#motivation-for-change">Motivation for Change</a></h2>
 <p>To ensure correct operation, we want drivers to implement identical tests for important features. BSON (and <code>extjson</code>)
 are critical for correct operation and data exchange, but historically had no common test corpus. This
@@ -201,8 +200,8 @@ enclosing document and a <code>multi-type.json</code> file for testing a documen
 <h4 id="top-level-keys"><a class="header" href="#top-level-keys">Top level keys</a></h4>
 <ul>
 <li><code>description</code>: human-readable description of what is in the file</li>
-<li><code>bson_type</code>: hex string of the first byte of a BSON element (e.g. "0x01" for type "double"); this will be the
-synthetic value "0x00" for "whole document" tests like <code>top.json</code>.</li>
+<li><code>bson_type</code>: hex string of the first byte of a BSON element (e.g. “0x01” for type “double”); this will be the
+synthetic value “0x00” for “whole document” tests like <code>top.json</code>.</li>
 <li><code>test_key</code>: (optional) name of a field in a single-BSON-type <code>valid</code> test case that contains the data type being
 tested.</li>
 <li><code>valid</code> (optional): an array of validity test cases (see below).</li>
@@ -212,7 +211,7 @@ tested.</li>
 Undefined and DBPointer)</li>
 </ul>
 <h4 id="validity-test-case-keys"><a class="header" href="#validity-test-case-keys">Validity test case keys</a></h4>
-<p>Validity test cases include 'canonical' forms of BSON and Extended JSON that are deemed equivalent and may provide
+<p>Validity test cases include ‘canonical’ forms of BSON and Extended JSON that are deemed equivalent and may provide
 additional cases or metadata for additional assertions. For each case, keys include:</p>
 <ul>
 <li><code>description</code>: human-readable test case label.</li>
@@ -226,14 +225,14 @@ a <em>string</em> inside a JSON document, characters like quote and backslash ar
 parseable, but not in compliance with the BSON spec. Be sure to mangle the case as appropriate in any roundtrip
 tests.</li>
 <li><code>degenerate_extjson</code>: (optional) a string containing an invalid form of Canonical Extended JSON that is still
-parseable according to type-specific rules. (For example, "1e100" instead of "1E+100".)</li>
+parseable according to type-specific rules. (For example, “1e100” instead of “1E+100”.)</li>
 <li><code>converted_bson</code>: (optional) an (uppercase) big-endian hex representation of a BSON byte string. It may be present for
 deprecated types. It represents a possible conversion of the deprecated type to a non-deprecated type, e.g. symbol
 to string.</li>
 <li><code>converted_extjson</code>: (optional) a string containing a Canonical Extended JSON document. Because this is itself
 embedded as a <em>string</em> inside a JSON document, characters like quote and backslash are escaped. It may be present
 for deprecated types and is the Canonical Extended JSON representation of <code>converted_bson</code>.</li>
-<li><code>lossy</code> (optional) -- boolean; present (and true) iff <code>canonical_bson</code> can't be represented exactly with extended JSON
+<li><code>lossy</code> (optional) – boolean; present (and true) iff <code>canonical_bson</code> can’t be represented exactly with extended JSON
 (e.g. NaN with a payload).</li>
 </ul>
 <h4 id="decode-error-case-keys"><a class="header" href="#decode-error-case-keys">Decode error case keys</a></h4>
@@ -248,7 +247,7 @@ include:</p>
 each case, keys include:</p>
 <ul>
 <li><code>description</code>: human-readable test case label.</li>
-<li><code>string</code>: a text or numeric representation of an input that can't be parsed to a valid value of the given type.</li>
+<li><code>string</code>: a text or numeric representation of an input that can’t be parsed to a valid value of the given type.</li>
 </ul>
 <h3 id="extended-json-encoding-escaping-and-ordering"><a class="header" href="#extended-json-encoding-escaping-and-ordering">Extended JSON encoding, escaping and ordering</a></h3>
 <p>Because the <code>canonical_extjson</code> and other Extended JSON fields are embedded in a JSON document, all their JSON
@@ -270,18 +269,18 @@ SHOULD ignore (or modify) any tests which are not supported on that platform.</p
 <h3 id="testing-validity"><a class="header" href="#testing-validity">Testing validity</a></h3>
 <p>To test validity of a case in the <code>valid</code> array, we consider up to five possible representations:</p>
 <ul>
-<li>Canonical BSON (denoted herein as "cB") -- fully valid, spec-compliant BSON</li>
-<li>Degenerate BSON (denoted herein as "dB") -- invalid but still parseable BSON (bad array keys, regex options out of
+<li>Canonical BSON (denoted herein as “cB”) – fully valid, spec-compliant BSON</li>
+<li>Degenerate BSON (denoted herein as “dB”) – invalid but still parseable BSON (bad array keys, regex options out of
 order)</li>
-<li>Canonical Extended JSON (denoted herein as "cEJ") -- A string format based on the JSON standard that emphasizes type
+<li>Canonical Extended JSON (denoted herein as “cEJ”) – A string format based on the JSON standard that emphasizes type
 preservation at the expense of readability and interoperability.</li>
-<li>Degenerate Extended JSON (denoted herin as "dEJ") -- An invalid form of Canonical Extended JSON that is still
-parseable. (For example, "1e100" instead of "1E+100".)</li>
-<li>Relaxed Extended JSON (denoted herein as "rEJ") -- A string format based on the JSON standard that emphasizes
+<li>Degenerate Extended JSON (denoted herin as “dEJ”) – An invalid form of Canonical Extended JSON that is still
+parseable. (For example, “1e100” instead of “1E+100”.)</li>
+<li>Relaxed Extended JSON (denoted herein as “rEJ”) – A string format based on the JSON standard that emphasizes
 readability and interoperability at the expense of type preservation.</li>
 </ul>
 <p>Not all input types will exist for a given test case.</p>
-<p>There are two forms of BSON/Extended JSON codecs: ones that have a language-native "intermediate" representation and
+<p>There are two forms of BSON/Extended JSON codecs: ones that have a language-native “intermediate” representation and
 ones that do not.</p>
 <p>For a codec <em>without</em> an intermediate representation (i.e. one that translates directly from BSON to JSON or back), the
 following assertions MUST hold (function names are for clarity of illustration only):</p>
@@ -349,7 +348,7 @@ codecs, the following assertions MUST hold (function names are for clarity of il
 </ul>
 <p>Implementations MAY test assertions in an implementation-specific manner.</p>
 <h3 id="testing-decode-errors"><a class="header" href="#testing-decode-errors">Testing decode errors</a></h3>
-<p>The <code>decodeErrors</code> cases represent BSON documents that are sufficiently incorrect that they can't be parsed even with
+<p>The <code>decodeErrors</code> cases represent BSON documents that are sufficiently incorrect that they can’t be parsed even with
 liberal interpretation of the BSON schema (e.g. reading arrays with invalid keys is possible, even though technically
 invalid, so they are <em>not</em> <code>decodeErrors</code>).</p>
 <p>Drivers SHOULD test that each case results in a decoding error. Implementations MAY test assertions in an
@@ -360,7 +359,7 @@ implementation-specific manner.</p>
 <p>Drivers SHOULD test that each case results in a parsing error (e.g. parsing Extended JSON, constructing a language
 type). Implementations MAY test assertions in an implementation-specific manner.</p>
 <h4 id="top-level-document-type-0x00"><a class="header" href="#top-level-document-type-0x00">Top-level Document (type 0x00)</a></h4>
-<p>For type "0x00" (i.e. top-level documents), the <code>string</code> field contains input for an Extended JSON parser. Drivers MUST
+<p>For type “0x00” (i.e. top-level documents), the <code>string</code> field contains input for an Extended JSON parser. Drivers MUST
 parse the Extended JSON input using an Extended JSON parser and verify that doing so yields an error. Drivers that parse
 Extended JSON into language types instead of directly to BSON MAY need to additionally convert the resulting language
 type(s) to BSON to expect an error.</p>
@@ -370,10 +369,10 @@ error conditions and that they do not have, for example, unintended syntax error
 <p>Note: due to the generic nature of these tests, they may also be used to test Extended JSON parsing errors for various
 BSON types appearing within a document.</p>
 <h4 id="binary-type-0x05"><a class="header" href="#binary-type-0x05">Binary (type 0x05)</a></h4>
-<p>For type "0x05" (i.e. binary), the rules for handling <code>parseErrors</code> are the same as those for
+<p>For type “0x05” (i.e. binary), the rules for handling <code>parseErrors</code> are the same as those for
 <a href="#top-level-document-type-0x00">Top-level Document (type 0x00)</a>.</p>
 <h4 id="decimal128-type-0x13"><a class="header" href="#decimal128-type-0x13">Decimal128 (type 0x13)</a></h4>
-<p>For type "0x13" (i.e. Decimal128), the <code>string</code> field contains input for a Decimal128 parser that converts string input
+<p>For type “0x13” (i.e. Decimal128), the <code>string</code> field contains input for a Decimal128 parser that converts string input
 to a binary Decimal128 value (e.g. Decimal128 constructor). Drivers MUST assert that these strings cannot be
 successfully converted to a binary Decimal128 value and that parsing the string produces an error.</p>
 <h3 id="deprecated-types"><a class="header" href="#deprecated-types">Deprecated types</a></h3>
@@ -403,20 +402,20 @@ may be used like this:</p>
 </code></pre>
 <h3 id="notes-for-certain-types"><a class="header" href="#notes-for-certain-types">Notes for certain types</a></h3>
 <h4 id="array"><a class="header" href="#array">Array</a></h4>
-<p>Arrays can have degenerate BSON if the array indexes are not set as "0", "1", etc.</p>
+<p>Arrays can have degenerate BSON if the array indexes are not set as “0”, “1”, etc.</p>
 <h4 id="boolean"><a class="header" href="#boolean">Boolean</a></h4>
-<p>The only valid values are 0 and 1. Other non-zero numbers MUST be interpreted as errors rather than "true" values.</p>
+<p>The only valid values are 0 and 1. Other non-zero numbers MUST be interpreted as errors rather than “true” values.</p>
 <h4 id="binary"><a class="header" href="#binary">Binary</a></h4>
 <p>The Base64 encoded text in the extended JSON representation MUST be padded.</p>
 <h4 id="code"><a class="header" href="#code">Code</a></h4>
 <p>There are multiple ways to encode Unicode characters as a JSON document. Individual implementers may need to normalize
 provided and generated extended JSON before comparison.</p>
 <h4 id="decimal"><a class="header" href="#decimal">Decimal</a></h4>
-<p>NaN with payload can't be represented in extended JSON, so such conversions are lossy.</p>
+<p>NaN with payload can’t be represented in extended JSON, so such conversions are lossy.</p>
 <h4 id="double"><a class="header" href="#double">Double</a></h4>
 <p>There is not yet a way to represent Inf, -Inf or NaN in extended JSON. Even if a <code>$numberDouble</code> is added, it is
 unlikely to support special values with payloads, so such doubles would be lossy when converted to extended JSON.</p>
-<p>String representation of doubles is fairly unportable so it's hard to provide a single string that all
+<p>String representation of doubles is fairly unportable so it’s hard to provide a single string that all
 platforms/languages will generate. Testers may need to normalize/modify the test cases.</p>
 <h4 id="string"><a class="header" href="#string">String</a></h4>
 <p>There are multiple ways to encode Unicode characters as a JSON document. Individual implementers may need to normalize
@@ -434,8 +433,8 @@ this spec.</p>
 <p>The Java, C# and Perl drivers.</p>
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
 <h3 id="use-of-extjson"><a class="header" href="#use-of-extjson">Use of extjson</a></h3>
-<p>Testing conversion requires an "input" and an "output". With a BSON string as both input and output, we can only test
-that it roundtrips correctly --we can't test that the decoded value visible to the language is correct.</p>
+<p>Testing conversion requires an “input” and an “output”. With a BSON string as both input and output, we can only test
+that it roundtrips correctly –we can’t test that the decoded value visible to the language is correct.</p>
 <p>For example, a pathological encoder/decoder could invert Boolean true and false during decoding and encoding. The BSON
 would roundtrip but the program would see the wrong values.</p>
 <p>Therefore, we need a separate, semantic description of the contents of a BSON string in a machine readable format.
@@ -470,15 +469,15 @@ assertions.</p>
 </li>
 <li>
 <p>2017-01-23: Added <code>multi-type.json</code> to test encoding and decoding all BSON types within the same document. Amended all
-extended JSON strings to adhere to the Extended JSON Specification. Modified the "Use of extjson" section of this
+extended JSON strings to adhere to the Extended JSON Specification. Modified the “Use of extjson” section of this
 specification to note that canonical extended JSON is now used.</p>
 </li>
 <li>
-<p>2016-11-14: Removed "invalid flags" BSON Regexp case.</p>
+<p>2016-11-14: Removed “invalid flags” BSON Regexp case.</p>
 </li>
 <li>
-<p>2016-10-25: Added a "non-alphabetized flags" case to the BSON Regexp corpus file; decoders must be able to read
-non-alphabetized flags, but encoders must emit alphabetized flags. Added an "invalid flags" case to the BSON Regexp
+<p>2016-10-25: Added a “non-alphabetized flags” case to the BSON Regexp corpus file; decoders must be able to read
+non-alphabetized flags, but encoders must emit alphabetized flags. Added an “invalid flags” case to the BSON Regexp
 corpus file.</p>
 </li>
 </ul>
@@ -491,27 +490,12 @@ corpus file.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../benchmarking/benchmarking.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../connections-survive-step-down/tests/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../benchmarking/benchmarking.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../connections-survive-step-down/tests/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,7 +159,7 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>Presently, seeding a driver with an initial list of ReplicaSet or MongoS addresses is somewhat cumbersome, requiring a
 comma-delimited list of host names to attempt connections to. A standardized answer to this problem exists in the form
@@ -171,8 +170,8 @@ lists at an application level.</p>
 adds a new protocol scheme and modifies how the
 <a href="../connection-string/connection-string-spec.html#host-information">Host Information</a> is interpreted.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="connection-string-format"><a class="header" href="#connection-string-format">Connection String Format</a></h3>
 <p>The connection string parser in the driver is extended with a new protocol <code>mongodb+srv</code> as a logical pre-processing
@@ -235,7 +234,7 @@ of a <code>MongoClient</code>.</p>
 <p>This option specifies a valid SRV service name according to
 <a href="https://datatracker.ietf.org/doc/html/rfc6335#section-5.1">RFC 6335</a>, with the exception that it may exceed 15
 characters as long as the 63rd (62nd with prepended underscore) character DNS query limit is not surpassed. This option
-requires a string value and defaults to "mongodb". This option MUST only be configurable at the level of a
+requires a string value and defaults to “mongodb”. This option MUST only be configurable at the level of a
 <code>MongoClient</code>.</p>
 <h4 id="uri-validation"><a class="header" href="#uri-validation">URI Validation</a></h4>
 <p>The driver MUST report an error if either the <code>srvServiceName</code> or <code>srvMaxHosts</code> URI options are specified with a non-SRV
@@ -267,7 +266,7 @@ This DNS query is expected to respond with one or more SRV records.</p>
 <p>If the DNS result returns no SRV records, or no records at all, or a DNS error happens, an error MUST be raised
 indicating that the URI could not be used to find hostnames. The error SHALL include the reason why they could not be
 found.</p>
-<p>A driver MUST verify that the host names returned through SRV records share the original SRV's <code>{domainname}</code>. In
+<p>A driver MUST verify that the host names returned through SRV records share the original SRV’s <code>{domainname}</code>. In
 addition, SRV records with fewer than three <code>.</code> separated parts, the returned hostname MUST have at least one more
 domain level than the SRV record hostname. Drivers MUST raise an error and MUST NOT initiate a connection to any
 returned hostname which does not fulfill these requirements.</p>
@@ -301,7 +300,7 @@ incorrect values directly specified through a Connection String. For example, if
 <code>authSource</code> option finds <code>authSource=db</code> in a TXT record, it MUST handle the unknown option according to the rules in
 the Connection String spec.</p>
 <h3 id="cname-not-supported"><a class="header" href="#cname-not-supported">CNAME not supported</a></h3>
-<p>The use of DNS CNAME records is not supported. Clients MUST NOT check for a CNAME record on <code>{hostname}</code>. A system's DNS
+<p>The use of DNS CNAME records is not supported. Clients MUST NOT check for a CNAME record on <code>{hostname}</code>. A system’s DNS
 resolver could transparently handle CNAME, but because of how clients validate records returned from SRV queries, use of
 CNAME could break validation. Seedlist discovery therefore does not recommend or support the use of CNAME records in
 concert with SRV or TXT records.</p>
@@ -371,7 +370,7 @@ left the behaviour of supporting UTF-8 characters as unspecified.</p>
 <h2 id="changelog"><a class="header" href="#changelog">ChangeLog</a></h2>
 <ul>
 <li>
-<p>2024-09-24: Removed requirement for URI to have three '.' separated parts; these SRVs have stricter parent domain
+<p>2024-09-24: Removed requirement for URI to have three ‘.’ separated parts; these SRVs have stricter parent domain
 matching requirements for security. Create terminology section. Remove usage of term <code>{TLD}</code>. The <code>{hostname}</code> now
 refers to the entire hostname, not just the <code>{subdomain}</code>.</p>
 </li>
@@ -444,27 +443,12 @@ Connection String Spec tests.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../socks5-support/socks5.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../socks5-support/socks5.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

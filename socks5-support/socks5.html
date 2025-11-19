@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,15 +159,15 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>SOCKS5 is a standardized protocol for connecting to network services through a separate proxy server. It can be used for
 connecting to hosts that would otherwise be unreachable from the local network by connecting to a proxy server, which
-receives the intended target host's address from the client and then connects to that address.</p>
+receives the intended target host’s address from the client and then connects to that address.</p>
 <p>This specification defines driver behaviour when connecting to MongoDB services through a SOCKS5 proxy.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <h4 id="socks5"><a class="header" href="#socks5">SOCKS5</a></h4>
@@ -208,9 +207,9 @@ a zero-length string. Drivers MUST error if this option was specified and <code>
 <li>
 <p>Perform a SOCKS5 handshake as specified in RFC1928.</p>
 <blockquote>
-<p>If <code>proxyUsername</code> and <code>proxyPassword</code> were passed, drivers MUST indicate in the handshake that both "no
-authentication" and "username/password authentication" are supported. Otherwise, drivers MUST indicate support for
-"no authentication" only.</p>
+<p>If <code>proxyUsername</code> and <code>proxyPassword</code> were passed, drivers MUST indicate in the handshake that both “no
+authentication” and “username/password authentication” are supported. Otherwise, drivers MUST indicate support for
+“no authentication” only.</p>
 <p>Drivers MUST NOT attempt to perform DNS A or AAAA record resolution of the destination hostname and instead pass
 the hostname to the proxy as-is.</p>
 </blockquote>
@@ -232,7 +231,7 @@ the <code>connectionId</code> field or other fields.</p>
 <h3 id="qa"><a class="header" href="#qa">Q&amp;A</a></h3>
 <h4 id="why-not-include-dns-requests-in-the-set-of-proxied-network-communication"><a class="header" href="#why-not-include-dns-requests-in-the-set-of-proxied-network-communication">Why not include DNS requests in the set of proxied network communication?</a></h4>
 <p>While SOCKS5 as a protocol does support UDP forwarding, using this feature has a number of downsides. Notably, only a
-subset of SOCKS5 client libraries and SOCKS5 server implementations support UDP forwarding (e.g. the OpenSSH client's
+subset of SOCKS5 client libraries and SOCKS5 server implementations support UDP forwarding (e.g. the OpenSSH client’s
 dynamic forwarding feature does not). This would also considerably increase implementation complexity in drivers that do
 not use DNS libraries in which the driver is in control of how the UDP packets are sent and received.</p>
 <h4 id="why-not-support-other-proxy-protocols-such-as-socks4socks4a-http-connect-proxies-etc"><a class="header" href="#why-not-support-other-proxy-protocols-such-as-socks4socks4a-http-connect-proxies-etc">Why not support other proxy protocols, such as Socks4/Socks4a, HTTP Connect proxies, etc.?</a></h4>
@@ -264,27 +263,12 @@ with enabling other authentication methods.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../compression/OP_COMPRESSED.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../compression/OP_COMPRESSED.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -171,8 +170,8 @@ options are defined, this spec aims to do just that—namely, provide a canonica
 defines.</p>
 <p><strong>THIS SPEC DOES NOT REQUIRE DRIVERS TO MAKE ANY BREAKING CHANGES.</strong></p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="conflicting-tls-options"><a class="header" href="#conflicting-tls-options">Conflicting TLS options</a></h3>
 <p>Per the <a href="../connection-string/connection-string-spec.html#repeated-keys">Connection String spec</a>, the behavior of
@@ -211,19 +210,24 @@ values MUST be encoded in UTF-8. All integer options are 32-bit unless specified
 and recommendations described in the <a href="../connection-string/connection-string-spec.html">Connection String spec</a> pertaining
 to URI options apply here.</p>
 <p><span id="uri.options"></span></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Accepted Values</th><th>Default Value</th><th>Optional to implement?</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Accepted Values</th><th>Default Value</th><th>Optional to implement?</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>appname</td><td>any string that meets the criteria listed in the <a href="../mongodb-handshake/handshake.html#client-application-name">handshake spec</a></td><td>no appname specified</td><td>no</td><td>Passed into the server in the client metadata as part of the connection handshake</td></tr>
 <tr><td>authMechanism</td><td>any string; valid values are defined in the <a href="../auth/auth.html#supported-authentication-methods">auth spec</a></td><td>None; default values for authentication exist for constructing authentication credentials per the <a href="../auth/auth.html#supported-authentication-methods">auth spec</a>, but there is no default for the URI option itself.</td><td>no</td><td>The authentication mechanism method to use for connection to the server</td></tr>
-<tr><td>authMechanismProperties</td><td>comma separated key:value pairs, e.g. "opt1:val1,opt2:val2"</td><td>no properties specified</td><td>no</td><td>Additional options provided for authentication (e.g. to enable hostname canonicalization for GSSAPI)</td></tr>
+<tr><td>authMechanismProperties</td><td>comma separated key:value pairs, e.g. “opt1:val1,opt2:val2”</td><td>no properties specified</td><td>no</td><td>Additional options provided for authentication (e.g. to enable hostname canonicalization for GSSAPI)</td></tr>
 <tr><td>authSource</td><td>any string</td><td>None; default values for authentication exist for constructing authentication credentials per the <a href="../auth/auth.html#supported-authentication-methods">auth spec</a>, but there is no default for the URI option itself.</td><td>no</td><td>The database that connections should authenticate against</td></tr>
-<tr><td>compressors</td><td>comma separated list of strings, e.g. "snappy,zlib"</td><td>defined in <a href="../compression/OP_COMPRESSED.html#compressors">compression spec</a></td><td>no</td><td>The list of allowed compression types for wire protocol messages sent or received from the server</td></tr>
-<tr><td>connectTimeoutMS</td><td>non-negative integer; 0 means "no timeout"</td><td>10,000 ms (unless a driver already has a different default)</td><td>no</td><td>Amount of time to wait for a single TCP socket connection to the server to be established before erroring; note that this applies to <a href="../mongodb-handshake/handshake.html">SDAM hello and legacy hello operations</a></td></tr>
-<tr><td>directConnection</td><td>"true" or "false"</td><td>defined in <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#initial-topologytype">SDAM spec</a></td><td>no</td><td>Whether to connect to the deployment in Single topology.</td></tr>
+<tr><td>compressors</td><td>comma separated list of strings, e.g. “snappy,zlib”</td><td>defined in <a href="../compression/OP_COMPRESSED.html#compressors">compression spec</a></td><td>no</td><td>The list of allowed compression types for wire protocol messages sent or received from the server</td></tr>
+<tr><td>connectTimeoutMS</td><td>non-negative integer; 0 means “no timeout”</td><td>10,000 ms (unless a driver already has a different default)</td><td>no</td><td>Amount of time to wait for a single TCP socket connection to the server to be established before erroring; note that this applies to <a href="../mongodb-handshake/handshake.html">SDAM hello and legacy hello operations</a></td></tr>
+<tr><td>directConnection</td><td>“true” or “false”</td><td>defined in <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#initial-topologytype">SDAM spec</a></td><td>no</td><td>Whether to connect to the deployment in Single topology.</td></tr>
 <tr><td>heartbeatFrequencyMS</td><td>integer greater than or equal to 500</td><td>defined in <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#heartbeatfrequencyms">SDAM spec</a></td><td>no</td><td>the interval between regular server monitoring checks</td></tr>
-<tr><td>journal</td><td>"true" or "false"</td><td>no "j" field specified</td><td>no</td><td>Default write concern "j" field for the client</td></tr>
-<tr><td>loadBalanced</td><td>"true" or "false"</td><td>defined in <a href="../load-balancers/load-balancers.html#loadbalanced">Load Balancer spec</a></td><td>no</td><td>Whether the driver is connecting to a load balancer.</td></tr>
+<tr><td>journal</td><td>“true” or “false”</td><td>no “j” field specified</td><td>no</td><td>Default write concern “j” field for the client</td></tr>
+<tr><td>loadBalanced</td><td>“true” or “false”</td><td>defined in <a href="../load-balancers/load-balancers.html#loadbalanced">Load Balancer spec</a></td><td>no</td><td>Whether the driver is connecting to a load balancer.</td></tr>
 <tr><td>localThresholdMS</td><td>non-negative integer; 0 means 0 ms (i.e. the fastest eligible server must be selected)</td><td>defined in the <a href="../server-selection/server-selection.html#localthresholdms">server selection spec</a></td><td>no</td><td>The amount of time beyond the fastest round trip time that a given server’s round trip time can take and still be eligible for server selection</td></tr>
-<tr><td>maxIdleTimeMS</td><td>non-negative integer; 0 means no minimum</td><td>defined in the <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">Connection Pooling spec</a></td><td>required for drivers with connection pools</td><td>The amount of time a connection can be idle before it's closed</td></tr>
+<tr><td>maxIdleTimeMS</td><td>non-negative integer; 0 means no minimum</td><td>defined in the <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">Connection Pooling spec</a></td><td>required for drivers with connection pools</td><td>The amount of time a connection can be idle before it’s closed</td></tr>
 <tr><td>maxPoolSize</td><td>non-negative integer; 0 means no maximum</td><td>defined in the <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">Connection Pooling spec</a></td><td>required for drivers with connection pools</td><td>The maximum number of clients or connections able to be created by a pool at a given time. This count includes connections which are currently checked out.</td></tr>
 <tr><td>maxConnecting</td><td>positive integer</td><td>defined in the <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">Connection Pooling spec</a></td><td>required for drivers with connection pools</td><td>The maximum number of Connections a Pool may be establishing concurrently.</td></tr>
 <tr><td>maxStalenessSeconds</td><td>-1 (no max staleness check) or integer &gt;= 90</td><td>defined in <a href="../max-staleness/max-staleness.html#api">max staleness spec</a></td><td>no</td><td>The maximum replication lag, in wall clock time, that a secondary can suffer and still be eligible for server selection</td></tr>
@@ -233,33 +237,34 @@ to URI options apply here.</p>
 <tr><td>proxyUsername</td><td>any string</td><td>defined in the <a href="../socks5-support/socks5.html#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The username for username/password authentication to the SOCKS5 proxy server specified in <code>proxyHost</code>.</td></tr>
 <tr><td>proxyPassword</td><td>any string</td><td>defined in the <a href="../socks5-support/socks5.html#mongoclient-configuration">SOCKS5 support spec</a></td><td>no</td><td>The password for username/password authentication to the SOCKS5 proxy server specified in <code>proxyHost</code>.</td></tr>
 <tr><td>readConcernLevel</td><td>any string (<a href="../read-write-concern/read-write-concern.html#unknown-levels-and-additional-options-for-string-based-readconcerns">to allow for forwards compatibility with the server</a>)</td><td>no read concern specified</td><td>no</td><td>Default read concern for the client</td></tr>
-<tr><td>readPreference</td><td>any string; currently supported values are defined in the <a href="../server-selection/server-selection.html#mode">server selection spec</a>, but must be lowercase camelCase, e.g. "primaryPreferred"</td><td>defined in <a href="../server-selection/server-selection.html#mode">server selection spec</a></td><td>no</td><td>Default read preference for the client (excluding tags)</td></tr>
-<tr><td>readPreferenceTags</td><td>comma-separated key:value pairs (e.g. "dc:ny,rack:1" and "dc:ny)<br><br>can be specified multiple times; each instance of this key is a separate tag set</td><td>no tags specified</td><td>no</td><td>Default read preference tags for the client; only valid if the read preference mode is not primary<br><br>The order of the tag sets in the read preference is the same as the order they are specified in the URI</td></tr>
+<tr><td>readPreference</td><td>any string; currently supported values are defined in the <a href="../server-selection/server-selection.html#mode">server selection spec</a>, but must be lowercase camelCase, e.g. “primaryPreferred”</td><td>defined in <a href="../server-selection/server-selection.html#mode">server selection spec</a></td><td>no</td><td>Default read preference for the client (excluding tags)</td></tr>
+<tr><td>readPreferenceTags</td><td>comma-separated key:value pairs (e.g. “dc:ny,rack:1” and “dc:ny)<br><br>can be specified multiple times; each instance of this key is a separate tag set</td><td>no tags specified</td><td>no</td><td>Default read preference tags for the client; only valid if the read preference mode is not primary<br><br>The order of the tag sets in the read preference is the same as the order they are specified in the URI</td></tr>
 <tr><td>replicaSet</td><td>any string</td><td>no replica set name provided</td><td>no</td><td>The name of the replica set to connect to</td></tr>
-<tr><td>retryReads</td><td>"true" or "false"</td><td>defined in <a href="../retryable-reads/retryable-reads.html#retryreads">retryable reads spec</a></td><td>no</td><td>Enables retryable reads on server 3.6+</td></tr>
-<tr><td>retryWrites</td><td>"true" or "false"</td><td>defined in <a href="../retryable-writes/retryable-writes.html#retrywrites">retryable writes spec</a></td><td>no</td><td>Enables retryable writes on server 3.6+</td></tr>
-<tr><td>serverMonitoringMode</td><td>"stream", "poll", or "auto"</td><td>defined in <a href="../server-discovery-and-monitoring/server-monitoring.html#servermonitoringmode">SDAM spec</a></td><td>required for multi-threaded or asynchronous drivers</td><td>Configures which server monitoring protocol to use.</td></tr>
+<tr><td>retryReads</td><td>“true” or “false”</td><td>defined in <a href="../retryable-reads/retryable-reads.html#retryreads">retryable reads spec</a></td><td>no</td><td>Enables retryable reads on server 3.6+</td></tr>
+<tr><td>retryWrites</td><td>“true” or “false”</td><td>defined in <a href="../retryable-writes/retryable-writes.html#retrywrites">retryable writes spec</a></td><td>no</td><td>Enables retryable writes on server 3.6+</td></tr>
+<tr><td>serverMonitoringMode</td><td>“stream”, “poll”, or “auto”</td><td>defined in <a href="../server-discovery-and-monitoring/server-monitoring.html#servermonitoringmode">SDAM spec</a></td><td>required for multi-threaded or asynchronous drivers</td><td>Configures which server monitoring protocol to use.</td></tr>
 <tr><td>serverSelectionTimeoutMS</td><td>positive integer; a driver may also accept 0 to be used for a special case, provided that it documents the meaning</td><td>defined in <a href="../server-selection/server-selection.html#serverselectiontimeoutms">server selection spec</a></td><td>no</td><td>A timeout in milliseconds to block for server selection before raising an error</td></tr>
-<tr><td>serverSelectionTryOnce</td><td>"true" or "false"</td><td>defined in <a href="../server-selection/server-selection.html#serverselectiontryonce">server selection spec</a></td><td>required for single-threaded drivers</td><td>Scan the topology only once after a server selection failure instead of repeatedly until the server selection times out</td></tr>
+<tr><td>serverSelectionTryOnce</td><td>“true” or “false”</td><td>defined in <a href="../server-selection/server-selection.html#serverselectiontryonce">server selection spec</a></td><td>required for single-threaded drivers</td><td>Scan the topology only once after a server selection failure instead of repeatedly until the server selection times out</td></tr>
 <tr><td>socketTimeoutMS</td><td>non-negative integer; 0 means no timeout</td><td>no timeout</td><td>no</td><td>NOTE: This option is deprecated in favor of <a href="../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a><br><br>Amount of time spent attempting to send or receive on a socket before timing out; note that this only applies to application operations, not SDAM.</td></tr>
 <tr><td>srvMaxHosts</td><td>non-negative integer; 0 means no maximum</td><td>defined in the <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvmaxhosts">Initial DNS Seedlist Discovery spec</a></td><td>no</td><td>The maximum number of SRV results to randomly select when initially populating the seedlist or, during SRV polling, adding new hosts to the topology.</td></tr>
-<tr><td>srvServiceName</td><td>a valid SRV service name according to <a href="https://datatracker.ietf.org/doc/html/rfc6335#section-5.1">RFC 6335</a></td><td>"mongodb"</td><td>no</td><td>the service name to use for SRV lookup in <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvservicename">initial DNS seedlist discovery</a> and <a href="../polling-srv-records-for-mongos-discovery/polling-srv-records-for-mongos-discovery.html">SRV polling</a></td></tr>
-<tr><td>ssl</td><td>"true" or "false"</td><td>same as "tls"</td><td>no</td><td>alias of "tls"; required to ensure that Atlas connection strings continue to work</td></tr>
+<tr><td>srvServiceName</td><td>a valid SRV service name according to <a href="https://datatracker.ietf.org/doc/html/rfc6335#section-5.1">RFC 6335</a></td><td>“mongodb”</td><td>no</td><td>the service name to use for SRV lookup in <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvservicename">initial DNS seedlist discovery</a> and <a href="../polling-srv-records-for-mongos-discovery/polling-srv-records-for-mongos-discovery.html">SRV polling</a></td></tr>
+<tr><td>ssl</td><td>“true” or “false”</td><td>same as “tls”</td><td>no</td><td>alias of “tls”; required to ensure that Atlas connection strings continue to work</td></tr>
 <tr><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td>tls</td><td>"true" or "false"</td><td>TLS required if "mongodb+srv" scheme; otherwise, drivers may may enable TLS by default if other "tls"-prefixed options are present<br><br>Drivers MUST clearly document the conditions under which TLS is enabled implicitly</td><td>no</td><td>Whether or not to require TLS for connections to the server</td></tr>
-<tr><td>tlsAllowInvalidCertificates</td><td>"true" or "false"</td><td>error on invalid certificates</td><td>required if the driver’s language/runtime allows bypassing hostname verification</td><td>Specifies whether or not the driver should error when the server’s TLS certificate is invalid</td></tr>
-<tr><td>tlsAllowInvalidHostnames</td><td>"true" or "false"</td><td>error on invalid certificates</td><td>required if the driver’s language/runtime allows bypassing hostname verification</td><td>Specifies whether or not the driver should error when there is a mismatch between the server’s hostname and the hostname specified by the TLS certificate</td></tr>
-<tr><td>tlsCAFile</td><td>any string</td><td>no certificate authorities specified</td><td>required if the driver's language/runtime allows non-global configuration</td><td>Path to file with either a single or bundle of certificate authorities to be considered trusted when making a TLS connection</td></tr>
-<tr><td>tlsCertificateKeyFile</td><td>any string</td><td>no client certificate specified</td><td>required if the driver's language/runtime allows non-global configuration</td><td>Path to the client certificate file or the client private key file; in the case that they both are needed, the files should be concatenated</td></tr>
-<tr><td>tlsCertificateKeyFilePassword</td><td>any string</td><td>no password specified</td><td>required if the driver's language/runtime allows non-global configuration</td><td>Password to decrypt the client private key to be used for TLS connections</td></tr>
-<tr><td>tlsDisableCertificateRevocationCheck</td><td>"true" or "false"</td><td>false i.e. driver will reach check a certificate's revocation status</td><td>Yes</td><td>Controls whether or not the driver will check a certificate's revocation status via CRLs or OCSP. See the <a href="../ocsp-support/ocsp-support.html#tlsdisablecertificaterevocationcheck">OCSP Support Spec</a> for additional information.</td></tr>
-<tr><td>tlsDisableOCSPEndpointCheck</td><td>"true" or "false"</td><td>false i.e. driver will reach out to OCSP endpoints <a href="../ocsp-support/ocsp-support.html#tlsdisableocspendpointcheck">if needed</a>.</td><td>Yes</td><td>Controls whether or not the driver will reach out to OCSP endpoints if needed. See the <a href="../ocsp-support/ocsp-support.html#tlsdisableocspendpointcheck">OCSP Support Spec</a> for additional information.</td></tr>
-<tr><td>tlsInsecure</td><td>"true" or "false"</td><td>No TLS constraints are relaxed</td><td>no</td><td>Relax TLS constraints as much as possible (e.g. allowing invalid certificates or hostname mismatches); drivers must document the exact constraints which are relaxed by this option being true</td></tr>
-<tr><td>w</td><td>non-negative integer or string</td><td>no "w" value specified</td><td>no</td><td>Default write concern "w" field for the client</td></tr>
-<tr><td>waitQueueTimeoutMS</td><td>positive number</td><td>defined in the <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">Connection Pooling spec</a></td><td>required for drivers with connection pools, with exceptions described in the <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">Connection Pooling spec</a></td><td>NOTE: This option is deprecated in favor of <a href="../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a><br><br>Amount of time spent attempting to check out a connection from a server's connection pool before timing out</td></tr>
-<tr><td>wTimeoutMS</td><td>non-negative 64-bit integer; 0 means no timeout</td><td>no timeout</td><td>no</td><td>NOTE: This option is deprecated in favor of <a href="../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a><br><br>Default write concern "wtimeout" field for the client</td></tr>
+<tr><td>tls</td><td>“true” or “false”</td><td>TLS required if “mongodb+srv” scheme; otherwise, drivers may may enable TLS by default if other “tls”-prefixed options are present<br><br>Drivers MUST clearly document the conditions under which TLS is enabled implicitly</td><td>no</td><td>Whether or not to require TLS for connections to the server</td></tr>
+<tr><td>tlsAllowInvalidCertificates</td><td>“true” or “false”</td><td>error on invalid certificates</td><td>required if the driver’s language/runtime allows bypassing hostname verification</td><td>Specifies whether or not the driver should error when the server’s TLS certificate is invalid</td></tr>
+<tr><td>tlsAllowInvalidHostnames</td><td>“true” or “false”</td><td>error on invalid certificates</td><td>required if the driver’s language/runtime allows bypassing hostname verification</td><td>Specifies whether or not the driver should error when there is a mismatch between the server’s hostname and the hostname specified by the TLS certificate</td></tr>
+<tr><td>tlsCAFile</td><td>any string</td><td>no certificate authorities specified</td><td>required if the driver’s language/runtime allows non-global configuration</td><td>Path to file with either a single or bundle of certificate authorities to be considered trusted when making a TLS connection</td></tr>
+<tr><td>tlsCertificateKeyFile</td><td>any string</td><td>no client certificate specified</td><td>required if the driver’s language/runtime allows non-global configuration</td><td>Path to the client certificate file or the client private key file; in the case that they both are needed, the files should be concatenated</td></tr>
+<tr><td>tlsCertificateKeyFilePassword</td><td>any string</td><td>no password specified</td><td>required if the driver’s language/runtime allows non-global configuration</td><td>Password to decrypt the client private key to be used for TLS connections</td></tr>
+<tr><td>tlsDisableCertificateRevocationCheck</td><td>“true” or “false”</td><td>false i.e. driver will reach check a certificate’s revocation status</td><td>Yes</td><td>Controls whether or not the driver will check a certificate’s revocation status via CRLs or OCSP. See the <a href="../ocsp-support/ocsp-support.html#tlsdisablecertificaterevocationcheck">OCSP Support Spec</a> for additional information.</td></tr>
+<tr><td>tlsDisableOCSPEndpointCheck</td><td>“true” or “false”</td><td>false i.e. driver will reach out to OCSP endpoints <a href="../ocsp-support/ocsp-support.html#tlsdisableocspendpointcheck">if needed</a>.</td><td>Yes</td><td>Controls whether or not the driver will reach out to OCSP endpoints if needed. See the <a href="../ocsp-support/ocsp-support.html#tlsdisableocspendpointcheck">OCSP Support Spec</a> for additional information.</td></tr>
+<tr><td>tlsInsecure</td><td>“true” or “false”</td><td>No TLS constraints are relaxed</td><td>no</td><td>Relax TLS constraints as much as possible (e.g. allowing invalid certificates or hostname mismatches); drivers must document the exact constraints which are relaxed by this option being true</td></tr>
+<tr><td>w</td><td>non-negative integer or string</td><td>no “w” value specified</td><td>no</td><td>Default write concern “w” field for the client</td></tr>
+<tr><td>waitQueueTimeoutMS</td><td>positive number</td><td>defined in the <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">Connection Pooling spec</a></td><td>required for drivers with connection pools, with exceptions described in the <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-options">Connection Pooling spec</a></td><td>NOTE: This option is deprecated in favor of <a href="../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a><br><br>Amount of time spent attempting to check out a connection from a server’s connection pool before timing out</td></tr>
+<tr><td>wTimeoutMS</td><td>non-negative 64-bit integer; 0 means no timeout</td><td>no timeout</td><td>no</td><td>NOTE: This option is deprecated in favor of <a href="../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a><br><br>Default write concern “wtimeout” field for the client</td></tr>
 <tr><td>zlibCompressionLevel</td><td>integer between -1 and 9 (inclusive)</td><td>-1 (default compression level of the driver)</td><td>no</td><td>Specifies the level of compression when using zlib to compress wire protocol messages; -1 signifies the default level, 0 signifies no compression, 1 signifies the fastest speed, and 9 signifies the best compression</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
 <p>Tests are implemented and described in the <a href="tests/README.html">tests</a> directory.</p>
@@ -268,33 +273,33 @@ to URI options apply here.</p>
 <p>First and foremost, this spec aims not to introduce any breaking changes to drivers. Forcing a driver to change the name
 of an option that it provides will break any applications that use the old option. Moreover, it is already possible to
 provide duplicate options in the URI by specifying the same option more than once; drivers can use the same semantics to
-resolve the conflicts as they did before, whether it's raising an error, using the first option provided, using the last
+resolve the conflicts as they did before, whether it’s raising an error, using the first option provided, using the last
 option provided, or simply telling users that the behavior is not defined.</p>
-<h3 id="why-use-tls-as-the-prefix-instead-of-ssl-for-related-options"><a class="header" href="#why-use-tls-as-the-prefix-instead-of-ssl-for-related-options">Why use "tls" as the prefix instead of "ssl" for related options?</a></h3>
+<h3 id="why-use-tls-as-the-prefix-instead-of-ssl-for-related-options"><a class="header" href="#why-use-tls-as-the-prefix-instead-of-ssl-for-related-options">Why use “tls” as the prefix instead of “ssl” for related options?</a></h3>
 <p>Technically speaking, drivers already only support TLS, which supersedes SSL. While SSL is commonly used in parlance to
 refer to TLS connections, the fact remains that SSL is a weaker cryptographic protocol than TLS, and we want to
 accurately reflect the strict requirements that drivers have in ensuring the security of a TLS connection.</p>
-<h3 id="why-use-the-names-tlsallowinvalidhostnames-and-tlsallowinvalidcertificates"><a class="header" href="#why-use-the-names-tlsallowinvalidhostnames-and-tlsallowinvalidcertificates">Why use the names "tlsAllowInvalidHostnames" and "tlsAllowInvalidCertificates"?</a></h3>
-<p>The "tls" prefix is used for the same reasons described above. The use of the terms "AllowInvalidHostnames" and
-"AllowInvalidCertificates" is an intentional choice in order to convey the inherent unsafety of these options, which
-should only be used for testing purposes. Additionally, both the server and the shell use "AllowInvalid" for their
+<h3 id="why-use-the-names-tlsallowinvalidhostnames-and-tlsallowinvalidcertificates"><a class="header" href="#why-use-the-names-tlsallowinvalidhostnames-and-tlsallowinvalidcertificates">Why use the names “tlsAllowInvalidHostnames” and “tlsAllowInvalidCertificates”?</a></h3>
+<p>The “tls” prefix is used for the same reasons described above. The use of the terms “AllowInvalidHostnames” and
+“AllowInvalidCertificates” is an intentional choice in order to convey the inherent unsafety of these options, which
+should only be used for testing purposes. Additionally, both the server and the shell use “AllowInvalid” for their
 equivalent options.</p>
-<h3 id="why-provide-multiple-implementation-options-for-the-insecure-tls-options-ie-tlsinsecure-vs-tlsallowinvalidhostnamestlsallowinvalidcertificates"><a class="header" href="#why-provide-multiple-implementation-options-for-the-insecure-tls-options-ie-tlsinsecure-vs-tlsallowinvalidhostnamestlsallowinvalidcertificates">Why provide multiple implementation options for the insecure TLS options (i.e. "tlsInsecure" vs. "tlsAllowInvalidHostnames"/"tlsAllowInvalidCertificates"?</a></h3>
-<p>Some TLS libraries (e.g. Go's standard library implementation) do not provide the ability to distinguish between allow
+<h3 id="why-provide-multiple-implementation-options-for-the-insecure-tls-options-ie-tlsinsecure-vs-tlsallowinvalidhostnamestlsallowinvalidcertificates"><a class="header" href="#why-provide-multiple-implementation-options-for-the-insecure-tls-options-ie-tlsinsecure-vs-tlsallowinvalidhostnamestlsallowinvalidcertificates">Why provide multiple implementation options for the insecure TLS options (i.e. “tlsInsecure” vs. “tlsAllowInvalidHostnames”/“tlsAllowInvalidCertificates”?</a></h3>
+<p>Some TLS libraries (e.g. Go’s standard library implementation) do not provide the ability to distinguish between allow
 invalid certificates and hostnames, meaning they either both are allowed, or neither are. However, when more granular
-options are available, it's better to expose these to the user to allow them to relax security constraints as little as
+options are available, it’s better to expose these to the user to allow them to relax security constraints as little as
 they need.</p>
 <h3 id="why-leave-the-decision-up-to-drivers-to-enable-tls-implicitly-when-tls-options-are-present"><a class="header" href="#why-leave-the-decision-up-to-drivers-to-enable-tls-implicitly-when-tls-options-are-present">Why leave the decision up to drivers to enable TLS implicitly when TLS options are present?</a></h3>
-<p>It can be useful to turn on TLS implicitly when options such as "tlsCAFile" are present and "tls" is not present.
-However, with options such as "tlsAllowInvalidHostnames", some drivers may not have the ability to distinguish between
-"false" being provided and the option not being specified. To keep the implicit enabling of TLS consistent between such
-options, we defer the decision to enable TLS based on the presence of "tls"-prefixed options (besides "tls" itself) to
+<p>It can be useful to turn on TLS implicitly when options such as “tlsCAFile” are present and “tls” is not present.
+However, with options such as “tlsAllowInvalidHostnames”, some drivers may not have the ability to distinguish between
+“false” being provided and the option not being specified. To keep the implicit enabling of TLS consistent between such
+options, we defer the decision to enable TLS based on the presence of “tls”-prefixed options (besides “tls” itself) to
 drivers.</p>
 <h2 id="reference-implementations"><a class="header" href="#reference-implementations">Reference Implementations</a></h2>
 <p>Ruby and Python</p>
 <h2 id="security-implication"><a class="header" href="#security-implication">Security Implication</a></h2>
-<p>Each of the "insecure" TLS options (i.e. "tlsInsecure", "tlsAllowInvalidHostnames", "tlsAllowInvalidCertificates",
-"tlsDisableOCSPEndpointCheck", and "tlsDisableCertificateRevocationCheck") default to the more secure option when TLS is
+<p>Each of the “insecure” TLS options (i.e. “tlsInsecure”, “tlsAllowInvalidHostnames”, “tlsAllowInvalidCertificates”,
+“tlsDisableOCSPEndpointCheck”, and “tlsDisableCertificateRevocationCheck”) default to the more secure option when TLS is
 enabled. In order to be backwards compatible with existing driver behavior, neither TLS nor authentication is enabled by
 default.</p>
 <h2 id="future-work"><a class="header" href="#future-work">Future Work</a></h2>
@@ -356,8 +361,7 @@ changes.</p>
 <p>2019-01-25: Updated to reflect new Connection Monitoring and Pooling Spec</p>
 </li>
 </ul>
-<hr />
-
+<hr>
                         </div>
                         <div id="sidetoc">
                             <nav id="pagetoc"></nav>
@@ -366,27 +370,12 @@ changes.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../connection-string/connection-string-spec.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../ocsp-support/ocsp-support.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../connection-string/connection-string-spec.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../ocsp-support/ocsp-support.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

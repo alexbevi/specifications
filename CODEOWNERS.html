@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="highlight.css" id="highlight-css">
@@ -156,9 +155,14 @@
                     <main>
                         <div class="content-wrap">
                             <h1 id="specification-owners"><a class="header" href="#specification-owners">Specification Owners</a></h1>
-<p>This is very loosely based on GitHub's <a href="https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners">CODEOWNERS</a>.</p>
-<div class="table-wrapper"><table><thead><tr><th>Specification</th><th>DRI/Owner(s)</th><th>Last Updated</th></tr></thead><tbody>
-<tr><td><a href="auth/auth.html">Authentication</a></td><td><a href="https://github.com/blink1073">Steven Silvester</a><br/><a href="https://github.com/comandeo-mongo">Dmitry Rybakov</a></td><td>2025-09-30</td></tr>
+<p>This is very loosely based on GitHub’s <a href="https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners">CODEOWNERS</a>.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Specification</th><th>DRI/Owner(s)</th><th>Last Updated</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="auth/auth.html">Authentication</a></td><td><a href="https://github.com/blink1073">Steven Silvester</a><br /><a href="https://github.com/comandeo-mongo">Dmitry Rybakov</a></td><td>2025-09-30</td></tr>
 <tr><td><a href="bson-binary-encrypted/binary-encrypted.html">BSON Binary Subtype 6: Encrypted</a></td><td></td><td>2024-03-04</td></tr>
 <tr><td><a href="bson-binary-vector/bson-binary-vector.html">BSON Binary Subtype 9: Vector</a></td><td></td><td>2025-06-23</td></tr>
 <tr><td><a href="bson-corpus/bson-corpus.html">BSON Corpus</a></td><td></td><td>2024-01-22</td></tr>
@@ -166,12 +170,12 @@
 <tr><td><a href="crud/bulk-write.html">Bulk Write</a></td><td></td><td>2025-09-09</td></tr>
 <tr><td><a href="causal-consistency/causal-consistency.html">Causal Consistency</a></td><td></td><td>2024-02-08</td></tr>
 <tr><td><a href="change-streams/change-streams.html">Change Streams</a></td><td><a href="https://github.com/abr-egn">Abraham Egnor</a></td><td>2025-09-08</td></tr>
-<tr><td><a href="client-side-encryption/client-side-encryption.html">Client Side Encryption</a></td><td><a href="https://github.com/kevinAlbs">Kevin Albertson</a><br/><a href="https://github.com/katcharov">Maxim Katcharov</a></td><td>2025-09-30</td></tr>
-<tr><td><a href="client-side-operations-timeout/client-side-operations-timeout.html">Client Side Operations Timeout (CSOT)</a></td><td><a href="https://github.com/ShaneHarvey">Shane Harvey</a><br/><a href="https://github.com/prestonvasquez">Preston Vasquez</a></td><td>2024-01-29</td></tr>
+<tr><td><a href="client-side-encryption/client-side-encryption.html">Client Side Encryption</a></td><td><a href="https://github.com/kevinAlbs">Kevin Albertson</a><br /><a href="https://github.com/katcharov">Maxim Katcharov</a></td><td>2025-09-30</td></tr>
+<tr><td><a href="client-side-operations-timeout/client-side-operations-timeout.html">Client Side Operations Timeout (CSOT)</a></td><td><a href="https://github.com/ShaneHarvey">Shane Harvey</a><br /><a href="https://github.com/prestonvasquez">Preston Vasquez</a></td><td>2024-01-29</td></tr>
 <tr><td><a href="collation/collation.html">Collation</a></td><td></td><td>2024-02-15</td></tr>
 <tr><td><a href="run-command/run-command.html">Command Execution</a></td><td></td><td>2024-09-02</td></tr>
 <tr><td><a href="command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a></td><td><a href="https://github.com/durran">Durran Jordan</a></td><td>2025-01-22</td></tr>
-<tr><td><a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">Connection Monitoring and Pooling</a></td><td><a href="https://github.com/stIncMale">Valentin Kovalenko</a><br/><a href="https://github.com/baileympearson">Bailey Pearson</a></td><td>2025-01-22</td></tr>
+<tr><td><a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">Connection Monitoring and Pooling</a></td><td><a href="https://github.com/stIncMale">Valentin Kovalenko</a><br /><a href="https://github.com/baileympearson">Bailey Pearson</a></td><td>2025-01-22</td></tr>
 <tr><td><a href="connection-string/connection-string-spec.html">Connection String</a></td><td></td><td>2024-05-29</td></tr>
 <tr><td><a href="transactions-convenient-api/transactions-convenient-api.html">Convenient Transactions API</a></td><td></td><td>2024-09-06</td></tr>
 <tr><td><a href="crud/crud.html">CRUD</a></td><td><a href="https://github.com/jmikola">Jeremy Mikola</a></td><td>2025-09-09</td></tr>
@@ -199,21 +203,23 @@
 <tr><td><a href="server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html">SDAM Logging and Monitoring</a></td><td></td><td>2025-01-22</td></tr>
 <tr><td><a href="server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a></td><td><a href="https://github.com/ShaneHarvey">Shane Harvey</a></td><td>2025-01-22</td></tr>
 <tr><td><a href="server-discovery-and-monitoring/server-monitoring.html">Server Monitoring</a></td><td></td><td>2025-01-22</td></tr>
-<tr><td><a href="server-selection/server-selection.html">Server Selection</a></td><td><a href="https://github.com/vector-of-bool">Colby Pike</a><br/><a href="https://github.com/NoahStapp">Noah Stapp</a></td><td>2025-02-25</td></tr>
-<tr><td><a href="sessions/driver-sessions.html">Sessions</a></td><td><a href="https://github.com/qingyang-hu">Qingyang Hu</a><br/><a href="https://github.com/sanych-sun">Oleksandr Poliakov</a></td><td>2025-02-24</td></tr>
+<tr><td><a href="server-selection/server-selection.html">Server Selection</a></td><td><a href="https://github.com/vector-of-bool">Colby Pike</a><br /><a href="https://github.com/NoahStapp">Noah Stapp</a></td><td>2025-02-25</td></tr>
+<tr><td><a href="sessions/driver-sessions.html">Sessions</a></td><td><a href="https://github.com/qingyang-hu">Qingyang Hu</a><br /><a href="https://github.com/sanych-sun">Oleksandr Poliakov</a></td><td>2025-02-24</td></tr>
 <tr><td><a href="sessions/snapshot-sessions.html">Snapshot Reads</a></td><td></td><td>2025-09-23</td></tr>
 <tr><td><a href="socks5-support/socks5.html">SOCKS5</a></td><td></td><td>2024-09-04</td></tr>
 <tr><td><a href="polling-srv-records-for-mongos-discovery/polling-srv-records-for-mongos-discovery.html"><code>SRV</code> Polling for <code>mongos</code> Discovery</a></td><td></td><td>2024-08-22</td></tr>
 <tr><td><a href="versioned-api/versioned-api.html">Stable API</a></td><td></td><td>2024-09-10</td></tr>
 <tr><td><a href="logging/logging.html">Standardized Logging</a></td><td><a href="https://github.com/BorisDog">Boris Dogadov</a></td><td>2024-03-06</td></tr>
-<tr><td><a href="transactions/transactions.html">Transactions</a></td><td><a href="https://github.com/durran">Durran Jordan</a><br/><a href="https://github.com/comandeo-mongo">Dmitry Rybakov</a></td><td>2024-11-01</td></tr>
+<tr><td><a href="transactions/transactions.html">Transactions</a></td><td><a href="https://github.com/durran">Durran Jordan</a><br /><a href="https://github.com/comandeo-mongo">Dmitry Rybakov</a></td><td>2024-11-01</td></tr>
 <tr><td><a href="unified-test-format/unified-test-format.html">Unified Test Format</a></td><td><a href="https://github.com/jmikola">Jeremy Mikola</a></td><td>2025-10-22</td></tr>
-<tr><td><a href="uri-options/uri-options.html">URI Options</a></td><td><a href="https://github.com/JamesKovacs">James Kovacs</a><br/><a href="https://github.com/alcaeus">Andreas Braun</a></td><td>2024-05-08</td></tr>
+<tr><td><a href="uri-options/uri-options.html">URI Options</a></td><td><a href="https://github.com/JamesKovacs">James Kovacs</a><br /><a href="https://github.com/alcaeus">Andreas Braun</a></td><td>2024-05-08</td></tr>
 <tr><td><a href="bson-binary-uuid/uuid.html">UUID</a></td><td></td><td>2024-08-01</td></tr>
 <tr><td><a href="compression/OP_COMPRESSED.html">Wire Compression</a></td><td></td><td>2024-02-16</td></tr>
 <tr><td><a href="server_write_commands/server_write_commands.html">Write Commands</a></td><td></td><td>2024-11-11</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
+
                         </div>
                         <div id="sidetoc">
                             <nav id="pagetoc"></nav>
@@ -222,27 +228,12 @@
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="driver-mantras.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="driver-mantras.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

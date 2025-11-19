@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="highlight.css" id="highlight-css">
@@ -159,10 +158,10 @@
 <p>The modern MongoDB driver consists of a number of components, each of which are thoroughly documented in <a href="https://github.com/mongodb/specifications">this repository</a>. Though this information is readily available and extremely helpful, what it lacks is a high level overview to tie the specs together into a cohesive picture of what a MongoDB driver is.</p>
 <p>Architecturally an implicit hierarchy exists within the drivers, so expressing drivers in terms of an <a href="https://en.wikipedia.org/wiki/Onion_model">onion model</a> feels appropriate.</p>
 <h2 id="layers-of-the-onion"><a class="header" href="#layers-of-the-onion">Layers of the Onion</a></h2>
-<p><img src="onion.png" alt="" /></p>
-<p>The <em>"drivers onion"</em> is meant to represent how various concepts, components and APIs can be layered atop each other to build a MongoDB driver from the ground up, or to help understand how existing drivers have been structured. Hopefully this representation of MongoDB’s drivers helps provide some clarity, as the complexity of these libraries - like the onion above - could otherwise bring you to tears.</p>
+<p><img src="onion.png" alt=""></p>
+<p>The <em>“drivers onion”</em> is meant to represent how various concepts, components and APIs can be layered atop each other to build a MongoDB driver from the ground up, or to help understand how existing drivers have been structured. Hopefully this representation of MongoDB’s drivers helps provide some clarity, as the complexity of these libraries - like the onion above - could otherwise bring you to tears.</p>
 <h3 id="serialization"><a class="header" href="#serialization">Serialization</a></h3>
-<p>At their lowest level all MongoDB drivers will need to know how to work with <a href="https://bsonspec.org/">BSON</a>. BSON (short for "Binary JSON") is a bin­ary-en­coded serialization of <a href="https://www.json.org/json-en.html">JSON</a>-like documents, and like JSON, it sup­ports the nesting of arrays and documents. BSON also contains extensions that al­low representation of data types that are not part of the <a href="https://datatracker.ietf.org/doc/html/rfc7159">JSON spec</a>.</p>
+<p>At their lowest level all MongoDB drivers will need to know how to work with <a href="https://bsonspec.org/">BSON</a>. BSON (short for “Binary JSON”) is a bin­ary-en­coded serialization of <a href="https://www.json.org/json-en.html">JSON</a>-like documents, and like JSON, it sup­ports the nesting of arrays and documents. BSON also contains extensions that al­low representation of data types that are not part of the <a href="https://datatracker.ietf.org/doc/html/rfc7159">JSON spec</a>.</p>
 <blockquote>
 <p><strong>Specifications:</strong> <a href="https://bsonspec.org/spec.html">BSON</a>, <a href="bson-objectid/objectid.html">ObjectId</a>, <a href="bson-decimal128/decimal128.html">Decimal128</a>, <a href="bson-binary-uuid/uuid.html">UUID</a>, <a href="dbref/dbref.html">DBRef</a>, <a href="extended-json/extended-json.html">Extended JSON</a></p>
 </blockquote>
@@ -231,8 +230,8 @@ async function main() {
 main();
 </code></pre>
 <p>Given the example above (using the <a href="https://www.mongodb.com/docs/drivers/node/current/">Node.js driver</a>) the specified connection events and command events would be logged as they’re emitted by the driver:</p>
-<p><code>connectionCheckedOut: {"time":{"$date":"2024-05-17T15:18:18.589Z"},"address":"localhost:27018","name":"connectionCheckedOut","connectionId":1}</code><br/>
-<code>commandStarted: {"name":"commandStarted","address":"127.0.0.1:27018","connectionId":1,"serviceId":null,"requestId":5,"databaseName":"test","commandName":"find","command":{"find":"foo","filter":{},"limit":1,"singleBatch":true,"batchSize":1,"lsid":{"id":{"$binary":{"base64":"4B1kOPCGRUe/641MKhGT4Q==","subType":"04"}}},"$clusterTime":{"clusterTime":{"$timestamp":{"t":1715959097,"i":1}},"signature":{"hash":{"$binary":"base64":"AAAAAAAAAAAAAAAAAAAAAAAAAAA=","subType":"00"}},"keyId":0}},"$db":"test"},"serverConnectionId":140}</code></p>
+<p><code>connectionCheckedOut: {“time”:{“$date”:“2024-05-17T15:18:18.589Z”},“address”:“localhost:27018”,“name”:“connectionCheckedOut”,“connectionId”:1}</code><br />
+<code>commandStarted: {“name”:“commandStarted”,“address”:“127.0.0.1:27018”,“connectionId”:1,“serviceId”:null,“requestId”:5,“databaseName”:“test”,“commandName”:“find”,“command”:{“find”:“foo”,“filter”:{},“limit”:1,“singleBatch”:true,“batchSize”:1,“lsid”:{“id”:{“$binary”:{“base64”:“4B1kOPCGRUe/641MKhGT4Q==”,“subType”:“04”}}},“$clusterTime”:{“clusterTime”:{“$timestamp”:{“t”:1715959097,“i”:1}},“signature”:{“hash”:{“$binary”:“base64”:“AAAAAAAAAAAAAAAAAAAAAAAAAAA=”,“subType”:“00”}},“keyId”:0}},“$db”:“test”},“serverConnectionId”:140}</code></p>
 <p>The preferred method of observing internal behavior would be through <a href="logging/logging.html">standardized logging</a> once it is available in all drivers (<a href="https://jira.mongodb.org/browse/DRIVERS-1204">DRIVERS-1204</a>), however until that time only event logging is consistently available. In the future additional observability tooling such as <a href="https://opentelemetry.io/">Open Telemetry</a> support may also be introduced.</p>
 <blockquote>
 <p><strong>Specifications:</strong> <a href="command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a>, <a href="server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.html">SDAM Logging and Monitoring</a>, <a href="logging/logging.html">Standardized Logging</a>, <a href="connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool-logging">Connection Pool Logging</a></p>
@@ -245,7 +244,7 @@ main();
 </blockquote>
 <h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
 <p>Most (if not all) the information required to build a new driver or maintain existing drivers technically exists within the specifications, however without a mental mode of their composition and architecture it can be extremely challenging to know where to look.</p>
-<p>Peeling the <em>"drivers onion"</em> should hopefully make reasoning about them a little easier, especially with the understanding that everything can be tested to validate individual implementations are "up to spec".</p>
+<p>Peeling the <em>“drivers onion”</em> should hopefully make reasoning about them a little easier, especially with the understanding that everything can be tested to validate individual implementations are “up to spec”.</p>
 
                         </div>
                         <div id="sidetoc">
@@ -255,21 +254,12 @@ main();
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-
-                            <a rel="next prefetch" href="CODEOWNERS.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-
-                    <a rel="next prefetch" href="CODEOWNERS.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,18 +159,18 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 2.6</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>This specification outlines a new <code>timeoutMS</code> option to govern the amount of time that a single operation can execute
 before control is returned to the user. This timeout applies to all of the work done to execute the operation, including
 but not limited to server selection, connection checkout, and server-side execution.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <p><strong>min(a, b)</strong></p>
-<p>Shorthand for "the minimum of a and b" where <code>a</code> and <code>b</code> are numeric values. For any cases where 0 means "infinite"
+<p>Shorthand for “the minimum of a and b” where <code>a</code> and <code>b</code> are numeric values. For any cases where 0 means “infinite”
 (e.g. <a href="#timeoutms">timeoutMS</a>), <code>min(0, other)</code> MUST evaluate to <code>other</code>.</p>
 <h3 id="mongoclient-configuration"><a class="header" href="#mongoclient-configuration">MongoClient Configuration</a></h3>
 <p>This specification introduces a new configuration option and deprecates some existing options.</p>
@@ -190,7 +189,7 @@ choose to leverage these APIs for the <code>timeoutMS</code> option rather than 
 follow the semantics for special values defined by those types. Such drivers MUST also ensure that there is a way to
 explicitly set <code>timeoutMS</code> to <code>infinite</code> in the API.</p>
 <p>See
-<a href="#timeoutms-cannot-be-changed-to-unset-once-its-specified">timeoutMS cannot be changed to unset once it's specified</a>.</p>
+<a href="#timeoutms-cannot-be-changed-to-unset-once-its-specified">timeoutMS cannot be changed to unset once it’s specified</a>.</p>
 <h4 id="backwards-breaking-considerations"><a class="header" href="#backwards-breaking-considerations">Backwards Breaking Considerations</a></h4>
 <p>This specification deprecates many existing timeout options and introduces a new exception type that is used to
 communicate timeout expiration. If drivers need to make backwards-breaking changes to support <code>timeoutMS</code>, the backwards
@@ -337,7 +336,7 @@ establishment and <code>socketTimeoutMS</code> as the socket timeout for all han
 <code>minRoundTripTime</code> field of the selected server. Note that this value MUST be retrieved during server selection using
 the <code>servers</code> field of the same
 <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#TopologyDescription">TopologyDescription</a> that
-was used for selection before the selected server's description can be modified. Otherwise, drivers may be subject to a
+was used for selection before the selected server’s description can be modified. Otherwise, drivers may be subject to a
 race condition where a server is reset to the default description (e.g. due to an error in the monitoring thread) after
 it has been selected but before the RTT is retrieved.</p>
 <p>If the <code>minRoundTripTime</code> is less than the remaining timeoutMS, the value of this field MUST be
@@ -346,7 +345,7 @@ message to the server. This is done to ensure that an operation is not routed to
 a socket timeout as that could cause connection churn. The <code>maxTimeMS</code> field MUST be appended after all blocking work is
 complete.</p>
 <p>After wire message construction, drivers MUST check for timeout before writing the message to the server. If the timeout
-has expired or the amount of time remaining is less than the selected server's minimum RTT, drivers MUST return the
+has expired or the amount of time remaining is less than the selected server’s minimum RTT, drivers MUST return the
 connection to the pool and raise a timeout exception. Otherwise, drivers MUST set the connection’s write timeout to the
 remaining <code>timeoutMS</code> value before writing a message to the server. After the write is complete, drivers MUST check for
 timeout expiration before reading the server’s response. If the timeout has expired, the connection MUST be closed and a
@@ -373,7 +372,7 @@ the key vault, and any commands against mongocryptd. It MUST also be used as the
 against KMS servers to decrypt data keys. When sending a command to mongocryptd, drivers MUST NOT append a <code>maxTimeMS</code>
 field. This is to ensure that a <code>maxTimeMS</code> field can be safely appended to the command after it has been marked by
 mongocryptd and encrypted by libmongocrypt. To determine whether or not the server is a mongocryptd, drivers MUST check
-that the <code>iscryptd</code> field in the server's description is <code>true</code>.</p>
+that the <code>iscryptd</code> field in the server’s description is <code>true</code>.</p>
 <p>For explicit encryption and decryption, the <code>ClientEncryptionOpts</code> options type used to construct
 <a href="../client-side-encryption/client-side-encryption.html#clientencryption">ClientEncryption</a> instances MUST support a new
 <code>timeoutMS</code> option, which specifies the timeout for all operations executed on the <code>ClientEncryption</code> object.</p>
@@ -501,12 +500,12 @@ for GridFS API operations MUST internally set the <code>timeoutMode</code> optio
 check the command document for the presence of a <code>maxTimeMS</code> field.</p>
 <p>See <a href="#runcommand-behavior">runCommand behavior</a>.</p>
 <h3 id="explain"><a class="header" href="#explain">Explain</a></h3>
-<blockquote>
-<p>[!NOTE]
-This portion of the specification is only relevant for drivers that provide <code>explain</code> helpers.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>This portion of the specification is only relevant for drivers that provide <code>explain</code> helpers.</p>
 </blockquote>
 <p>When <code>timeoutMS</code> is specified, drivers MUST provide a way to specify timeoutMS that results in maxTimeMS being set on
-the <code>explain</code> command. For example, Node's implementation might look like:</p>
+the <code>explain</code> command. For example, Node’s implementation might look like:</p>
 <pre><code class="language-typescript">collection.find({}).explain({ timeoutMS: 1000 });
 // sends:
 { explain: { find: ... }, maxTimeMS: &lt;remaining timeoutMS - min rtt&gt;}
@@ -526,7 +525,7 @@ to be propagated to applications. Supporting a timeout for an entire operation a
 multiple times while still guaranteeing that an application can get back control once the specified amount of time has
 elapsed.</p>
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
-<h3 id="timeoutms-cannot-be-changed-to-unset-once-its-specified"><a class="header" href="#timeoutms-cannot-be-changed-to-unset-once-its-specified">timeoutMS cannot be changed to unset once it's specified</a></h3>
+<h3 id="timeoutms-cannot-be-changed-to-unset-once-its-specified"><a class="header" href="#timeoutms-cannot-be-changed-to-unset-once-its-specified">timeoutMS cannot be changed to unset once it’s specified</a></h3>
 <p>If <code>timeoutMS</code> is specified at any level, it cannot be later changed to unset at a lower level. For example, a user
 cannot do:</p>
 <pre><code class="language-python">client = MongoClient(uri, timeoutMS=1000)
@@ -586,7 +585,7 @@ while others would append a second <code>maxTimeMS</code> field, which would cau
 prescriptive, we could mandate that drivers raise a client-side error in this case, but this would require a potentially
 expensive lookup in the command document. To avoid this additional cost, drivers are only required to document the
 behavior and suggest that <code>timeoutMS</code> be used instead of including a manual <code>maxTimeMS</code> field.</p>
-<h3 id="why-dont-drivers-use-backoffjitter-between-retry-attempts"><a class="header" href="#why-dont-drivers-use-backoffjitter-between-retry-attempts">Why don't drivers use backoff/jitter between retry attempts?</a></h3>
+<h3 id="why-dont-drivers-use-backoffjitter-between-retry-attempts"><a class="header" href="#why-dont-drivers-use-backoffjitter-between-retry-attempts">Why don’t drivers use backoff/jitter between retry attempts?</a></h3>
 <p>Earlier versions of this specification proposed adding backoff and/or jitter between retry attempts to avoid connection
 storming or overloading the server, but we later deemed this unnecessary. If multiple concurrent operations select the
 same server for a retry and its connection pool is empty, we rely on the <code>maxConnecting</code> parameter introduced in
@@ -701,27 +700,12 @@ timeout for each database operation. This would mimic using <code>timeoutMode=IT
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../retryable-writes/retryable-writes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../sessions/driver-sessions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../retryable-writes/retryable-writes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../sessions/driver-sessions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,15 +159,15 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 4.0</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>Reliably committing a transaction in the face of errors can be a complicated endeavor using the MongoDB 4.0 drivers API.
 This specification introduces a <code>withTransaction</code> method on the ClientSession object that allows application logic to be
 executed within a transaction. This method is capable of retrying either the commit operation or entire transaction as
 needed (and when the error permits) to better ensure that the transaction can complete successfully.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <p><span id="callback"></span></p>
@@ -179,7 +178,7 @@ implementing language, this may be a closure, function pointer, or other callabl
 <p>Driver object representing a client session, as defined in the <a href="../sessions/driver-sessions.html">Driver Session</a>
 specification. The name of this object MAY vary across drivers.</p>
 <p><strong>MongoClient</strong></p>
-<p>The root object of a driver's API. The name of this object MAY vary across drivers.</p>
+<p>The root object of a driver’s API. The name of this object MAY vary across drivers.</p>
 <p><span id="TransactionOptions"></span></p>
 <p><strong>TransactionOptions</strong></p>
 <p>Options for <code>ClientSession.startTransaction</code>, as defined in the <a href="../transactions/transactions.html">Transactions</a>
@@ -223,7 +222,7 @@ the error is not MaxTimeMSExpired and the retry timeout has not been exceeded. O
 commit and allow <code>withTransaction</code> to propagate the error to its caller.</p>
 <p>If a TransientTransactionError is encountered at any point, the entire transaction may be retried. If the retry timeout
 has not been exceeded, the driver MUST retry a transaction that fails with an error bearing the
-"TransientTransactionError" label. Since retrying the entire transaction will entail invoking the callback again,
+“TransientTransactionError” label. Since retrying the entire transaction will entail invoking the callback again,
 drivers MUST document that the callback may be invoked multiple times (i.e. one additional time per retry attempt) and
 MUST document the risk of side effects from using a non-idempotent callback. If the retry timeout has been exceeded,
 drivers MUST NOT retry the transaction and allow <code>withTransaction</code> to propagate the error to its caller.</p>
@@ -250,29 +249,29 @@ ClientSession as the first parameter, rely on lexical scoping). Drivers MAY pass
 reported an error (e.g. thrown exception, error output parameter).</li>
 <li>If the callback reported an error:
 <ol>
-<li>If the ClientSession is in the "starting transaction" or "transaction in progress" state, invoke
+<li>If the ClientSession is in the “starting transaction” or “transaction in progress” state, invoke
 <a href="../transactions/transactions.html#aborttransaction">abortTransaction</a> on the session.</li>
-<li>If the callback's error includes a "TransientTransactionError" label and the elapsed time of <code>withTransaction</code> is
+<li>If the callback’s error includes a “TransientTransactionError” label and the elapsed time of <code>withTransaction</code> is
 less than 120 seconds, jump back to step two.</li>
-<li>If the callback's error includes a "UnknownTransactionCommitResult" label, the callback must have manually
-committed a transaction, propagate the callback's error to the caller of <code>withTransaction</code> and return
+<li>If the callback’s error includes a “UnknownTransactionCommitResult” label, the callback must have manually
+committed a transaction, propagate the callback’s error to the caller of <code>withTransaction</code> and return
 immediately.</li>
-<li>Otherwise, propagate the callback's error to the caller of <code>withTransaction</code> and return immediately.</li>
+<li>Otherwise, propagate the callback’s error to the caller of <code>withTransaction</code> and return immediately.</li>
 </ol>
 </li>
-<li>If the ClientSession is in the "no transaction", "transaction aborted", or "transaction committed" state, assume the
+<li>If the ClientSession is in the “no transaction”, “transaction aborted”, or “transaction committed” state, assume the
 callback intentionally aborted or committed the transaction and return immediately.</li>
 <li>Invoke <a href="../transactions/transactions.html#committransaction">commitTransaction</a> on the session.</li>
 <li>If <code>commitTransaction</code> reported an error:
 <ol>
 <li>
-<p>If the <code>commitTransaction</code> error includes a "UnknownTransactionCommitResult" label and the error is not
+<p>If the <code>commitTransaction</code> error includes a “UnknownTransactionCommitResult” label and the error is not
 MaxTimeMSExpired and the elapsed time of <code>withTransaction</code> is less than 120 seconds, jump back to step eight.
 We will trust <code>commitTransaction</code> to apply a majority write concern on retry attempts (see:
 <a href="#majority-write-concern-is-used-when-retrying-committransaction">Majority write concern is used when retrying commitTransaction</a>).</p>
 </li>
 <li>
-<p>If the <code>commitTransaction</code> error includes a "TransientTransactionError" label and the elapsed time of
+<p>If the <code>commitTransaction</code> error includes a “TransientTransactionError” label and the elapsed time of
 <code>withTransaction</code> is less than 120 seconds, jump back to step two.</p>
 </li>
 <li>
@@ -356,7 +355,7 @@ propagate. Command errors may abort the transaction on the server, and an attemp
 rejected with <code>NoSuchTransaction</code> error.</p>
 <p>For example, <code>DuplicateKeyError</code> is an error that aborts a transaction on the server. If the callback catches
 <code>DuplicateKeyError</code> and does not re-throw it, the driver will attempt to commit the transaction. The server will reject
-the commit attempt with <code>NoSuchTransaction</code> error. This error has the "TransientTransactionError" label and the driver
+the commit attempt with <code>NoSuchTransaction</code> error. This error has the “TransientTransactionError” label and the driver
 will retry the commit. This will result in an infinite loop.</p>
 <p>Drivers MUST recommend that the callback re-throw command errors if they need to be handled inside the callback. Drivers
 SHOULD also recommend using Core Transaction API if a user wants to handle errors in a custom way.</p>
@@ -382,12 +381,12 @@ superfluous for languages where the callback might already have access to Client
 Instead, the spec simply requires that drivers ensure the callback will be able to access the ClientSession.</p>
 <p>Similarly, the specification does not concern itself with the return type of the callback function. If drivers allow the
 callback to return a value, they may also choose to propagate that value as the return value of withTransaction.</p>
-<p>An earlier design also considered using the callback's return value to indicate whether control should break out of
+<p>An earlier design also considered using the callback’s return value to indicate whether control should break out of
 <code>withTransaction</code> (and its retry loop) and return to the application. The design allows this to be accomplished in one
 of two ways:</p>
 <ul>
 <li>The callback aborts the transaction directly and returns to <code>withTransaction</code>, which will then return to its caller.</li>
-<li>The callback raises an error without the "TransientTransactionError" label, in which case <code>withTransaction</code> will abort
+<li>The callback raises an error without the “TransientTransactionError” label, in which case <code>withTransaction</code> will abort
 the transaction and return to its caller.</li>
 </ul>
 <h3 id="applications-are-responsible-for-passing-clientsession-for-operations-within-a-transaction"><a class="header" href="#applications-are-responsible-for-passing-clientsession-for-operations-within-a-transaction">Applications are responsible for passing ClientSession for operations within a transaction</a></h3>
@@ -396,7 +395,7 @@ transaction. With regard to <code>withTransaction</code>, applications are free 
 irrespective of whether those operations are associated with the transaction.</p>
 <h3 id="it-is-assumed-that-the-callback-will-not-start-a-new-transaction-on-the-clientsession"><a class="header" href="#it-is-assumed-that-the-callback-will-not-start-a-new-transaction-on-the-clientsession">It is assumed that the callback will not start a new transaction on the ClientSession</a></h3>
 <p>Under normal circumstances, the callback should not commit the transaction nor should it start a new transaction. The
-<code>withTransaction</code> method will inspect the ClientSession's transaction state after the callback returns and take the most
+<code>withTransaction</code> method will inspect the ClientSession’s transaction state after the callback returns and take the most
 sensible course of action; however, it will not detect whether the callback has started a new transaction.</p>
 <h3 id="the-callback-function-may-be-executed-multiple-times"><a class="header" href="#the-callback-function-may-be-executed-multiple-times">The callback function may be executed multiple times</a></h3>
 <p>The callback may be executed any number of times. Drivers are free to encourage their users to design idempotent
@@ -415,12 +414,12 @@ is applied for the the following errors:</p>
 <code>{ok:1, writeConcernError: {code: 50, codeName: "MaxTimeMSExpired"}}</code>.</li>
 </ul>
 <p>A previous design for <code>withTransaction</code> retried for all of these errors <em>except</em> for write concern timeouts, so as not
-to exceed the user's original intention for <code>wtimeout</code>. The current design of this specification no longer excludes
+to exceed the user’s original intention for <code>wtimeout</code>. The current design of this specification no longer excludes
 write concern timeouts, and simply retries <code>commitTransaction</code> within its timeout period for all errors bearing the
-"UnknownTransactionCommitResult" label.</p>
+“UnknownTransactionCommitResult” label.</p>
 <h3 id="the-commit-is-not-retried-after-a-maxtimemsexpired-error"><a class="header" href="#the-commit-is-not-retried-after-a-maxtimemsexpired-error">The commit is not retried after a MaxTimeMSExpired error</a></h3>
 <p>This specification intentionally chooses not to retry commit operations after a MaxTimeMSExpired error as doing so would
-exceed the user's original intention for <code>maxTimeMS</code>.</p>
+exceed the user’s original intention for <code>maxTimeMS</code>.</p>
 <h3 id="the-transaction-and-commit-may-be-retried-any-number-of-times-within-a-timeout-period"><a class="header" href="#the-transaction-and-commit-may-be-retried-any-number-of-times-within-a-timeout-period">The transaction and commit may be retried any number of times within a timeout period</a></h3>
 <p>The callback may be executed any number of times. Drivers are free to encourage their users to design idempotent
 callbacks.</p>
@@ -432,7 +431,7 @@ regularly in a healthy application, as opposed to UnknownTransactionCommitResult
 election.</p>
 <p>In order to avoid blocking the application with infinite retry loops, <code>withTransaction</code> will cease retrying invocations
 of the callback or commitTransaction if it has exceeded a fixed timeout period of 120 seconds. This limit is a
-non-configurable default and is intentionally twice the value of MongoDB 4.0's default for the
+non-configurable default and is intentionally twice the value of MongoDB 4.0’s default for the
 <a href="https://www.mongodb.com/docs/manual/reference/parameters/#param.transactionLifetimeLimitSeconds">transactionLifetimeLimitSeconds</a>
 parameter (60 seconds). Applications that desire longer retry periods may call <code>withTransaction</code> additional times as
 needed. Applications that desire shorter retry periods should not use this method.</p>
@@ -477,27 +476,12 @@ provides an implementation of a technique already described in the MongoDB 4.0 d
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../transactions/transactions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../versioned-api/versioned-api.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../transactions/transactions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../versioned-api/versioned-api.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

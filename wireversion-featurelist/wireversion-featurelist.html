@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -156,29 +155,153 @@
                     <main>
                         <div class="content-wrap">
                             <h1 id="server-wire-version-and-feature-list"><a class="header" href="#server-wire-version-and-feature-list">Server Wire version and Feature List</a></h1>
-<div class="table-wrapper"><table><thead><tr><th>Server version</th><th>Wire version</th><th>Feature List</th></tr></thead><tbody>
-<tr><td>2.6</td><td>1</td><td><p>Aggregation cursor</p> <p>Auth commands</p></td></tr>
-<tr><td>2.6</td><td>2</td><td><p>Write commands (insert/update/delete)</p> <p>Aggregation $out pipeline operator</p></td></tr>
-<tr><td>3.0</td><td>3</td><td><p>listCollections</p> <p>listIndexes</p> <p>SCRAM-SHA-1</p> <p>explain command</p></td></tr>
-<tr><td>3.2</td><td>4</td><td><p>(find/getMore/killCursors) commands</p> <p>currentOp command</p> <p>fsyncUnlock command</p> <p>findAndModify take write concern</p> <p>Commands take read concern</p> <p>Document-level validation</p> <p>explain command supports distinct and findAndModify</p></td></tr>
-<tr><td>3.4</td><td>5</td><td><p>Commands take write concern</p> <p>Commands take collation</p></td></tr>
-<tr><td>3.6</td><td>6</td><td><p>Supports OP_MSG</p> <p>Collection-level ChangeStream support</p> <p>Retryable Writes</p> <p>Causally Consistent Reads</p> <p>Logical Sessions</p> <p>update "arrayFilters" option</p></td></tr>
-<tr><td>4.0</td><td>7</td><td><p>ReplicaSet transactions</p> <p>Database and cluster-level change streams and startAtOperationTime option</p></td></tr>
-<tr><td>4.2</td><td>8</td><td><p>Sharded transactions</p> <p>Aggregation $merge pipeline operator</p> <p>update "hint" option</p></td></tr>
-<tr><td>4.4</td><td>9</td><td><p>Streaming protocol for SDAM</p> <p>ResumableChangeStreamError error label</p> <p>delete "hint" option</p> <p>findAndModify "hint" option</p> <p>createIndexes "commitQuorum" option</p></td></tr>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Server version</th><th>Wire version</th><th>Feature List</th></tr>
+</thead>
+<tbody>
+<tr><td>2.6</td><td>1</td><td>
+<p>Aggregation cursor</p>
+ 
+<p>Auth commands</p>
+</td></tr>
+<tr><td>2.6</td><td>2</td><td>
+<p>Write commands (insert/update/delete)</p>
+ 
+<p>Aggregation $out pipeline operator</p>
+</td></tr>
+<tr><td>3.0</td><td>3</td><td>
+<p>listCollections</p>
+ 
+<p>listIndexes</p>
+ 
+<p>SCRAM-SHA-1</p>
+ 
+<p>explain command</p>
+</td></tr>
+<tr><td>3.2</td><td>4</td><td>
+<p>(find/getMore/killCursors) commands</p>
+ 
+<p>currentOp command</p>
+ 
+<p>fsyncUnlock command</p>
+ 
+<p>findAndModify take write concern</p>
+ 
+<p>Commands take read concern</p>
+ 
+<p>Document-level validation</p>
+ 
+<p>explain command supports distinct and findAndModify</p>
+</td></tr>
+<tr><td>3.4</td><td>5</td><td>
+<p>Commands take write concern</p>
+ 
+<p>Commands take collation</p>
+</td></tr>
+<tr><td>3.6</td><td>6</td><td>
+<p>Supports OP_MSG</p>
+ 
+<p>Collection-level ChangeStream support</p>
+ 
+<p>Retryable Writes</p>
+ 
+<p>Causally Consistent Reads</p>
+ 
+<p>Logical Sessions</p>
+ 
+<p>update “arrayFilters” option</p>
+</td></tr>
+<tr><td>4.0</td><td>7</td><td>
+<p>ReplicaSet transactions</p>
+ 
+<p>Database and cluster-level change streams and startAtOperationTime option</p>
+</td></tr>
+<tr><td>4.2</td><td>8</td><td>
+<p>Sharded transactions</p>
+ 
+<p>Aggregation $merge pipeline operator</p>
+ 
+<p>update “hint” option</p>
+</td></tr>
+<tr><td>4.4</td><td>9</td><td>
+<p>Streaming protocol for SDAM</p>
+ 
+<p>ResumableChangeStreamError error label</p>
+ 
+<p>delete “hint” option</p>
+ 
+<p>findAndModify “hint” option</p>
+ 
+<p>createIndexes “commitQuorum” option</p>
+</td></tr>
 <tr><td>5.0</td><td>13</td><td>$out and $merge on secondaries (technically FCV 4.4+)</td></tr>
 <tr><td>5.1</td><td>14</td><td></td></tr>
 <tr><td>5.2</td><td>15</td><td></td></tr>
 <tr><td>5.3</td><td>16</td><td></td></tr>
-<tr><td>6.0</td><td>17</td><td><p>Support for Partial Indexes</p><p>Sharded Time Series Collections</p><p>FCV set to 5.0</p></td></tr>
-<tr><td>6.1</td><td>18</td><td><p>Update Perl Compatible Regular Expressions version to PCRE2</p><p>Add <code>*UCP</code> option for regex queries</p></td></tr>
-<tr><td>6.2</td><td>19</td><td><p>Collection validation ensures BSON documents conform to BSON spec</p><p>Collection validation checks time series collections for internal consistency</p></td></tr>
-<tr><td>7.0</td><td>21</td><td><p>Atlas Search Index Management</p><p><code>$currentOp</code> aggregation Metrics</p><p>Compound Wildcard Indexes</p><p>Support large change stream events via <code>$changeStreamSplitLargeEvent</code> stage</p><p><code>serverStatus</code> output gets new fields</p> <p>Slot Based Query Execution</p></td></tr>
-<tr><td>7.1</td><td>22</td><td><p>Improved Index Builds</p><p>Exhaust Cursors Enabled for Sharded Clusters</p><p>New Sharding Statistics for Chunk Migrations</p><p>Self-Managed Backups of Sharded Clusters</td></tr>
-<tr><td>7.2</td><td>23</td><td><p>Database Validation on <code>mongos</code> Aggregation Queries</p><p><code>serverStatus</code> Metrics</p><p>Default Chunks Per Shard</p></td></tr>
-<tr><td>7.3</td><td>24</td><td><p>Compaction Improvements</p><p>New <code>serverStatus</code> metrics</p></td></tr>
-<tr><td>8.0</td><td>25</td><td><p>Range Encryption GA</p><p>OIDC authentication mechanism</p><p>New <code>bulkWrite</code> command</p><p><code>snapshot</code> read concern on capped collections</p></td></tr>
-</tbody></table>
+<tr><td>6.0</td><td>17</td><td>
+<p>Support for Partial Indexes</p>
+ 
+<p>Sharded Time Series Collections</p>
+ 
+<p>FCV set to 5.0</p>
+</td></tr>
+<tr><td>6.1</td><td>18</td><td>
+<p>Update Perl Compatible Regular Expressions version to PCRE2</p>
+ 
+<p>Add <code>*UCP</code> option for regex queries</p>
+</td></tr>
+<tr><td>6.2</td><td>19</td><td>
+<p>Collection validation ensures BSON documents conform to BSON spec</p>
+ 
+<p>Collection validation checks time series collections for internal consistency</p>
+</td></tr>
+<tr><td>7.0</td><td>21</td><td>
+<p>Atlas Search Index Management</p>
+ 
+<p><code>$currentOp</code> aggregation Metrics</p>
+ 
+<p>Compound Wildcard Indexes</p>
+ 
+<p>Support large change stream events via <code>$changeStreamSplitLargeEvent</code> stage</p>
+ 
+<p><code>serverStatus</code> output gets new fields</p>
+ 
+<p>Slot Based Query Execution</p>
+</td></tr>
+<tr><td>7.1</td><td>22</td><td>
+<p>Improved Index Builds</p>
+ 
+<p>Exhaust Cursors Enabled for Sharded Clusters</p>
+ 
+<p>New Sharding Statistics for Chunk Migrations</p>
+ 
+<p>Self-Managed Backups of Sharded Clusters</p>
+</td></tr>
+<tr><td>7.2</td><td>23</td><td>
+<p>Database Validation on <code>mongos</code> Aggregation Queries</p>
+ 
+<p><code>serverStatus</code> Metrics</p>
+ 
+<p>Default Chunks Per Shard</p>
+</td></tr>
+<tr><td>7.3</td><td>24</td><td>
+<p>Compaction Improvements</p>
+ 
+<p>New <code>serverStatus</code> metrics</p>
+</td></tr>
+<tr><td>8.0</td><td>25</td><td>
+<p>Range Encryption GA</p>
+ 
+<p>OIDC authentication mechanism</p>
+ 
+<p>New <code>bulkWrite</code> command</p>
+ 
+<p><code>snapshot</code> read concern on capped collections</p>
+</td></tr>
+</tbody>
+</table>
 </div>
 <p>In server versions 5.0 and earlier, the wire version was defined as a numeric literal in
 <a href="https://github.com/mongodb/mongo/blob/master/src/mongo/db/wire_version.h">src/mongo/db/wire_version.h</a>. Since server
@@ -196,27 +319,12 @@ and
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../driver-mantras.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../BSON.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../driver-mantras.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../BSON.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

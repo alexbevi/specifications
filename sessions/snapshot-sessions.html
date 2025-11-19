@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,21 +159,21 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 5.0</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
-<p>Version 5.0 of the server introduces support for read concern level "snapshot" (non-speculative) for read commands
+<p>Version 5.0 of the server introduces support for read concern level “snapshot” (non-speculative) for read commands
 outside of transactions, including on secondaries. This spec builds upon the
-<a href="./driver-sessions.html">Sessions Specification</a> to define how an application requests "snapshot" level read concern and
+<a href="./driver-sessions.html">Sessions Specification</a> to define how an application requests “snapshot” level read concern and
 how a driver interacts with the server to implement snapshot reads.</p>
 <h2 id="definitions"><a class="header" href="#definitions">Definitions</a></h2>
 <h3 id="meta"><a class="header" href="#meta">META</a></h3>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <p><strong>ClientSession</strong></p>
 <p>The driver object representing a client session and the operations that can be performed on it.</p>
 <p><strong>MongoClient</strong></p>
-<p>The root object of a driver's API. MAY be named differently in some drivers.</p>
+<p>The root object of a driver’s API. MAY be named differently in some drivers.</p>
 <p><strong>MongoCollection</strong></p>
 <p>The driver object representing a collection and the operations that can be performed on it. MAY be named differently in
 some drivers.</p>
@@ -281,11 +280,11 @@ operations (i.e. find/aggregate/distinct commands).</li>
 the <code>readConcern</code> with a <code>snapshot</code> level in subsequent read operations.</p>
 <h2 id="server-errors"><a class="header" href="#server-errors">Server Errors</a></h2>
 <ol>
-<li>The server may reply to read commands with a <code>SnapshotTooOld(239)</code> error if the client's <code>atClusterTime</code> value is not
-available in the server's history.</li>
+<li>The server may reply to read commands with a <code>SnapshotTooOld(239)</code> error if the client’s <code>atClusterTime</code> value is not
+available in the server’s history.</li>
 <li>The server will return <code>InvalidOptions(72)</code> error if both <code>atClusterTime</code> and <code>afterClusterTime</code> options are set to
 true.</li>
-<li>The server will return <code>InvalidOptions(72)</code> error if the command does not support readConcern.level "snapshot".</li>
+<li>The server will return <code>InvalidOptions(72)</code> error if the command does not support readConcern.level “snapshot”.</li>
 </ol>
 <h2 id="snapshot-read-commands"><a class="header" href="#snapshot-read-commands">Snapshot Read Commands</a></h2>
 <p>For snapshot reads the driver MUST first obtain <code>atClusterTime</code> from the server response of a find/aggregate/distinct
@@ -323,20 +322,20 @@ value of the <code>atClusterTime</code> field of the <code>readConcern</code> wi
 session, including commands that do not accept a readConcern (e.g. insert, update). This ensures that the server will
 return an error for invalid operations, such as writes, within a session configured for snapshot reads.</p>
 <h2 id="requires-mongodb-50"><a class="header" href="#requires-mongodb-50">Requires MongoDB 5.0+</a></h2>
-<p>Snapshot reads require MongoDB 5.0+. When the connected server's maxWireVersion is less than 13, drivers MUST throw an
-exception with the message "Snapshot reads require MongoDB 5.0 or later".</p>
+<p>Snapshot reads require MongoDB 5.0+. When the connected server’s maxWireVersion is less than 13, drivers MUST throw an
+exception with the message “Snapshot reads require MongoDB 5.0 or later”.</p>
 <h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
 <p>To support snapshot reads. Only supported with server version 5.0+ or newer.</p>
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
-<p>The goal is to modify the driver API as little as possible so that existing programs that don't need snapshot reads
-don't have to be changed. This goal is met by defining a <code>SessionOptions</code> field that applications use to start a
+<p>The goal is to modify the driver API as little as possible so that existing programs that don’t need snapshot reads
+don’t have to be changed. This goal is met by defining a <code>SessionOptions</code> field that applications use to start a
 <code>ClientSession</code> that can be used for snapshot reads. Alternative explicit approach of obtaining <code>atClusterTime</code> from
 <code>cursor</code> object and passing it to read concern object was considered initially. A session-based approach was chosen as
 it aligns better with the existing API, and requires minimal API changes. Future extensibility for snapshot reads would
 be best served by a session-based approach, as no API changes will be required.</p>
 <h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
 <p>The API changes to support snapshot reads extend the existing API but do not introduce any backward breaking changes.
-Existing programs that don't use snapshot reads continue to compile and run correctly.</p>
+Existing programs that don’t use snapshot reads continue to compile and run correctly.</p>
 <h2 id="reference-implementation"><a class="header" href="#reference-implementation">Reference Implementation</a></h2>
 <p>C# driver will provide the reference implementation. The corresponding ticket is
 <a href="https://jira.mongodb.org/browse/CSHARP-3668">CSHARP-3668</a>.</p>
@@ -361,27 +360,12 @@ Existing programs that don't use snapshot reads continue to compile and run corr
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../causal-consistency/causal-consistency.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../transactions/transactions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../causal-consistency/causal-consistency.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../transactions/transactions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

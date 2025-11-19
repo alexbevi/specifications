@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,17 +159,17 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>Currently the <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html">Initial DNS Seedlist Discovery</a>
 functionality provides a static seedlist when a MongoClient is constructed. Periodically polling the DNS SRV records
 would allow for the mongos proxy list to be updated without having to change client configuration.</p>
 <p>This specification builds on top of the original Initial DNS Seedlist Discovery specification, and modifies the
-<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> specification's
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> specification’s
 definition of monitoring a set of mongos servers in a Sharded TopologyType.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <h4 id="rescan-rescanning"><a class="header" href="#rescan-rescanning">rescan, rescanning</a></h4>
@@ -239,7 +238,7 @@ seconds.</p>
 <em>rescanSRVIntervalMS</em> period SHOULD be calculated from the <strong>end</strong> of the previous rescan (or the <strong>end</strong> of the initial
 DNS seedlist discovery scan).</p>
 <h3 id="multi-threaded-drivers"><a class="header" href="#multi-threaded-drivers">Multi-Threaded Drivers</a></h3>
-<p>A threaded driver MUST use a separate monitoring thread for scanning the DNS records so that DNS lookups don't block
+<p>A threaded driver MUST use a separate monitoring thread for scanning the DNS records so that DNS lookups don’t block
 other operations.</p>
 <h3 id="single-threaded-drivers"><a class="header" href="#single-threaded-drivers">Single-Threaded Drivers</a></h3>
 <p>The rescan MUST happen <strong>before</strong> scanning all servers as part of the normal
@@ -263,15 +262,15 @@ topology:</p>
 <h4 id="should-dns-polling-use-heartbeatfrequencyms-or-dns-cache-ttls"><a class="header" href="#should-dns-polling-use-heartbeatfrequencyms-or-dns-cache-ttls">Should DNS polling use heartbeatFrequencyMS or DNS cache TTLs?</a></h4>
 <p>We have selected to use lowest TTLs among all DNS SRV records, with a caveat that the rescan frequency is not lower than
 60 seconds.</p>
-<h4 id="should-dns-polling-also-have-a-fast-polling-mode-when-no-servers-are-available"><a class="header" href="#should-dns-polling-also-have-a-fast-polling-mode-when-no-servers-are-available">Should DNS polling also have a "fast polling" mode when no servers are available?</a></h4>
-<p>We have not opted to have a "fast polling" mode, but we did include a provision that a rescan needs to happen when DNS
+<h4 id="should-dns-polling-also-have-a-fast-polling-mode-when-no-servers-are-available"><a class="header" href="#should-dns-polling-also-have-a-fast-polling-mode-when-no-servers-are-available">Should DNS polling also have a “fast polling” mode when no servers are available?</a></h4>
+<p>We have not opted to have a “fast polling” mode, but we did include a provision that a rescan needs to happen when DNS
 records are not available. In that case, a rescan would happen every <em>heartbeatFrequencyMS</em>. The rationale being that
 polling DNS really often really fast does not make a lot of sense due to DNS caching, which often uses the TTL already
 anyway, but when we have no TTL records to reference we still need a fallback frequency.</p>
 <h3 id="for-the-design"><a class="header" href="#for-the-design">For the design</a></h3>
 <h4 id="no-option-to-turn-off-periodic-rescanning"><a class="header" href="#no-option-to-turn-off-periodic-rescanning">No option to turn off periodic rescanning</a></h4>
 <p>The design does not allow for an option to turn off the periodic rescanning of SRV records on the basis that we try to
-have as few options as possible: the "no knobs" philosophy.</p>
+have as few options as possible: the “no knobs” philosophy.</p>
 <h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
 <p>This specification changes the behaviour of server monitoring by introducing a repeating DNS lookup of the SRV records.
 Although this is an improvement in the <code>mongodb+srv://</code> scheme it can nonetheless break expectations with users that
@@ -312,27 +311,12 @@ option.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server-discovery-and-monitoring/server-monitoring.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../server-selection/server-selection.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server-discovery-and-monitoring/server-monitoring.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../server-selection/server-selection.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

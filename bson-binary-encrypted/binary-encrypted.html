@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,15 +159,15 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 4.2</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>Client side encryption requires a new binary subtype to store (1) encrypted ciphertext with metadata, and (2) binary
 markings indicating what values must be encrypted in a document. (1) is stored in the server, but (2) is only used in
 the communication protocol between libmongocrypt and mongocryptd described in
 <a href="../client-side-encryption/client-side-encryption.html">Driver Spec: Client Side Encryption Encryption</a>.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <p>This spec introduces a new BSON binary subtype with value 6. The binary has multiple formats determined by the first
 byte, but are all related to client side encryption. The first byte indicates the type and layout of the remaining data.</p>
@@ -179,16 +178,29 @@ intent-to-encrypt markings which are only used between libmongocrypt and mongocr
    [more data - see individual type definitions]
 }
 </code></pre>
-<div class="table-wrapper"><table><thead><tr><th></th><th></th><th></th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
 <tr><td><strong>Name</strong></td><td><strong>Type</strong></td><td><strong>Description</strong></td></tr>
 <tr><td>subtype</td><td>uint8</td><td>Type of blob format.</td></tr>
-</tbody></table>
-</div><div class="table-wrapper"><table><thead><tr><th></th><th></th><th></th></tr></thead><tbody>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
 <tr><td><strong>Type</strong></td><td><strong>Name</strong></td><td><strong>Blob Description</strong></td></tr>
 <tr><td>0</td><td>Intent-to-encrypt marking.</td><td>Contains unencrypted data that will be encrypted (by libmongocrypt) along with metadata describing how to encrypt it.</td></tr>
 <tr><td>1</td><td>AEAD_AES_CBC_HMAC_SHA512 deterministic ciphertext.</td><td>The metadata and encrypted data for deterministic encrypted data.</td></tr>
 <tr><td>2</td><td>AEAD_AES_CBC_HMAC_SHA512 randomized ciphertext.</td><td>The metadata and encrypted data for random encrypted data.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h3 id="type-0-intent-to-encrypt-marking"><a class="header" href="#type-0-intent-to-encrypt-marking">Type 0: Intent-to-encrypt marking</a></h3>
 <pre><code class="language-typescript">struct {
@@ -197,13 +209,19 @@ intent-to-encrypt markings which are only used between libmongocrypt and mongocr
 }
 </code></pre>
 <p>bson is the raw bytes of the following BSON document:</p>
-<div class="table-wrapper"><table><thead><tr><th></th><th></th><th></th><th></th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
 <tr><td><strong>Name</strong></td><td><strong>Long Name</strong></td><td><strong>Type</strong></td><td><strong>Description</strong></td></tr>
 <tr><td>v</td><td>value</td><td>any</td><td>Value to encrypt.</td></tr>
 <tr><td>a</td><td>algorithm</td><td>int32</td><td>Encryption algorithm to use. Same as fle_blob_subtype: 1 for deterministic, 2 for randomized.</td></tr>
-<tr><td>ki</td><td>keyId</td><td>UUID</td><td>Optional. Used to query the key vault by _id. If omitted, then "ka" must be specified.</td></tr>
-<tr><td>ka</td><td>keyAltName</td><td>string</td><td>Optional. Used to query the key vault by keyAltName. If omitted, then "ki" must be specified.</td></tr>
-</tbody></table>
+<tr><td>ki</td><td>keyId</td><td>UUID</td><td>Optional. Used to query the key vault by _id. If omitted, then “ka” must be specified.</td></tr>
+<tr><td>ka</td><td>keyAltName</td><td>string</td><td>Optional. Used to query the key vault by keyAltName. If omitted, then “ki” must be specified.</td></tr>
+</tbody>
+</table>
 </div>
 <h3 id="types-1-and-2-ciphertext"><a class="header" href="#types-1-and-2-ciphertext">Types 1 and 2: Ciphertext</a></h3>
 <pre><code class="language-typescript">struct {
@@ -213,13 +231,19 @@ intent-to-encrypt markings which are only used between libmongocrypt and mongocr
    uint8 ciphertext[ciphertext_length];
 }
 </code></pre>
-<div class="table-wrapper"><table><thead><tr><th></th><th></th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th></tr>
+</thead>
+<tbody>
 <tr><td><strong>Name</strong></td><td><strong>Description</strong></td></tr>
 <tr><td>subtype</td><td>Type of blob format and encryption algorithm used.</td></tr>
 <tr><td>key_uuid[16]</td><td>The value of _id for the key used to decrypt the ciphertext.</td></tr>
 <tr><td>original_bson_type</td><td>The byte representing the original BSON type of the encrypted data.</td></tr>
 <tr><td>ciphertext[]</td><td>The encrypted ciphertext (includes IV prepended).</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
 <p>Covered in <a href="../client-side-encryption/client-side-encryption.html">Driver Spec: Client Side Encryption Encryption</a>.</p>
@@ -231,19 +255,19 @@ servers.</p>
 <p>Plus, encrypted ciphertext is inherently a binary blob. Packing metadata inside isolates all of the encryption related
 data into one BSON value that can be treated as an opaque blob in most contexts.</p>
 <h3 id="why-not-use-separate-bson-binary-subtypes-instead-of-a-nested-subtype"><a class="header" href="#why-not-use-separate-bson-binary-subtypes-instead-of-a-nested-subtype">Why not use separate BSON binary subtypes instead of a nested subtype?</a></h3>
-<p>If we used separate subtypes, we'd need to reserve three (and possibly more in the future) of our 124 remaining
+<p>If we used separate subtypes, we’d need to reserve three (and possibly more in the future) of our 124 remaining
 subtypes.</p>
 <p><span id="intent-to-encrypt"></span></p>
 <h3 id="why-are-intent-to-encrypt-markings-needed"><a class="header" href="#why-are-intent-to-encrypt-markings-needed">Why are intent-to-encrypt markings needed?</a></h3>
 <p>Intent-to-encrypt markings provide a simple way for mongocryptd to communicate what values need to be encrypted to
 libmongocrypt. Alternatively, mongocryptd could respond with a list of field paths. But field paths are difficult to
 make unambiguous, and even the query language is not always consistent.</p>
-<h3 id="what-happened-to-the-key-vault-alias"><a class="header" href="#what-happened-to-the-key-vault-alias">What happened to the "key vault alias"?</a></h3>
-<p>In an earlier revision of this specification the notion of a "key vault alias". The key vault alias identified one of
+<h3 id="what-happened-to-the-key-vault-alias"><a class="header" href="#what-happened-to-the-key-vault-alias">What happened to the “key vault alias”?</a></h3>
+<p>In an earlier revision of this specification the notion of a “key vault alias”. The key vault alias identified one of
 possibly many key vaults that stored the key to decrypt the ciphertext. However, enforcing one key vault is a reasonable
 restriction for users. Users can migrate from one key vault to another without ciphertext data including a key vault
 alias. If we find a future need for multiple key vaults, we can easily introduce a new format with the fle_blob_subtype.</p>
-<p>Why distinguish between "deterministic" and "randomized" when they contain the same fields?</p>
+<p>Why distinguish between “deterministic” and “randomized” when they contain the same fields?</p>
 <p>Deterministic and randomized ciphertext supports different behavior. Deterministic ciphertext supports exact match
 queries but randomized does not.</p>
 <h3 id="why-is-the-original-bson-type-not-encrypted"><a class="header" href="#why-is-the-original-bson-type-not-encrypted">Why is the original BSON type not encrypted?</a></h3>
@@ -269,27 +293,12 @@ marking inadvertently being stored on a server – meaning that plaintext is st
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../client-side-encryption/client-side-encryption.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../open-telemetry/open-telemetry.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../client-side-encryption/client-side-encryption.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../open-telemetry/open-telemetry.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

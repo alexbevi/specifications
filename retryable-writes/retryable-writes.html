@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,7 +159,7 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.6</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>MongoDB 3.6 will implement support for server sessions, which are shared resources within a cluster identified by a
 session ID. Drivers compatible with MongoDB 3.6 will also implement support for client sessions, which are always
@@ -168,13 +167,13 @@ associated with a server session and will allow for certain commands to be execu
 session.</p>
 <p>Additionally, MongoDB 3.6 will utilize server sessions to allow some write commands to specify a transaction ID to
 enforce at-most-once semantics for the write operation(s) and allow for retrying the operation if the driver fails to
-obtain a write result (e.g. network error or "not writable primary" error after a replica set failover). This
+obtain a write result (e.g. network error or “not writable primary” error after a replica set failover). This
 specification will outline how an API for retryable write operations will be implemented in drivers. The specification
 will define an option to enable retryable writes for an application and describe how a transaction ID will be provided
 to write commands executed therein.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <p><strong>Transaction ID</strong></p>
@@ -189,7 +188,7 @@ specification. This object is always associated with a server session; however, 
 that creating a ClientSession will not always entail creation of a new server session. The name of this object MAY vary
 across drivers.</p>
 <p><strong>Retryable Error</strong></p>
-<p>An error is considered retryable if it has a RetryableWriteError label in its top-level "errorLabels" field. See
+<p>An error is considered retryable if it has a RetryableWriteError label in its top-level “errorLabels” field. See
 <a href="#determining-retryable-errors">Determining Retryable Errors</a> for more information.</p>
 <p>Additional terms may be defined in the <a href="../sessions/driver-sessions.html">Driver Session</a> specification.</p>
 <h3 id="naming-deviations"><a class="header" href="#naming-deviations">Naming Deviations</a></h3>
@@ -212,11 +211,11 @@ individual write operation.</p>
 <p>Like sessions, retryable writes require a MongoDB 3.6 replica set or shard cluster operating with feature compatibility
 version 3.6 (i.e. the <code>{setFeatureCompatibilityVersion: 3.6}</code> administrative command has been run on the cluster).
 Drivers MUST verify server eligibility by ensuring that <code>maxWireVersion</code> is at least six, the
-<code>logicalSessionTimeoutMinutes</code> field is present in the server's <code>hello</code> or legacy hello response, and the server type is
+<code>logicalSessionTimeoutMinutes</code> field is present in the server’s <code>hello</code> or legacy hello response, and the server type is
 not standalone.</p>
 <p>Retryable writes are only supported by storage engines that support document-level locking. Notably, that excludes the
 MMAPv1 storage engine which is available in both MongoDB 3.6 and 4.0. Since <code>retryWrites</code> defaults to <code>true</code>, Drivers
-MUST raise an actionable error message when the server returns code 20 with errmsg starting with "Transaction numbers".
+MUST raise an actionable error message when the server returns code 20 with errmsg starting with “Transaction numbers”.
 The replacement error message MUST be:</p>
 <pre><code class="language-text">This MongoDB deployment does not support retryable writes. Please add
 retryWrites=false to your connection string.
@@ -275,7 +274,7 @@ occurs during a write command within a transaction (excepting <code>commitTransa
 <h3 id="implementing-retryable-writes"><a class="header" href="#implementing-retryable-writes">Implementing Retryable Writes</a></h3>
 <h4 id="determining-retryable-errors"><a class="header" href="#determining-retryable-errors">Determining Retryable Errors</a></h4>
 <p>When connected to a MongoDB instance that supports retryable writes (versions 3.6+), the driver MUST treat all errors
-with the RetryableWriteError label as retryable. This error label can be found in the top-level "errorLabels" field of
+with the RetryableWriteError label as retryable. This error label can be found in the top-level “errorLabels” field of
 the error.</p>
 <h5 id="retryablewriteerror-labels"><a class="header" href="#retryablewriteerror-labels">RetryableWriteError Labels</a></h5>
 <p>The RetryableWriteError label might be added to an error in a variety of ways:</p>
@@ -309,7 +308,12 @@ on the client performing the relevant operation:</p>
 <ul>
 <li>
 <p>a mongod or mongos response with any the following error codes in the top-level <code>code</code> field:</p>
-<div class="table-wrapper"><table><thead><tr><th>Error Name</th><th>Error Code</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Error Name</th><th>Error Code</th></tr>
+</thead>
+<tbody>
 <tr><td>InterruptedAtShutdown</td><td>11600</td></tr>
 <tr><td>InterruptedDueToReplStateChange</td><td>11602</td></tr>
 <tr><td>NotWritablePrimary</td><td>10107</td></tr>
@@ -322,8 +326,10 @@ on the client performing the relevant operation:</p>
 <tr><td>NetworkTimeout</td><td>89</td></tr>
 <tr><td>SocketException</td><td>9001</td></tr>
 <tr><td>ExceededTimeLimit</td><td>262</td></tr>
-</tbody></table>
-</div></li>
+</tbody>
+</table>
+</div>
+</li>
 <li>
 <p>a mongod response with any of the previously listed codes in the <code>writeConcernError.code</code> field.</p>
 </li>
@@ -333,7 +339,7 @@ on the client performing the relevant operation:</p>
 <li>any <code>writeErrors[].code</code> fields in a mongod or mongos response</li>
 <li>the <code>writeConcernError.code</code> field in a mongos response</li>
 </ul>
-<p>The criteria for retryable errors is similar to the discussion in the SDAM spec's section on
+<p>The criteria for retryable errors is similar to the discussion in the SDAM spec’s section on
 <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#error-handling">Error Handling</a>, but includes
 additional error codes. See <a href="#what-do-the-additional-error-codes-mean">What do the additional error codes mean?</a> for
 the reasoning behind these additional errors.</p>
@@ -354,7 +360,7 @@ obtained from the ClientSession object, which will have either been passed to th
 or constructed internally for the operation. Drivers will be responsible for maintaining a monotonically increasing
 transaction number for each server session used by a ClientSession object. Drivers that pool server sessions MUST
 preserve the transaction number when reusing a server session from the pool with a new ClientSession (this can be
-tracked as another property on the driver's object for the server session).</p>
+tracked as another property on the driver’s object for the server session).</p>
 <p>Drivers MUST ensure that each retryable write command specifies a transaction number larger than any previously used
 transaction number for its session ID.</p>
 <p>Since ClientSession objects are not thread safe and may only be used by one thread at a time, drivers should not need to
@@ -364,8 +370,8 @@ worry about race conditions when incrementing the transaction number.</p>
 <a href="../crud/crud.html">CRUD</a> method (e.g. <code>updateOne()</code>) or write command method (e.g. <code>executeWriteCommand()</code>) within a
 MongoClient where retryable writes have been enabled and when the selected server supports retryable writes.</p>
 <p>If your driver offers a generic command method on your database object (e.g. <code>runCommand()</code>), it MUST NOT check the
-user's command document to determine if it is a supported write operation and MUST NOT automatically add a transaction
-ID. The method should send the user's command document to the server as-is.</p>
+user’s command document to determine if it is a supported write operation and MUST NOT automatically add a transaction
+ID. The method should send the user’s command document to the server as-is.</p>
 <p>This specification does not affect write commands executed within a MongoClient where retryable writes have not been
 enabled.</p>
 <h4 id="constructing-write-commands"><a class="header" href="#constructing-write-commands">Constructing Write Commands</a></h4>
@@ -424,8 +430,8 @@ is able to infer that an attempt was made.</p>
 <p>If a retry attempt also fails, drivers MUST update their topology according to the SDAM spec (see:
 <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#error-handling">Error Handling</a>). If an error
 would not allow the caller to infer that an attempt was made (e.g. connection pool exception originating from the
-driver) or the error is labeled "NoWritesPerformed", the error from the previous attempt should be raised. If all server
-errors are labeled "NoWritesPerformed", then the first error should be raised.</p>
+driver) or the error is labeled “NoWritesPerformed”, the error from the previous attempt should be raised. If all server
+errors are labeled “NoWritesPerformed”, then the first error should be raised.</p>
 <p>If a driver associates server information (e.g. the server address or description) with an error, the driver MUST ensure
 that the reported server information corresponds to the server that originated the error.</p>
 <p>The above rules are implemented in the following pseudo-code:</p>
@@ -565,17 +571,17 @@ messages.</p>
 <p>In accordance with the
 <a href="../command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a> specification,
 drivers MUST guarantee that each <code>CommandStartedEvent</code> has either a correlating <code>CommandSucceededEvent</code> or
-<code>CommandFailedEvent</code> and that every "command started" log message has either a correlating "command succeeded" log
-message or "command failed" log message. If the first attempt of a retryable write operation encounters a retryable
-error, drivers MUST fire a <code>CommandFailedEvent</code> and emit a "command failed" log message for the retryable error and fire
-a separate <code>CommandStartedEvent</code> and "command succeeded" log message when executing the subsequent retry attempt. Note
-that the second <code>CommandStartedEvent</code> and "command succeeded" log message may have a different <code>connectionId</code>, since a
+<code>CommandFailedEvent</code> and that every “command started” log message has either a correlating “command succeeded” log
+message or “command failed” log message. If the first attempt of a retryable write operation encounters a retryable
+error, drivers MUST fire a <code>CommandFailedEvent</code> and emit a “command failed” log message for the retryable error and fire
+a separate <code>CommandStartedEvent</code> and “command succeeded” log message when executing the subsequent retry attempt. Note
+that the second <code>CommandStartedEvent</code> and “command succeeded” log message may have a different <code>connectionId</code>, since a
 writable server is reselected for the retry attempt.</p>
 <p>Each attempt of a retryable write operation SHOULD report a different <code>requestId</code> so that events for each attempt can be
 properly correlated with one another.</p>
 <p>The <a href="../command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a> specification
-states that the <code>operationId</code> field is a driver-generated, 64-bit integer and may be "used to link events together such
-as bulk write operations." Each attempt of a retryable write operation SHOULD report the same <code>operationId</code>; however,
+states that the <code>operationId</code> field is a driver-generated, 64-bit integer and may be “used to link events together such
+as bulk write operations.” Each attempt of a retryable write operation SHOULD report the same <code>operationId</code>; however,
 drivers SHOULD NOT use the <code>operationId</code> field to relay information about a transaction ID. A bulk write operation may
 consist of multiple write commands, each of which may specify a unique transaction ID.</p>
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
@@ -625,7 +631,7 @@ problems routing to a shard. These may be transient, or localized to that mongos
 <p>The spec concerns itself with retrying write operations that encounter a retryable error (i.e. no response due to
 network error or a response indicating that the node is no longer a primary). A retryable error may be classified as
 either a transient error (e.g. dropped connection, replica set failover) or persistent outage. In the case of a
-transient error, the driver will mark the server as "unknown" per the
+transient error, the driver will mark the server as “unknown” per the
 <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">SDAM</a> spec. A subsequent retry attempt will
 allow the driver to rediscover the primary within the designated server selection timeout period (30 seconds by
 default). If server selection times out during this retry attempt, we can reasonably assume that there is a persistent
@@ -650,7 +656,7 @@ spec elects not to support unacknowledged write concerns due to various ways tha
 with unacknowledged write concerns.</p>
 <p>When using <code>OP_QUERY</code> to issue a write command to the server, a command response is always returned. A write command
 with an unacknowledged write concern (i.e. <code>{w: 0}</code>) will return a response of <code>{ok: 1}</code>. If a retryable error is
-encountered (either a network error or "not writeable primary" response), the driver could attempt to retry the
+encountered (either a network error or “not writeable primary” response), the driver could attempt to retry the
 operation by executing it again with the same transaction ID.</p>
 <p>Some drivers fall back to legacy opcodes (e.g. <code>OP_INSERT</code>) to execute write operations with an unacknowledged write
 concern. In the future, <code>OP_MSG</code> may allow the server to avoid returning any response for write operations sent with an
@@ -661,7 +667,7 @@ not support retryable behavior for unacknowledged write concerns and guarantee a
 drivers.</p>
 <h3 id="why-must-drivers-maintain-an-allow-list-of-supported-operations"><a class="header" href="#why-must-drivers-maintain-an-allow-list-of-supported-operations">Why must drivers maintain an allow list of supported operations?</a></h3>
 <p>Requiring that drivers maintain an allow list of supported write operations is unfortunate. It both adds complexity to
-the driver's implementation and limits the driver's ability to immediately take advantage of new server functionality
+the driver’s implementation and limits the driver’s ability to immediately take advantage of new server functionality
 (i.e. the driver must be upgraded to support additional write operations).</p>
 <p>Several other alternatives were discussed:</p>
 <ul>
@@ -692,9 +698,9 @@ the <code>responseTo</code> field in its replies to the client. That said, re-us
 <a href="../sessions/driver-sessions.html#gossipping-the-cluster-time">gossipping the cluster time</a> and might also have
 implications for <a href="#command-monitoring">Command Monitoring</a>, since the original write command and its retry attempt may
 report the same <code>requestId</code>.</p>
-<h3 id="why-cant-drivers-split-bulk-write-commands-to-maximize-retryability"><a class="header" href="#why-cant-drivers-split-bulk-write-commands-to-maximize-retryability">Why can't drivers split bulk write commands to maximize retryability?</a></h3>
+<h3 id="why-cant-drivers-split-bulk-write-commands-to-maximize-retryability"><a class="header" href="#why-cant-drivers-split-bulk-write-commands-to-maximize-retryability">Why can’t drivers split bulk write commands to maximize retryability?</a></h3>
 <p>In <a href="#supported-write-operations">Supported Write Operations</a>, the spec prohibits drivers from altering existing logic
-for splits <code>bulkWrite()</code>'s <code>requests</code> parameter into write commands in an attempt to segregate unsupported,
+for splits <code>bulkWrite()</code>’s <code>requests</code> parameter into write commands in an attempt to segregate unsupported,
 multi-document write operations and maximize retryability for other, supported write operations. The reasoning behind
 this prohibition is that such behavior would conflict with a primary goal of the bulk API in reducing the number of
 command round-trips to the server.</p>
@@ -707,10 +713,10 @@ continue to be unsupported for retryable writes (updateMany and deleteMany) does
 shards) can have mixed deployments using different storage engines on different members. This is especially true when a
 replica set or sharded cluster is being upgraded from one storage engine to another. This could be common when upgrading
 to MongoDB 4.2, where MMAPv1 is no longer supported.</p>
-<p>The server returns error code 20 (IllegalOperation) when the storage engine doesn't support document-level locking and
+<p>The server returns error code 20 (IllegalOperation) when the storage engine doesn’t support document-level locking and
 txnNumbers. Error code 20 is used for a large number of different error cases in the server so we need some other way to
 differentiate this error case from any other. The error code and errmsg are the same in MongoDB 3.6 and 4.0, and the
-same from a replica set or sharded cluster (mongos just forwards the error from the shard's replica set).</p>
+same from a replica set or sharded cluster (mongos just forwards the error from the shard’s replica set).</p>
 <h3 id="why-does-the-driver-only-add-the-retryablewriteerror-label-to-errors-that-occur-on-a-mongoclient-with-retrywrites-set-to-true"><a class="header" href="#why-does-the-driver-only-add-the-retryablewriteerror-label-to-errors-that-occur-on-a-mongoclient-with-retrywrites-set-to-true">Why does the driver only add the RetryableWriteError label to errors that occur on a MongoClient with retryWrites set to true?</a></h3>
 <p>The driver does this to maintain consistency with the MongoDB server. Servers that support the RetryableWriteError label
 (MongoDB version 4.4 and newer) only add the label to an error when the client has added a txnNumber to the command,
@@ -746,7 +752,7 @@ even in the presence of retries.</p>
 selection mechanism as a deprioritized server.</p>
 </li>
 <li>
-<p>2022-11-17: Add logic for persisting "currentError" as "previousError" on first retry attempt, avoiding raising "null"
+<p>2022-11-17: Add logic for persisting “currentError” as “previousError” on first retry attempt, avoiding raising “null”
 errors.</p>
 </li>
 <li>
@@ -785,7 +791,7 @@ clear that mongos will sometimes perform internal retries and not return the Ret
 <p>2020-01-14: Add ExceededTimeLimit to the list of error codes that should receive a RetryableWriteError label.</p>
 </li>
 <li>
-<p>2019-10-21: Change the definition of "retryable write" to be based on the RetryableWriteError label. Stop requiring
+<p>2019-10-21: Change the definition of “retryable write” to be based on the RetryableWriteError label. Stop requiring
 drivers to parse errmsg to categorize retryable errors for pre-4.4 servers.</p>
 </li>
 <li>
@@ -833,7 +839,7 @@ attempt. Encourage drivers to provide intermediary write results after an unreco
 <p>2017-10-18: Standalone servers do not support retryable writes.</p>
 </li>
 <li>
-<p>2017-10-18: Also retry writes after a "not writable primary" error.</p>
+<p>2017-10-18: Also retry writes after a “not writable primary” error.</p>
 </li>
 <li>
 <p>2017-10-08: Renamed <code>txnNum</code> to <code>txnNumber</code> and noted that it must be a 64-bit integer (BSON type 0x12).</p>
@@ -855,27 +861,12 @@ IDs will not be included in unsupported write commands, irrespective of the <cod
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../retryable-reads/retryable-reads.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../client-side-operations-timeout/client-side-operations-timeout.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../retryable-reads/retryable-reads.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../client-side-operations-timeout/client-side-operations-timeout.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

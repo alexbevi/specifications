@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,7 +159,7 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.4</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>MongoDB 3.4 introduces a new BSON type representing high precision decimal (<code>"\x13"</code>), known as Decimal128. 3.4
 compatible drivers must support this type by creating a Value Object for it, possibly with accessor functions for
@@ -177,19 +176,19 @@ mappings to/from BSON types to native types MAY allow the option to automaticall
 a native type. It should however be made abundantly clear to the user that converting to native data types risks
 incurring data loss.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="terminology"><a class="header" href="#terminology">Terminology</a></h2>
 <p><strong>IEEE 754-2008 128-bit decimal floating point (Decimal128)</strong></p>
 <p>The Decimal128 specification supports 34 decimal digits of precision, a max value of approximately <code>10^6145</code>, and min
 value of approximately <code>-10^6145</code>. This is the new <code>BSON Decimal128</code> type (<code>"\x13"</code>).</p>
 <p><strong>Clamping</strong></p>
-<p>Clamping happens when a value's exponent is too large for the destination format. This works by adding zeros to the
+<p>Clamping happens when a value’s exponent is too large for the destination format. This works by adding zeros to the
 coefficient to reduce the exponent to the largest usable value. An overflow occurs if the number of digits required is
 more than allowed in the destination format.</p>
 <p><strong>Binary Integer Decimal (BID)</strong></p>
 <p>MongoDB uses this binary encoding for the coefficient as specified in <code>IEEE 754-2008</code> section 3.5.2 using method 2
-"binary encoding" rather than method 1 "decimal encoding". The byte order is little-endian, like the rest of the BSON
+“binary encoding” rather than method 1 “decimal encoding”. The byte order is little-endian, like the rest of the BSON
 types.</p>
 <p><strong>Value Object</strong></p>
 <p>An immutable container type representing a value (e.g. Decimal128). This Value Object MAY provide accessors that
@@ -390,7 +389,12 @@ if (_exponent &gt; 0 || adjusted_exponent &lt; -6) {
 }
 </code></pre>
 <p>For special numbers such as infinity or the not a number (NaN) variants, the below table is used:</p>
-<div class="table-wrapper"><table><thead><tr><th>Value</th><th>String</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Value</th><th>String</th></tr>
+</thead>
+<tbody>
 <tr><td>Positive Infinite</td><td>Infinity</td></tr>
 <tr><td>Negative Infinite</td><td>-Infinity</td></tr>
 <tr><td>Positive NaN</td><td>NaN</td></tr>
@@ -398,7 +402,8 @@ if (_exponent &gt; 0 || adjusted_exponent &lt; -6) {
 <tr><td>Signaled NaN</td><td>NaN</td></tr>
 <tr><td>Negative Signaled NaN</td><td>NaN</td></tr>
 <tr><td>NaN with a payload</td><td>NaN</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>Finally, there are certain other invalid representations that must be treated as zeros, as per <code>IEEE 754-2008</code>. The
 tests will verify that each special value has been accounted for.</p>
@@ -434,17 +439,17 @@ BSON/Extended JSON Decimal128.</p>
 <h2 id="qa"><a class="header" href="#qa">Q&amp;A</a></h2>
 <ul>
 <li>
-<p>Is it true Decimal128 doesn't normalize the value?</p>
+<p>Is it true Decimal128 doesn’t normalize the value?</p>
 <ul>
 <li>Yes. As a result of non-normalization rules of the Decimal128 data type, precision is represented exactly. For
-example, '2.00' always remains stored as 200E-2 in Decimal128, and it differs from the representation of '2.0'
+example, ‘2.00’ always remains stored as 200E-2 in Decimal128, and it differs from the representation of ‘2.0’
 (20E-1). These two values compare equally, but represent different ideas.</li>
 </ul>
 </li>
 <li>
-<p>How does Decimal128 "2.000" look in the shell?</p>
+<p>How does Decimal128 “2.000” look in the shell?</p>
 <ul>
-<li>NumberDecimal("2.000")</li>
+<li>NumberDecimal(“2.000”)</li>
 </ul>
 </li>
 <li>
@@ -474,27 +479,12 @@ example, '2.00' always remains stored as 200E-2 in Decimal128, and it differs fr
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../bson-objectid/objectid.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../bson-binary-uuid/uuid.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../bson-objectid/objectid.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../bson-binary-uuid/uuid.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

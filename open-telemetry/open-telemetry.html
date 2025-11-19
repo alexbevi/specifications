@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -161,14 +160,14 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
-<p>This specification defines requirements for drivers' OpenTelemetry integration and behavior. Drivers will trace database
+<p>This specification defines requirements for drivers’ OpenTelemetry integration and behavior. Drivers will trace database
 commands and driver operations with a pre-defined set of attributes when OpenTelemetry is enabled and configured in an
 application.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <p><strong>Host Application</strong></p>
@@ -202,7 +201,7 @@ the driver ecosystem. Drivers MUST NOT add a dependency to OpenTelemetry SDK.</p
 <p>OpenTelemetry SHOULD be disabled by default.</p>
 <p>Drivers SHOULD support configuring OpenTelemetry on multiple levels.</p>
 <ul>
-<li><strong>MongoClient Level</strong>: Drivers SHOULD provide a configuration option for <code>MongoClient</code>'s Configuration/Settings that
+<li><strong>MongoClient Level</strong>: Drivers SHOULD provide a configuration option for <code>MongoClient</code>’s Configuration/Settings that
 enables or disables tracing for operations and commands executed with this client. This option MUST override
 settings on higher levels. This configuration can be implemented with a <code>MongoClient</code> option. See
 <a href="#client-options">Client Options</a> section below.</li>
@@ -239,15 +238,15 @@ variables:</p>
 <h4 id="tracer-attributes"><a class="header" href="#tracer-attributes">Tracer Attributes</a></h4>
 <p>If a driver creates a Tracer using OpenTelemetry API, drivers MUST use the following attributes:</p>
 <ul>
-<li><code>name</code>: A string that identifies the driver. It can be the name of a driver's component (e.g., "mongo", "PyMongo") or
-a package name (e.g., "com.mongo.Driver"). Drivers SHOULD select a name that is idiomatic for their language and
+<li><code>name</code>: A string that identifies the driver. It can be the name of a driver’s component (e.g., “mongo”, “PyMongo”) or
+a package name (e.g., “com.mongo.Driver”). Drivers SHOULD select a name that is idiomatic for their language and
 ecosystem. Drivers SHOULD follow the Instrumentation Scope guidance.</li>
 <li><code>version</code>: A string that represents internal driver version. The version formatting is not defined; drivers SHOULD
 apply the same formatting as the use for <code>client.driver.version</code> attribute of the
 <a href="https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.md#clientdriverversion">handshake</a>.</li>
 </ul>
 <h4 id="instrumenting-driver-operations"><a class="header" href="#instrumenting-driver-operations">Instrumenting Driver Operations</a></h4>
-<p>When a user calls the driver's public API, the driver MUST create a span for every driver operation. Drivers MUST start
+<p>When a user calls the driver’s public API, the driver MUST create a span for every driver operation. Drivers MUST start
 the span as soon as possible so that the span’s duration reflects all activities made by the driver, such as server
 selection and serialization/deserialization.</p>
 <p>The span for the operation MUST be created within the current span of the host application, with the exceptions listed
@@ -274,16 +273,22 @@ span is <code>findAndModify</code>. This ensures consistency between drivers whe
 <li><code>driver_operation_name db</code> if there is no specific collection for the operation (e.g., <code>runCommand warehouse</code>).</li>
 </ul>
 <h5 id="operation-span-kind"><a class="header" href="#operation-span-kind">Operation Span Kind</a></h5>
-<p>Span kind MUST be "client".</p>
+<p>Span kind MUST be “client”.</p>
 <h5 id="operation-span-attributes"><a class="header" href="#operation-span-attributes">Operation Span Attributes</a></h5>
 <p>Spans SHOULD have the following attributes:</p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Attribute</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th><th style="text-align: left">Requirement Level</th></tr></thead><tbody>
-<tr><td style="text-align: left"><code>db.system</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be 'mongodb'</td><td style="text-align: left">Required</td></tr>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">Attribute</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th><th style="text-align: left">Requirement Level</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><code>db.system</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be ‘mongodb’</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.namespace</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The database name</td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.collection.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The collection being accessed within the database stated in <code>db.namespace</code></td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.operation.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the driver operation being executed</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.operation.summary</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Equivalent to span name</td><td style="text-align: left">Required</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>Not all attributes are available at the moment of span creation. Drivers need to add attributes at later stages, which
 requires an operation span to be available throughout the complete operation lifecycle.</p>
@@ -303,7 +308,7 @@ client <code>bulkWrite</code>) operations.</p>
 order to be compliant with these, we use this name even though the term <code>namespace</code> has a different
 <a href="https://www.mongodb.com/docs/manual/reference/glossary/">meaning</a> for MongoDB.</p>
 <h6 id="dbcollectionname"><a class="header" href="#dbcollectionname">db.collection.name</a></h6>
-<p>This attribute should be set to the user's collection if the operation is executing against a collection, this field is
+<p>This attribute should be set to the user’s collection if the operation is executing against a collection, this field is
 omitted for commands running against <code>admin</code> database or commands that do not target a specific collection.</p>
 <p>Examples:</p>
 <ul>
@@ -333,18 +338,23 @@ span.</p>
 <h5 id="command-span-name"><a class="header" href="#command-span-name">Command Span Name</a></h5>
 <p>The span name SHOULD be the command name. For example, <code>find</code>, <code>insert</code>, <code>update</code>, etc.</p>
 <h5 id="command-span-kind"><a class="header" href="#command-span-kind">Command Span Kind</a></h5>
-<p>Span kind MUST be "client".</p>
+<p>Span kind MUST be “client”.</p>
 <h5 id="command-span-attributes"><a class="header" href="#command-span-attributes">Command Span Attributes</a></h5>
 <p>Spans SHOULD have the following attributes:</p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Attribute</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th><th style="text-align: left">Requirement Level</th></tr></thead><tbody>
-<tr><td style="text-align: left"><code>db.system</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be 'mongodb'</td><td style="text-align: left">Required</td></tr>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">Attribute</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th><th style="text-align: left">Requirement Level</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><code>db.system</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be ‘mongodb’</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.namespace</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The database name</td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.collection.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The collection being accessed within the database stated in <code>db.namespace</code></td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.command.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the server command being executed</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.response.status_code</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MongoDB error code represented as a string. This attribute should be added only if an error happens.</td><td style="text-align: left">Required if an error happens</td></tr>
 <tr><td style="text-align: left"><code>server.port</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Server port number</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>server.address</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Name of the database host, or IP address if name is not known</td><td style="text-align: left">Required</td></tr>
-<tr><td style="text-align: left"><code>network.transport</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be 'tcp' or 'unix' depending on the protocol</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>network.transport</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be ‘tcp’ or ‘unix’ depending on the protocol</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.query.summary</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">(see explanation below)</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.mongodb.server_connection_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Server connection id</td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.mongodb.driver_connection_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Local connection id</td><td style="text-align: left">Required if available</td></tr>
@@ -352,7 +362,8 @@ span.</p>
 <tr><td style="text-align: left"><code>db.mongodb.cursor_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">If a cursor is created or used in the operation</td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.mongodb.lsid</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Logical session id</td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.mongodb.txn_number</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Transaction number</td><td style="text-align: left">Required if available</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>Besides the attributes listed in the table above, drivers MAY add other attributes from the
 <a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/db/">Semantic Conventions for Databases</a> that are
@@ -373,7 +384,7 @@ client <code>bulkWrite</code>) operations.</p>
 order to be compliant with these, we use this name even though the term <code>namespace</code> has a different
 <a href="https://www.mongodb.com/docs/manual/reference/glossary/">meaning</a> for MongoDB.</p>
 <h6 id="dbcollectionname-1"><a class="header" href="#dbcollectionname-1">db.collection.name</a></h6>
-<p>This attribute should be set to the user's collection if the operation is executing against a collection, this field is
+<p>This attribute should be set to the user’s collection if the operation is executing against a collection, this field is
 omitted for commands running against <code>admin</code> database or commands that do not target a specific collection.</p>
 <p>Examples:</p>
 <ul>
@@ -413,7 +424,7 @@ available:</p>
 <li><code>exception.stacktrace</code></li>
 </ul>
 <h2 id="motivation-for-change"><a class="header" href="#motivation-for-change">Motivation for Change</a></h2>
-<p>A common complaint from our support team is that they don't know how to easily get debugging information from drivers.
+<p>A common complaint from our support team is that they don’t know how to easily get debugging information from drivers.
 Some drivers provide debug logging, but others do not. For drivers that do provide it, the log messages produced and the
 mechanisms for enabling debug logging are inconsistent.</p>
 <p>OpenTelemetry is currently the industry standard for instrumenting, generating, and collecting telemetry data (metrics,
@@ -426,7 +437,12 @@ take.</p>
 <p>See <a href="tests/README.html">OpenTelemetry Tests</a> for the test plan.</p>
 <h2 id="covered-operations"><a class="header" href="#covered-operations">Covered operations</a></h2>
 <p>The OpenTelemetry specification covers all driver operations including but not limited to the following operations:</p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Operation</th><th style="text-align: left">Test</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">Operation</th><th style="text-align: left">Test</th></tr>
+</thead>
+<tbody>
 <tr><td style="text-align: left"><code>aggregate</code></td><td style="text-align: left"><a href="tests/operation/aggregate.yml">tests/operation/aggregate.yml</a></td></tr>
 <tr><td style="text-align: left"><code>findAndModify</code></td><td style="text-align: left"><a href="tests/operation/find_and_modify.yml">tests/operation/find_and_modify.yml</a></td></tr>
 <tr><td style="text-align: left"><code>bulkWrite</code></td><td style="text-align: left"><a href="tests/operation/bulk_write.yml">tests/operation/bulk_write.yml</a></td></tr>
@@ -451,7 +467,8 @@ take.</p>
 <tr><td style="text-align: left"><code>dropSearchIndex</code></td><td style="text-align: left"><a href="tests/operation/atlas_search.yml">tests/operation/atlas_search.yml</a></td></tr>
 <tr><td style="text-align: left"><code>updateSearchIndex</code></td><td style="text-align: left"><a href="tests/operation/delete.yml">tests/operation/delete.yml</a></td></tr>
 <tr><td style="text-align: left"><code>delete</code></td><td style="text-align: left"><a href="tests/operation/atlas_search.yml">tests/operation/atlas_search.yml</a></td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
 <p>Introduction of OpenTelemetry in new driver versions should not significantly affect existing applications that do not
@@ -494,27 +511,12 @@ tracing may have unexpected negative outcome.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../bson-binary-encrypted/binary-encrypted.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../command-logging-and-monitoring/command-logging-and-monitoring.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../bson-binary-encrypted/binary-encrypted.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../command-logging-and-monitoring/command-logging-and-monitoring.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

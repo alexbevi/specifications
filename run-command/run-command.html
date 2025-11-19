@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,21 +159,20 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
-<p>This specification defines requirements and behaviors for drivers' run command and related APIs.</p>
+<p>This specification defines requirements and behaviors for drivers’ run command and related APIs.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
-<p>Command<br />
-A structure representing a BSON document that has a shape matching a supported MongoDB operation.</p>
+<p>Command<br>A structure representing a BSON document that has a shape matching a supported MongoDB operation.</p>
 <h3 id="implementation-requirements"><a class="header" href="#implementation-requirements">Implementation requirements</a></h3>
 <p>All drivers MAY offer the operations defined in the following sections. This does not preclude a driver from offering
 more.</p>
 <h3 id="deviations"><a class="header" href="#deviations">Deviations</a></h3>
-<p>Please refer to <a href="../crud/crud.html#guidance">The CRUD specification's Guidance</a> on how APIs may deviate between languages.</p>
+<p>Please refer to <a href="../crud/crud.html#guidance">The CRUD specification’s Guidance</a> on how APIs may deviate between languages.</p>
 <p>Cursor iterating APIs MAY be offered via language syntax or predefined iterable methods.</p>
 <h3 id="runcommand"><a class="header" href="#runcommand"><code>runCommand</code></a></h3>
 <p>The following represents how a runCommand API SHOULD be exposed.</p>
@@ -216,48 +214,48 @@ interface RunCommandOptions {
 <h4 id="runcommand-implementation-details"><a class="header" href="#runcommand-implementation-details">RunCommand implementation details</a></h4>
 <p>RunCommand provides a way to access MongoDB server commands directly without requiring a driver to implement a bespoke
 helper. The API is intended to take a document from a user and apply a number of common driver internal concerns before
-forwarding the command to a server. A driver MUST not inspect the user's command, this includes checking for the fields
-a driver MUST attach to the command sent as described below. Depending on a driver's BSON implementation this can result
+forwarding the command to a server. A driver MUST not inspect the user’s command, this includes checking for the fields
+a driver MUST attach to the command sent as described below. Depending on a driver’s BSON implementation this can result
 in these fields being overwritten or duplicated, a driver SHOULD document that using these fields has undefined
-behavior. A driver MUST not modify the user's command, a clone SHOULD be created before the driver attaches any of the
+behavior. A driver MUST not modify the user’s command, a clone SHOULD be created before the driver attaches any of the
 required fields to the command.</p>
 <p>Drivers that have historically modified user input SHOULD strive to instead clone the input such that appended fields do
-not affect the user's input in their next major version.</p>
+not affect the user’s input in their next major version.</p>
 <h5 id="op_msg"><a class="header" href="#op_msg">OP_MSG</a></h5>
 <p>The <code>$db</code> global command argument MUST be set on the command sent to the server and it MUST equal the database name
 RunCommand was invoked on.</p>
 <ul>
-<li>See OP_MSG's section on <a href="../message/OP_MSG.html#global-command-arguments">Global Command Arguments</a></li>
+<li>See OP_MSG’s section on <a href="../message/OP_MSG.html#global-command-arguments">Global Command Arguments</a></li>
 </ul>
 <h5 id="readpreference"><a class="header" href="#readpreference">ReadPreference</a></h5>
 <p>For the purposes of server selection RunCommand MUST assume all commands are read operations. To facilitate server
 selection the RunCommand operation MUST accept an optional <code>readPreference</code> option.</p>
 <ul>
-<li>See Server Selection's section on
+<li>See Server Selection’s section on
 <a href="../server-selection/server-selection.html#use-of-read-preferences-with-commands">Use of read preferences with commands</a></li>
 </ul>
 <p>If the provided ReadPreference is NOT <code>{mode: primary}</code> and the selected server is NOT a standalone, the command sent
 MUST include the <code>$readPreference</code> global command argument.</p>
 <ul>
-<li>See OP_MSG's section on <a href="../message/OP_MSG.html#global-command-arguments">Global Command Arguments</a></li>
+<li>See OP_MSG’s section on <a href="../message/OP_MSG.html#global-command-arguments">Global Command Arguments</a></li>
 </ul>
 <h5 id="driver-sessions"><a class="header" href="#driver-sessions">Driver Sessions</a></h5>
-<p>A driver's RunCommand MUST provide an optional session option to support explicit sessions and transactions. If a
+<p>A driver’s RunCommand MUST provide an optional session option to support explicit sessions and transactions. If a
 session is not provided the driver MUST attach an implicit session if the connection supports sessions. Drivers MUST NOT
 attempt to check the command document for the presence of an <code>lsid</code>.</p>
 <p>Every ClientSession has a corresponding logical session ID representing the server-side session ID. The logical session
 ID MUST be included under <code>lsid</code> in the command sent to the server without modifying user input.</p>
 <ul>
-<li>See Driver Sessions' section on
+<li>See Driver Sessions’ section on
 <a href="../sessions/driver-sessions.html#sending-the-session-id-to-the-server-on-all-commands">Sending the session ID to the server on all commands</a></li>
 </ul>
 <p>The command sent to the server MUST gossip the <code>$clusterTime</code> if cluster time support is detected.</p>
 <ul>
-<li>See Driver Sessions' section on
+<li>See Driver Sessions’ section on
 <a href="../sessions/driver-sessions.html#gossipping-the-cluster-time">Gossipping the cluster time</a></li>
 </ul>
 <h5 id="transactions"><a class="header" href="#transactions">Transactions</a></h5>
-<p>If RunCommand is used within a transaction the read preference MUST be sourced from the transaction's options. The
+<p>If RunCommand is used within a transaction the read preference MUST be sourced from the transaction’s options. The
 command sent to the server MUST include the transaction specific fields, summarized as follows:</p>
 <ul>
 <li>If <code>runCommand</code> is executing within a transaction:
@@ -269,7 +267,7 @@ command sent to the server MUST include the transaction specific fields, summari
 <li>If <code>runCommand</code> is the first operation of the transaction:
 <ul>
 <li><code>startTransaction</code> - MUST be set to true.</li>
-<li><code>readConcern</code> - MUST be set to the transaction's read concern if it is NOT the default.</li>
+<li><code>readConcern</code> - MUST be set to the transaction’s read concern if it is NOT the default.</li>
 </ul>
 </li>
 <li>See
@@ -284,24 +282,24 @@ in the command document. For example, default values MUST NOT be inherited from 
 <p>If the user-provided command document already includes <code>readConcern</code> or <code>writeConcern</code> fields, the values MUST be left
 as-is.</p>
 <ul>
-<li>See Read Concern's section on
+<li>See Read Concern’s section on
 <a href="../read-write-concern/read-write-concern.html#generic-command-method">Generic Command Method</a></li>
-<li>See Write Concern's section on
+<li>See Write Concern’s section on
 <a href="../read-write-concern/read-write-concern.html#generic-command-method">Generic Command Method</a></li>
 </ul>
 <h5 id="retryability"><a class="header" href="#retryability">Retryability</a></h5>
 <p>All commands executed via RunCommand are non-retryable operations. Drivers MUST NOT inspect the command to determine if
 it is a write and MUST NOT attach a <code>txnNumber</code>.</p>
 <ul>
-<li>See Retryable Reads' section on
+<li>See Retryable Reads’ section on
 <a href="../retryable-reads/retryable-reads.html#unsupported-read-operations">Unsupported Read Operations</a></li>
-<li>See Retryable Writes' section on
+<li>See Retryable Writes’ section on
 <a href="../retryable-writes/retryable-writes.html#behavioral-changes-for-write-commands">Behavioral Changes for Write Commands</a></li>
 </ul>
 <h5 id="stable-api"><a class="header" href="#stable-api">Stable API</a></h5>
 <p>The command sent MUST attach stable API fields as configured on the MongoClient.</p>
 <ul>
-<li>See Stable API's section on
+<li>See Stable API’s section on
 <a href="../versioned-api/versioned-api.html#generic-command-helper">Generic Command Helper Behaviour</a></li>
 </ul>
 <h5 id="client-side-operations-timeout"><a class="header" href="#client-side-operations-timeout">Client Side Operations Timeout</a></h5>
@@ -309,9 +307,9 @@ it is a write and MUST NOT attach a <code>txnNumber</code>.</p>
 attempt to check the command document for the presence of a <code>maxTimeMS</code> field. Drivers MUST document the behavior of
 RunCommand if a <code>maxTimeMS</code> field is already set on the command (such as overwriting the command field).</p>
 <ul>
-<li>See Client Side Operations Timeout's section on
+<li>See Client Side Operations Timeout’s section on
 <a href="../client-side-operations-timeout/client-side-operations-timeout.html#runcommand">runCommand</a></li>
-<li>See Client Side Operations Timeout's section on
+<li>See Client Side Operations Timeout’s section on
 <a href="../client-side-operations-timeout/client-side-operations-timeout.html#runcommand-behavior">runCommand behavior</a></li>
 </ul>
 <h3 id="runcursorcommand"><a class="header" href="#runcursorcommand"><code>runCursorCommand</code></a></h3>
@@ -379,18 +377,18 @@ command was executed on.</li>
 <li>Create a local cursor instance and store the <code>firstBatch</code>, <code>ns</code>, and <code>id</code> from the response.</li>
 <li>When the current batch has been fully iterated, execute a <code>getMore</code> using the same server the initial command was
 executed on.</li>
-<li>Store the <code>nextBatch</code> from the <code>getMore</code> response and update the cursor's <code>id</code>.</li>
+<li>Store the <code>nextBatch</code> from the <code>getMore</code> response and update the cursor’s <code>id</code>.</li>
 <li>Continue to execute <code>getMore</code> commands as needed when the caller empties local batches until the cursor is exhausted
 or closed (i.e. <code>id</code> is zero).</li>
 </ul>
 <h5 id="driver-sessions-1"><a class="header" href="#driver-sessions-1">Driver Sessions</a></h5>
 <p>A driver MUST create an implicit ClientSession if none is provided and it MUST be attached for the duration of the
-cursor's lifetime. All <code>getMore</code> commands constructed for this cursor MUST send the same <code>lsid</code> used on the initial
+cursor’s lifetime. All <code>getMore</code> commands constructed for this cursor MUST send the same <code>lsid</code> used on the initial
 command. A cursor is considered exhausted or closed when the server reports its <code>id</code> as zero. When the cursor is
 exhausted the client session MUST be ended and the server session returned to the pool as early as possible rather than
 waiting for a caller to completely iterate the final batch.</p>
 <ul>
-<li>See Drivers Sessions' section on <a href="../sessions/driver-sessions.html#sessions-and-cursors">Sessions and Cursors</a></li>
+<li>See Drivers Sessions’ section on <a href="../sessions/driver-sessions.html#sessions-and-cursors">Sessions and Cursors</a></li>
 </ul>
 <h5 id="server-selection"><a class="header" href="#server-selection">Server Selection</a></h5>
 <p>RunCursorCommand MUST support a <code>readPreference</code> option that MUST be used to determine server selection. The selected
@@ -399,25 +397,25 @@ server MUST be used for subsequent <code>getMore</code> commands.</p>
 <p>When in <code>loadBalanced</code> mode, a driver MUST pin the connection used to execute the initial operation, and reuse it for
 subsequent <code>getMore</code> operations.</p>
 <ul>
-<li>See Load Balancer's section on <a href="../load-balancers/load-balancers.html#behaviour-with-cursors">Behaviour With Cursors</a></li>
+<li>See Load Balancer’s section on <a href="../load-balancers/load-balancers.html#behaviour-with-cursors">Behaviour With Cursors</a></li>
 </ul>
 <h5 id="iterating-the-cursor"><a class="header" href="#iterating-the-cursor">Iterating the Cursor</a></h5>
 <p>Drivers MUST provide an API, typically, a method named <code>next()</code>, that returns one document per invocation. If the
-cursor's batch is empty and the cursor id is nonzero, the driver MUST perform a <code>getMore</code> operation.</p>
+cursor’s batch is empty and the cursor id is nonzero, the driver MUST perform a <code>getMore</code> operation.</p>
 <h5 id="executing-getmore-commands"><a class="header" href="#executing-getmore-commands">Executing <code>getMore</code> Commands</a></h5>
 <p>The cursor API returned to the caller MUST offer an API to configure <code>batchSize</code>, <code>maxTimeMS</code>, and <code>comment</code> options
 that are sent on subsequent <code>getMore</code> commands. If it is idiomatic for a driver to allow setting these options in
 <code>RunCursorCommandOptions</code>, the driver MUST document that the options only pertain to <code>getMore</code> commands. A driver MAY
-permit users to change <code>getMore</code> field settings at any time during the cursor's lifetime and subsequent <code>getMore</code>
+permit users to change <code>getMore</code> field settings at any time during the cursor’s lifetime and subsequent <code>getMore</code>
 commands MUST be constructed with the changes to those fields. If that API is offered drivers MUST write tests asserting
 <code>getMore</code> commands are constructed with any updated fields.</p>
 <ul>
-<li>See Find, getMore and killCursors commands' section on
+<li>See Find, getMore and killCursors commands’ section on
 <a href="../find_getmore_killcursors_commands/find_getmore_killcursors_commands.html#getmore">GetMore</a></li>
 </ul>
 <h5 id="tailable-and-tailableawait"><a class="header" href="#tailable-and-tailableawait">Tailable and TailableAwait</a></h5>
 <ul>
-<li><strong>See first:</strong> Find, getMore and killCursors commands's section on
+<li><strong>See first:</strong> Find, getMore and killCursors commands’s section on
 <a href="../find_getmore_killcursors_commands/find_getmore_killcursors_commands.html#tailable-cursors">Tailable cursors</a></li>
 </ul>
 <p>It is the responsibility of the caller to construct their initial command with <code>awaitData</code> and <code>tailable</code> flags <strong>as
@@ -428,9 +426,9 @@ not align with the fields sent to the server on the initial command SHOULD be do
 cursor id is nonzero a KillCursors operation MUST be attempted, the result of the operation SHOULD be ignored. The
 ClientSession associated with the cursor MUST be ended and the ServerSession returned to the pool.</p>
 <ul>
-<li>See Driver Sessions' section on
+<li>See Driver Sessions’ section on
 <a href="../sessions/driver-sessions.html#when-sending-a-killcursors-command">When sending a killCursors command</a></li>
-<li>See Find, getMore and killCursors commands' section on
+<li>See Find, getMore and killCursors commands’ section on
 <a href="../find_getmore_killcursors_commands/find_getmore_killcursors_commands.html#killcursors">killCursors</a></li>
 </ul>
 <h5 id="client-side-operations-timeout-1"><a class="header" href="#client-side-operations-timeout-1">Client Side Operations Timeout</a></h5>
@@ -443,7 +441,7 @@ can have undefined behavior and is not supported.</p>
 <p>When <code>timeoutMS</code> and <code>timeoutMode</code> are provided the driver MUST support timeout functionality as described in the CSOT
 specification.</p>
 <ul>
-<li>See Client Side Operations Timeout's section on
+<li>See Client Side Operations Timeout’s section on
 <a href="../client-side-operations-timeout/client-side-operations-timeout.html#cursors">Cursors</a></li>
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
@@ -462,27 +460,12 @@ specification.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../message/OP_MSG.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../connection-string/connection-string-spec.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../message/OP_MSG.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../connection-string/connection-string-spec.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

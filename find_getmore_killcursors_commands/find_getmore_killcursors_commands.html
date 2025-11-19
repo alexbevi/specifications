@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -166,15 +165,15 @@ and OP_KILL_CURSORS wire protocol messages. This specification lays out how driv
 commands when compared to the legacy wire protocol level messages.</p>
 <h2 id="definitions"><a class="header" href="#definitions">Definitions</a></h2>
 <h3 id="meta"><a class="header" href="#meta">Meta</a></h3>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <h4 id="document"><a class="header" href="#document">Document</a></h4>
-<p>The term Document refers to the implementation in the driver's language of a BSON document.</p>
+<p>The term Document refers to the implementation in the driver’s language of a BSON document.</p>
 <h4 id="command"><a class="header" href="#command">Command</a></h4>
 <p>A BSON document containing the fields making up a MongoDB server command.</p>
 <h4 id="wire-protocol"><a class="header" href="#wire-protocol">Wire Protocol</a></h4>
-<p>The binary protocol used to talk with MongoDB over a socket. It's made up by the OP_QUERY, OP_GET_MORE, OP_KILL_CURSORS,
+<p>The binary protocol used to talk with MongoDB over a socket. It’s made up by the OP_QUERY, OP_GET_MORE, OP_KILL_CURSORS,
 OP_INSERT, OP_UPDATE and OP_DELETE.</p>
 <h2 id="guidance"><a class="header" href="#guidance">Guidance</a></h2>
 <h3 id="documentation"><a class="header" href="#documentation">Documentation</a></h3>
@@ -210,29 +209,47 @@ protocol message, the <strong>find</strong> command cannot be used to execute ot
 instead of the inprog, killop, unlock, etc. commands they SHOULD default to using the old-style OP_QUERY.</p>
 <p>Any driver that provides helpers for any of the special collections below SHOULD use the replacement commands if
 <strong>hello.maxWireVersion &gt;=4</strong> or higher.</p>
-<div class="table-wrapper"><table><thead><tr><th>Special collection name</th><th>Replacement Command</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Special collection name</th><th>Replacement Command</th></tr>
+</thead>
+<tbody>
 <tr><td><code>$cmd.sys.inprog</code></td><td>currentOp</td></tr>
 <tr><td><code>$cmd.sys.unlock</code></td><td>fsyncUnlock</td></tr>
 <tr><td><code>&lt;database&gt;.system.indexes</code></td><td>listIndexes</td></tr>
 <tr><td><code>&lt;database&gt;.system.namespaces</code></td><td>listCollections</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>Special Collection Names</p>
 <h4 id="exhaust"><a class="header" href="#exhaust">Exhaust</a></h4>
 <p>This section only applies to drivers that support exhaust cursors.</p>
 <p>The exhaust protocol differs based on the server version:</p>
-<div class="table-wrapper"><table><thead><tr><th>Server version</th><th>Server behavior</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Server version</th><th>Server behavior</th></tr>
+</thead>
+<tbody>
 <tr><td>4.0 and earlier</td><td>Only supports exhaust over legacy <strong>OP_QUERY</strong>. The <strong>find</strong> command does not support the exhaust flag from <strong>OP_QUERY</strong>.</td></tr>
 <tr><td>4.2 to 5.0</td><td>Supports exhaust both over legacy <strong>OP_QUERY</strong> and <strong>OP_MSG</strong>.</td></tr>
 <tr><td>5.1 and later</td><td>Supports exhaust over <strong>OP_MSG</strong>.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>Therefore drivers that implement exhaust cursors:</p>
-<div class="table-wrapper"><table><thead><tr><th>Server version</th><th>Driver behavior</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Server version</th><th>Driver behavior</th></tr>
+</thead>
+<tbody>
 <tr><td>4.0 and earlier</td><td>Drivers MUST use legacy <strong>OP_QUERY</strong>.</td></tr>
 <tr><td>4.2 to 5.0</td><td>Drivers SHOULD use <strong>OP_MSG</strong> but MAY use legacy <strong>OP_QUERY</strong>.</td></tr>
 <tr><td>5.1 and later</td><td>Drivers MUST only use <strong>OP_MSG</strong>. Alternatively, drivers MAY fallback to a non-exhaust cursor when an exhaust cursor is requested.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="interactions-with-op_query"><a class="header" href="#interactions-with-op_query">Interactions with OP_QUERY</a></h4>
 <p>When sending a find operation as a find command rather than a legacy <strong>OP_QUERY</strong> find only the <strong>secondaryOk</strong> flag is
@@ -312,12 +329,12 @@ first batch of documents are returned. Given a query returning 4 documents the n
 user expected behavior of allowing the first result to contain a single document when specifying batchSize=1.</p>
 <h4 id="tailable-cursors"><a class="header" href="#tailable-cursors">Tailable cursors</a></h4>
 <p>By default, most cursors are non-tailable. For example, a typical <code>find</code> cursor is exhausted when all results for the
-filter have been returned. MongoDB also supports creating cursors that "tail" or follow the target namespace for new
-data. This is done via the <code>find</code> command's <code>tailable</code> option. Querying a capped collection is one use case for a
+filter have been returned. MongoDB also supports creating cursors that “tail” or follow the target namespace for new
+data. This is done via the <code>find</code> command’s <code>tailable</code> option. Querying a capped collection is one use case for a
 tailable cursor. A tailable cursor can receive <code>getMore</code> responses with an empty <code>nextBatch</code> array, which does not
 indicate that the cursor has been exhausted.</p>
-<p>Additionally, tailable cursors may "await data" from the server, which means that the server will wait to respond to the
-client's <code>getMore</code> command until new data is available or some period of time has elapsed, whichever comes first. A
+<p>Additionally, tailable cursors may “await data” from the server, which means that the server will wait to respond to the
+client’s <code>getMore</code> command until new data is available or some period of time has elapsed, whichever comes first. A
 tailable <code>find</code> cursor can be configured using the <code>awaitData</code> option. The amount of time the server will wait for new
 data is based on the <code>maxTimeMS</code> field of the <code>getMore</code> (or server default if unspecified). If the time does expire an
 empty batch will be returned. A <code>maxTimeMS</code> field cannot be sent if the cursor was not configured with <code>awaitData=true</code>.</p>
@@ -393,7 +410,7 @@ secondary. The OP_QUERY namespace MUST be the same as for the <strong>find</stro
   // ... Note: additional non-relevant fields omitted
 }
 </code></pre>
-<p>The driver's local cursor MUST update its <code>id</code> and <code>ns</code>, as well as store the <code>nextBatch</code> from every <code>getMore</code> response.</p>
+<p>The driver’s local cursor MUST update its <code>id</code> and <code>ns</code>, as well as store the <code>nextBatch</code> from every <code>getMore</code> response.</p>
 <h3 id="killcursors"><a class="header" href="#killcursors">killCursors</a></h3>
 <p>The <a href="https://www.mongodb.com/docs/manual/reference/command/killCursors/">killCursors</a> command replaces the
 <strong>OP_KILL_CURSORS</strong> wire protocol message. The OP_QUERY namespace MUST be the same as for the <strong>find</strong> and <strong>getMore</strong>
@@ -460,8 +477,8 @@ and <strong>getMore</strong> commands to access the returned documents.</p>
 to partially deserialize documents to be able to efficiently provide the behavior in comparison to existing <strong>OP_QUERY</strong>
 queryresults.</p>
 <h2 id="errors"><a class="header" href="#errors">Errors</a></h2>
-<p>The <strong>find</strong> and <strong>getMore</strong> commands will report errors using the standard mechanism: an "ok: 0" field paired with
-"errmsg" and "code" fields. See below for example error responses:</p>
+<p>The <strong>find</strong> and <strong>getMore</strong> commands will report errors using the standard mechanism: an “ok: 0” field paired with
+“errmsg” and “code” fields. See below for example error responses:</p>
 <pre><code class="language-javascript">db.runCommand({find: "t", sort: {padding: -1}})
 </code></pre>
 <pre><code class="language-javascript">{
@@ -542,27 +559,12 @@ have same behavior as for OP_GET_MORE and OP_KILL_CURSORS.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../change-streams/change-streams.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../gridfs/gridfs-spec.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../change-streams/change-streams.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../gridfs/gridfs-spec.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -170,8 +169,8 @@
 <p>Server side compressor support is checked during the initial MongoDB Handshake, and is compatible with all historical
 versions of MongoDB. If a client detects a compatible compressor it will use the compressor for all valid requests.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="terms"><a class="header" href="#terms">Terms</a></h2>
 <p><em>Compressor</em> - A compression algorithm. There are currently three supported algorithms: snappy, zlib, and zstd.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
@@ -200,7 +199,7 @@ the client configuration - that they are willing to support to the server during
 example, a client wishing to compress with the snappy algorithm, should send:</p>
 <pre><code class="language-javascript">{ hello: 1, ... , compression: [ "snappy" ] }
 </code></pre>
-<p>The server will respond with the intersection of its list of supported compressors and the client's. For example, if the
+<p>The server will respond with the intersection of its list of supported compressors and the client’s. For example, if the
 server had both snappy and zlib enabled and the client requested snappy, it would respond with:</p>
 <pre><code class="language-javascript">{ ... , compression: [ "snappy" ], ok: 1 }
 </code></pre>
@@ -213,7 +212,7 @@ compression field. Clients MAY issue a log level event to inform the user, but M
 compressor, including the reply of the initial MongoDB Handshake. As each OP_COMPRESSED message contains the compressor
 ID, clients MUST NOT assume which compressor each message uses, but MUST decompress the message using the compressor
 identified in the OP_COMPRESSED opcode header.</p>
-<p>When compressing, clients MUST use the first compressor in the client's configured compressors list that is also in the
+<p>When compressing, clients MUST use the first compressor in the client’s configured compressors list that is also in the
 servers list.</p>
 <h3 id="connection-string-options"><a class="header" href="#connection-string-options">Connection String Options</a></h3>
 <p>Two new connection string options:</p>
@@ -230,12 +229,18 @@ lowest priority to the last compressor in the list.</p>
 <p>Integer value from <code>-1</code> - <code>9</code>. This configuration option only applies to the zlib compressor. When zlib is not one of
 the compressors enumerated by the <code>compressors</code> configuration option then providing this option has no meaning, but
 clients SHOULD NOT issue a warning.</p>
-<div class="table-wrapper"><table><thead><tr><th>Level</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Level</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>-1</td><td>Default Compression (usually 6)</td></tr>
 <tr><td>0</td><td>No compression</td></tr>
 <tr><td>1</td><td>Best Speed</td></tr>
 <tr><td>9</td><td>Best Compression</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>Note that this value only applies to the client side compression level, not the response.</p>
 <h3 id="op_compressed"><a class="header" href="#op_compressed">OP_COMPRESSED</a></h3>
@@ -253,22 +258,34 @@ clients SHOULD NOT issue a warning.</p>
     char    *compressedMessage;
 };
 </code></pre>
-<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>originalOpcode</td><td>Contains the value of the wrapped opcode.</td></tr>
 <tr><td>uncompressedSize</td><td>The size of the deflated compressedMessage, which excludes the MsgHeader</td></tr>
 <tr><td>compressorId</td><td>The ID of the compressor that compressed the message</td></tr>
 <tr><td>compressedMessage</td><td>The opcode itself, excluding the MsgHeader</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h3 id="compressor-ids"><a class="header" href="#compressor-ids">Compressor IDs</a></h3>
 <p>Each compressor is assigned a predefined compressor ID.</p>
-<div class="table-wrapper"><table><thead><tr><th>compressorId</th><th>Handshake Value</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>compressorId</th><th>Handshake Value</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>0</td><td>noop</td><td>The content of the message is uncompressed.<br>This is realistically only used for testing</td></tr>
 <tr><td>1</td><td>snappy</td><td>The content of the message is compressed using snappy.</td></tr>
 <tr><td>2</td><td>zlib</td><td>The content of the message is compressed using zlib.</td></tr>
 <tr><td>3</td><td>zstd</td><td>The content of the message is compressed using zstd.</td></tr>
 <tr><td>4-255</td><td>reserved</td><td>Reserved for future use.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h3 id="compressible-messages"><a class="header" href="#compressible-messages">Compressible messages</a></h3>
 <p>Any opcode can be compressed and wrapped in an <code>OP_COMPRESSED</code> header. The <code>OP_COMPRESSED</code> is strictly a wire protocol
@@ -464,12 +481,12 @@ actual MongoDB Handshake/hello where the support was announced.</li>
 </ul>
 </li>
 <li>
-<p>This is billed a MongoDB 3.6 feature -- but I hear it works with MongoDB3.4?</p>
+<p>This is billed a MongoDB 3.6 feature – but I hear it works with MongoDB3.4?</p>
 <ul>
 <li>Yes, it does. All MongoDB versions support the <code>compression</code> argument to the initial handshake and all MongoDB
 versions will reply with an intersection of compressors it supports. This works even with MongoDB 3.0, as it will
 not reply with any compressors. It also works with MongoDB 3.4 which will reply with <code>snappy</code> if it was part of
-the driver's list. MongoDB 3.6 will likely include zlib support.</li>
+the driver’s list. MongoDB 3.6 will likely include zlib support.</li>
 </ul>
 </li>
 <li>
@@ -520,9 +537,9 @@ which could originate on any type of platform, which may or may not support snap
 <ul>
 <li>2024-02-16: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter and reformat changelog.</li>
-<li>2021-04-06: Use 'hello' command</li>
+<li>2021-04-06: Use ‘hello’ command</li>
 <li>2019-05-13: Add zstd as supported compression algorithm</li>
-<li>2017-06-13: Don't require clients to implement legacy opcodes</li>
+<li>2017-06-13: Don’t require clients to implement legacy opcodes</li>
 <li>2017-05-10: Initial commit.</li>
 </ul>
 
@@ -534,27 +551,12 @@ which could originate on any type of platform, which may or may not support snap
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../mongodb-handshake/handshake.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../socks5-support/socks5.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../mongodb-handshake/handshake.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../socks5-support/socks5.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

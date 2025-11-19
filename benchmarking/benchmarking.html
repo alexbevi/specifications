@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -164,41 +163,41 @@
 <p>This document describes a standard benchmarking suite for MongoDB drivers.</p>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <h3 id="name-and-purpose"><a class="header" href="#name-and-purpose">Name and purpose</a></h3>
-<p>Driver performance will be measured by the MongoDB Driver Performance Benchmark (AKA "DriverBench"). It will provide
-both "horizontal" insights into how individual language driver performance evolves over time and "vertical" insights
+<p>Driver performance will be measured by the MongoDB Driver Performance Benchmark (AKA “DriverBench”). It will provide
+both “horizontal” insights into how individual language driver performance evolves over time and “vertical” insights
 into relative performance of different drivers.</p>
 <p>We do expect substantial performance differences between language families (e.g. static vs. dynamic or compiled vs.
-virtual-machine-based). However we still expect "vertical" comparison within language families to expose outlier
+virtual-machine-based). However we still expect “vertical” comparison within language families to expose outlier
 behavior that might be amenable to optimization.</p>
 <h3 id="task-hierarchy"><a class="header" href="#task-hierarchy">Task Hierarchy</a></h3>
 <p>The benchmark consists of a number of micro-benchmarks tasks arranged into groups of increasing complexity. This allows
 us to better isolate areas within drivers that are faster or slower.</p>
 <ul>
-<li>BSON -- BSON encoding/decoding tasks, to explore BSON codec efficiency</li>
-<li>Single-Doc -- single-document insertion and query tasks, to explore basic wire protocol efficiency</li>
-<li>Multi-Doc -- multi-document insertion and query tasks, to explore batch-write and cursor chunking efficiency</li>
-<li>Parallel -- multi-process/thread ETL tasks, to explore concurrent operation efficiency</li>
+<li>BSON – BSON encoding/decoding tasks, to explore BSON codec efficiency</li>
+<li>Single-Doc – single-document insertion and query tasks, to explore basic wire protocol efficiency</li>
+<li>Multi-Doc – multi-document insertion and query tasks, to explore batch-write and cursor chunking efficiency</li>
+<li>Parallel – multi-process/thread ETL tasks, to explore concurrent operation efficiency</li>
 </ul>
 <h3 id="measurement"><a class="header" href="#measurement">Measurement</a></h3>
-<p>In addition to timing data, all micro-benchmark tasks will be measured in terms of "megabytes/second" (MB/s) of
-documents processed, with higher scores being better. (In this document, "megabyte" refers to the SI decimal unit, i.e.
+<p>In addition to timing data, all micro-benchmark tasks will be measured in terms of “megabytes/second” (MB/s) of
+documents processed, with higher scores being better. (In this document, “megabyte” refers to the SI decimal unit, i.e.
 1,000,000 bytes.) This makes cross-benchmark comparisons easier.</p>
 <p>To avoid various types of measurement skew, tasks will be measured over numerous iterations. Each iteration will have a
-"scale" -- the number of similar operations performed -- that will vary by task. The final score for a task will be the
+“scale” – the number of similar operations performed – that will vary by task. The final score for a task will be the
 median score of the iterations. Other quantiles will be recorded for diagnostic analysis.</p>
 <h3 id="data-sets"><a class="header" href="#data-sets">Data sets</a></h3>
 <p>Data sets will vary by micro-benchmark. In some cases, they it will be a synthetically generated document inserted
 repeatedly (with different <code>_id</code> fields) to construct an overall corpus of documents. In other cases, data sets will be
 synthetic line-delimited JSON files or mock binary files.</p>
 <h3 id="composite-scores"><a class="header" href="#composite-scores">Composite scores</a></h3>
-<p>Micro-benchmark scores will be combined into a composite for each weight class ("BSONBench", "SingleBench", etc.) and
-for read and write operations ("ReadBench" and "WriteBench"). The read and write scores will be combined into an
-aggregate composite score ("DriverBench"). The compositing formula in the DriverBench uses simple averages with equal
+<p>Micro-benchmark scores will be combined into a composite for each weight class (“BSONBench”, “SingleBench”, etc.) and
+for read and write operations (“ReadBench” and “WriteBench”). The read and write scores will be combined into an
+aggregate composite score (“DriverBench”). The compositing formula in the DriverBench uses simple averages with equal
 weighting.</p>
 <h3 id="versioning"><a class="header" href="#versioning">Versioning</a></h3>
-<p>DriverBench will have vX.Y versioning. Minor updates and clarifications will increment "Y" and should have little impact
+<p>DriverBench will have vX.Y versioning. Minor updates and clarifications will increment “Y” and should have little impact
 on score comparison. Major changes, such as changing score weights, MongoDB version tested against, or hardware used,
-will increment "X" to indicate that older version scores are unlikely to be comparable.</p>
+will increment “X” to indicate that older version scores are unlikely to be comparable.</p>
 <h2 id="benchmark-execution-phases-and-measurement"><a class="header" href="#benchmark-execution-phases-and-measurement">Benchmark execution phases and measurement</a></h2>
 <p>All micro-benchmark tasks will be conducted via a number of iterations. Each iteration will be timed and will generally
 include a large number of individual driver operations.</p>
@@ -206,15 +205,15 @@ include a large number of individual driver operations.</p>
 problem of benchmarking an operation over many iterations, such as 100,000 document insertions, we want to avoid two
 extreme forms of measurement:</p>
 <ul>
-<li>measuring a single insertion 100,000 times -- in this case, the timing code is likely to be a greater proportion of
+<li>measuring a single insertion 100,000 times – in this case, the timing code is likely to be a greater proportion of
 executed code, which could routinely evict the insertion code from CPU caches or mislead a JIT optimizer and throw
 off results</li>
-<li>measuring 100,000 insertions one time -- in this case, the longer the timer runs, the higher the likelihood that an
+<li>measuring 100,000 insertions one time – in this case, the longer the timer runs, the higher the likelihood that an
 external event occurs that affects the time of the run</li>
 </ul>
 <p>Therefore, we choose a middle ground:</p>
 <ul>
-<li>measuring the same 1000 insertions over 100 iterations -- each timing run includes enough operations that insertion
+<li>measuring the same 1000 insertions over 100 iterations – each timing run includes enough operations that insertion
 code dominates timing code; unusual system events are likely to affect only a fraction of the 100 timing
 measurements</li>
 </ul>
@@ -227,17 +226,17 @@ which is robust in the face of outliers.</p>
 <p>Each benchmark is structured into discrete setup/execute/teardown phases. Phases are as follows, with specific details
 given in a subsequent section:</p>
 <ul>
-<li>setup -- (ONCE PER MICRO-BENCHMARK) something to do once before any benchmarking, e.g. construct a client object, load
+<li>setup – (ONCE PER MICRO-BENCHMARK) something to do once before any benchmarking, e.g. construct a client object, load
 test data, insert data into a collection, etc.</li>
-<li>before task -- (ONCE PER ITERATION) something to do before every task iteration, e.g. drop a collection, or reload
+<li>before task – (ONCE PER ITERATION) something to do before every task iteration, e.g. drop a collection, or reload
 test data (if the test run modifies it), etc.</li>
-<li>do task -- (ONCE PER ITERATION) smallest amount of code necessary to execute the task; e.g. insert 1000 documents one
+<li>do task – (ONCE PER ITERATION) smallest amount of code necessary to execute the task; e.g. insert 1000 documents one
 by one into the database, or retrieve 1000 document of test data from the database, etc.</li>
-<li>after task -- (ONCE PER ITERATION) something to do after every task iteration (if necessary)</li>
-<li>teardown -- (ONCE PER MICRO-BENCHMARK) something done once after all benchmarking is complete (if necessary); e.g.
+<li>after task – (ONCE PER ITERATION) something to do after every task iteration (if necessary)</li>
+<li>teardown – (ONCE PER MICRO-BENCHMARK) something done once after all benchmarking is complete (if necessary); e.g.
 drop the test database</li>
 </ul>
-<p>The wall-clock execution time of each "do task" phase will be recorded. We use wall clock time to model user experience
+<p>The wall-clock execution time of each “do task” phase will be recorded. We use wall clock time to model user experience
 and as a lowest-common denominator across languages and threading models. Iteration timing should be done with a
 high-resolution monotonic timer (or best language approximation).</p>
 <p>Unless otherwise specified, the number of iterations to measure per micro-benchmark is variable:</p>
@@ -257,25 +256,25 @@ following algorithm:</p>
 <p><em>N.B. This is the <a href="https://en.wikipedia.org/wiki/Percentile#The_Nearest_Rank_method">Nearest Rank</a> algorithm, chosen for
 its utter simplicity given that it needs to be implemented identically across multiple languages for every driver.</em></p>
 <p>The 50th percentile (i.e. the median) will be used for score composition. Other percentiles will be stored for
-visualizations and analysis (e.g. a "candlestick" chart showing benchmark volatility over time).</p>
+visualizations and analysis (e.g. a “candlestick” chart showing benchmark volatility over time).</p>
 <p>Each task will have defined for it an associated size in megabytes (MB). The score for micro-benchmark composition will
 be the task size in MB divided by the median wall clock time.</p>
 <h2 id="micro-benchmark-definitions"><a class="header" href="#micro-benchmark-definitions">Micro-benchmark definitions</a></h2>
 <p>Datasets are available in the <code>data</code> directory adjacent to this spec.</p>
-<p>Note: The term "LDJSON" means "line-delimited JSON", which should be understood to mean a collection of UTF-8 encoded
+<p>Note: The term “LDJSON” means “line-delimited JSON”, which should be understood to mean a collection of UTF-8 encoded
 JSON documents (without embedded CR or LF characters), separated by a single LF character. (Some Internet definition of
 line-delimited JSON use CRLF delimiters, but this benchmark uses only LF.)</p>
 <h3 id="bson-micro-benchmarks"><a class="header" href="#bson-micro-benchmarks">BSON micro-benchmarks</a></h3>
 <p>Datasets are in the <code>extended_bson</code> tarball.</p>
 <p>BSON tests focus on BSON encoding and decoding; they are client-side only and do not involve any transmission of data to
 or from the benchmark server. When appropriate, data sets will be stored on disk as
-<a href="https://www.mongodb.com/docs/manual/reference/mongodb-extended-json">extended strict JSON</a>. For drivers that don't
+<a href="https://www.mongodb.com/docs/manual/reference/mongodb-extended-json">extended strict JSON</a>. For drivers that don’t
 support extended JSON, a BSON analogue will be provided as well.</p>
 <p>BSON micro-benchmarks include:</p>
 <ul>
-<li>Flat BSON Encoding and Flat BSON Decoding -- shallow documents with only common BSON field types</li>
-<li>Deep BSON Encoding and Deep BSON Decoding -- deeply nested documents with only common BSON field types</li>
-<li>Full BSON Encoding and Full BSON Decoding -- shallow documents with all possible BSON field types</li>
+<li>Flat BSON Encoding and Flat BSON Decoding – shallow documents with only common BSON field types</li>
+<li>Deep BSON Encoding and Deep BSON Decoding – deeply nested documents with only common BSON field types</li>
+<li>Full BSON Encoding and Full BSON Decoding – shallow documents with all possible BSON field types</li>
 </ul>
 <h4 id="flat-bson-encoding"><a class="header" href="#flat-bson-encoding">Flat BSON Encoding</a></h4>
 <p>Summary: This benchmark tests driver performance encoding documents with top level key/value pairs involving the most
@@ -286,13 +285,19 @@ of the following types: string, Int32, Int64, Double, Boolean. (121 total key/va
 strings of length 8. String data will be random ASCII strings of length 80.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (7531
 bytes) times 10,000 operations, which equals 75,310,000 bytes or 75.31 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Load the FLAT_BSON dataset into memory as a language-appropriate document types. For languages like C without a document type, the raw JSON string for each document should be used instead.</td></tr>
 <tr><td>Before task</td><td>n/a</td></tr>
 <tr><td>Do task</td><td>Encode the FLAT_BSON document to a BSON byte-string. Repeat this 10,000 times.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>n/a</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="flat-bson-decoding"><a class="header" href="#flat-bson-decoding">Flat BSON Decoding</a></h4>
 <p>Summary: This benchmark tests driver performance decoding documents with top level key/value pairs involving the most
@@ -303,46 +308,64 @@ string, Int32, Int64, Double, Boolean. (121 total key/value pairs) Keys will be 
 data will be random ASCII strings of length 80.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (7531
 bytes) times 10,000 operations, which equals 75,310,000 bytes or 75.31 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Load the FLAT_BSON dataset into memory as a language-appropriate document types. For languages like C without a document type, the raw JSON string for each document should be used instead. Encode it to a BSON byte-string.</td></tr>
 <tr><td>Before task</td><td>n/a</td></tr>
 <tr><td>Do task</td><td>Decode the BSON byte-string to a language-appropriate document type. Repeat this 10,000 times. For languages like C without a document type, decode to extended JSON instead.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>n/a</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="deep-bson-encoding"><a class="header" href="#deep-bson-encoding">Deep BSON Encoding</a></h4>
 <p>Summary: This benchmark tests driver performance encoding documents with deeply nested key/value pairs involving
 subdocuments, strings, integers, doubles and booleans.</p>
 <p>Dataset: The dataset, designated DEEP_BSON (disk file <code>deep_bson.json</code>), will be synthetically generated and consist of
-an extended JSON document representing a balanced binary tree of depth 6, with "left" and "right" keys at each level
+an extended JSON document representing a balanced binary tree of depth 6, with “left” and “right” keys at each level
 containing a sub-document until the final level, which will contain a random ASCII string of length 8 (126 total
 key/value pairs).</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (1964
 bytes) times 10,000 operations, which equals 19,640,000 bytes or 19.64 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Load the DEEP_BSON dataset into memory as a language-appropriate document type. For languages like C without a document type, the raw JSON string for each document should be used instead.</td></tr>
 <tr><td>Before task</td><td>n/a</td></tr>
 <tr><td>Do task</td><td>Encode the DEEP_BSON document to a BSON byte-string. Repeat this 10,000 times.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>n/a</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="deep-bson-decoding"><a class="header" href="#deep-bson-decoding">Deep BSON Decoding</a></h4>
 <p>Summary: This benchmark tests driver performance decoding documents with deeply nested key/value pairs involving
 subdocuments, strings, integers, doubles and booleans.</p>
 <p>Dataset: The dataset, designated DEEP_BSON, will be synthetically generated and consist of an extended JSON document
-representing a balanced binary tree of depth 6, with "left" and "right" keys at each level containing a sub-document
+representing a balanced binary tree of depth 6, with “left” and “right” keys at each level containing a sub-document
 until the final level, which will contain a random ASCII string of length 8 (126 total key/value pairs).</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (1964
 bytes) times 10,000 operations, which equals 19,640,000 bytes or 19.64 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Load the DEEP_BSON dataset into memory as a language-appropriate document types. For languages like C without a document type, the raw JSON string for each document should be used instead. Encode it to a BSON byte-string.</td></tr>
 <tr><td>Before task</td><td>n/a</td></tr>
 <tr><td>Do task</td><td>Decode the BSON byte-string to a language-appropriate document type. Repeat this 10,000 times. For languages like C without a document type, decode to extended JSON instead.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>n/a</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="full-bson-encoding"><a class="header" href="#full-bson-encoding">Full BSON Encoding</a></h4>
 <p>Summary: This benchmark tests driver performance encoding documents with top level key/value pairs involving the full
@@ -354,13 +377,19 @@ Javascript code with context, and timestamp. (91 total keys.) Keys (other than <
 length 8. Strings values will be random ASCII strings with length 80.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (5734
 bytes) times 10,000 operations, which equals 57,340,000 bytes or 57.34 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Load the FULL_BSON dataset into memory as a language-appropriate document type. For languages like C without a document type, the raw JSON string for each document should be used instead.</td></tr>
 <tr><td>Before task</td><td>n/a</td></tr>
 <tr><td>Do task</td><td>Encode the FULL_BSON document to a BSON byte-string. Repeat this 10,000 times.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>n/a</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="full-bson-decoding"><a class="header" href="#full-bson-decoding">Full BSON Decoding</a></h4>
 <p>Summary: This benchmark tests driver performance decoding documents with top level key/value pairs involving the full
@@ -372,18 +401,24 @@ context, and timestamp. (91 total keys.) Keys (other than <code>_id</code>) will
 values will be random ASCII strings with length 80.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (5734
 bytes) times 10,000 operations, which equals 57,340,000 bytes or 57.34 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Load the FULL_BSON dataset into memory as a language-appropriate document types. For languages like C without a document type, the raw JSON string for each document should be used instead. Encode it to a BSON byte-string.</td></tr>
 <tr><td>Before task</td><td>n/a</td></tr>
 <tr><td>Do task</td><td>Decode the BSON byte-string to a language-appropriate document type. Repeat this 10,000 times. For languages like C without a document type, decode to extended JSON instead.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>n/a</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h3 id="single-doc-benchmarks"><a class="header" href="#single-doc-benchmarks">Single-Doc Benchmarks</a></h3>
 <p>Datasets are in the <code>single_and_multi_document</code> tarball.</p>
 <p>Single-doc tests focus on single-document read and write operations. They are designed to give insights into the
-efficiency of the driver's implementation of the basic wire protocol.</p>
+efficiency of the driver’s implementation of the basic wire protocol.</p>
 <p>The data will be stored as strict JSON with no extended types.</p>
 <p>Single-doc micro-benchmarks include:</p>
 <ul>
@@ -398,13 +433,19 @@ efficiency of the driver's implementation of the basic wire protocol.</p>
 <p>Dataset size: While there is no external dataset, for score calculation purposes use 130,000 bytes (10,000 x the size of
 a BSON {hello:true} command).</p>
 <p><em>N.B. We use {hello:true} rather than {hello:1} to ensure a consistent command size.</em></p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Construct whatever language-appropriate objects (Database, etc.) would be required to send a command.</td></tr>
 <tr><td>Before task</td><td>n/a</td></tr>
 <tr><td>Do task</td><td>Run the command {hello:true} 10,000 times, reading (and discarding) the result each time.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>n/a</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="find-one-by-id"><a class="header" href="#find-one-by-id">Find one by ID</a></h4>
 <p>Summary: This benchmark tests driver performance sending an indexed query to the database and reading a single document
@@ -412,13 +453,19 @@ in response.</p>
 <p>Dataset: The dataset, designated TWEET (disk file <code>tweet.json</code>), consists of a sample tweet stored as strict JSON.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (1622
 bytes) times 10,000 operations, which equals 16,220,000 bytes or 16.22 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the TWEET document into memory as a language-appropriate document type (or JSON string for C). Construct a Collection object for the <code>corpus</code> collection to use for querying. Insert the document 10,000 times to the <code>perftest</code> database in the <code>corpus</code> collection using sequential <code>_id</code> values. (1 to 10,000)</td></tr>
 <tr><td>Before task</td><td>n/a</td></tr>
 <tr><td>Do task</td><td>For each of the 10,000 sequential <code>_id</code> numbers, issue a find command for that <code>_id</code> on the <code>corpus</code> collection and retrieve the single-document result.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="small-doc-insertone"><a class="header" href="#small-doc-insertone">Small doc insertOne</a></h4>
 <p>Summary: This benchmark tests driver performance inserting a single, small document to the database.</p>
@@ -426,13 +473,19 @@ bytes) times 10,000 operations, which equals 16,220,000 bytes or 16.22 MB.</p>
 length of approximately 250 bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (275 bytes)
 times 10,000 operations, which equals 2,750,000 bytes or 2.75 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C).</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command. Construct a Collection object for the <code>corpus</code> collection to use for insertion.</td></tr>
 <tr><td>Do task</td><td>Insert the document with the insertOne CRUD method. DO NOT manually add an <code>_id</code> field; leave it to the driver or database. Repeat this 10,000 times.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="large-doc-insertone"><a class="header" href="#large-doc-insertone">Large doc insertOne</a></h4>
 <p>Summary: This benchmark tests driver performance inserting a single, large document to the database.</p>
@@ -440,18 +493,24 @@ times 10,000 operations, which equals 2,750,000 bytes or 2.75 MB.</p>
 length of approximately 2,500,000 bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (2,731,089
 bytes) times 10 operations, which equals 27,310,890 bytes or 27.31 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the LARGE_DOC dataset into memory as a language-appropriate document type (or JSON string for C).</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command. Construct a Collection object for the <code>corpus</code> collection to use for insertion.</td></tr>
 <tr><td>Do task</td><td>Insert the document with the insertOne CRUD method. DO NOT manually add an <code>_id</code> field; leave it to the driver or database. Repeat this 10 times.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h3 id="multi-doc-benchmarks"><a class="header" href="#multi-doc-benchmarks">Multi-Doc Benchmarks</a></h3>
 <p>Datasets are in the <code>single_and_multi_document</code> tarball.</p>
 <p>Multi-doc benchmarks focus on multiple-document read and write operations. They are designed to give insight into the
-efficiency of the driver's implementation of bulk/batch operations such as bulk writes and cursor reads.</p>
+efficiency of the driver’s implementation of bulk/batch operations such as bulk writes and cursor reads.</p>
 <p>Multi-doc micro-benchmarks include:</p>
 <ul>
 <li>Find many and empty the cursor</li>
@@ -471,13 +530,19 @@ efficiency of the driver's implementation of bulk/batch operations such as bulk 
 <p>Dataset: The dataset, designated TWEET consists of a sample tweet stored as strict JSON.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (1622
 bytes) times 10,000 operations, which equals 16,220,000 bytes or 16.22 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the TWEET dataset into memory as a language-appropriate document type (or JSON string for C). Construct a Collection object for the <code>corpus</code> collection to use for querying. Insert the document 10,000 times to the <code>perftest</code> database in the <code>corpus</code> collection. (Let the driver generate <code>_id</code>s).</td></tr>
 <tr><td>Before task</td><td>n/a</td></tr>
 <tr><td>Do task</td><td>Issue a find command on the <code>corpus</code> collection with an empty filter expression. Retrieve (and discard) all documents from the cursor.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="small-doc-bulk-insert"><a class="header" href="#small-doc-bulk-insert">Small doc bulk insert</a></h4>
 <p>Summary: This benchmark tests driver performance inserting multiple small documents to the database using <code>insertMany</code>.</p>
@@ -485,13 +550,19 @@ bytes) times 10,000 operations, which equals 16,220,000 bytes or 16.22 MB.</p>
 bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (275 bytes)
 times 10,000 operations, which equals 2,750,000 bytes or 2.75 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C).</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command. Construct a Collection object for the <code>corpus</code> collection to use for insertion.</td></tr>
 <tr><td>Do task</td><td>Do an ordered <code>insertMany</code> with 10,000 copies of the document. DO NOT manually add an <code>_id</code> field; leave it to the driver or database.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="large-doc-bulk-insert"><a class="header" href="#large-doc-bulk-insert">Large doc bulk insert</a></h4>
 <p>Summary: This benchmark tests driver performance inserting multiple large documents to the database using <code>insertMany</code>.</p>
@@ -499,13 +570,19 @@ times 10,000 operations, which equals 2,750,000 bytes or 2.75 MB.</p>
 bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (2,731,089
 bytes) times 10 operations, which equals 27,310,890 bytes or 27.31 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the LARGE_DOC dataset into memory as a language-appropriate document type (or JSON string for C).</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command. Construct a Collection object for the <code>corpus</code> collection to use for insertion.</td></tr>
 <tr><td>Do task</td><td>Do an ordered <code>insertMany</code> with 10 copies of the document. DO NOT manually add an <code>_id</code> field; leave it to the driver or database.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="small-doc-collection-bulkwrite-insert"><a class="header" href="#small-doc-collection-bulkwrite-insert">Small doc Collection BulkWrite insert</a></h4>
 <p>Summary: This benchmark tests driver performance inserting multiple small documents to the database using the
@@ -514,13 +591,19 @@ bytes) times 10 operations, which equals 27,310,890 bytes or 27.31 MB.</p>
 bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (275 bytes)
 times 10,000 operations, which equals 2,750,000 bytes or 2.75 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). Create a list of insert models for 10,000 copies of the document, allowing the driver or database to auto-assign the <code>_id</code> field.</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command. Construct a Collection object for the <code>corpus</code> collection to use for insertion.</td></tr>
 <tr><td>Do task</td><td>Do an ordered <code>Collection::bulkWrite</code> with the list of insert models.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="large-doc-collection-bulkwrite-insert"><a class="header" href="#large-doc-collection-bulkwrite-insert">Large doc Collection BulkWrite insert</a></h4>
 <p>Summary: This benchmark tests driver performance inserting multiple large documents to the database using the
@@ -529,13 +612,19 @@ times 10,000 operations, which equals 2,750,000 bytes or 2.75 MB.</p>
 bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (2,731,089
 bytes) times 10 operations, which equals 27,310,890 bytes or 27.31 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the LARGE_DOC dataset into memory as a language-appropriate document type (or JSON string for C). Create a list of insert models for 10 copies of the document, allowing the driver or database to auto-assign the <code>_id</code> field.</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command. Construct a Collection object for the <code>corpus</code> collection to use for insertion.</td></tr>
 <tr><td>Do task</td><td>Do an ordered <code>Collection::bulkWrite</code> with the list of insert models.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="small-doc-client-bulkwrite-insert"><a class="header" href="#small-doc-client-bulkwrite-insert">Small doc Client BulkWrite insert</a></h4>
 <p>Summary: This benchmark tests driver performance inserting multiple small documents to the database using the
@@ -544,13 +633,19 @@ bytes) times 10 operations, which equals 27,310,890 bytes or 27.31 MB.</p>
 bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (275 bytes)
 times 10,000 operations, which equals 2,750,000 bytes or 2.75 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
-<tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). Create a list of insert models for 10,000 copies of the document in the same namespace ("perftest.corpus"), allowing the driver or database to auto-assign the <code>_id</code> field.</td></tr>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). Create a list of insert models for 10,000 copies of the document in the same namespace (“perftest.corpus”), allowing the driver or database to auto-assign the <code>_id</code> field.</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command. Construct a Collection object for the <code>corpus</code> collection to use for insertion.</td></tr>
 <tr><td>Do task</td><td>Do an ordered <code>Client::bulkWrite</code> with the list of insert models.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="large-doc-client-bulkwrite-insert"><a class="header" href="#large-doc-client-bulkwrite-insert">Large doc Client BulkWrite insert</a></h4>
 <p>Summary: This benchmark tests driver performance inserting multiple large documents to the database using the
@@ -559,13 +654,19 @@ times 10,000 operations, which equals 2,750,000 bytes or 2.75 MB.</p>
 bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (2,731,089
 bytes) times 10 operations, which equals 27,310,890 bytes or 27.31 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
-<tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the LARGE_DOC dataset into memory as a language-appropriate document type (or JSON string for C). Create a list of insert models for 10 copies of the document in the same namespace ("perftest.corpus"), allowing the driver or database to auto-assign the <code>_id</code> field.</td></tr>
-<tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command. Construct a Collection object for the <code>corpus</code> collection to use for insertion.<br/></td></tr>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the LARGE_DOC dataset into memory as a language-appropriate document type (or JSON string for C). Create a list of insert models for 10 copies of the document in the same namespace (“perftest.corpus”), allowing the driver or database to auto-assign the <code>_id</code> field.</td></tr>
+<tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command. Construct a Collection object for the <code>corpus</code> collection to use for insertion.<br /></td></tr>
 <tr><td>Do task</td><td>Do an ordered <code>Client::bulkWrite</code> with the list of insert models.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="small-doc-client-bulkwrite-mixed-operations"><a class="header" href="#small-doc-client-bulkwrite-mixed-operations">Small doc Client BulkWrite Mixed Operations</a></h4>
 <p>Summary: This benchmark tests driver performance of a <code>Client::bulkWrite</code> operation with small documents and mixed
@@ -574,13 +675,19 @@ operations (e.g. insert, replace and delete).</p>
 bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (275 bytes)
 times 20,000 operations (insert + replace), which equals 5,500,000 bytes or 5.5 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
-<tr><td>Setup</td><td>Construct a MongoClient object. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). <br> Create a list of 10 numbered collection names (<code>corpus_1</code>, <code>corpus_2</code>, ...) <br/> Create a list of write models for 10,000 document copies. For each document (where i goes from 0 to 9,999), create three write models with the namespace set to the collection name found at index <code>i % 10</code> in your collection names list: <br/> 1. An insert model. <br/> 2. A replace model (using an empty filter and a copy of the document). <br/> 3. A delete model (using an empty filter). <br/> Notes: <br/> - DO NOT manually add an <code>_id</code> field; leave it to the driver or database. You should have 30,000 write models in your list.</td></tr>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Construct a MongoClient object. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). <br> Create a list of 10 numbered collection names (<code>corpus_1</code>, <code>corpus_2</code>, …) <br /> Create a list of write models for 10,000 document copies. For each document (where i goes from 0 to 9,999), create three write models with the namespace set to the collection name found at index <code>i % 10</code> in your collection names list: <br /> 1. An insert model. <br /> 2. A replace model (using an empty filter and a copy of the document). <br /> 3. A delete model (using an empty filter). <br /> Notes: <br /> - DO NOT manually add an <code>_id</code> field; leave it to the driver or database. You should have 30,000 write models in your list.</td></tr>
 <tr><td>Before task</td><td>Drop the <code>perftest</code> database, create it again and create the collections found in your numbered collection names list.</td></tr>
 <tr><td>Do task</td><td>Do an ordered <code>Client::bulkWrite</code> with the list of write models.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="small-doc-collection-bulkwrite-mixed-operations"><a class="header" href="#small-doc-collection-bulkwrite-mixed-operations">Small doc Collection BulkWrite Mixed Operations</a></h4>
 <p>Summary: This benchmark tests driver performance of a <code>Collection::bulkWrite</code> operation with small documents and mixed
@@ -589,13 +696,19 @@ operations (e.g. insert, replace and delete).</p>
 bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the single-document source file (275 bytes)
 times 20,000 operations (insert + replace), which equals 5,500,000 bytes or 5.5 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
-<tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). Create a list of write models for 10,000 copies of the document where for each copy of the document add the following models: <br/> 1. insert model. <br/> 2. replace model with a copy and using an empty filter. <br/> 3. delete model using empty filter. <br/> DO NOT manually add an <code>_id</code> field; leave it to the driver or database. You should have 30,000 write models in your list.</td></tr>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Load the SMALL_DOC dataset into memory as a language-appropriate document type (or JSON string for C). Create a list of write models for 10,000 copies of the document where for each copy of the document add the following models: <br /> 1. insert model. <br /> 2. replace model with a copy and using an empty filter. <br /> 3. delete model using empty filter. <br /> DO NOT manually add an <code>_id</code> field; leave it to the driver or database. You should have 30,000 write models in your list.</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command. Construct a Collection object for the <code>corpus</code> collection to use for insertion.</td></tr>
 <tr><td>Do task</td><td>Do an ordered <code>Collection::bulkWrite</code> with the list of write models.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="gridfs-upload"><a class="header" href="#gridfs-upload">GridFS upload</a></h4>
 <p>Summary: This benchmark tests driver performance uploading a GridFS file from memory.</p>
@@ -604,13 +717,19 @@ times 20,000 operations (insert + replace), which equals 5,500,000 bytes or 5.5 
 batches.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the source file (52,428,800 bytes) times 1
 operation or 52.43 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. rop the <code>perftest</code> database. Load the GRIDFS_LARGE file as a string or other language-appropriate type for binary octet data.</td></tr>
 <tr><td>Before task</td><td>Drop the default GridFS bucket. Insert a 1-byte file into the bucket. (This ensures the bucket collections and indices have been created.) Construct a GridFSBucket object to use for uploads.</td></tr>
 <tr><td>Do task</td><td>Upload the GRIDFS_LARGE data as a GridFS file. Use whatever upload API is most natural for each language (e.g. open_upload_stream(), write the data to the stream and close the stream).</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="gridfs-download"><a class="header" href="#gridfs-download">GridFS download</a></h4>
 <p>Summary: This benchmark tests driver performance downloading a GridFS file to memory.</p>
@@ -618,23 +737,29 @@ operation or 52.43 MB.</p>
 large file to ensure multiple database round-trips even if chunks are are sent in batches.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the size of the source file (52,428,800 bytes) times 1
 operation or 52.43 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
-<tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Upload the GRIDFS_LARGE file to the default gridFS bucket with the name "gridfstest". Record the <code>_id</code> of the uploaded file.</td></tr>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Upload the GRIDFS_LARGE file to the default gridFS bucket with the name “gridfstest”. Record the <code>_id</code> of the uploaded file.</td></tr>
 <tr><td>Before task</td><td>Construct a GridFSBucket object to use for downloads.</td></tr>
-<tr><td>Do task</td><td>Download the "gridfstest" file by its <code>_id</code>. Use whatever download API is most natural for each language (e.g. open_download_stream(), read from the stream into a variable). Discard the downloaded data.</td></tr>
+<tr><td>Do task</td><td>Download the “gridfstest” file by its <code>_id</code>. Use whatever download API is most natural for each language (e.g. open_download_stream(), read from the stream into a variable). Discard the downloaded data.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h3 id="parallel"><a class="header" href="#parallel">Parallel</a></h3>
 <p>Datasets are in the <code>parallel</code> tarball.</p>
 <p>Parallel tests simulate ETL operations from disk to database or vice-versa. They are designed to be implemented using a
-language's preferred approach to concurrency and thus stress how drivers handle concurrency. These intentionally involve
-overhead above and beyond the driver itself to simulate -- however loosely -- the sort of "real-world" pressures that a
+language’s preferred approach to concurrency and thus stress how drivers handle concurrency. These intentionally involve
+overhead above and beyond the driver itself to simulate – however loosely – the sort of “real-world” pressures that a
 drivers would be under during concurrent operation.</p>
 <p>They are intended for directional indication of which languages perform best for this sort of pseudo-real-world
 activity, but are not intended to represent real-world performance claims.</p>
-<p>Drivers teams are expected to treat these as a competitive "shoot-out" to surface optimal ETL patterns for each language
+<p>Drivers teams are expected to treat these as a competitive “shoot-out” to surface optimal ETL patterns for each language
 (e.g. multi-thread, multi-process, asynchronous I/O, etc.).</p>
 <p>Parallel micro-benchmarks include:</p>
 <ul>
@@ -649,13 +774,19 @@ activity, but are not intended to represent real-world performance claims.</p>
 containing 5,000 JSON documents. Each document should be about 1000 bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the total size of all source files: 565,000,000 bytes
 or 565 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database.</td></tr>
 <tr><td>Before task</td><td>Drop the <code>corpus</code> collection. Create an empty <code>corpus</code> collection with the <code>create</code> command.</td></tr>
 <tr><td>Do task</td><td>Do an unordered insert of all 500,000 documents in the dataset into the <code>corpus</code> collection as fast as possible. Data must be loaded from disk during this phase. Concurrency is encouraged.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="ldjson-multi-file-export"><a class="header" href="#ldjson-multi-file-export">LDJSON multi-file export</a></h4>
 <p>Summary: This benchmark tests driver performance exporting documents to a set of LDJSON files.</p>
@@ -663,57 +794,81 @@ or 565 MB.</p>
 document should be about 1000 bytes.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the total size of all source files: 565,000,000 bytes
 or 565 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Drop the <code>corpus</code> collection. Do an unordered insert of all 500,000 documents in the dataset into the <code>corpus</code> collection.</td></tr>
 <tr><td>Before task</td><td>Construct whatever objects, threads, etc. are required for exporting the dataset.</td></tr>
 <tr><td>Do task</td><td>Dump all 500,000 documents in the dataset into 100 LDJSON files of 5,000 documents each as fast as possible. Data must be completely written/flushed to disk during this phase. Concurrency is encouraged. The order and distribution of documents across files does not need to match the original LDJSON_MULTI files.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="gridfs-multi-file-upload"><a class="header" href="#gridfs-multi-file-upload">GridFS multi-file upload</a></h4>
 <p>Summary: This benchmark tests driver performance uploading files from disk to GridFS.</p>
 <p>Dataset: The dataset, designated GRIDFS_MULTI (disk directory <code>gridfs_multi</code>), consists of 50 files, each of 5MB. This
 file size corresponds roughly to the output of a (slightly dated) digital camera. Thus the task approximates uploading
-50 "photos".</p>
+50 “photos”.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the total size of all source files: 262,144,000 bytes
 or 262.144 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database.</td></tr>
 <tr><td>Before task</td><td>Drop the default GridFS bucket in the <code>perftest</code> database. Construct a GridFSBucket object for the default bucket in <code>perftest</code> to use for uploads. Insert a 1-byte file into the bucket (to initialize indexes).</td></tr>
 <tr><td>Do task</td><td>Upload all 50 files in the GRIDFS_MULTI dataset (reading each from disk). Concurrency is encouraged.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="gridfs-multi-file-download"><a class="header" href="#gridfs-multi-file-download">GridFS multi-file download</a></h4>
 <p>Summary: This benchmark tests driver performance downloading files from GridFS to disk.</p>
 <p>Dataset: The dataset, designated GRIDFS_MULTI, consists of 50 files, each of 5MB. This file size corresponds roughly to
-the output of a (slightly dated) digital camera. Thus the task approximates downloading 50 "photos".</p>
+the output of a (slightly dated) digital camera. Thus the task approximates downloading 50 “photos”.</p>
 <p>Dataset size: For score purposes, the dataset size for a task is the total size of all source files: 262,144,000 bytes
 or 262.144 MB.</p>
-<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>Setup</td><td>Construct a MongoClient object. Drop the <code>perftest</code> database. Construct a temporary directory for holding downloads. Drop the default GridFS bucket in the <code>perftest</code> database. Upload the 50 file dataset to the default GridFS bucket in <code>perftest</code>.</td></tr>
 <tr><td>Before task</td><td>Delete all files in the temporary folder for downloads. Construct a GridFSBucket object to use for downloads from the default bucket in <code>perftest</code>.</td></tr>
 <tr><td>Do task</td><td>Download all 50 files in the GRIDFS_MULTI dataset, saving each to a file in the temporary folder for downloads. Data must be completely written/flushed to disk during this phase. Concurrency is encouraged.</td></tr>
 <tr><td>After task</td><td>n/a</td></tr>
 <tr><td>Teardown</td><td>Drop the <code>perftest</code> database.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h2 id="composite-score-calculation"><a class="header" href="#composite-score-calculation">Composite score calculation</a></h2>
 <p>Every micro-benchmark has a score equal to the 50th percentile (median) of sampled timings, expressed as Megabytes
-(1,000,000 bytes) per second where the micro-benchmark "database size" given in each section above is divided by the
+(1,000,000 bytes) per second where the micro-benchmark “database size” given in each section above is divided by the
 50th percentile of measured wall-clock times.</p>
 <p>From these micro-benchmarks, the following composite scores must be calculated:</p>
-<div class="table-wrapper"><table><thead><tr><th>Composite Name</th><th>Compositing formula</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Composite Name</th><th>Compositing formula</th></tr>
+</thead>
+<tbody>
 <tr><td>BSONBench</td><td>Average of all BSON micro-benchmarks</td></tr>
-<tr><td>SingleBench</td><td>Average of all Single-doc micro-benchmarks, except "Run Command"</td></tr>
+<tr><td>SingleBench</td><td>Average of all Single-doc micro-benchmarks, except “Run Command”</td></tr>
 <tr><td>MultiBench</td><td>Average of all Multi-doc micro-benchmarks</td></tr>
 <tr><td>ParallelBench</td><td>Average of all Parallel micro-benchmarks</td></tr>
-<tr><td>ReadBench</td><td>Average of "Find one", "Find many and empty cursor", "GridFS download", "LDJSON multi-file export", and "GridFS multi-file download" microbenchmarks</td></tr>
-<tr><td>WriteBench</td><td>Average of "Small doc insertOne", "Large doc insertOne", "Small doc bulk insert", "Large doc bulk insert", "Small doc Collection BulkWrite insert", "Large doc Collection BulkWrite insert", "Small doc Client BulkWrite insert", "Large doc Client BulkWrite insert", "Small doc Client BulkWrite Mixed Operations", "Small doc Collection BulkWrite Mixed Operations", "GridFS upload", "LDJSON multi-file import", and "GridFS multi-file upload" micro-benchmarks</td></tr>
+<tr><td>ReadBench</td><td>Average of “Find one”, “Find many and empty cursor”, “GridFS download”, “LDJSON multi-file export”, and “GridFS multi-file download” microbenchmarks</td></tr>
+<tr><td>WriteBench</td><td>Average of “Small doc insertOne”, “Large doc insertOne”, “Small doc bulk insert”, “Large doc bulk insert”, “Small doc Collection BulkWrite insert”, “Large doc Collection BulkWrite insert”, “Small doc Client BulkWrite insert”, “Large doc Client BulkWrite insert”, “Small doc Client BulkWrite Mixed Operations”, “Small doc Collection BulkWrite Mixed Operations”, “GridFS upload”, “LDJSON multi-file import”, and “GridFS multi-file upload” micro-benchmarks</td></tr>
 <tr><td>DriverBench</td><td>Average of ReadBench and WriteBench</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>At least for this first DriverBench version, scores are combined with simple averages. In addition, the BSONBench scores
 do not factor into the overall DriverBench scores, as encoding and decoding are inherent in all other tasks.</p>
@@ -721,7 +876,7 @@ do not factor into the overall DriverBench scores, as encoding and decoding are 
 <h3 id="benchmark-client"><a class="header" href="#benchmark-client">Benchmark Client</a></h3>
 <p>TBD: spec Amazon instance size; describe in general terms how language clients will be run independently; same AWS zone
 as server</p>
-<p>All operations must be run with write concern "w:1".</p>
+<p>All operations must be run with write concern “w:1”.</p>
 <h3 id="benchmark-server"><a class="header" href="#benchmark-server">Benchmark Server</a></h3>
 <p>TBD: spec Amazon instance size; describe configuration (e.g. no auth, journal, pre-alloc sizes?, WT with compression to
 minimize disk I/O impact?); same AWS zone as client</p>
@@ -757,8 +912,8 @@ actual benchmark.)</li>
 <p>2016-01-06:</p>
 <ul>
 <li>Clarify that <code>bulk insert</code> means <code>insert_many</code></li>
-<li>Clarify that "create a collection" means using the <code>create</code> command</li>
-<li>Add omitted "upload files" step to setup for GridFS multi-file download; also clarify that steps should be using the
+<li>Clarify that “create a collection” means using the <code>create</code> command</li>
+<li>Add omitted “upload files” step to setup for GridFS multi-file download; also clarify that steps should be using the
 default bucket in the <code>perftest</code> database</li>
 </ul>
 </li>
@@ -768,7 +923,7 @@ default bucket in the <code>perftest</code> database</li>
 <li>Rename benchmark names away from MMA/weight class names</li>
 <li>Split BSON encoding and decoding micro-benchmarks</li>
 <li>Rename BSON micro-benchmarks to better match dataset names</li>
-<li>Move "Run Command" micro-benchmark out of composite</li>
+<li>Move “Run Command” micro-benchmark out of composite</li>
 <li>Reduced amount of data held in memory and sent to/from the server to decrease memory pressure and increase number of
 iterations in a reasonable time (e.g. file sizes and number of documents in certain datasets changed)</li>
 <li>Create empty collections/indexes during the <code>before</code> phase when appropriate</li>
@@ -785,27 +940,12 @@ iterations in a reasonable time (e.g. file sizes and number of documents in cert
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../unified-test-format/unified-test-format.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../bson-corpus/bson-corpus.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../unified-test-format/unified-test-format.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../bson-corpus/bson-corpus.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

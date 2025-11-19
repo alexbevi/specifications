@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,7 +159,7 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.4</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>MongoDB 3.4 has the ability to annotate connections with metadata provided by the connecting client. The intent of this
 metadata is to be able to identify client level information about the connection, such as application name, driver name
@@ -173,8 +172,8 @@ that clients provide as part of the handshake.</p>
 <p>This spec furthermore adds a new connection string argument for applications to declare its application name to the
 server.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="terms"><a class="header" href="#terms">Terms</a></h2>
 <p><strong>hello command</strong></p>
 <p>The command named <code>hello</code>. It is the preferred and modern command for handshakes and topology monitoring.</p>
@@ -187,7 +186,7 @@ redact, or otherwise treat specially.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="connection-handshake"><a class="header" href="#connection-handshake">Connection handshake</a></h3>
 <p>MongoDB uses the <code>hello</code> or <code>isMaster</code> commands for handshakes and topology monitoring. <code>hello</code> is the modern and
-preferred command. <code>hello</code> must always be sent using the <code>OP_MSG</code> protocol. <code>isMaster</code> is referred to as "legacy hello"
+preferred command. <code>hello</code> must always be sent using the <code>OP_MSG</code> protocol. <code>isMaster</code> is referred to as “legacy hello”
 and is maintained for backwards compatibility with servers that do not support the <code>hello</code> command.</p>
 <p>If a <a href="../versioned-api/versioned-api.html">server API version</a> is requested or <code>loadBalanced: True</code>, drivers MUST use the
 <code>hello</code> command for the initial handshake and use the <code>OP_MSG</code> protocol. If server API version is not requested and
@@ -328,7 +327,7 @@ This field is REQUIRED and clients must default to <code>unknown</code> when an 
 </code></pre>
 <h4 id="clientosname"><a class="header" href="#clientosname">client.os.name</a></h4>
 <p>This value is optional, but RECOMMENDED, it is not application configurable.</p>
-<p>Detailed name of the Operating System's, such as fully qualified distribution name. On systemd systems, this is
+<p>Detailed name of the Operating System’s, such as fully qualified distribution name. On systemd systems, this is
 typically <code>PRETTY_NAME</code> of <code>os-release(5)</code> (<code>/etc/os-release</code>) or the <code>DISTRIB_DESCRIPTION</code> (<code>/etc/lsb-release</code>,
 <code>lsb_release(1) --description</code>) on LSB systems. The exact value and method to determine this value is undefined.</p>
 <p>Example:</p>
@@ -371,25 +370,37 @@ runtime.</p>
 <h5 id="faas"><a class="header" href="#faas">FaaS</a></h5>
 <p>FaaS details are captured in the <code>name</code>, <code>timeout_sec</code>, <code>memory_mb</code>, and <code>region</code> fields of <code>client.env</code>. The <code>name</code>
 field is determined by which of the following environment variables are populated:</p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Environment Variable</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Environment Variable</th></tr>
+</thead>
+<tbody>
 <tr><td><code>aws.lambda</code></td><td><code>AWS_EXECUTION_ENV</code><sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup> or <code>AWS_LAMBDA_RUNTIME_API</code></td></tr>
 <tr><td><code>azure.func</code></td><td><code>FUNCTIONS_WORKER_RUNTIME</code></td></tr>
 <tr><td><code>gcp.func</code></td><td><code>K_SERVICE</code> or <code>FUNCTION_NAME</code></td></tr>
 <tr><td><code>vercel</code></td><td><code>VERCEL</code></td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>If none of those variables are populated the other FaaS values MUST be entirely omitted. When variables for multiple
 <code>client.env.name</code> values are present, <code>vercel</code> takes precedence over <code>aws.lambda</code>; any other combination MUST cause the
 other FaaS values to be entirely omitted.</p>
 <p>Depending on which <code>client.env.name</code> has been selected, other FaaS fields in <code>client.env</code> SHOULD be populated:</p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Field</th><th>Environment Variable</th><th>Expected Type</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Field</th><th>Environment Variable</th><th>Expected Type</th></tr>
+</thead>
+<tbody>
 <tr><td><code>aws.lambda</code></td><td><code>client.env.region</code></td><td><code>AWS_REGION</code></td><td>string</td></tr>
 <tr><td></td><td><code>client.env.memory_mb</code></td><td><code>AWS_LAMBDA_FUNCTION_MEMORY_SIZE</code></td><td>int32</td></tr>
 <tr><td><code>gcp.func</code></td><td><code>client.env.memory_mb</code></td><td><code>FUNCTION_MEMORY_MB</code></td><td>int32</td></tr>
 <tr><td></td><td><code>client.env.timeout_sec</code></td><td><code>FUNCTION_TIMEOUT_SEC</code></td><td>int32</td></tr>
 <tr><td></td><td><code>client.env.region</code></td><td><code>FUNCTION_REGION</code></td><td>string</td></tr>
 <tr><td><code>vercel</code></td><td><code>client.env.region</code></td><td><code>VERCEL_REGION</code></td><td>string</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>Missing variables or variables with values not matching the expected type MUST cause the corresponding <code>client.env</code>
 field to be omitted and MUST NOT cause a user-visible error.</p>
@@ -471,8 +482,8 @@ the purpose of transferring updated metadata.</p>
 <p>If <code>DriverInfoOptions</code> are provided during or after <code>MongoClient</code> initialization, these options MUST NOT replace any
 existing metadata values, including driver-generated metadata and previously provided options. The provided options MUST
 be appended to their respective fields, and be delimited by a <code>|</code> character. For example, when
-<a href="https://www.mongodb.com/docs/drivers/motor/">Motor</a> wraps PyMongo, the following fields are updated to include Motor's
-"driver info":</p>
+<a href="https://www.mongodb.com/docs/drivers/motor/">Motor</a> wraps PyMongo, the following fields are updated to include Motor’s
+“driver info”:</p>
 <pre><code class="language-typescript">{
     client: {
         driver: {
@@ -523,9 +534,9 @@ that may or may not be valuable to every system. Rather than specifying such a l
 basics; something that everyone can discover and consider valuable. The obvious requirement here being the driver itself
 and its version. Any additional information is generally very system specific. Scala may care to know the Java runtime,
 while Python would like to know if it was built with C extensions - and C would like to know the compiler.</p>
-<p>Having to define dozens of arguments that may or may not be useful to one or two drivers isn't a good idea. Instead, we
+<p>Having to define dozens of arguments that may or may not be useful to one or two drivers isn’t a good idea. Instead, we
 define a <code>platform</code> argument that is driver dependent. This value will not have defined value across drivers and is
-therefore not generically queryable -- however, it will gain defined schema for that particular driver, and will
+therefore not generically queryable – however, it will gain defined schema for that particular driver, and will
 therefore over time gain defined structure that can be formatted and value extracted from.</p>
 <h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
 <p>The legacy hello command currently ignores arguments. (i.e. If arguments are provided the legacy hello command discards
@@ -585,19 +596,19 @@ way and have no effect one way or another.</li>
 <li>
 <p>Does this affect SDAM implementations?</p>
 <ul>
-<li>Possibly. There are a couple of gotchas. If the application.name is not in the URI...
+<li>Possibly. There are a couple of gotchas. If the application.name is not in the URI…
 <ul>
 <li>The SDAM monitoring cannot be launched until the user has had the ability to set the application name because the
 application name has to be sent in the initial handshake. This means that the connection pool cannot be
 established until the first user initiated command, or else some connections will have the application name
-while other won't</li>
+while other won’t</li>
 <li>The initial handshake must be called on all sockets, including administrative background sockets to MongoDB</li>
 </ul>
 </li>
 </ul>
 </li>
 <li>
-<p>My language doesn't have <code>uname</code>, but does instead provide its own variation of these values, is that OK?</p>
+<p>My language doesn’t have <code>uname</code>, but does instead provide its own variation of these values, is that OK?</p>
 <ul>
 <li>Absolutely. As long as the value is identifiable it is fine. The exact method and values are undefined by this
 specification</li>
@@ -625,10 +636,12 @@ specification</li>
 <li>2024-04-22: Clarify that driver should not validate <code>saslSupportedMechs</code> content.</li>
 </ul>
 <hr>
-<ol class="footnote-definition"><li id="footnote-1">
+<ol class="footnote-definition">
+<li id="footnote-1">
 <p><code>AWS_EXECUTION_ENV</code> must start with the string <code>"AWS_Lambda_"</code>. <a href="#fr-1-1">↩</a></p>
 </li>
 </ol>
+
                         </div>
                         <div id="sidetoc">
                             <nav id="pagetoc"></nav>
@@ -637,27 +650,12 @@ specification</li>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../ocsp-support/ocsp-support.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../compression/OP_COMPRESSED.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../ocsp-support/ocsp-support.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../compression/OP_COMPRESSED.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

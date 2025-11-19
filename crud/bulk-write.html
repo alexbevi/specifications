@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -167,12 +166,12 @@ minimized number of round trips, and to receive detailed results for each operat
 the <a href="../crud/crud.html#insert-update-replace-delete-and-bulk-writes">collection-level bulkWrite method</a> defined in the
 CRUD specification.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
-<blockquote>
-<p>[!NOTE]
-The <code>BulkWriteOptions</code>, <code>BulkWriteResult</code>, and <code>BulkWriteException</code> types defined in this specification are similar to
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The <code>BulkWriteOptions</code>, <code>BulkWriteResult</code>, and <code>BulkWriteException</code> types defined in this specification are similar to
 those used for the <code>MongoCollection.bulkWrite</code> method. Statically typed drivers MUST NOT reuse their existing
 definitions for these types for the <code>MongoClient.bulkWrite</code> API and MUST introduce new types. If naming conflicts
-arise, drivers SHOULD prepend "Client" to the new type names (e.g. <code>ClientBulkWriteOptions</code>).</p>
+arise, drivers SHOULD prepend “Client” to the new type names (e.g. <code>ClientBulkWriteOptions</code>).</p>
 </blockquote>
 <h3 id="mongoclientbulkwrite-interface"><a class="header" href="#mongoclientbulkwrite-interface"><code>MongoClient.bulkWrite</code> Interface</a></h3>
 <pre><code class="language-typescript">interface MongoClient {
@@ -402,7 +401,7 @@ is most idiomatic for its language. For example, drivers may:</p>
 <p>Drivers MUST throw an exception if the list provided for <code>models</code> is empty.</p>
 <h4 id="update-vs-replace-document-validation"><a class="header" href="#update-vs-replace-document-validation">Update vs. replace document validation</a></h4>
 <p>Update documents provided in <code>UpdateOne</code> and <code>UpdateMany</code> write models are required only to contain atomic modifiers
-(i.e. keys that start with <code>$</code>). Drivers MUST throw an error if an update document is empty or if the document's first
+(i.e. keys that start with <code>$</code>). Drivers MUST throw an error if an update document is empty or if the document’s first
 key does not start with <code>$</code>. Drivers MUST rely on the server to return an error if any other entries in the update
 document are not atomic modifiers. Drivers are not required to perform validation on update pipelines.</p>
 <p>Replacement documents provided in <code>ReplaceOne</code> write models are required not to contain atomic modifiers. Drivers MUST
@@ -663,7 +662,7 @@ the ones defined here exactly.</p>
 <h3 id="index-types"><a class="header" href="#index-types">Index Types</a></h3>
 <p>The <code>insertResults</code>, <code>updateResults</code>, and <code>deleteResults</code> maps in <code>BulkWriteResult</code> and the <code>writeErrors</code> map in
 <code>BulkWriteException</code> specify <code>Index</code> as their key type. This value corresponds to the index of the operation in the
-<code>writeModels</code> list that was provided to <code>MongoClient.bulkWrite</code>. Drivers SHOULD use their language's standard numeric
+<code>writeModels</code> list that was provided to <code>MongoClient.bulkWrite</code>. Drivers SHOULD use their language’s standard numeric
 type for indexes for this type (e.g. <code>usize</code> in Rust). If no standard index type exists, drivers MUST use <code>Int64</code>.</p>
 <h2 id="building-a-bulkwrite-command"><a class="header" href="#building-a-bulkwrite-command">Building a <code>bulkWrite</code> Command</a></h2>
 <p>The <code>bulkWrite</code> server command has the following format:</p>
@@ -683,10 +682,10 @@ type for indexes for this type (e.g. <code>usize</code> in Rust). If no standard
 <p>If auto-encryption is not enabled, drivers MUST use document sequences (<a href="../message/OP_MSG.html"><code>OP_MSG</code></a> payload type 1)
 for the <code>ops</code> and <code>nsInfo</code> fields. If auto-encryption is enabled, drivers MUST NOT use document sequences and MUST
 append the <code>ops</code> and <code>nsInfo</code> fields to the <code>bulkWrite</code> command document.</p>
-<p>The <code>bulkWrite</code> command is executed on the "admin" database.</p>
+<p>The <code>bulkWrite</code> command is executed on the “admin” database.</p>
 <h3 id="operations"><a class="header" href="#operations">Operations</a></h3>
 <p>The <code>ops</code> field is a list of write operation documents. The first entry in each document has the name of the operation
-(i.e. "insert", "update", or "delete") as its key and the index in the <code>nsInfo</code> array of the namespace on which the
+(i.e. “insert”, “update”, or “delete”) as its key and the index in the <code>nsInfo</code> array of the namespace on which the
 operation should be performed as its value. The documents have the following format:</p>
 <h4 id="insert"><a class="header" href="#insert">Insert</a></h4>
 <pre><code class="language-javascript">{
@@ -754,9 +753,9 @@ write concern containing the following message:</p>
 <p>Drivers MUST accept an arbitrary number of operations as input to the <code>MongoClient.bulkWrite</code> method. Because the server
 imposes restrictions on the size of write operations, this means that a single call to <code>MongoClient.bulkWrite</code> may
 require multiple <code>bulkWrite</code> commands to be sent to the server. Drivers MUST split bulk writes into separate commands
-when the user's list of operations exceeds one or more of these maximums: <code>maxWriteBatchSize</code>, <code>maxBsonObjectSize</code> (for
+when the user’s list of operations exceeds one or more of these maximums: <code>maxWriteBatchSize</code>, <code>maxBsonObjectSize</code> (for
 <code>OP_MSG</code> payload type 0), and <code>maxMessageSizeBytes</code> (for <code>OP_MSG</code> payload type 1). Each of these values can be retrieved
-from the selected server's <code>hello</code> command response. Drivers MUST merge results from multiple batches into a single
+from the selected server’s <code>hello</code> command response. Drivers MUST merge results from multiple batches into a single
 <code>BulkWriteResult</code> or <code>BulkWriteException</code> to return from <code>MongoClient.bulkWrite</code>.</p>
 <p>When constructing the <code>nsInfo</code> array for a <code>bulkWrite</code> batch, drivers MUST only include the namespaces that are
 referenced in the <code>ops</code> array for that batch.</p>
@@ -819,7 +818,7 @@ was determined.</p>
 <a href="../client-side-encryption/client-side-encryption.html#size-limits-for-write-commands">Size limits for Write Commands</a> for
 the size of the <code>bulkWrite</code> command document when auto-encryption is enabled.</p>
 <h2 id="handling-the-bulkwrite-server-response"><a class="header" href="#handling-the-bulkwrite-server-response">Handling the <code>bulkWrite</code> Server Response</a></h2>
-<p>The server's response to <code>bulkWrite</code> has the following format:</p>
+<p>The server’s response to <code>bulkWrite</code> has the following format:</p>
 <pre><code class="language-javascript">{
     "ok": &lt;0 | 1&gt;,
     "cursor": {
@@ -846,7 +845,7 @@ were included in the <code>bulkWrite</code> command.</li>
 </ul>
 <p>Drivers MUST NOT populate the <code>partialResult</code> field in <code>BulkWriteException</code> if it cannot be determined that at least one
 write was successfully performed.</p>
-<p>Drivers MUST attempt to consume the contents of the cursor returned in the server's <code>bulkWrite</code> response before
+<p>Drivers MUST attempt to consume the contents of the cursor returned in the server’s <code>bulkWrite</code> response before
 returning to the user. This is required regardless of whether the user requested verbose or summary results, as the
 results cursor always contains any write errors that occurred. If the cursor contains a nonzero cursor ID, drivers MUST
 perform <code>getMore</code> until the cursor has been exhausted. Drivers MUST use the same session used for the <code>bulkWrite</code>
@@ -868,17 +867,23 @@ command for each <code>getMore</code> call. When connected to a load balancer, d
 populated with details about the failure.</p>
 <p>If the write succeeded, (i.e. the value for <code>ok</code> is 1), <code>n</code>, <code>nModified</code>, and <code>upsertedId</code> will be populated with the
 following values based on the type of write:</p>
-<div class="table-wrapper"><table><thead><tr><th>Response Field</th><th>Insert</th><th>Update</th><th>Delete</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Response Field</th><th>Insert</th><th>Update</th><th>Delete</th></tr>
+</thead>
+<tbody>
 <tr><td><code>n</code></td><td>The number of documents that were inserted.</td><td>The number of documents that matched the filter.</td><td>The number of documents that were deleted.</td></tr>
 <tr><td><code>nModified</code></td><td>Not present.</td><td>The number of documents that were modified.</td><td>Not present.</td></tr>
 <tr><td><code>upserted</code></td><td>Not present.</td><td>A document containing the <code>_id</code> value for the upserted document. Only present if an upsert took place.</td><td>Not present.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>Note that the responses do not contain information about the type of operation that was performed. Drivers may need to
-maintain the user's list of write models to infer which type of result should be recorded based on the value of <code>idx</code>.</p>
+maintain the user’s list of write models to infer which type of result should be recorded based on the value of <code>idx</code>.</p>
 <h3 id="handling-insert-results"><a class="header" href="#handling-insert-results">Handling Insert Results</a></h3>
 <p>Unlike the other result types, <code>InsertOneResult</code> contains an <code>insertedId</code> field that is generated driver-side, either by
-recording the <code>_id</code> field present in the user's insert document or creating and adding one. Drivers MUST only record
+recording the <code>_id</code> field present in the user’s insert document or creating and adding one. Drivers MUST only record
 these <code>insertedId</code> values in a <code>BulkWriteResult</code> when a successful response for the insert operation (i.e.
 <code>{ "ok": 1, "n": 1 }</code>) is received in the results cursor. This ensures that drivers only report an <code>insertedId</code> when it
 is confirmed that the insert succeeded.</p>
@@ -932,7 +937,7 @@ and <code>nsInfo</code> when auto-encryption is enabled.</p>
 existing bulk write implementation that uses the <code>insert</code>, <code>update</code>, and <code>delete</code> commands. Additionally, because the
 new <code>bulkWrite</code> command allows operations against multiple collections and databases, <code>MongoClient</code> is a more
 appropriate place to expose its functionality.</p>
-<h3 id="why-cant-drivers-reuse-existing-bulk-write-types"><a class="header" href="#why-cant-drivers-reuse-existing-bulk-write-types">Why can't drivers reuse existing bulk write types?</a></h3>
+<h3 id="why-cant-drivers-reuse-existing-bulk-write-types"><a class="header" href="#why-cant-drivers-reuse-existing-bulk-write-types">Why can’t drivers reuse existing bulk write types?</a></h3>
 <p>This specification introduces several types that are similar to existing types used in the <code>MongoCollection.bulkWrite</code>
 API. Although these types are similar now, they may diverge in the future with the introduction of new options and
 features to the <code>bulkWrite</code> command. Introducing new types also provides more clarity to users on the existing
@@ -956,7 +961,7 @@ driver version. See <a href="https://jira.mongodb.org/browse/DRIVERS-2385">DRIVE
 unique namespace, and each namespace is near the
 <a href="https://www.mongodb.com/docs/manual/reference/limits/#mongodb-limit-Restriction-on-Collection-Names">maximum length</a>
 allowed for namespaces given the values for these limits at the time of writing this specification. Providing <code>nsInfo</code>
-as a document sequence reduces the likelihood that a driver would need to batch split a user's bulk write in this
+as a document sequence reduces the likelihood that a driver would need to batch split a user’s bulk write in this
 scenario.</p>
 <h3 id="how-was-the-op_msg-overhead-allowance-determined"><a class="header" href="#how-was-the-op_msg-overhead-allowance-determined">How was the <code>OP_MSG</code> overhead allowance determined?</a></h3>
 <p>The Command Batching <a href="#total-message-size">Total Message Size</a> section uses a 1000 byte overhead allowance to
@@ -968,7 +973,7 @@ number was determined by constructing <code>OP_MSG</code> messages with various 
 batch-splitting to standardize implementations across drivers and simplify batch-splitting testing.</p>
 <h3 id="why-is-there-no-requirement-to-validate-the-size-of-a-bson-document"><a class="header" href="#why-is-there-no-requirement-to-validate-the-size-of-a-bson-document">Why is there no requirement to validate the size of a BSON document?</a></h3>
 <p>Following
-<a href="https://github.com/mongodb/specifications/blob/f8dbd2469f18d093f917efa1f758024bca5d3aaa/source/driver-mantras.md#where-possible-depend-on-server-to-return-errors">"<em>Where possible, depend on server to return errors</em>"</a>,
+<a href="https://github.com/mongodb/specifications/blob/f8dbd2469f18d093f917efa1f758024bca5d3aaa/source/driver-mantras.md#where-possible-depend-on-server-to-return-errors">“<em>Where possible, depend on server to return errors</em>”</a>,
 drivers should rely on the server to return errors about exceeded size limits. Such reliance is not possible for
 unacknowledged writes. This specification previously required drivers to check size limits for unacknowledged writes.
 The requirement has since been removed. Checking size limits complicates some driver implementations. Returning a driver
@@ -1006,7 +1011,7 @@ error in this specific situation does not seem helpful enough to require size ch
 <p>2024-09-18: Relax numeric type requirements for indexes.</p>
 </li>
 <li>
-<p>2024-05-17: Update specification status to "Accepted".</p>
+<p>2024-05-17: Update specification status to “Accepted”.</p>
 </li>
 <li>
 <p>2024-05-10: Improve rendered format for JSON-like code blocks.</p>
@@ -1024,27 +1029,12 @@ error in this specific situation does not seem helpful enough to require size ch
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../driver-bulk-update.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../read-write-concern/read-write-concern.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../driver-bulk-update.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../read-write-concern/read-write-concern.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

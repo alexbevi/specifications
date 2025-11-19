@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,14 +159,14 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 2.4</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>This spec defines how a driver monitors a MongoDB server. In summary, the client monitors each server in the topology.
 The scope of server monitoring is to provide the topology with updated ServerDescriptions based on hello or legacy hello
 command responses.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <p>See the terms in the <a href="server-discovery-and-monitoring.html">main SDAM spec</a>.</p>
@@ -179,20 +178,20 @@ sharded cluster, as well as drivers, the shell, tools, etc.</p>
 <h4 id="scan"><a class="header" href="#scan">scan</a></h4>
 <p>The process of checking all servers in the deployment.</p>
 <h4 id="suitable"><a class="header" href="#suitable">suitable</a></h4>
-<p>A server is judged "suitable" for an operation if the client can use it for a particular operation. For example, a write
+<p>A server is judged “suitable” for an operation if the client can use it for a particular operation. For example, a write
 requires a standalone, primary, or mongos. Suitability is fully specified in the
 <a href="../server-selection/server-selection.html">Server Selection Spec</a>.</p>
 <h4 id="significant-topology-change"><a class="header" href="#significant-topology-change">significant topology change</a></h4>
-<p>A change in the server's state that is relevant to the client's view of the server, e.g. a change in the server's
+<p>A change in the server’s state that is relevant to the client’s view of the server, e.g. a change in the server’s
 replica set member state, or its replica set tags. In SDAM terms, a significant topology change on the server means the
-client's ServerDescription is out of date. Standalones and mongos do not currently experience significant topology
+client’s ServerDescription is out of date. Standalones and mongos do not currently experience significant topology
 changes but they may in the future.</p>
 <h4 id="regular-hello-or-legacy-hello-command"><a class="header" href="#regular-hello-or-legacy-hello-command">regular hello or legacy hello command</a></h4>
 <p>A default <code>{hello: 1}</code> or legacy hello command where the server responds immediately.</p>
 <h4 id="streamable-hello-or-legacy-hello-command"><a class="header" href="#streamable-hello-or-legacy-hello-command">streamable hello or legacy hello command</a></h4>
 <p>The hello or legacy hello command feature which allows the server to stream multiple replies back to the client.</p>
 <h4 id="rtt"><a class="header" href="#rtt">RTT</a></h4>
-<p>Round trip time. The client's measurement of the duration of one hello or legacy hello call. The RTT is used to support
+<p>Round trip time. The client’s measurement of the duration of one hello or legacy hello call. The RTT is used to support
 <a href="../server-selection/server-selection.html#localthresholdms">localThresholdMS</a> from the Server Selection spec and
 <a href="../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a> from the
 <a href="../client-side-operations-timeout/client-side-operations-timeout.html">Client Side Operations Timeout Spec</a>.</p>
@@ -200,14 +199,14 @@ changes but they may in the future.</p>
 <p>A Function-as-a-Service (FaaS) environment like AWS Lambda.</p>
 <p><span id="servermonitoringmode"></span></p>
 <h4 id="servermonitoringmode"><a class="header" href="#servermonitoringmode">serverMonitoringMode</a></h4>
-<p>The serverMonitoringMode option configures which server monitoring protocol to use. Valid modes are "stream", "poll", or
-"auto". The default value MUST be "auto":</p>
+<p>The serverMonitoringMode option configures which server monitoring protocol to use. Valid modes are “stream”, “poll”, or
+“auto”. The default value MUST be “auto”:</p>
 <ul>
-<li>With "stream" mode, the client MUST use the streaming protocol when the server supports it or fall back to the polling
+<li>With “stream” mode, the client MUST use the streaming protocol when the server supports it or fall back to the polling
 protocol otherwise.</li>
-<li>With "poll" mode, the client MUST use the polling protocol.</li>
-<li>With "auto" mode, the client MUST behave the same as "poll" mode when running on a FaaS platform or the same as
-"stream" mode otherwise. The client detects that it's running on a FaaS platform via the same rules for generating
+<li>With “poll” mode, the client MUST use the polling protocol.</li>
+<li>With “auto” mode, the client MUST behave the same as “poll” mode when running on a FaaS platform or the same as
+“stream” mode otherwise. The client detects that it’s running on a FaaS platform via the same rules for generating
 the <code>client.env</code> handshake metadata field in the
 <a href="../mongodb-handshake/handshake.html#client-env">MongoDB Handshake spec</a>.</li>
 </ul>
@@ -225,14 +224,14 @@ monitoring. If a server API version is not requested, the initial handshake usin
 If the response does not contain <code>helloOk: true</code>, then the driver must use the legacy hello command for monitoring.</p>
 <p>The socket used to check a server MUST use the same
 <a href="https://www.mongodb.com/docs/manual/reference/connection-string/">connectTimeoutMS</a> as regular sockets. Multi-threaded
-clients SHOULD set monitoring sockets' socketTimeoutMS to the connectTimeoutMS. (See
+clients SHOULD set monitoring sockets’ socketTimeoutMS to the connectTimeoutMS. (See
 <a href="#socket-timeout-for-monitoring-is-connecttimeoutms">socket timeout for monitoring is connectTimeoutMS</a>. Drivers MAY let
 users configure the timeouts for monitoring sockets separately if necessary to preserve backwards compatibility.)</p>
 <p>The client begins monitoring a server when:</p>
 <ul>
-<li>... the client is initialized and begins monitoring each seed. See
+<li>… the client is initialized and begins monitoring each seed. See
 <a href="server-discovery-and-monitoring.html#initial-servers">initial servers</a>.</li>
-<li>... <a href="server-discovery-and-monitoring.html#updateRSWithoutPrimary">updateRSWithoutPrimary</a> or
+<li>… <a href="server-discovery-and-monitoring.html#updateRSWithoutPrimary">updateRSWithoutPrimary</a> or
 <a href="server-discovery-and-monitoring.html#updateRSFromPrimary">updateRSFromPrimary</a> discovers new replica set members.</li>
 </ul>
 <p>The following subsections specify how monitoring works, first in multi-threaded or asynchronous clients, and second in
@@ -240,13 +239,13 @@ single-threaded clients. This spec provides detailed requirements for monitoring
 behave consistently.</p>
 <h4 id="multi-threaded-or-asynchronous-monitoring"><a class="header" href="#multi-threaded-or-asynchronous-monitoring">Multi-threaded or asynchronous monitoring</a></h4>
 <h5 id="servers-are-monitored-in-parallel"><a class="header" href="#servers-are-monitored-in-parallel">Servers are monitored in parallel</a></h5>
-<p>All servers' monitors run independently, in parallel: If some monitors block calling hello or legacy hello over slow
+<p>All servers’ monitors run independently, in parallel: If some monitors block calling hello or legacy hello over slow
 connections, other monitors MUST proceed unimpeded.</p>
 <p>The natural implementation is a thread per server, but the decision is left to the implementer. (See
 <a href="#thread-per-server">thread per server</a>.)</p>
 <h5 id="servers-are-monitored-with-dedicated-sockets"><a class="header" href="#servers-are-monitored-with-dedicated-sockets">Servers are monitored with dedicated sockets</a></h5>
-<p><a href="#a-monitor-should-not-use-the-clients-regular-connection-pool">A monitor SHOULD NOT use the client's regular connection pool</a>
-to acquire a socket; it uses a dedicated socket that does not count toward the pool's maximum size.</p>
+<p><a href="#a-monitor-should-not-use-the-clients-regular-connection-pool">A monitor SHOULD NOT use the client’s regular connection pool</a>
+to acquire a socket; it uses a dedicated socket that does not count toward the pool’s maximum size.</p>
 <p>Drivers MUST NOT authenticate on sockets used for monitoring nor include SCRAM mechanism negotiation (i.e.
 <code>saslSupportedMechs</code>), as doing so would make monitoring checks more expensive for the server.</p>
 <h5 id="servers-are-checked-periodically"><a class="header" href="#servers-are-checked-periodically">Servers are checked periodically</a></h5>
@@ -255,8 +254,8 @@ TopologyDescription.</p>
 <p>After each check, the next check SHOULD be scheduled <a href="#heartbeatfrequencyms">heartbeatFrequencyMS</a> later; a check MUST
 NOT run while a previous check is still in progress.</p>
 <h5 id="requesting-an-immediate-check"><a class="header" href="#requesting-an-immediate-check">Requesting an immediate check</a></h5>
-<p>At any time, the client can request that a monitor check its server immediately. (For example, after a "not writable
-primary" error. See <a href="server-discovery-and-monitoring.html#error-handling">error handling</a>.) If the monitor is sleeping
+<p>At any time, the client can request that a monitor check its server immediately. (For example, after a “not writable
+primary” error. See <a href="server-discovery-and-monitoring.html#error-handling">error handling</a>.) If the monitor is sleeping
 when this request arrives, it MUST wake and check as soon as possible. If a hello or legacy hello call is already in
 progress, the request MUST be ignored. If the previous check ended less than
 <a href="#minheartbeatfrequencyms">minHeartbeatFrequencyMS</a> ago, the monitor MUST sleep until the minimum delay has passed, then
@@ -285,7 +284,7 @@ server until cooldownMS has passed.</p>
 <h5 id="scanning"><a class="header" href="#scanning">Scanning</a></h5>
 <p>Single-threaded clients MUST <a href="#scan">scan</a> all servers synchronously, inline with regular application operations. Before
 each operation, the client checks if <a href="#heartbeatfrequencyms">heartbeatFrequencyMS</a> has passed since the previous scan
-ended, or if the topology is marked "stale"; if so it scans all the servers before selecting a server and performing the
+ended, or if the topology is marked “stale”; if so it scans all the servers before selecting a server and performing the
 operation.</p>
 <p>Selection failure triggers an immediate scan. When a client that uses single-threaded monitoring fails to select a
 suitable server for any operation, it <a href="#scan">scans</a> the servers, then attempts selection again, to see if the scan
@@ -327,19 +326,19 @@ while true:
 <ol>
 <li>The client is configured with one seed and TopologyType Unknown. It begins a scan.</li>
 <li>When it checks the seed, it discovers a secondary.</li>
-<li>The secondary's hello or legacy hello response includes the "primary" field with the address of the server that the
+<li>The secondary’s hello or legacy hello response includes the “primary” field with the address of the server that the
 secondary thinks is primary.</li>
-<li>The client creates a ServerDescription with that address, type PossiblePrimary, and lastUpdateTime "infinity ago".
+<li>The client creates a ServerDescription with that address, type PossiblePrimary, and lastUpdateTime “infinity ago”.
 (See <a href="server-discovery-and-monitoring.html#updateRSWithoutPrimary">updateRSWithoutPrimary</a>.)</li>
 <li>On the next iteration, there is still no RSPrimary, so the new PossiblePrimary is the top-priority server to check.</li>
 <li>The PossiblePrimary is checked and replaced with an RSPrimary. The client has now acquired an authoritative host
-list. Any new hosts in the list are added to the TopologyDescription with lastUpdateTime "infinity ago". (See
+list. Any new hosts in the list are added to the TopologyDescription with lastUpdateTime “infinity ago”. (See
 <a href="server-discovery-and-monitoring.html#updateRSFromPrimary">updateRSFromPrimary</a>.)</li>
 <li>The client continues scanning until all known hosts have been checked.</li>
 </ol>
 <p>Another common case might be scanning a pool of mongoses. When the client first scans its seed list, they all have the
-default lastUpdateTime "infinity ago", so it scans them in random order. This randomness provides some load-balancing if
-many clients start at once. A client's subsequent scans of the mongoses are always in the same order, since their
+default lastUpdateTime “infinity ago”, so it scans them in random order. This randomness provides some load-balancing if
+many clients start at once. A client’s subsequent scans of the mongoses are always in the same order, since their
 lastUpdateTimes are always in the same order by the time a scan ends.</p>
 <h4 id="minheartbeatfrequencyms"><a class="header" href="#minheartbeatfrequencyms">minHeartbeatFrequencyMS</a></h4>
 <p>If a client frequently rechecks a server, it MUST wait at least minHeartbeatFrequencyMS milliseconds since the previous
@@ -355,14 +354,14 @@ minHeartbeatFrequencyMS (500ms).</p>
 <p>(See <a href="server-discovery-and-monitoring.html#heartbeatFrequencyMS">heartbeatFrequencyMS in the main SDAM spec</a>.)</p>
 <h3 id="awaitable-hello-or-legacy-hello-server-specification"><a class="header" href="#awaitable-hello-or-legacy-hello-server-specification">Awaitable hello or legacy hello Server Specification</a></h3>
 <p>As of MongoDB 4.4 the hello or legacy hello command can wait to reply until there is a topology change or a maximum time
-has elapsed. Clients opt in to this "awaitable hello" feature by passing new parameters "topologyVersion" and
-"maxAwaitTimeMS" to the hello or legacy hello commands. Exhaust support has also been added, which clients can enable in
+has elapsed. Clients opt in to this “awaitable hello” feature by passing new parameters “topologyVersion” and
+“maxAwaitTimeMS” to the hello or legacy hello commands. Exhaust support has also been added, which clients can enable in
 the usual manner by setting the <a href="../message/OP_MSG.html#exhaustAllowed">OP_MSG exhaustAllowed flag</a>.</p>
 <p>Clients use the awaitable hello feature as the basis of the streaming heartbeat protocol to learn much sooner about
 stepdowns, elections, reconfigs, and other events.</p>
 <h4 id="topologyversion"><a class="header" href="#topologyversion">topologyVersion</a></h4>
-<p>A server that supports awaitable hello or legacy hello includes a "topologyVersion" field in all hello or legacy hello
-replies and State Change Error replies. The topologyVersion is a subdocument with two fields, "processId" and "counter":</p>
+<p>A server that supports awaitable hello or legacy hello includes a “topologyVersion” field in all hello or legacy hello
+replies and State Change Error replies. The topologyVersion is a subdocument with two fields, “processId” and “counter”:</p>
 <pre><code class="language-typescript">{
     topologyVersion: {processId: &lt;ObjectId&gt;, counter: &lt;int64&gt;},
     ( ... other fields ...)
@@ -375,12 +374,12 @@ time this server process starts.</p>
 <p>An int64 State change counter, maintained in memory by the server. It begins at 0 when the server starts, and it is
 incremented whenever there is a significant topology change.</p>
 <h4 id="maxawaittimems"><a class="header" href="#maxawaittimems">maxAwaitTimeMS</a></h4>
-<p>To enable awaitable hello or legacy hello, the client includes a new int64 field "maxAwaitTimeMS" in the hello or legacy
+<p>To enable awaitable hello or legacy hello, the client includes a new int64 field “maxAwaitTimeMS” in the hello or legacy
 hello request. This field determines the maximum duration in milliseconds a server will wait for a significant topology
 change before replying.</p>
 <h4 id="feature-discovery"><a class="header" href="#feature-discovery">Feature Discovery</a></h4>
 <p>To discover if the connected server supports awaitable hello or legacy hello, a client checks the most recent hello or
-legacy hello command reply. If the reply includes "topologyVersion" then the server supports awaitable hello or legacy
+legacy hello command reply. If the reply includes “topologyVersion” then the server supports awaitable hello or legacy
 hello.</p>
 <h4 id="awaitable-hello-or-legacy-hello-protocol"><a class="header" href="#awaitable-hello-or-legacy-hello-protocol">Awaitable hello or legacy hello Protocol</a></h4>
 <p>To initiate an awaitable hello or legacy hello command, the client includes both maxAwaitTimeMS and topologyVersion in
@@ -397,31 +396,42 @@ hello or legacy hello. With streaming hello or legacy hello, the server MAY send
 responses without waiting for further requests.</p>
 <p>A server that implements the new protocol follows these rules:</p>
 <ul>
-<li>Always include the server's topologyVersion in hello, legacy hello, and State Change Error replies.</li>
+<li>Always include the server’s topologyVersion in hello, legacy hello, and State Change Error replies.</li>
 <li>If the request includes topologyVersion without maxAwaitTimeMS or vice versa, return an error.</li>
 <li>If the request omits topologyVersion and maxAwaitTimeMS, reply immediately.</li>
-<li>If the request includes topologyVersion and maxAwaitTimeMS, then reply immediately if the server's
-topologyVersion.processId does not match the request's, otherwise reply when the server's topologyVersion.counter is
-greater than the request's, or maxAwaitTimeMS elapses, whichever comes first.</li>
+<li>If the request includes topologyVersion and maxAwaitTimeMS, then reply immediately if the server’s
+topologyVersion.processId does not match the request’s, otherwise reply when the server’s topologyVersion.counter is
+greater than the request’s, or maxAwaitTimeMS elapses, whichever comes first.</li>
 <li>Following the <a href="../message/OP_MSG.html">OP_MSG spec</a>, if the request omits the exhaustAllowed flag, the server MUST NOT
-set the moreToCome flag on the reply. If the request's exhaustAllowed flag is set, the server MAY set the moreToCome
+set the moreToCome flag on the reply. If the request’s exhaustAllowed flag is set, the server MAY set the moreToCome
 flag on the reply. If the server sets moreToCome, it MUST continue streaming replies without awaiting further
-requests. Between replies it MUST wait until the server's topologyVersion.counter is incremented or maxAwaitTimeMS
+requests. Between replies it MUST wait until the server’s topologyVersion.counter is incremented or maxAwaitTimeMS
 elapses, whichever comes first. If the reply includes <code>ok: 0</code> the server MUST NOT set the moreToCome flag.</li>
 <li>On a topology change that changes the horizon parameters, the server will close all application connections.</li>
 </ul>
 <p>Example awaitable hello conversation:</p>
-<div class="table-wrapper"><table><thead><tr><th>Client</th><th>Server</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Client</th><th>Server</th></tr>
+</thead>
+<tbody>
 <tr><td>hello handshake -&gt;</td><td></td></tr>
 <tr><td></td><td>&lt;- reply with topologyVersion</td></tr>
 <tr><td>hello as OP_MSG with maxAwaitTimeMS and topologyVersion -&gt;</td><td></td></tr>
 <tr><td></td><td>wait for change or timeout</td></tr>
 <tr><td></td><td>&lt;- OP_MSG with topologyVersion</td></tr>
-<tr><td>...</td><td></td></tr>
-</tbody></table>
+<tr><td>…</td><td></td></tr>
+</tbody>
+</table>
 </div>
 <p>Example streaming hello conversation (awaitable hello with exhaust):</p>
-<div class="table-wrapper"><table><thead><tr><th>Client</th><th>Server</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Client</th><th>Server</th></tr>
+</thead>
+<tbody>
 <tr><td>hello handshake -&gt;</td><td></td></tr>
 <tr><td></td><td>&lt;- reply with topologyVersion</td></tr>
 <tr><td>hello as OP_MSG with exhaustAllowed, maxAwaitTimeMS, and topologyVersion -&gt;</td><td></td></tr>
@@ -429,10 +439,11 @@ elapses, whichever comes first. If the reply includes <code>ok: 0</code> the ser
 <tr><td></td><td>&lt;- OP_MSG with moreToCome and topologyVersion</td></tr>
 <tr><td></td><td>wait for change or timeout</td></tr>
 <tr><td></td><td>&lt;- OP_MSG with moreToCome and topologyVersion</td></tr>
-<tr><td></td><td>...</td></tr>
+<tr><td></td><td>…</td></tr>
 <tr><td></td><td>&lt;- OP_MSG without moreToCome</td></tr>
-<tr><td>...</td><td></td></tr>
-</tbody></table>
+<tr><td>…</td><td></td></tr>
+</tbody>
+</table>
 </div>
 <h3 id="streaming-protocol"><a class="header" href="#streaming-protocol">Streaming Protocol</a></h3>
 <p>The streaming protocol is used to monitor MongoDB 4.4+ servers and optimally reduces the time it takes for a client to
@@ -460,9 +471,9 @@ process responses strictly in the order they were received.)</p>
 <li>If the response indicates a command error, or a network error or timeout occurs, the client MUST close the connection
 and restart the monitoring protocol on a new connection. (See
 <a href="#network-or-command-error-during-server-check">Network or command error during server check</a>.)</li>
-<li>If the response is successful (includes "ok:1") and includes the OP_MSG moreToCome flag, then the client begins
+<li>If the response is successful (includes “ok:1”) and includes the OP_MSG moreToCome flag, then the client begins
 reading the next response.</li>
-<li>If the response is successful (includes "ok:1") and does not include the OP_MSG moreToCome flag, then the client
+<li>If the response is successful (includes “ok:1”) and does not include the OP_MSG moreToCome flag, then the client
 initiates a new awaitable hello or legacy hello with the topologyVersion field from the previous response.</li>
 </ul>
 <h4 id="socket-timeout"><a class="header" href="#socket-timeout">Socket timeout</a></h4>
@@ -479,21 +490,21 @@ dedicated connections to measure RTT when the streaming protocol is not used. (S
 NOT update RTT based on streaming hello or legacy hello responses.</p>
 <p>Clients MUST ignore the response to the hello or legacy hello command when measuring RTT. Errors encountered when
 running a hello or legacy hello command MUST NOT update the topology. (See
-<a href="#why-dont-clients-mark-a-server-unknown-when-an-rtt-command-fails">Why don't clients mark a server unknown when an RTT command fails?</a>)</p>
+<a href="#why-dont-clients-mark-a-server-unknown-when-an-rtt-command-fails">Why don’t clients mark a server unknown when an RTT command fails?</a>)</p>
 <p>Clients MUST track the minimum RTT out of the (at most) last 10 samples. Clients MUST report the minimum RTT as 0 until
 at least 2 samples have been gathered.</p>
 <p>When constructing a ServerDescription from a streaming hello or legacy hello response, clients MUST set the average and
-minimum round trip times from the RTT task as the "roundTripTime" and "minRoundTripTime" fields, respectively.</p>
+minimum round trip times from the RTT task as the “roundTripTime” and “minRoundTripTime” fields, respectively.</p>
 <p>See the pseudocode in the <a href="#rtt-thread">RTT thread</a> section for an example implementation.</p>
 <h4 id="sdam-monitoring"><a class="header" href="#sdam-monitoring">SDAM Monitoring</a></h4>
 <p>Clients MUST publish a ServerHeartbeatStartedEvent before attempting to read the next hello or legacy hello exhaust
 response. (See
 <a href="#why-must-streaming-hello-or-legacy-hello-clients-publish-serverheartbeatstartedevents">Why must streaming hello or legacy hello clients publish ServerHeartbeatStartedEvents?</a>)</p>
 <p>Clients MUST NOT publish any events when running an RTT command. (See
-<a href="#why-dont-streaming-hello-or-legacy-hello-clients-publish-events-for-rtt-commands">Why don't streaming hello or legacy hello clients publish events for RTT commands?</a>)</p>
+<a href="#why-dont-streaming-hello-or-legacy-hello-clients-publish-events-for-rtt-commands">Why don’t streaming hello or legacy hello clients publish events for RTT commands?</a>)</p>
 <h4 id="heartbeat-frequency"><a class="header" href="#heartbeat-frequency">Heartbeat frequency</a></h4>
 <p>In the polling protocol, a client sleeps between each hello or legacy hello check (for at least minHeartbeatFrequencyMS
-and up to heartbeatFrequencyMS). In the streaming protocol, after processing an "ok:1" hello or legacy hello response,
+and up to heartbeatFrequencyMS). In the streaming protocol, after processing an “ok:1” hello or legacy hello response,
 the client MUST NOT sleep and MUST begin the next check immediately.</p>
 <p>Clients MUST set <a href="#maxawaittimems">maxAwaitTimeMS</a> to heartbeatFrequencyMS.</p>
 <h4 id="hello-or-legacy-hello-cancellation"><a class="header" href="#hello-or-legacy-hello-cancellation">hello or legacy hello Cancellation</a></h4>
@@ -509,10 +520,10 @@ clients MUST cancel the hello or legacy hello check on that server and close the
 a server with a hello or legacy hello command and then sleeps for heartbeatFrequencyMS before running another check.</p>
 <h3 id="marking-the-connection-pool-as-ready-cmap-only"><a class="header" href="#marking-the-connection-pool-as-ready-cmap-only">Marking the connection pool as ready (CMAP only)</a></h3>
 <p>When a monitor completes a successful check against a server, it MUST mark the connection pool for that server as
-"ready", and doing so MUST be synchronized with the update to the topology (e.g. by marking the pool as ready in
+“ready”, and doing so MUST be synchronized with the update to the topology (e.g. by marking the pool as ready in
 onServerDescriptionChanged). This is required to ensure a server does not get selected while its pool is still paused.
 See the <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#connection-pool">Connection Pool</a>
-definition in the CMAP specification for more details on marking the pool as "ready".</p>
+definition in the CMAP specification for more details on marking the pool as “ready”.</p>
 <h3 id="error-handling"><a class="header" href="#error-handling">Error handling</a></h3>
 <h4 id="network-or-command-error-during-server-check"><a class="header" href="#network-or-command-error-during-server-check">Network or command error during server check</a></h4>
 <p>When a server <a href="#check">check</a> fails due to a network error (including a network timeout) or a command error (<code>ok: 0</code>),
@@ -528,7 +539,7 @@ the client MUST follow these steps:</p>
 <p>Clear the connection pool for the server (See
 <a href="#clear-the-connection-pool-on-both-network-and-command-errors">Clear the connection pool on both network and command errors</a>).
 For CMAP compliant drivers, clearing the pool MUST be synchronized with marking the server as Unknown (see
-<a href="server-discovery-and-monitoring.html#why-synchronize-clearing-a-servers-pool-with-updating-the-topology">Why synchronize clearing a server's pool with updating the topology?</a>).
+<a href="server-discovery-and-monitoring.html#why-synchronize-clearing-a-servers-pool-with-updating-the-topology">Why synchronize clearing a server’s pool with updating the topology?</a>).
 If this was a network timeout error, then the pool MUST be cleared with interruptInUseConnections = true (see
 <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#why-does-the-pool-need-to-support-interrupting-in-use-connections-as-part-of-its-clear-logic">Why does the pool need to support closing in use connections as part of its clear logic?</a>)</p>
 </li>
@@ -552,7 +563,7 @@ an immediate check or for the heartbeatFrequencyMS timeout to expire before begi
 <a href="#clients-update-the-topology-from-each-handshake">clients update the topology from each handshake</a>.</p>
 <h3 id="implementation-notes"><a class="header" href="#implementation-notes">Implementation notes</a></h3>
 <p>This section intends to provide generous guidance to driver authors. It is complementary to the reference
-implementations. Words like "should", "may", and so on are used more casually here.</p>
+implementations. Words like “should”, “may”, and so on are used more casually here.</p>
 <h4 id="monitor-thread"><a class="header" href="#monitor-thread">Monitor thread</a></h4>
 <p>Most platforms can use an event object to control the monitor thread. The event API here is assumed to be like the
 standard <a href="https://docs.python.org/2/library/threading.html#event-objects">Python Event</a>.
@@ -786,22 +797,22 @@ However, streaming hello or legacy hello has two downsides:</p>
 </ol>
 <p>To address these concerns we designed the alternating hello or legacy hello protocol. This protocol would have
 alternated between awaitable hello or legacy hello and regular hello or legacy hello. The awaitable hello or legacy
-hello replaces the polling protocol's client side sleep and allows the client to receive updated hello or legacy hello
+hello replaces the polling protocol’s client side sleep and allows the client to receive updated hello or legacy hello
 responses sooner. The regular hello or legacy hello allows the client to maintain accurate RTT calculations without
 requiring any extra threads or sockets.</p>
-<p>We reject this design because streaming hello or legacy hello is strictly better at reducing the client's
+<p>We reject this design because streaming hello or legacy hello is strictly better at reducing the client’s
 time-to-recovery. We determined that one extra connection per server per MongoClient is reasonable for all drivers.
-Applications that upgrade may see a modest increase in connections and memory usage on the server. We don't expect this
+Applications that upgrade may see a modest increase in connections and memory usage on the server. We don’t expect this
 increase to be problematic; however, we have several projects planned for future MongoDB releases to make the streaming
 hello or legacy hello protocol cheaper server-side which should mitigate the cost of the extra monitoring connections.</p>
 <h3 id="use-tcp-smoothed-round-trip-time-instead-of-measuring-rtt-explicitly"><a class="header" href="#use-tcp-smoothed-round-trip-time-instead-of-measuring-rtt-explicitly">Use TCP smoothed round-trip time instead of measuring RTT explicitly</a></h3>
-<p>TCP sockets internally maintain a "smoothed round-trip time" or SRTT. Drivers could use this SRTT instead of measuring
+<p>TCP sockets internally maintain a “smoothed round-trip time” or SRTT. Drivers could use this SRTT instead of measuring
 RTT explicitly via hello or legacy hello commands. The server could even include this value on all hello or legacy hello
 responses. We reject this idea for a few reasons:</p>
 <ul>
-<li>Not all programming languages have an API to access the TCP socket's RTT.</li>
+<li>Not all programming languages have an API to access the TCP socket’s RTT.</li>
 <li>On Windows, RTT access requires Admin privileges.</li>
-<li>TCP's SRTT would likely differ substantially from RTT measurements in the current protocol. For example, the SRTT can
+<li>TCP’s SRTT would likely differ substantially from RTT measurements in the current protocol. For example, the SRTT can
 be reset on <a href="https://tools.ietf.org/html/rfc2988#section-5">retransmission timeouts</a>.</li>
 </ul>
 <h2 id="rationale"><a class="header" href="#rationale">Rationale</a></h2>
@@ -815,20 +826,20 @@ differently.</p>
 <h3 id="socket-timeout-for-monitoring-is-connecttimeoutms"><a class="header" href="#socket-timeout-for-monitoring-is-connecttimeoutms">Socket timeout for monitoring is connectTimeoutMS</a></h3>
 <p>When a client waits for a server to respond to a connection, the client does not know if the server will respond
 eventually or if it is down. Users can help the client guess correctly by supplying a reasonable connectTimeoutMS for
-their network: on some networks a server is probably down if it hasn't responded in 10 ms, on others a server might
-still be up even if it hasn't responded in 10 seconds.</p>
-<p>The socketTimeoutMS, on the other hand, must account for both network latency and the operation's duration on the
+their network: on some networks a server is probably down if it hasn’t responded in 10 ms, on others a server might
+still be up even if it hasn’t responded in 10 seconds.</p>
+<p>The socketTimeoutMS, on the other hand, must account for both network latency and the operation’s duration on the
 server. Applications should typically set a very long or infinite socketTimeoutMS so they can wait for long-running
 MongoDB operations.</p>
 <p>Multi-threaded clients use distinct sockets for monitoring and for application operations. A socket used for monitoring
 does two things: it connects and calls hello or legacy hello. Both operations are fast on the server, so only network
 latency matters. Thus both operations SHOULD use connectTimeoutMS, since that is the value users supply to help the
-client guess if a server is down, based on users' knowledge of expected latencies on their networks.</p>
-<h3 id="a-monitor-should-not-use-the-clients-regular-connection-pool"><a class="header" href="#a-monitor-should-not-use-the-clients-regular-connection-pool">A monitor SHOULD NOT use the client's regular connection pool</a></h3>
-<p>If a multi-threaded driver's connection pool enforces a maximum size and monitors use sockets from the pool, there are
+client guess if a server is down, based on users’ knowledge of expected latencies on their networks.</p>
+<h3 id="a-monitor-should-not-use-the-clients-regular-connection-pool"><a class="header" href="#a-monitor-should-not-use-the-clients-regular-connection-pool">A monitor SHOULD NOT use the client’s regular connection pool</a></h3>
+<p>If a multi-threaded driver’s connection pool enforces a maximum size and monitors use sockets from the pool, there are
 two bad options: either monitors compete with the application for sockets, or monitors have the exceptional ability to
 create sockets even when the pool has reached its maximum size. The former risks starving the monitor. The latter is
-more complex than it is worth. (A lesson learned from PyMongo 2.6's pool, which implemented this option.)</p>
+more complex than it is worth. (A lesson learned from PyMongo 2.6’s pool, which implemented this option.)</p>
 <p>Since this rule is justified for drivers that enforce a maximum pool size, this spec recommends that all drivers follow
 the same rule for the sake of consistency.</p>
 <h3 id="monitors-must-use-a-dedicated-connection-for-rtt-commands"><a class="header" href="#monitors-must-use-a-dedicated-connection-for-rtt-commands">Monitors MUST use a dedicated connection for RTT commands</a></h3>
@@ -841,7 +852,7 @@ from the Server Selection spec.</p>
 <li>Under contention the application may block the RTT task from completing in a timely manner.</li>
 <li>Under contention the RTT task may often result in an extra connection anyway because the pool creates new connections
 under contention up to maxPoolSize.</li>
-<li>This would be inconsistent with the rule that a monitor SHOULD NOT use the client's regular connection pool.</li>
+<li>This would be inconsistent with the rule that a monitor SHOULD NOT use the client’s regular connection pool.</li>
 </ul>
 <p>The client could open and close a new connection for each RTT check. We rejected this design, because if we ping every
 heartbeatFrequencyMS (default 10 seconds) then the cost to the client and the server of creating and destroying the
@@ -849,8 +860,8 @@ connection might exceed the cost of keeping a dedicated connection open.</p>
 <p>Instead, the client must use a dedicated connection reserved for RTT commands. Despite the cost of the additional
 connection per server, we chose this option as the safest and least likely to result in surprising behavior under load.</p>
 <h3 id="monitors-must-use-the-hello-or-legacy-hello-command-to-measure-rtt"><a class="header" href="#monitors-must-use-the-hello-or-legacy-hello-command-to-measure-rtt">Monitors MUST use the hello or legacy hello command to measure RTT</a></h3>
-<p>In the streaming protocol, clients could use the "ping", "hello", or legacy hello commands to measure RTT. This spec
-chooses "hello" or legacy hello for consistency with the polling protocol as well as consistency with the initial RTT
+<p>In the streaming protocol, clients could use the “ping”, “hello”, or legacy hello commands to measure RTT. This spec
+chooses “hello” or legacy hello for consistency with the polling protocol as well as consistency with the initial RTT
 provided the connection handshake which also uses the hello or legacy hello commands. Additionally, mongocryptd does not
 allow the ping command but does allow hello or legacy hello.</p>
 <h3 id="why-not-use-awaitedtimems-in-the-server-response-to-calculate-rtt-in-the-streaming-protocol"><a class="header" href="#why-not-use-awaitedtimems-in-the-server-response-to-calculate-rtt-in-the-streaming-protocol">Why not use <code>awaitedTimeMS</code> in the server response to calculate RTT in the streaming protocol?</a></h3>
@@ -863,23 +874,23 @@ operation while the remote clock times the wait. This means that if these clocks
 anomalies like clock changes, you will get bad results. To make matters worse, you will be comparing times from multiple
 servers that could each have clocks ticking at different rates. This approach will bias toward servers with the fastest
 ticking clock, since it will seem like it spends the least time on the wire.</p>
-<p>Additionally, systems using NTP will experience clock "slew". ntpd "slews" time by up to 500 parts-per-million to have
-the local time gradually approach the "true" time without big jumps - over a 10 second window that means a 5ms
+<p>Additionally, systems using NTP will experience clock “slew”. ntpd “slews” time by up to 500 parts-per-million to have
+the local time gradually approach the “true” time without big jumps - over a 10 second window that means a 5ms
 difference. If both sides are slewing in opposite directions, that can result in an effective difference of 10ms. Both
 of these times are close enough to <a href="../server-selection/server-selection.html#localthresholdms">localThresholdMS</a> to
 significantly affect which servers are viable in NEAREST calculations.</p>
 <p>Ensuring that all measurements use the same clock obviates the need for a more complicated solution, and mitigates the
 above mentioned concerns.</p>
-<h3 id="why-dont-clients-mark-a-server-unknown-when-an-rtt-command-fails"><a class="header" href="#why-dont-clients-mark-a-server-unknown-when-an-rtt-command-fails">Why don't clients mark a server unknown when an RTT command fails?</a></h3>
-<p>In the streaming protocol, clients use the hello or legacy hello command on a dedicated connection to measure a server's
+<h3 id="why-dont-clients-mark-a-server-unknown-when-an-rtt-command-fails"><a class="header" href="#why-dont-clients-mark-a-server-unknown-when-an-rtt-command-fails">Why don’t clients mark a server unknown when an RTT command fails?</a></h3>
+<p>In the streaming protocol, clients use the hello or legacy hello command on a dedicated connection to measure a server’s
 RTT. However, errors encountered when running the RTT command MUST NOT mark a server Unknown. We reached this decision
 because the dedicated RTT connection does not come from a connection pool and thus does not have a generation number
 associated with it. Without a generation number we cannot handle errors from the RTT command without introducing race
 conditions. Introducing such a generation number would add complexity to this design without much benefit. It is safe to
-ignore these errors because the Monitor will soon discover the server's state regardless (either through an updated
+ignore these errors because the Monitor will soon discover the server’s state regardless (either through an updated
 streaming response, an error on the streaming connection, or by handling an error on an application connection).</p>
 <h3 id="drivers-cancel-in-progress-monitor-checks"><a class="header" href="#drivers-cancel-in-progress-monitor-checks">Drivers cancel in-progress monitor checks</a></h3>
-<p>When an application operation fails with a non-timeout network error, drivers cancel that monitor's in-progress check.</p>
+<p>When an application operation fails with a non-timeout network error, drivers cancel that monitor’s in-progress check.</p>
 <p>We assume that a non-timeout network error on one application connection implies that all other connections to that
 server are also bad. This means that it is redundant to continue reading on the current monitoring connection. Instead,
 we cancel the current monitor check, close the monitoring connection, and start a new check soon. Note that we rely on
@@ -890,8 +901,8 @@ monitoring connection is still healthy. If we did not cancel the monitor check i
 remain in the Unknown state until the next hello or legacy hello response (up to maxAwaitTimeMS). A potential real world
 example of this behavior is when Azure closes an idle connection in the application pool.</p>
 <h3 id="retry-hello-or-legacy-hello-calls-once"><a class="header" href="#retry-hello-or-legacy-hello-calls-once">Retry hello or legacy hello calls once</a></h3>
-<p>A monitor's connection to a server is long-lived and used only for hello or legacy hello calls. So if a server has
-responded in the past, a network error on the monitor's connection means that there was a network glitch, or a server
+<p>A monitor’s connection to a server is long-lived and used only for hello or legacy hello calls. So if a server has
+responded in the past, a network error on the monitor’s connection means that there was a network glitch, or a server
 restart since the last check, or that the server is truly down. To handle the case that the server is truly down, the
 monitor makes the server unselectable by marking it Unknown. To handle the case of a transient network glitch or
 restart, the monitor immediately runs the next check without waiting.</p>
@@ -910,17 +921,17 @@ Other command errors are unexpected but are handled identically.</p>
 ServerHeartbeatStartedEvent has either a correlating ServerHeartbeatSucceededEvent or ServerHeartbeatFailedEvent. This
 is consistent with Command Monitoring on exhaust cursors where the driver publishes a fake CommandStartedEvent before
 reading the next getMore response.</p>
-<h3 id="why-dont-streaming-hello-or-legacy-hello-clients-publish-events-for-rtt-commands"><a class="header" href="#why-dont-streaming-hello-or-legacy-hello-clients-publish-events-for-rtt-commands">Why don't streaming hello or legacy hello clients publish events for RTT commands?</a></h3>
+<h3 id="why-dont-streaming-hello-or-legacy-hello-clients-publish-events-for-rtt-commands"><a class="header" href="#why-dont-streaming-hello-or-legacy-hello-clients-publish-events-for-rtt-commands">Why don’t streaming hello or legacy hello clients publish events for RTT commands?</a></h3>
 <p>In the streaming protocol, clients MUST NOT publish any events (server, topology, command, CMAP, etc..) when running an
 RTT command. We considered introducing new RTT events (ServerRTTStartedEvent, ServerRTTSucceededEvent,
-ServerRTTFailedEvent) but it's not clear that there is a demand for this. Applications can still monitor changes to a
-server's RTT by listening to TopologyDescriptionChangedEvents.</p>
-<h3 id="what-is-the-purpose-of-the-awaited-field-on-server-heartbeat-events"><a class="header" href="#what-is-the-purpose-of-the-awaited-field-on-server-heartbeat-events">What is the purpose of the "awaited" field on server heartbeat events?</a></h3>
+ServerRTTFailedEvent) but it’s not clear that there is a demand for this. Applications can still monitor changes to a
+server’s RTT by listening to TopologyDescriptionChangedEvents.</p>
+<h3 id="what-is-the-purpose-of-the-awaited-field-on-server-heartbeat-events"><a class="header" href="#what-is-the-purpose-of-the-awaited-field-on-server-heartbeat-events">What is the purpose of the “awaited” field on server heartbeat events?</a></h3>
 <p>ServerHeartbeatSucceededEvents published from awaitable hello or legacy hello responses will regularly have 10 second
-durations. The spec introduces the "awaited" field on server heartbeat events so that applications can differentiate a
+durations. The spec introduces the “awaited” field on server heartbeat events so that applications can differentiate a
 slow heartbeat in the polling protocol from a normal awaitable hello or legacy hello heartbeat in the new protocol.</p>
 <h3 id="why-disable-the-streaming-protocol-on-faas-platforms-like-aws-lambda"><a class="header" href="#why-disable-the-streaming-protocol-on-faas-platforms-like-aws-lambda">Why disable the streaming protocol on FaaS platforms like AWS Lambda?</a></h3>
-<p>The streaming protocol relies on the assumption that the client can read the server's heartbeat responses in a timely
+<p>The streaming protocol relies on the assumption that the client can read the server’s heartbeat responses in a timely
 manner, otherwise the client will be acting on stale information. In many FaaS platforms, like AWS Lambda, host
 applications will be suspended and resumed many minutes later. This behavior causes a build up of heartbeat responses
 and the client can end up spending a long time in a catch up phase processing outdated responses. This problem was
@@ -943,19 +954,19 @@ outdated or inaccurate.</p>
 <p>2020-02-20: Extracted server monitoring from SDAM into this new spec.</p>
 </li>
 <li>
-<p>2020-03-09: A monitor check that creates a new connection MUST use the connection's handshake to update the topology.</p>
+<p>2020-03-09: A monitor check that creates a new connection MUST use the connection’s handshake to update the topology.</p>
 </li>
 <li>
 <p>2020-04-20: Add streaming heartbeat protocol.</p>
 </li>
 <li>
-<p>2020-05-20: Include rationale for why we don't use <code>awaitedTimeMS</code></p>
+<p>2020-05-20: Include rationale for why we don’t use <code>awaitedTimeMS</code></p>
 </li>
 <li>
 <p>2020-06-11: Support connectTimeoutMS=0 in streaming heartbeat protocol.</p>
 </li>
 <li>
-<p>2020-12-17: Mark the pool for a server as "ready" after performing a successful check. Synchronize pool clearing with
+<p>2020-12-17: Mark the pool for a server as “ready” after performing a successful check. Synchronize pool clearing with
 SDAM updates.</p>
 </li>
 <li>
@@ -984,8 +995,7 @@ SDAM updates.</p>
 connections to measure RTT when using the polling protocol.</p>
 </li>
 </ul>
-<hr />
-
+<hr>
                         </div>
                         <div id="sidetoc">
                             <nav id="pagetoc"></nav>
@@ -994,27 +1004,12 @@ connections to measure RTT when using the polling protocol.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../auth/auth.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../polling-srv-records-for-mongos-discovery/polling-srv-records-for-mongos-discovery.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../auth/auth.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../polling-srv-records-for-mongos-discovery/polling-srv-records-for-mongos-discovery.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

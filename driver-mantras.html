@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="highlight.css" id="highlight-css">
@@ -156,7 +155,7 @@
                     <main>
                         <div class="content-wrap">
                             <h1 id="driver-mantras"><a class="header" href="#driver-mantras">Driver Mantras</a></h1>
-<p>When developing specifications -- and the drivers themselves -- we follow the following principles:</p>
+<p>When developing specifications – and the drivers themselves – we follow the following principles:</p>
 <h3 id="strive-to-be-idiomatic-but-favor-consistency"><a class="header" href="#strive-to-be-idiomatic-but-favor-consistency">Strive to be idiomatic, but favor consistency</a></h3>
 <p>Drivers attempt to provide the easiest way to work with MongoDB in a given language ecosystem, while specifications
 attempt to provide a consistent behavior and experience across all languages. Drivers should strive to be as idiomatic
@@ -169,29 +168,29 @@ of adding a knob.</p>
 <p>Users test and deploy against different topologies or might scale up from replica sets to sharded clusters. Applications
 should never need to use the driver differently based on topology type.</p>
 <h3 id="where-possible-depend-on-server-to-return-errors"><a class="header" href="#where-possible-depend-on-server-to-return-errors">Where possible, depend on server to return errors</a></h3>
-<p>The features available to users depend on a server's version, topology, storage engine and configuration. So that
-drivers don't need to code and test all possible variations, and to maximize forward compatibility, always let users
-attempt operations and let the server error when it can't comply. Exceptions should be rare: for cases where the server
+<p>The features available to users depend on a server’s version, topology, storage engine and configuration. So that
+drivers don’t need to code and test all possible variations, and to maximize forward compatibility, always let users
+attempt operations and let the server error when it can’t comply. Exceptions should be rare: for cases where the server
 might not error and correctness is at stake.</p>
 <h3 id="minimize-administrative-helpers"><a class="header" href="#minimize-administrative-helpers">Minimize administrative helpers</a></h3>
 <p>Administrative helpers are methods for admin tasks, like user creation. These are rarely used and have maintenance costs
-as the server changes the administrative API. Don't create administrative helpers; let users rely on "RunCommand" for
+as the server changes the administrative API. Don’t create administrative helpers; let users rely on “RunCommand” for
 administrative commands.</p>
 <h3 id="check-wire-version-not-server-version"><a class="header" href="#check-wire-version-not-server-version">Check wire version, not server version</a></h3>
 <p>When determining server capabilities within the driver, rely only on the maxWireVersion in the hello response, not on
 the X.Y.Z server version. An exception is testing server development releases, as the server bumps wire version early
 and then continues to add features until the GA.</p>
-<h3 id="when-in-doubt-use-must-not-should-in-specs"><a class="header" href="#when-in-doubt-use-must-not-should-in-specs">When in doubt, use "MUST" not "SHOULD" in specs</a></h3>
+<h3 id="when-in-doubt-use-must-not-should-in-specs"><a class="header" href="#when-in-doubt-use-must-not-should-in-specs">When in doubt, use “MUST” not “SHOULD” in specs</a></h3>
 <p>Specs guide our work. While there are occasionally valid technical reasons for drivers to differ in their behavior,
-avoid encouraging it with a wishy-washy "SHOULD" instead of a more assertive "MUST".</p>
+avoid encouraging it with a wishy-washy “SHOULD” instead of a more assertive “MUST”.</p>
 <h3 id="defy-augury"><a class="header" href="#defy-augury">Defy augury</a></h3>
-<p>While we have some idea of what the server will do in the future, don't design features with those expectations in mind.
+<p>While we have some idea of what the server will do in the future, don’t design features with those expectations in mind.
 Design and implement based on what is expected in the next release.</p>
 <p>Case Study: In designing OP_MSG, we held off on designing support for Document Sequences in Replies in drivers until the
 server would support it. We subsequently decided not to implement that feature in the server.</p>
 <h3 id="the-best-way-to-see-what-the-server-does-is-to-test-it"><a class="header" href="#the-best-way-to-see-what-the-server-does-is-to-test-it">The best way to see what the server does is to test it</a></h3>
-<p>For any unusual case, relying on documentation or anecdote to anticipate the server's behavior in different
-versions/topologies/etc. is error-prone. The best way to check the server's behavior is to use a driver or the shell and
+<p>For any unusual case, relying on documentation or anecdote to anticipate the server’s behavior in different
+versions/topologies/etc. is error-prone. The best way to check the server’s behavior is to use a driver or the shell and
 test it directly.</p>
 <h3 id="drivers-follow-semantic-versioning"><a class="header" href="#drivers-follow-semantic-versioning">Drivers follow semantic versioning</a></h3>
 <p>Drivers should follow X.Y.Z versioning, where breaking API changes require a bump to X. See
@@ -209,27 +208,12 @@ without carefully reading the changelog and/or adequately testing the change.</p
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="CODEOWNERS.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="wireversion-featurelist/wireversion-featurelist.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="CODEOWNERS.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="wireversion-featurelist/wireversion-featurelist.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

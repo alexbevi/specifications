@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -164,8 +163,8 @@
 <p>Minimum Server Version: 2.4</p>
 </li>
 </ul>
-<p>See also the YAML test files and their accompanying README in the "tests" directory.</p>
-<hr />
+<p>See also the YAML test files and their accompanying README in the “tests” directory.</p>
+<hr>
 <h2 id="readpreference-document-validation"><a class="header" href="#readpreference-document-validation">ReadPreference Document Validation</a></h2>
 <p>While there are no YAML tests for this section, clients implementing this spec SHOULD perform validations on
 ReadPreference documents provided by the user. Specifically, documents with the following values should raise an error:</p>
@@ -174,7 +173,7 @@ ReadPreference documents provided by the user. Specifically, documents with the 
 </ul>
 <h2 id="calculating-round-trip-time"><a class="header" href="#calculating-round-trip-time">Calculating Round Trip Time</a></h2>
 <p>Drivers implementing server selection MUST test that RTT values are calculated correctly. YAML tests for RTT
-calculations can be found in the "tests" directory and they test for correctness in the following scenarios:</p>
+calculations can be found in the “tests” directory and they test for correctness in the following scenarios:</p>
 <ul>
 <li>first RTT: new average RTT equals measurement</li>
 <li>subsequent measurements: new average RTT is calculated using the new measurement and the previous average as described
@@ -188,13 +187,19 @@ should become the average RTT for this server.</p>
 additional conditions on drivers that might affect architecture. For some drivers, RTT tests might require mocks; for
 others, it might just require unit tests.</p>
 <h2 id="server-selection"><a class="header" href="#server-selection">Server Selection</a></h2>
-<p>The following test cases can be found in YAML form in the "tests" directory. Each test lists a TopologyDescription
+<p>The following test cases can be found in YAML form in the “tests” directory. Each test lists a TopologyDescription
 representing a set of servers, a ReadPreference document, and sets of servers returned at various stages of the server
 selection process. These sets are described below. Note that it is not required to test for correctness at every step.</p>
-<div class="table-wrapper"><table><thead><tr><th>Test Case</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Test Case</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td><code>suitable_servers</code></td><td>the set of servers matching all server selection logic.</td></tr>
 <tr><td><code>in_latency_window</code></td><td>the subset of <code>suitable_servers</code> that falls within the allowable latency window (required). NOTE: tests use the default localThresholdMS of 15 ms.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>Drivers implementing server selection MUST test that their implementations correctly return <strong>one</strong> of the servers in
 <code>in_latency_window</code>. Drivers SHOULD test against the full set of servers in <code>in_latency_window</code> and against
@@ -245,8 +250,8 @@ selection process. These sets are described below. Note that it is not required 
 <ul>
 <li>PRIMARY
 <ul>
-<li>primary is selected <strong>NOTE:</strong> it is an error to provide tags with mode PRIMARY. See "ReadPreference Document
-Validation."</li>
+<li>primary is selected <strong>NOTE:</strong> it is an error to provide tags with mode PRIMARY. See “ReadPreference Document
+Validation.”</li>
 </ul>
 </li>
 <li>PRIMARY_PREFERRED
@@ -396,7 +401,7 @@ the test case. Specifics of the test format and how to run the tests are include
 </code></pre>
 </li>
 <li>
-<p>Create a client with both mongoses' addresses in its seed list, appName="loadBalancingTest", and
+<p>Create a client with both mongoses’ addresses in its seed list, appName=“loadBalancingTest”, and
 localThresholdMS=30000.</p>
 <ul>
 <li>localThresholdMS is set to a high value to help avoid a single mongos being selected too many times due to a random
@@ -404,7 +409,7 @@ spike in latency in the other mongos.</li>
 </ul>
 </li>
 <li>
-<p>Using CMAP events, ensure the client's connection pools for both mongoses have been saturated, either via setting
+<p>Using CMAP events, ensure the client’s connection pools for both mongoses have been saturated, either via setting
 minPoolSize=maxPoolSize or executing operations.</p>
 <ul>
 <li>This helps reduce any noise introduced by connection establishment latency during the actual server selection
@@ -447,21 +452,12 @@ number.</li>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../max-staleness/max-staleness-tests.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../max-staleness/max-staleness-tests.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
             </nav>
 
         </div>

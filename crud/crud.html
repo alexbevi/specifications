@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,9 +159,9 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 2.6</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
-<p>The CRUD API defines a set of related methods and structures defining a driver's API. As not all languages/frameworks
+<p>The CRUD API defines a set of related methods and structures defining a driver’s API. As not all languages/frameworks
 have the same abilities, parts of the spec may or may not apply. These sections have been called out.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <p>This specification is about <a href="#guidance">Guidance</a> in 3 areas related to the CRUD API as well as a specification for the
@@ -170,13 +169,13 @@ API itself. It does not define implementation details and provides room and flex
 in languages and frameworks.</p>
 <h3 id="definitions"><a class="header" href="#definitions">Definitions</a></h3>
 <h4 id="meta"><a class="header" href="#meta">META</a></h4>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h4 id="terms"><a class="header" href="#terms">Terms</a></h4>
 <p><strong>Collection:</strong></p>
 <p>The term <code>interface Collection</code> will be seen in most of the sections. Each driver will likely have a class or interface
 defined for the concept of a collection. Operations appearing inside the <code>interface Collection</code> are required operations
-to be present on a driver's concept of a collection.</p>
+to be present on a driver’s concept of a collection.</p>
 <p><strong>Iterable:</strong></p>
 <p>The term <code>Iterable</code> will be seen as a return type from some of the <a href="#read">Read</a> methods. Its use is as that of a
 sequence of items. For instance, <code>collection.find({})</code> returns a sequence of documents that can be iterated over.</p>
@@ -220,13 +219,13 @@ skip and limit in find is order irrelevant where skip and limit in aggregate is 
 the user of another driver.</p>
 <p>A non-exhaustive list of acceptable naming deviations are as follows:</p>
 <ul>
-<li>Using "batchSize" as an example, Java would use "batchSize" while Python would use "batch_size". However, calling it
-"batchCount" would not be acceptable.</li>
-<li>Using "maxTimeMS" as an example, .NET would use "MaxTime" where it's type is a TimeSpan structure that includes units.
-However, calling it "MaximumTime" would not be acceptable.</li>
-<li>Using "FindOptions" as an example, Javascript wouldn't need to name it while other drivers might prefer to call it
-"FindArgs" or "FindParams". However, calling it "QueryOptions" would not be acceptable.</li>
-<li>Using "isOrdered" rather than "ordered". Some languages idioms prefer the use of "is", "has", or "was" and this is
+<li>Using “batchSize” as an example, Java would use “batchSize” while Python would use “batch_size”. However, calling it
+“batchCount” would not be acceptable.</li>
+<li>Using “maxTimeMS” as an example, .NET would use “MaxTime” where it’s type is a TimeSpan structure that includes units.
+However, calling it “MaximumTime” would not be acceptable.</li>
+<li>Using “FindOptions” as an example, Javascript wouldn’t need to name it while other drivers might prefer to call it
+“FindArgs” or “FindParams”. However, calling it “QueryOptions” would not be acceptable.</li>
+<li>Using “isOrdered” rather than “ordered”. Some languages idioms prefer the use of “is”, “has”, or “was” and this is
 acceptable.</li>
 </ul>
 <h4 id="timeouts"><a class="header" href="#timeouts">Timeouts</a></h4>
@@ -239,9 +238,9 @@ All explain helpers MUST support the timeout options documented in the
 specification.</p>
 <h3 id="api"><a class="header" href="#api">API</a></h3>
 <h4 id="read"><a class="header" href="#read">Read</a></h4>
-<blockquote>
-<p>[!NOTE]
-The term <code>Iterable&lt;T&gt;</code> is used below to indicate many of T. This spec is flexible on what that means as different
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The term <code>Iterable&lt;T&gt;</code> is used below to indicate many of T. This spec is flexible on what that means as different
 drivers will have different requirements, types, and idioms.</p>
 </blockquote>
 <pre><code class="language-typescript">interface Collection {
@@ -1823,17 +1822,17 @@ class UpdateManyModel implements WriteModel {
 </code></pre>
 <h6 id="write-results"><a class="header" href="#write-results">Write Results</a></h6>
 <p>The acknowledged property is defined for languages/frameworks without a sufficient optional type. Hence, a driver may
-choose to return an optional result (e.g. <code>Optional&lt;BulkWriteResult&gt;</code>) such that unacknowledged writes don't have a
+choose to return an optional result (e.g. <code>Optional&lt;BulkWriteResult&gt;</code>) such that unacknowledged writes don’t have a
 value and acknowledged writes do have a value.</p>
-<blockquote>
-<p>[!NOTE]
-If you have a choice, consider providing the acknowledged member and raising an error if the other fields are accessed
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>If you have a choice, consider providing the acknowledged member and raising an error if the other fields are accessed
 in an unacknowledged write. Instead of users receiving a null reference exception, you have the opportunity to provide
-an informative error message indicating the correct way to handle the situation. For instance, "The insertedCount
-member is not available when the write was unacknowledged. Check the acknowledged member to avoid this error."</p>
+an informative error message indicating the correct way to handle the situation. For instance, “The insertedCount
+member is not available when the write was unacknowledged. Check the acknowledged member to avoid this error.”</p>
 </blockquote>
 <p>Any result class with all parameters marked NOT REQUIRED is ultimately NOT REQUIRED as well. For instance, the
-<code>InsertOneResult</code> has all NOT REQUIRED parameters and is therefore also NOT REQUIRED allowing a driver to use "void" as
+<code>InsertOneResult</code> has all NOT REQUIRED parameters and is therefore also NOT REQUIRED allowing a driver to use “void” as
 the return value for the <code>insertOne</code> method.</p>
 <pre><code class="language-typescript">class BulkWriteResult {
 
@@ -1991,8 +1990,8 @@ class UpdateResult {
 <h5 id="error-handling"><a class="header" href="#error-handling">Error Handling</a></h5>
 <p>Defined below are error and exception types that should be reported from the various write methods. Since error types
 across languages would be impossible to reconcile, the below definitions represent the fields and names for the
-information that should be present. Structure isn't important as long as the information is available.</p>
-<p>Drivers SHOULD report errors however they report other server errors: by raising an exception, returning "false" and
+information that should be present. Structure isn’t important as long as the information is available.</p>
+<p>Drivers SHOULD report errors however they report other server errors: by raising an exception, returning “false” and
 populating an error struct, or another idiom that is consistent with other server errors.</p>
 <h6 id="writeconcernerror"><a class="header" href="#writeconcernerror">WriteConcernError</a></h6>
 <pre><code class="language-typescript">class WriteConcernError {
@@ -2549,7 +2548,7 @@ class FindOneAndUpdateOptions {
 <h5 id="update-vs-replace-validation"><a class="header" href="#update-vs-replace-validation">Update vs. Replace Validation</a></h5>
 <p>The <code>update</code> family of operations require that the update document parameter MUST have only atomic modifiers. In
 practice, this means that introspection needs to happen on that document to enforce this. However, it is enough to only
-check the first element in the document. If it begins with a <code>$</code> sign and the rest of the document's elements do not,
+check the first element in the document. If it begins with a <code>$</code> sign and the rest of the document’s elements do not,
 the server will throw an error. Note that it is required that an update document have at least one atomic modifier.</p>
 <p>The <code>replace</code> family of operations require that the replacement document parameter MUST NOT begin with an atomic
 modifier. In practice, this means that introspection needs to happen on that document to enforce this. However, it is
@@ -2585,9 +2584,9 @@ the <a href="../message/OP_MSG.html#global-command-arguments">$readPreference gl
 <a href="../server-selection/server-selection.html#passing-read-preference-to-mongos-and-load-balancers">passing read preference to mongos and load balancers</a>
 (if applicable).</p>
 <h3 id="explain"><a class="header" href="#explain">Explain</a></h3>
-<blockquote>
-<p>[!NOTE]
-Explain helpers are optional. Drivers that do not provide explain helpers may ignore this section.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Explain helpers are optional. Drivers that do not provide explain helpers may ignore this section.</p>
 </blockquote>
 <pre><code class="language-typescript">interface ExplainOptions {
   /**
@@ -2644,12 +2643,12 @@ deviations from the Naming section are still permissible.</p>
 <p>Q: Why do the names of the fields differ from those defined in the MongoDB manual?</p>
 <p>Documentation and commands often refer to same-purposed fields with different names making it difficult to have a
 cohesive API. In addition, occasionally the name was correct at one point and its purpose has expanded to a point where
-the initial name doesn't accurately describe its current function.</p>
+the initial name doesn’t accurately describe its current function.</p>
 <p>In addition, responses from the servers are sometimes cryptic and used for the purposes of compactness. In these cases,
 we felt the more verbose form was desirable for self-documentation purposes.</p>
 <p>Q: Where is read preference?</p>
 <p>Read preference is about selecting a server with which to perform a read operation, such as a query, a count, or an
-aggregate. Since all operations defined in this specification are performed on a collection, it's uncommon that two
+aggregate. Since all operations defined in this specification are performed on a collection, it’s uncommon that two
 different read operations on the same collection would use a different read preference, potentially getting out-of-sync
 results. As such, the most natural place to indicate read preference is on the client, the database, or the collection
 itself and not the operations within it.</p>
@@ -2657,14 +2656,14 @@ itself and not the operations within it.</p>
 noted before, it is permitted to specify this, along with other driver-specific options, in some alternative way.</p>
 <p>Q: Where is read concern?</p>
 <p>Read concern is about indicating how reads are handled. Since all operations defined in this specification are performed
-on a collection, it's uncommon that two different read operations on the same collection would use a different read
+on a collection, it’s uncommon that two different read operations on the same collection would use a different read
 concern, potentially causing mismatched and out-of-sync data. As such, the most natural place to indicate read concern
 is on the client, the database, or the collection itself and not the operations within it.</p>
 <p>However, it might be that a driver needs to expose read concern to a user per operation for various reasons. As noted
 before, it is permitted to specify this, along with other driver-specific options, in some alternative way.</p>
 <p>Q: Where is write concern?</p>
 <p>Write concern is about indicating how writes are acknowledged. Since all operations defined in this specification are
-performed on a collection, it's uncommon that two different write operations on the same collection would use a
+performed on a collection, it’s uncommon that two different write operations on the same collection would use a
 different write concern, potentially causing mismatched and out-of-sync data. As such, the most natural place to
 indicate write concern is on the client, the database, or the collection itself and not the operations within it. See
 the <a href="../read-write-concern/read-write-concern.html">Read/Write Concern specification</a> for the API of constructing a
@@ -2674,10 +2673,10 @@ before, it is permitted to specify this, along with other driver-specific option
 <p>Q: How do I throttle unacknowledged writes now that write concern is no longer defined on a per operation basis?</p>
 <p>Some users used to throttle unacknowledged writes by using an acknowledged write concern every X number of operations.
 Going forward, the proper way to handle this is by using the bulk write API.</p>
-<p>Q: What is the logic for adding "One" or "Many" into the method and model names?</p>
-<p>If the maximum number of documents affected can only be one, we added "One" into the name. This makes it explicit that
+<p>Q: What is the logic for adding “One” or “Many” into the method and model names?</p>
+<p>If the maximum number of documents affected can only be one, we added “One” into the name. This makes it explicit that
 the maximum number of documents that could be affected is one vs. infinite.</p>
-<p>In addition, the current API exposed by all our drivers has the default value for "one" or "many" set differently for
+<p>In addition, the current API exposed by all our drivers has the default value for “one” or “many” set differently for
 update and delete. This generally causes some issues for new developers and is a minor annoyance for existing
 developers. The safest way to combat this without introducing discrepancies between drivers/driver versions or breaking
 backwards compatibility was to use multiple methods, each signifying the number of documents that could be affected.</p>
@@ -2688,31 +2687,30 @@ guarantees for full backwards compatibility.</p>
 <p>Hence, the only real concern is how to initiate a query using QE. While <code>find</code> is preferable, it would be a backwards
 breaking change. It might be decided that <code>find</code> is what should be used, and all drivers will release major revisions
 with this backwards breaking change. Alternatively, it might be decided that another initiator would be used.</p>
-<p>Q: Didn't we just build a bulk API?</p>
+<p>Q: Didn’t we just build a bulk API?</p>
 <p>Yes, most drivers did just build out a bulk API (fluent-bulk-api). While unfortunate, we felt it better to have the bulk
 api be consistent with the rest of the methods in the CRUD family of operations. However, the fluent-bulk-api is still
 able to be used as this change is non-backwards breaking. Any driver which implemented the fluent bulk API should
 deprecate it and drivers that have not built it should not do so.</p>
-<p>Q: Should drivers offer explain helpers?<br />
-Originally, it was determined that explain should not be exposed via specialized APIs in drivers because it it was
-deemed to be an unusual use-case for a driver. We'd like users to use the shell for this purpose. However, explain is
+<p>Q: Should drivers offer explain helpers?<br>Originally, it was determined that explain should not be exposed via specialized APIs in drivers because it it was
+deemed to be an unusual use-case for a driver. We’d like users to use the shell for this purpose. However, explain is
 still possible from a driver. Some drivers have historically provided explain helpers and continue to do so. Drivers
 that do not offer explain helpers can run explain commands using the runCommand API.</p>
 <p>Q: What about explain?</p>
-<p>Explain has been determined to be not a normal use-case for a driver. We'd like users to use the shell for this purpose.
+<p>Explain has been determined to be not a normal use-case for a driver. We’d like users to use the shell for this purpose.
 However, explain is still possible from a driver. For find, it can be passed as a modifier. Aggregate can be run using a
 runCommand method passing the explain option. In addition, server 3.0 offers an explain command that can be run using a
 runCommand method.</p>
 <p>Q: Where did modifiers go in FindOptions?</p>
-<p>MongoDB 3.2 introduced the find command. As opposed to using the general "modifiers" field any longer, each relevant
-option is listed explicitly. Some options, such as "tailable" or "singleBatch" are not listed as they are derived from
-other fields. Upgrading a driver should be a simple procedure of deprecating the "modifiers" field and introducing the
-new fields. When a collision occurs, the explicitly specified field should override the value in "modifiers".</p>
+<p>MongoDB 3.2 introduced the find command. As opposed to using the general “modifiers” field any longer, each relevant
+option is listed explicitly. Some options, such as “tailable” or “singleBatch” are not listed as they are derived from
+other fields. Upgrading a driver should be a simple procedure of deprecating the “modifiers” field and introducing the
+new fields. When a collision occurs, the explicitly specified field should override the value in “modifiers”.</p>
 <p>Q: Where is <code>save</code>?</p>
 <p>Drivers have historically provided a <code>save</code> method, which was syntactic sugar for upserting or inserting a document
 based on whether it contained an identifier, respectively. While the <code>save</code> method may be convenient for interactive
 environments, such as the shell, it was intentionally excluded from the CRUD specification for language drivers for
-several reasons. The <code>save</code> method promotes a design pattern of "fetch, modify, replace" and invites race conditions in
+several reasons. The <code>save</code> method promotes a design pattern of “fetch, modify, replace” and invites race conditions in
 application logic. Additionally, the split nature of <code>save</code> makes it difficult to discern at a glance if application
 code will perform an insert or potentially dangerous full-document replacement. Instead of relying on <code>save</code>,
 application code should know whether document already has an identifier and explicitly call <code>insertOne</code> or <code>replaceOne</code>
@@ -2893,7 +2891,7 @@ an error on older server versions.</p>
 <p>2018-02-06: Note that batchSize in FindOptions and AggregateOptions should also apply to getMore.</p>
 </li>
 <li>
-<p>2018-01-26: Only send bypassDocumentValidation option if it's true, don't send false.</p>
+<p>2018-01-26: Only send bypassDocumentValidation option if it’s true, don’t send false.</p>
 </li>
 <li>
 <p>2017-10-23: Allow BulkWriteException to provide an intermediary write result.</p>
@@ -2933,7 +2931,7 @@ implications for drivers using option classes.</p>
 <p>2017-06-26: Added FAQ entry for omission of save method.</p>
 </li>
 <li>
-<p>2017-05-12: Removed extra "collation" option added to several bulk write models.</p>
+<p>2017-05-12: Removed extra “collation” option added to several bulk write models.</p>
 </li>
 <li>
 <p>2017-01-09: Removed modifiers from FindOptions and added in all options.</p>
@@ -2979,27 +2977,12 @@ calculating batchSize for opcode writes.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../index-management/index-management.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../collation/collation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../index-management/index-management.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../collation/collation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

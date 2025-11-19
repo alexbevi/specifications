@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,16 +159,16 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 5.0</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>This specification defines driver behaviour when connected to MongoDB services through a load balancer.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <h4 id="sdam"><a class="header" href="#sdam">SDAM</a></h4>
-<p>An abbreviated form of "Server Discovery and Monitoring", specification defined in
+<p>An abbreviated form of “Server Discovery and Monitoring”, specification defined in
 <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring Specification</a>.</p>
 <h4 id="service"><a class="header" href="#service">Service</a></h4>
 <p>Any MongoDB service that can run behind a load balancer.</p>
@@ -201,9 +200,9 @@ SRV record as is done for non-load balanced sharded clusters.</p>
 <h4 id="monitoring"><a class="header" href="#monitoring">Monitoring</a></h4>
 <p>When <code>loadBalanced=true</code> is specified in the URI the topology MUST start in type <code>LoadBalanced</code> and MUST remain as
 <code>LoadBalanced</code> indefinitely. The topology MUST contain 1 <code>ServerDescription</code> with a <code>ServerType</code> of -
-Code:<code>LoadBalancer</code>. The "address" field of the <code>ServerDescription</code> MUST be set to the address field of the load
+Code:<code>LoadBalancer</code>. The “address” field of the <code>ServerDescription</code> MUST be set to the address field of the load
 balancer. All other fields in the - Code:<code>ServerDescription</code> MUST remain unset. In this mode the driver MUST NOT start a
-monitoring connection. The <code>TopologyDescription</code>'s <code>compatible</code> field MUST always be <code>true</code>.</p>
+monitoring connection. The <code>TopologyDescription</code>’s <code>compatible</code> field MUST always be <code>true</code>.</p>
 <p>Although there is no monitoring connection in load balanced mode, drivers MUST emit the following series of SDAM events:</p>
 <ul>
 <li><code>TopologyOpeningEvent</code> when the topology is created.</li>
@@ -256,8 +255,8 @@ MUST add a <code>loadBalanced</code> field to the - Code:<code>hello</code> comm
 <p>Driver connection string contains <code>loadBalanced=false</code> or no - Code:<code>loadBalanced</code> option:</p>
 <pre><code class="language-typescript">{ hello: 1 }
 </code></pre>
-<p>When the server's hello response does not contain a <code>serviceId</code> field, the driver MUST throw an exception with the
-message "Driver attempted to initialize in load balancing mode, but the server does not support this mode."</p>
+<p>When the server’s hello response does not contain a <code>serviceId</code> field, the driver MUST throw an exception with the
+message “Driver attempted to initialize in load balancing mode, but the server does not support this mode.”</p>
 <p>For single threaded drivers that do not use a connection pool, the driver MUST have only 1 socket connection to the load
 balancer in load balancing mode.</p>
 <h4 id="connection-pinning"><a class="header" href="#connection-pinning">Connection Pinning</a></h4>
@@ -271,13 +270,13 @@ or <code>ConnectionCheckOutFailedEvent</code>. Similarly, the driver MUST only p
 connection back into the pool unless the command fails or the server returns a cursor ID of <code>0</code> (i.e. all documents are
 returned in a single batch). Otherwise, the driver MUST continue to use the same connection for all subsequent -
 Code:<code>getMore</code> commands for the cursor. The driver MUST check the connection back into the pool if the server returns a
-cursor ID of <code>0</code> in a <code>getMore</code> response (i.e. the cursor is drained). When the cursor's <code>close</code> method is invoked,
+cursor ID of <code>0</code> in a <code>getMore</code> response (i.e. the cursor is drained). When the cursor’s <code>close</code> method is invoked,
 either explicitly or via an implicit resource cleanup mechanism, the driver MUST use the same connection to execute a
 <code>killCursors</code> command if necessary and then check the connection back into the pool regardless of the result.</p>
 <p>For multi-threaded drivers, cursors with pinned connections MUST either document to the user that calling <code>next()</code> and
 <code>close()</code> operations on the cursor concurrently is not permitted, or explicitly prevent cursors from executing those
 operations simultaneously.</p>
-<p>If a <code>getMore</code> fails with a network error, drivers MUST leave the connection pinned to the cursor. When the cursor's
+<p>If a <code>getMore</code> fails with a network error, drivers MUST leave the connection pinned to the cursor. When the cursor’s
 <code>close</code> method is invoked, drivers MUST NOT execute a <code>killCursors</code> command because the pinned connection is no longer
 valid and MUST return the connection back to the pool.</p>
 <h4 id="behaviour-with-transactions"><a class="header" href="#behaviour-with-transactions">Behaviour With Transactions</a></h4>
@@ -296,10 +295,10 @@ concurrent transactions run under different sessions from the same client.</p>
 <li>Connections checked out for transactions</li>
 <li>Connections checked out for operations not falling under the previous 2 categories</li>
 </ul>
-<p>When the connection pool's <code>maxPoolSize</code> is reached and the pool times out waiting for a new connection the
-<code>WaitQueueTimeoutError</code> MUST include a new detailed message, "Timeout waiting for connection from the connection pool.
+<p>When the connection pool’s <code>maxPoolSize</code> is reached and the pool times out waiting for a new connection the
+<code>WaitQueueTimeoutError</code> MUST include a new detailed message, “Timeout waiting for connection from the connection pool.
 maxPoolSize: n, connections in use by cursors: n, connections in use by transactions: n, connections in use by other
-operations: n".</p>
+operations: n”.</p>
 <h3 id="error-handling"><a class="header" href="#error-handling">Error Handling</a></h3>
 <h4 id="initial-handshake-errors"><a class="header" href="#initial-handshake-errors">Initial Handshake Errors</a></h4>
 <p>When establishing a new connection in load balanced mode, drivers MUST NOT perform SDAM error handling for any errors
@@ -328,7 +327,7 @@ hostname the client is connecting to.</p>
 <p>All services behind a load balancer that have been started with the aforementioned option MUST add a top level
 <code>serviceId</code> field to their response to the <code>hello</code> command. This field MUST be a BSON <code>ObjectId</code> and SHOULD NOT change
 while the service is running. When a driver is configured to not be in load balanced mode and the service is configured
-behind a load balancer, the service MAY return an error from the driver's <code>hello</code> command that the driver is not
+behind a load balancer, the service MAY return an error from the driver’s <code>hello</code> command that the driver is not
 configured to use it properly.</p>
 <p>All services that have the behaviour of reaping idle cursors after a specified period of time MAY also close the
 connection associated with the cursor when the cursor is reaped. Conversely, those services MAY reap a cursor when the
@@ -383,8 +382,8 @@ inform the driver they are behind a load balancer, potentially with the IP addre
 <p>The benefit of this solution would be that no changes would be required from the application side, and could also not
 require a restart of any application. A single request to the service through the load balancer could automatically
 trigger the change in the hello response and cause the driver to switch into load balancing mode pointing at the load
-balancer's IP address. Also with this solution it would provide services the ability to record the original IP addresses
-of the application that was connecting to it as they are provided the PROXY protocol's header bytes.</p>
+balancer’s IP address. Also with this solution it would provide services the ability to record the original IP addresses
+of the application that was connecting to it as they are provided the PROXY protocol’s header bytes.</p>
 <p>The additional complexity of this alternative on the driver side is that instead of starting in a single mode and
 remaining there for the life of the application, the driver would need to deal with additional state changes based on
 the results of the server monitors. From a service perspective, every service would need to be updated to understand the
@@ -409,27 +408,12 @@ only load balancers that support the PROXY protocol would be supported.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../auth/auth.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../auth/auth.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

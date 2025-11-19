@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,29 +159,29 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 2.4</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>The SDAM logging and monitoring specification defines a set of behaviors in the driver for providing runtime information
 about server discovery and monitoring (SDAM) in log messages, as well as in events that users can consume
 programmatically, either directly or by integrating with third-party APM libraries.</p>
 <h3 id="definitions"><a class="header" href="#definitions">Definitions</a></h3>
 <h4 id="meta"><a class="header" href="#meta">META</a></h4>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h4 id="terms"><a class="header" href="#terms">Terms</a></h4>
 <p><code>ServerAddress</code></p>
 <blockquote>
-<p>The term <code>ServerAddress</code> refers to the implementation in the driver's language of a server host/port pair. This may be
+<p>The term <code>ServerAddress</code> refers to the implementation in the driver’s language of a server host/port pair. This may be
 an object or a string. The name of this object is NOT REQUIRED.</p>
 </blockquote>
 <p><code>TopologyType</code></p>
 <blockquote>
-<p>The term <code>TopologyType</code> refers to the implementation in the driver's language of a topology type (standalone, sharded,
+<p>The term <code>TopologyType</code> refers to the implementation in the driver’s language of a topology type (standalone, sharded,
 etc.). This may be a string or object. The name of the object is NOT REQUIRED.</p>
 </blockquote>
 <p><code>Server</code></p>
 <blockquote>
-<p>The term <code>Server</code> refers to the implementation in the driver's language of an abstraction of a mongod or mongos
+<p>The term <code>Server</code> refers to the implementation in the driver’s language of an abstraction of a mongod or mongos
 process, or a load balancer, as defined by the <a href="server-discovery-and-monitoring.html#server">SDAM specification</a>.</p>
 </blockquote>
 <h3 id="specification"><a class="header" href="#specification">Specification</a></h3>
@@ -199,7 +198,7 @@ all properties are REQUIRED unless noted otherwise.</p>
 rule are noted in the appropriate section. Class and interface names may vary according to the driver and language best
 practices.</p>
 <h4 id="publishing-and-subscribing"><a class="header" href="#publishing-and-subscribing">Publishing and Subscribing</a></h4>
-<p>The driver SHOULD publish events in a manner that is standard to the driver's language publish/subscribe patterns and is
+<p>The driver SHOULD publish events in a manner that is standard to the driver’s language publish/subscribe patterns and is
 not strictly mandated in this specification.</p>
 <p>Similarly, as described in the <a href="../logging/logging.html#implementation-requirements">logging specification</a> the driver
 SHOULD emit log messages in a manner that is standard for the language.</p>
@@ -210,47 +209,53 @@ Events MUST NOT be published concurrently for the same topology ID or server ID,
 differing topology IDs and server IDs.</p>
 <h4 id="heartbeats"><a class="header" href="#heartbeats">Heartbeats</a></h4>
 <p>The driver MUST guarantee that every <code>ServerHeartbeatStartedEvent</code> has either a correlating
-<code>ServerHeartbeatSucceededEvent</code> or <code>ServerHeartbeatFailedEvent</code>, and that every "server heartbeat started" log message
-has either a correlating "server heartbeat succeeded" or "server heartbeat failed" log message.</p>
-<p>Drivers that use the streaming heartbeat protocol MUST publish a <code>ServerHeartbeatStartedEvent</code> and "server heartbeat
-started" log message before attempting to read the next <code>hello</code> or legacy hello exhaust response.</p>
+<code>ServerHeartbeatSucceededEvent</code> or <code>ServerHeartbeatFailedEvent</code>, and that every “server heartbeat started” log message
+has either a correlating “server heartbeat succeeded” or “server heartbeat failed” log message.</p>
+<p>Drivers that use the streaming heartbeat protocol MUST publish a <code>ServerHeartbeatStartedEvent</code> and “server heartbeat
+started” log message before attempting to read the next <code>hello</code> or legacy hello exhaust response.</p>
 <h4 id="error-handling"><a class="header" href="#error-handling">Error Handling</a></h4>
 <p>If an exception occurs while sending the <code>hello</code> or legacy hello operation to the server, the driver MUST generate a
-<code>ServerHeartbeatFailedEvent</code> and "server heartbeat failed" log message with the exception or message and re-raise the
+<code>ServerHeartbeatFailedEvent</code> and “server heartbeat failed” log message with the exception or message and re-raise the
 exception. The SDAM mandated retry of the <code>hello</code> or legacy hello call should be visible to consumers.</p>
 <h4 id="topology-ids"><a class="header" href="#topology-ids">Topology IDs</a></h4>
 <p>These MUST be a unique value that is specific to the Topology for which the events and log messages are emitted. The
 language may decide how to generate the value and what type the value is, as long as it is unique to the Topology. The
 ID MUST be created once when the Topology is created and remain the same until the Topology is destroyed.</p>
 <h4 id="initial-server-description"><a class="header" href="#initial-server-description">Initial Server Description</a></h4>
-<p><code>ServerDescription</code> objects MUST be initialized with a default description in an "unknown" state, guaranteeing that the
+<p><code>ServerDescription</code> objects MUST be initialized with a default description in an “unknown” state, guaranteeing that the
 previous description in the events and log messages will never be null.</p>
 <h4 id="initial-topology-description"><a class="header" href="#initial-topology-description">Initial Topology Description</a></h4>
 <p>The first <code>TopologyDescriptionChangedEvent</code> to be emitted from a monitored Topology MUST set its <code>previousDescription</code>
-property to be a <code>TopologyDescription</code> object in the "unknown" state.</p>
+property to be a <code>TopologyDescription</code> object in the “unknown” state.</p>
 <h3 id="events-api"><a class="header" href="#events-api">Events API</a></h3>
 <p>The first <code>TopologyDescriptionChangedEvent</code> to be emitted from a monitored Topology MUST set its <code>previousDescription</code>
-property to be a <code>TopologyDescription</code> object in the "unknown" state.</p>
+property to be a <code>TopologyDescription</code> object in the “unknown” state.</p>
 <h2 id="closing-topology-description"><a class="header" href="#closing-topology-description">Closing Topology Description</a></h2>
 <p>When a <code>Topology</code> object or equivalent is being shut-down or closed, the driver MUST change the <code>TopologyDescription</code> to
-an "unknown" state.</p>
-<hr />
+an “unknown” state.</p>
+<hr>
 <h2 id="events-api-1"><a class="header" href="#events-api-1">Events API</a></h2>
 <p>This specification defines 9 main events that MUST be published in the scenarios described. 6 of these events are the
 core behaviour within the cluster lifecycle, and the remaining 3 server heartbeat events are fired from the server
 monitor and follow the guidelines for publishing in the command monitoring specification.</p>
 <p>Events that MUST be published (with their conditions) are as follows.</p>
-<div class="table-wrapper"><table><thead><tr><th>Event Type</th><th>Condition</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Event Type</th><th>Condition</th></tr>
+</thead>
+<tbody>
 <tr><td><code>TopologyOpeningEvent</code></td><td>When a topology description is initialized - this MUST be the first SDAM event fired.</td></tr>
 <tr><td><code>ServerOpeningEvent</code></td><td>Published when the server description is instantiated with its defaults, and MUST be the first operation to happen after the defaults are set. This is before the Monitor is created and the Monitor socket connection is opened.</td></tr>
 <tr><td><code>ServerDescriptionChangedEvent</code></td><td>When the old server description is not equal to the new server description</td></tr>
 <tr><td><code>TopologyDescriptionChangedEvent</code></td><td>When the old topology description is not equal to the new topology description.</td></tr>
-<tr><td><code>ServerClosedEvent</code></td><td>Published when the server monitor's connection is closed and the server is shutdown.</td></tr>
+<tr><td><code>ServerClosedEvent</code></td><td>Published when the server monitor’s connection is closed and the server is shutdown.</td></tr>
 <tr><td><code>TopologyClosedEvent</code></td><td>When a topology is shut down - this MUST be the last SDAM event fired.</td></tr>
 <tr><td><code>ServerHeartbeatStartedEvent</code></td><td>Published when the server monitor sends its <code>hello</code> or legacy hello call to the server. When the monitor is creating a new connection, this event MUST be published just before the socket is created.</td></tr>
-<tr><td><code>ServerHeartbeatSucceededEvent</code></td><td>Published on successful completion of the server monitor's <code>hello</code> or legacy hello call.</td></tr>
-<tr><td><code>ServerHeartbeatFailedEvent</code></td><td>Published on failure of the server monitor's <code>hello</code> or legacy hello call, either with an ok: 0 result or a socket exception from the connection.</td></tr>
-</tbody></table>
+<tr><td><code>ServerHeartbeatSucceededEvent</code></td><td>Published on successful completion of the server monitor’s <code>hello</code> or legacy hello call.</td></tr>
+<tr><td><code>ServerHeartbeatFailedEvent</code></td><td>Published on failure of the server monitor’s <code>hello</code> or legacy hello call, either with an ok: 0 result or a socket exception from the connection.</td></tr>
+</tbody>
+</table>
 </div>
 <pre><code class="language-typescript">/**
  * Published when server description changes, but does NOT include changes to the RTT.
@@ -476,14 +481,20 @@ interface TopologyDescription {
 <p>The following table describes the rules for determining if a topology type has readable or writable servers. If no read
 preference is passed to <code>hasReadableServer</code>, the driver MUST default the value to the default read preference,
 <code>primary</code>, or treat the call as if <code>primary</code> was provided.</p>
-<div class="table-wrapper"><table><thead><tr><th>Topology Type</th><th><code>hasReadableServer</code></th><th><code>hasWritableServer</code></th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Topology Type</th><th><code>hasReadableServer</code></th><th><code>hasWritableServer</code></th></tr>
+</thead>
+<tbody>
 <tr><td>Unknown</td><td><code>false</code></td><td><code>false</code></td></tr>
 <tr><td>Single</td><td><code>true</code> if the server is available</td><td><code>true</code> if the server is available</td></tr>
 <tr><td>ReplicaSetNoPrimary</td><td>Called with <code>primary</code>: <code>false</code> <br>Called with any other option: uses the read preference to determine if any server in the cluster is suitable for reading. <br>Called with no option: <code>false</code></td><td><code>false</code></td></tr>
 <tr><td>ReplicaSetWithPrimary</td><td>Called with any valid option: uses the read preference to determine if any server in the cluster is suitable for reading. <br>Called with no option: <code>true</code></td><td><code>true</code></td></tr>
 <tr><td>Sharded</td><td><code>true</code> if 1+ servers are available</td><td><code>true</code> if 1+ servers are available</td></tr>
 <tr><td>LoadBalanced</td><td><code>true</code></td><td><code>true</code></td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h3 id="log-messages"><a class="header" href="#log-messages">Log Messages</a></h3>
 <p>Please refer to the <a href="../logging/logging.html">logging specification</a> for details on logging implementations in general,
@@ -499,77 +510,113 @@ equivalent log message.</p>
 so long as the information is present (e.g. a double instead of an integer, or a string instead of an integer if the
 structured logging framework does not support numeric types.)</p>
 <h4 id="common-fields"><a class="header" href="#common-fields">Common Fields</a></h4>
-<p>The following key-value pairs are common to all or several log messages and MUST be included in the "applicable
-messages":</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Applicable Messages</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
-<tr><td>topologyId</td><td>All messages</td><td>Flexible</td><td>The driver's unique ID for this topology as discussed in <a href="#topology-ids">Topology IDs</a>. The type is flexible depending on the driver's choice of type for topology ID.</td></tr>
+<p>The following key-value pairs are common to all or several log messages and MUST be included in the “applicable
+messages”:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Key</th><th>Applicable Messages</th><th>Suggested Type</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>topologyId</td><td>All messages</td><td>Flexible</td><td>The driver’s unique ID for this topology as discussed in <a href="#topology-ids">Topology IDs</a>. The type is flexible depending on the driver’s choice of type for topology ID.</td></tr>
 <tr><td>serverHost</td><td>Log messages specific to a particular server, including heartbeat-related messages</td><td>String</td><td>The hostname, IP address, or Unix domain socket path for the endpoint the pool is for.</td></tr>
 <tr><td>serverPort</td><td>Log messages specific to a particular server, including heartbeat-related messages</td><td>Int</td><td>(Only present for server-specific log messages) The port for the endpoint the pool is for. Optional; not present for Unix domain sockets. When the user does not specify a port and the default (27017) is used, the driver SHOULD include it here.</td></tr>
 <tr><td>driverConnectionId</td><td>Heartbeat-related log messages</td><td>Int</td><td>The driver-generated ID for the monitoring connection as defined in the <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">connection monitoring and pooling specification</a>. Unlike <code>connectionId</code> in the above events, this field MUST NOT contain the host/port; that information MUST be in the above fields, <code>serverHost</code> and <code>serverPort</code>. This field is optional for drivers that do not implement CMAP if they do have an equivalent concept of a connection ID.</td></tr>
-<tr><td>serverConnectionId</td><td>Heartbeat-related log messages</td><td>Int</td><td>The server's ID for the monitoring connection, if known. This value will be unknown and can be omitted in certain cases, e.g. the first "heartbeat started" message for a monitoring connection. Only present on server versions 4.2+.</td></tr>
-</tbody></table>
+<tr><td>serverConnectionId</td><td>Heartbeat-related log messages</td><td>Int</td><td>The server’s ID for the monitoring connection, if known. This value will be unknown and can be omitted in certain cases, e.g. the first “heartbeat started” message for a monitoring connection. Only present on server versions 4.2+.</td></tr>
+</tbody>
+</table>
 </div>
-<h4 id="starting-topology-monitoring-log-message"><a class="header" href="#starting-topology-monitoring-log-message">"Starting Topology Monitoring" Log Message</a></h4>
+<h4 id="starting-topology-monitoring-log-message"><a class="header" href="#starting-topology-monitoring-log-message">“Starting Topology Monitoring” Log Message</a></h4>
 <p>This message MUST be published under the same circumstances as a <code>TopologyOpeningEvent</code> as detailed in
 <a href="#events-api">Events API</a>.</p>
 <p>In addition to the relevant common fields, these messages MUST contain the following key-value pair:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
-<tr><td>message</td><td>String</td><td>"Starting topology monitoring"</td></tr>
-</tbody></table>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>message</td><td>String</td><td>“Starting topology monitoring”</td></tr>
+</tbody>
+</table>
 </div>
 <p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
 placeholders as appropriate:</p>
 <blockquote>
 <p>Starting monitoring for topology with ID {{topologyId}}</p>
 </blockquote>
-<h4 id="stopped-topology-monitoring-log-message"><a class="header" href="#stopped-topology-monitoring-log-message">"Stopped Topology Monitoring" Log Message</a></h4>
+<h4 id="stopped-topology-monitoring-log-message"><a class="header" href="#stopped-topology-monitoring-log-message">“Stopped Topology Monitoring” Log Message</a></h4>
 <p>This message MUST be published under the same circumstances as a <code>TopologyClosedEvent</code> as detailed in
 <a href="#events-api">Events API</a>.</p>
 <p>In addition to the relevant common fields, these messages MUST contain the following key-value pair:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
-<tr><td>message</td><td>String</td><td>"Stopped topology monitoring"</td></tr>
-</tbody></table>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>message</td><td>String</td><td>“Stopped topology monitoring”</td></tr>
+</tbody>
+</table>
 </div>
 <p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
 placeholders as appropriate:</p>
 <blockquote>
 <p>Stopped monitoring for topology with ID {{topologyId}}</p>
 </blockquote>
-<h4 id="starting-server-monitoring-log-message"><a class="header" href="#starting-server-monitoring-log-message">"Starting Server Monitoring" Log Message</a></h4>
+<h4 id="starting-server-monitoring-log-message"><a class="header" href="#starting-server-monitoring-log-message">“Starting Server Monitoring” Log Message</a></h4>
 <p>This message MUST be published under the same circumstances as a <code>ServerOpeningEvent</code> as detailed in
 <a href="#events-api">Events API</a>.</p>
 <p>In addition to the relevant common fields, these messages MUST contain the following key-value pair:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
-<tr><td>message</td><td>String</td><td>"Starting server monitoring"</td></tr>
-</tbody></table>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>message</td><td>String</td><td>“Starting server monitoring”</td></tr>
+</tbody>
+</table>
 </div>
 <p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
 placeholders as appropriate:</p>
 <blockquote>
 <p>Starting monitoring for server {{serverHost}}:{{serverPort}} in topology with ID {{topologyId}}</p>
 </blockquote>
-<h4 id="stopped-server-monitoring-log-message"><a class="header" href="#stopped-server-monitoring-log-message">"Stopped Server Monitoring" Log Message</a></h4>
+<h4 id="stopped-server-monitoring-log-message"><a class="header" href="#stopped-server-monitoring-log-message">“Stopped Server Monitoring” Log Message</a></h4>
 <p>This message MUST be published under the same circumstances as a <code>ServerClosedEvent</code> as detailed in
 <a href="#events-api">Events API</a>.</p>
 <p>In addition to the relevant common fields, these messages MUST contain the following key-value pair:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
-<tr><td>message</td><td>String</td><td>"Stopped server monitoring"</td></tr>
-</tbody></table>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>message</td><td>String</td><td>“Stopped server monitoring”</td></tr>
+</tbody>
+</table>
 </div>
 <p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
 placeholders as appropriate:</p>
 <blockquote>
 <p>Stopped monitoring for server {{serverHost}}:{{serverPort}} in topology with ID {{topologyId}}</p>
 </blockquote>
-<h4 id="topology-description-changed-log-message"><a class="header" href="#topology-description-changed-log-message">"Topology Description Changed" Log Message</a></h4>
+<h4 id="topology-description-changed-log-message"><a class="header" href="#topology-description-changed-log-message">“Topology Description Changed” Log Message</a></h4>
 <p>This message MUST be published under the same circumstances as a <code>TopologyDescriptionChangedEvent</code> as detailed in
 <a href="#events-api">Events API</a>.</p>
 <p>In addition to the relevant common fields, these messages MUST contain the following key-value pairs:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
-<tr><td>message</td><td>String</td><td>"Topology description changed"</td></tr>
-<tr><td>previousDescription</td><td>String</td><td>A string representation of the previous description of the topology. The format is flexible and could be e.g. the <code>toString()</code> implementation for a driver's topology description type, or an extended JSON representation of the topology object.</td></tr>
-<tr><td>newDescription</td><td>String</td><td>A string representation of the new description of the server. The format is flexible and could be e.g. the <code>toString()</code> implementation for a driver's topology description type, or an extended JSON representation of the topology object.</td></tr>
-</tbody></table>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>message</td><td>String</td><td>“Topology description changed”</td></tr>
+<tr><td>previousDescription</td><td>String</td><td>A string representation of the previous description of the topology. The format is flexible and could be e.g. the <code>toString()</code> implementation for a driver’s topology description type, or an extended JSON representation of the topology object.</td></tr>
+<tr><td>newDescription</td><td>String</td><td>A string representation of the new description of the server. The format is flexible and could be e.g. the <code>toString()</code> implementation for a driver’s topology description type, or an extended JSON representation of the topology object.</td></tr>
+</tbody>
+</table>
 </div>
 <p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
 placeholders as appropriate:</p>
@@ -577,14 +624,20 @@ placeholders as appropriate:</p>
 <p>Description changed for topology with ID {{topologyId}}. Previous description: {{previousDescription}}. New
 description: {{newDescription}}</p>
 </blockquote>
-<h4 id="server-heartbeat-started-log-message"><a class="header" href="#server-heartbeat-started-log-message">"Server Heartbeat Started" Log Message</a></h4>
+<h4 id="server-heartbeat-started-log-message"><a class="header" href="#server-heartbeat-started-log-message">“Server Heartbeat Started” Log Message</a></h4>
 <p>This message MUST be published under the same circumstances as a <code>ServerHeartbeatStartedEvent</code> as detailed in
 <a href="#events-api">Events API</a>.</p>
 <p>In addition to the relevant common fields, these messages MUST contain the following key-value pairs:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
-<tr><td>message</td><td>String</td><td>"Server heartbeat started"</td></tr>
-<tr><td>awaited</td><td>Boolean</td><td>Whether this log message is for an awaitable hello or legacy "hello".</td></tr>
-</tbody></table>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>message</td><td>String</td><td>“Server heartbeat started”</td></tr>
+<tr><td>awaited</td><td>Boolean</td><td>Whether this log message is for an awaitable hello or legacy “hello”.</td></tr>
+</tbody>
+</table>
 </div>
 <p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
 placeholders as appropriate:</p>
@@ -592,16 +645,22 @@ placeholders as appropriate:</p>
 <p>Heartbeat started for {{serverHost}}:{{serverPort}} on connection with driver-generated ID {{driverConnectionId}} and
 server-generated ID {{serverConnectionId}} in topology with ID {{topologyId}}. Awaited: {{awaited}}</p>
 </blockquote>
-<h4 id="server-heartbeat-succeeded-log-message"><a class="header" href="#server-heartbeat-succeeded-log-message">"Server Heartbeat Succeeded" Log Message</a></h4>
+<h4 id="server-heartbeat-succeeded-log-message"><a class="header" href="#server-heartbeat-succeeded-log-message">“Server Heartbeat Succeeded” Log Message</a></h4>
 <p>This message MUST be published under the same circumstances as a <code>ServerHeartbeatSucceededEvent</code> as detailed in
 <a href="#events-api">Events API</a>.</p>
 <p>In addition to the relevant common fields, these messages MUST contain the following key-value pairs:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
-<tr><td>message</td><td>String</td><td>"Server heartbeat succeeded"</td></tr>
-<tr><td>awaited</td><td>Boolean</td><td>Whether this log message is for an awaitable hello or legacy "hello".</td></tr>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>message</td><td>String</td><td>“Server heartbeat succeeded”</td></tr>
+<tr><td>awaited</td><td>Boolean</td><td>Whether this log message is for an awaitable hello or legacy “hello”.</td></tr>
 <tr><td>durationMS</td><td>Int32/Int64/Double</td><td>The execution time for the heartbeat in milliseconds. See <code>ServerHeartbeatSucceededEvent</code> in <a href="#events-api">Events API</a> for details on calculating this value.</td></tr>
 <tr><td>reply</td><td>String</td><td>Relaxed extended JSON representation of the reply to the heartbeat command.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
 placeholders as appropriate:</p>
@@ -610,16 +669,22 @@ placeholders as appropriate:</p>
 {{driverConnectionId}} and server-generated ID {{serverConnectionId}} in topology with ID {{topologyId}}. Awaited:
 {{awaited}}. Reply: {{reply}}</p>
 </blockquote>
-<h4 id="server-heartbeat-failed-log-message"><a class="header" href="#server-heartbeat-failed-log-message">"Server Heartbeat Failed" Log Message</a></h4>
+<h4 id="server-heartbeat-failed-log-message"><a class="header" href="#server-heartbeat-failed-log-message">“Server Heartbeat Failed” Log Message</a></h4>
 <p>This message MUST be published under the same circumstances as a <code>ServerHeartbeatFailedEvent</code> as detailed in
 <a href="#events-api">Events API</a>.</p>
 <p>In addition to the relevant common fields, these messages MUST contain the following key-value pairs:</p>
-<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr></thead><tbody>
-<tr><td>message</td><td>String</td><td>"Server heartbeat failed"</td></tr>
-<tr><td>awaited</td><td>Boolean</td><td>Whether this log message is for an awaitable hello or legacy "hello".</td></tr>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>message</td><td>String</td><td>“Server heartbeat failed”</td></tr>
+<tr><td>awaited</td><td>Boolean</td><td>Whether this log message is for an awaitable hello or legacy “hello”.</td></tr>
 <tr><td>durationMS</td><td>Int32/Int64/Double</td><td>The execution time for the heartbeat in milliseconds. See <code>ServerHeartbeatFailedEvent</code> in <a href="#events-api">Events API</a> for details on calculating this value.</td></tr>
 <tr><td>failure</td><td>Flexible</td><td>The error. The type and format of this value is flexible; see the <a href="../logging/logging.html#representing-errors-in-log-messages">logging specification</a> for details on representing errors in log messages. If the command is considered sensitive, the error MUST be redacted and replaced with a language-appropriate alternative for a redacted error, e.g. an empty string, empty document, or null.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
 placeholders as appropriate:</p>
@@ -639,13 +704,13 @@ placeholders as appropriate:</p>
 <p>2024-05-02: Migrated from reStructuredText to Markdown.</p>
 </li>
 <li>
-<p>2024-03-29: Updated to clarify expected initial value of TopologyDescriptionChangedEvent's previousDescription field</p>
+<p>2024-03-29: Updated to clarify expected initial value of TopologyDescriptionChangedEvent’s previousDescription field</p>
 </li>
 <li>
 <p>2024-01-04: Updated to clarify when ServerHeartbeatStartedEvent should be emitted</p>
 </li>
 <li>
-<p>2023-03-31: Renamed to include "logging" in the title. Reorganized contents and made consistent with CLAM spec, and
+<p>2023-03-31: Renamed to include “logging” in the title. Reorganized contents and made consistent with CLAM spec, and
 added requirements for SDAM log messages.</p>
 </li>
 <li>
@@ -655,7 +720,7 @@ added requirements for SDAM log messages.</p>
 <p>2021-05-06: Updated to use modern terminology.</p>
 </li>
 <li>
-<p>2020-04-20: Add rules for streaming heartbeat protocol and add "awaited" field to heartbeat events.</p>
+<p>2020-04-20: Add rules for streaming heartbeat protocol and add “awaited” field to heartbeat events.</p>
 </li>
 <li>
 <p>2018-12-12: Clarified table of rules for readable/writable servers</p>
@@ -667,8 +732,7 @@ added requirements for SDAM log messages.</p>
 <p>2016-10-11: TopologyDescription objects MAY have additional methods and properties.</p>
 </li>
 </ul>
-<hr />
-
+<hr>
                         </div>
                         <div id="sidetoc">
                             <nav id="pagetoc"></nav>
@@ -677,27 +741,12 @@ added requirements for SDAM log messages.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../command-logging-and-monitoring/command-logging-and-monitoring.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../logging/logging.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../command-logging-and-monitoring/command-logging-and-monitoring.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../logging/logging.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

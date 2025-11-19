@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,7 +159,7 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>This document describes the subtype of the Binary BSON type used for efficient storage and retrieval of vectors. Vectors
 here refer to densely packed arrays of numbers, all of the same type.</p>
@@ -169,18 +168,24 @@ here refer to densely packed arrays of numbers, all of the same type.</p>
 such as NumPy, PyTorch, TensorFlow and Apache Arrow. Storing and retrieving vector data using the same densely packed
 format used by these libraries can result in significant memory savings and processing efficiency.</p>
 <h3 id="meta"><a class="header" href="#meta">META</a></h3>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <p>This specification introduces a new BSON binary subtype, the vector, with value <code>9</code>.</p>
 <p>Drivers SHOULD provide idiomatic APIs to translate between arrays of numbers and this BSON Binary specification.</p>
 <h3 id="data-types-dtypes"><a class="header" href="#data-types-dtypes">Data Types (dtypes)</a></h3>
 <p>Each vector can take one of multiple data types (dtypes). The following table lists the dtypes implemented.</p>
-<div class="table-wrapper"><table><thead><tr><th>Vector data type</th><th>Alias</th><th>Bits per vector element</th><th><a href="https://arrow.apache.org/docs/cpp/api/datatype.html">Arrow Data Type</a> (for illustration)</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Vector data type</th><th>Alias</th><th>Bits per vector element</th><th><a href="https://arrow.apache.org/docs/cpp/api/datatype.html">Arrow Data Type</a> (for illustration)</th></tr>
+</thead>
+<tbody>
 <tr><td><code>0x03</code></td><td>INT8</td><td>8</td><td>INT8</td></tr>
 <tr><td><code>0x27</code></td><td>FLOAT32</td><td>32</td><td>FLOAT</td></tr>
 <tr><td><code>0x10</code></td><td>PACKED_BIT</td><td>1 <code>*</code></td><td>BOOL</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p><code>*</code> A Binary Quantized (PACKED_BIT) Vector is a vector of 0s and 1s (bits), but it is represented in memory as a list of
 integers in [0, 255]. So, for example, the vector <code>[0, 255]</code> would be shorthand for the 16-bit vector
@@ -188,7 +193,7 @@ integers in [0, 255]. So, for example, the vector <code>[0, 255]</code> would be
 some languages, Python for one, do not have an uint8 type, so must be represented as an int in memory, but not on disk.</p>
 <h3 id="byte-padding"><a class="header" href="#byte-padding">Byte padding</a></h3>
 <p>As not all data types have a bit length equal to a multiple of 8, and hence do not fit squarely into a certain number of
-bytes, a second piece of metadata, the "padding" is included. This instructs the driver of the number of bits in the
+bytes, a second piece of metadata, the “padding” is included. This instructs the driver of the number of bits in the
 final byte that are to be ignored. The least-significant bits are ignored.</p>
 <h3 id="binary-structure"><a class="header" href="#binary-structure">Binary structure</a></h3>
 <p>Following the binary subtype <code>9</code>, a two-element byte array of metadata precedes the packed numbers.</p>
@@ -207,17 +212,20 @@ integer. It must be present, even in cases where it is not applicable, and set t
 </ul>
 <p>All values use the little-endian format.</p>
 <h4 id="example"><a class="header" href="#example">Example</a></h4>
-<p>Let's take a vector <code>[238, 224]</code> of dtype PACKED_BIT (<code>\x10</code>) with a padding of <code>4</code>.</p>
+<p>Let’s take a vector <code>[238, 224]</code> of dtype PACKED_BIT (<code>\x10</code>) with a padding of <code>4</code>.</p>
 <p>In hex, it looks like this: <code>b"\x10\x04\xee\xe0"</code>: 1 byte for dtype, 1 for padding, and 1 for each uint8.</p>
 <p>We can visualize the binary representation like so:</p>
 <table border="1" cellspacing="0" cellpadding="5">
-  <tr>
+  
+<tr>
     <td colspan="8">1st byte: dtype (from list in previous table) </td>
     <td colspan="8">2nd byte: padding (values in [0,7])</td>
     <td colspan="8">1st uint8: 238</td>
     <td colspan="8">2nd uint8: 224</td>
   </tr>
-  <tr>
+
+  
+<tr>
     <td>0</td>
     <td>0</td>
     <td>0</td>
@@ -251,10 +259,17 @@ integer. It must be present, even in cases where it is not applicable, and set t
     <td>0</td>
     <td>0</td>
   </tr>
+
 </table>
+
 <p>Finally, after we remove the last 4 bits of padding, the actual bit vector has a length of 12 and looks like this!</p>
-<div class="table-wrapper"><table><thead><tr><th>1</th><th>1</th><th>1</th><th>0</th><th>1</th><th>1</th><th>1</th><th>0</th><th>1</th><th>1</th><th>1</th><th>0</th></tr></thead><tbody>
-</tbody></table>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>1</th><th>1</th><th>1</th><th>0</th><th>1</th><th>1</th><th>1</th><th>0</th><th>1</th><th>1</th><th>1</th><th>0</th></tr>
+</thead>
+<tbody></tbody>
+</table>
 </div>
 <h2 id="api-guidance"><a class="header" href="#api-guidance">API Guidance</a></h2>
 <p>Drivers MUST implement methods for explicit encoding and decoding that adhere to the pattern described below while
@@ -317,7 +332,7 @@ padding MUST be a multiple of 4 bytes.</li>
 <ul>
 <li>For a PACKED_BIT vector with non-zero padding, ignored bits SHOULD be zero.
 <ul>
-<li>When encoding, if ignored bits aren't zero, drivers SHOULD raise an exception, but drivers MAY leave them as-is if
+<li>When encoding, if ignored bits aren’t zero, drivers SHOULD raise an exception, but drivers MAY leave them as-is if
 backwards-compatibility is a concern.</li>
 <li>When decoding, drivers SHOULD raise an exception if decoding non-zero ignored bits, but drivers MAY choose not to
 for backwards compatibility.</li>
@@ -372,7 +387,7 @@ Struct Vector
 <li>
 <p>What MongoDB Server version does this apply to?</p>
 <ul>
-<li>Files in the "specifications" repository have no version scheme. They are not tied to a MongoDB server version.</li>
+<li>Files in the “specifications” repository have no version scheme. They are not tied to a MongoDB server version.</li>
 </ul>
 </li>
 <li>
@@ -420,27 +435,12 @@ avoids comparing different unused bits.</li>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../BSON.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../bson-objectid/objectid.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../BSON.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../bson-objectid/objectid.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

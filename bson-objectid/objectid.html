@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,7 +159,7 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>This specification documents the format and data contents of ObjectID BSON values that the drivers and the server
 generate when no field values have been specified (e.g. creating an ObjectID BSON value when no <code>_id</code> field is present
@@ -168,8 +167,8 @@ in a document). It is primarily aimed to provide an alternative to the historica
 the machine information field of the ObjectID, which is problematic when providing a FIPS compliant implementation. It
 also documents existing best practices for the timestamp and counter fields.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <p>The <a href="https://www.mongodb.com/docs/manual/reference/method/ObjectId/">ObjectID</a> BSON type is a 12-byte value consisting
 of three different portions (fields):</p>
@@ -219,8 +218,8 @@ Epoch for the Timestamp values:
 </ul>
 </li>
 <li>Ensure that the Counter field successfully overflows its sequence from <code>0xFFFFFF</code> to <code>0x000000</code>.</li>
-<li>Ensure that after a new process is created through a fork() or similar process creation operation, the "random number
-unique to a machine and process" is no longer the same as the parent process that created the new process.</li>
+<li>Ensure that after a new process is created through a fork() or similar process creation operation, the “random number
+unique to a machine and process” is no longer the same as the parent process that created the new process.</li>
 </ul>
 <h2 id="motivation-for-change"><a class="header" href="#motivation-for-change">Motivation for Change</a></h2>
 <p>Besides the specific exclusion of MD5 as an allowed hashing algorithm, the information in this specification is meant to
@@ -231,7 +230,7 @@ timestamp can represent from the year 2038 to 2106. There is no reason why Mongo
 date before 1970, as MongoDB did not exist back then.</p>
 <p><strong>Random Value:</strong> Originally, this field consisted of the Machine ID and Process ID fields. There were numerous
 divergences between drivers due to implementation choices, and the Machine ID field traditionally used the MD5 hashing
-algorithm which can't be used on FIPS compliant machines. In order to allow for a similar behaviour among all drivers
+algorithm which can’t be used on FIPS compliant machines. In order to allow for a similar behaviour among all drivers
 <strong>and</strong> the MongoDB Server, these two fields have been collated together into a single 5-byte random value, unique to a
 machine and process.</p>
 <p><strong>Counter:</strong> The counter makes it possible to have multiple ObjectIDs per second, per server, and per process. As the
@@ -254,7 +253,7 @@ getters and setters for the original <em>Machine ID</em> and <em>Process ID</em>
 <p>2022-10-05: Remove spec front matter and reformat changelog.</p>
 </li>
 <li>
-<p>2019-01-14: Clarify that the random numbers don't need to be cryptographically secure. Add a test to test that the
+<p>2019-01-14: Clarify that the random numbers don’t need to be cryptographically secure. Add a test to test that the
 unique value is different in forked processes.</p>
 </li>
 <li>
@@ -276,27 +275,12 @@ unique value is different in forked processes.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../bson-binary-vector/bson-binary-vector.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../bson-decimal128/decimal128.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../bson-binary-vector/bson-binary-vector.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../bson-decimal128/decimal128.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

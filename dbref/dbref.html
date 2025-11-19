@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,14 +159,14 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>DBRefs are a convention for expressing a reference to another document as an embedded document (i.e. BSON type 0x03).
 Several drivers provide a model class for encoding and/or decoding DBRef documents. This specification will both define
 the structure of a DBRef and provide guidance for implementing model classes in drivers that choose to do so.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <p>This specification presents documents as Extended JSON for readability and expressing special types (e.g. ObjectId).
 Although JSON fields are unordered, the order of fields presented herein should be considered pertinent. This is
 especially relevant for the <a href="#test-plan">Test Plan</a>.</p>
@@ -237,7 +236,7 @@ values.</li>
 </ul>
 <h4 id="decoding-a-bson-document-to-a-dbref-model"><a class="header" href="#decoding-a-bson-document-to-a-dbref-model">Decoding a BSON document to a DBRef model</a></h4>
 <p>Drivers MAY support explicit and/or implicit decoding. An example of explicit decoding might be a DBRef model
-constructor that takes a BSON document. An example of implicit decoding might be configuring the driver's BSON codec to
+constructor that takes a BSON document. An example of implicit decoding might be configuring the driver’s BSON codec to
 automatically convert embedded documents that comply with the <a href="#dbref-structure">DBRef Structure</a> into a DBRef model.</p>
 <p>Drivers that provide implicit decoding SHOULD provide some way for applications to opt out and allow DBRefs to be
 decoded like any other embedded document.</p>
@@ -261,7 +260,7 @@ to provide access to any extra, optional fields.</p>
 <h4 id="encoding-a-dbref-model-to-a-bson-document"><a class="header" href="#encoding-a-dbref-model-to-a-bson-document">Encoding a DBRef model to a BSON document</a></h4>
 <p>Drivers MAY support explicit and/or implicit encoding. An example of explicit encoding might be a DBRef method that
 returns its corresponding representation as a BSON document. An example of implicit encoding might be configuring the
-driver's BSON codec to automatically convert DBRef models to the corresponding BSON document representation as needed.</p>
+driver’s BSON codec to automatically convert DBRef models to the corresponding BSON document representation as needed.</p>
 <p>If a driver supports implicit decoding of BSON to a DBRef model, it SHOULD also support implicit encoding. Doing so will
 allow applications to more easily round-trip DBRefs through the driver.</p>
 <p>When encoding a DBRef model to BSON document:</p>
@@ -277,7 +276,7 @@ order of those fields relative to one another.</li>
 class.</p>
 <p>The documents in these tests are presented as Extended JSON for readability; however, readers should consider the field
 order pertinent when translating to BSON (or their language equivalent). These tests are not intended to exercise a
-driver's Extended JSON parser. Implementations SHOULD construct the documents directly using native BSON types (e.g.
+driver’s Extended JSON parser. Implementations SHOULD construct the documents directly using native BSON types (e.g.
 Document, ObjectId).</p>
 <h3 id="decoding"><a class="header" href="#decoding">Decoding</a></h3>
 <p>These tests are only relevant to drivers that allow decoding into a DBRef model. Drivers SHOULD implement these tests
@@ -436,27 +435,12 @@ that model DBRefs (e.g. C#, Java, Node, Python, Ruby) and applications can opt o
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../bson-binary-uuid/uuid.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../extended-json/extended-json.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../bson-binary-uuid/uuid.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../extended-json/extended-json.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

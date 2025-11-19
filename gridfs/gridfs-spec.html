@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,9 +159,9 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 2.2</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
-<p>GridFS is a convention drivers use to store and retrieve BSON binary data (type "x05") that exceeds MongoDB's
+<p>GridFS is a convention drivers use to store and retrieve BSON binary data (type “x05”) that exceeds MongoDB’s
 BSON-document size limit of 16 MiB. When this data, called a <strong>user file</strong>, is written to the system, GridFS divides the
 file into <strong>chunks</strong> that are stored as distinct documents in a <strong>chunks collection</strong>. To retrieve a stored file, GridFS
 locates and returns all of its component chunks. Internally, GridFS creates a <strong>files collection document</strong> for each
@@ -174,15 +173,15 @@ in the GridFS data model, disambiguate GridFS terminology, and document configur
 unspecified.</p>
 <h2 id="definitions"><a class="header" href="#definitions">Definitions</a></h2>
 <h3 id="meta"><a class="header" href="#meta">META</a></h3>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <p><strong>Bucket name</strong></p>
-<p>A prefix under which a GridFS system's collections are stored. Collection names for the files and chunks collections are
+<p>A prefix under which a GridFS system’s collections are stored. Collection names for the files and chunks collections are
 prefixed with the bucket name. The bucket name MUST be configurable by the user. Multiple buckets may exist within a
-single database. The default bucket name is "fs".</p>
+single database. The default bucket name is “fs”.</p>
 <p><strong>Chunk</strong></p>
-<p>A section of a user file, stored as a single document in the "chunks" collection of a GridFS bucket. The default size
+<p>A section of a user file, stored as a single document in the “chunks” collection of a GridFS bucket. The default size
 for the data field in chunks is 255 KiB. Chunk documents have the following form:</p>
 <pre><code class="language-javascript">{
   "_id" : &lt;ObjectId&gt;,
@@ -201,13 +200,13 @@ for the data field in chunks is 255 KiB. Chunk documents have the following form
 <p><strong>data</strong></p>
 <p>a chunk of data from the user file</p>
 <p><strong>Chunks collection</strong></p>
-<p>A collection in which chunks of a user file are stored. The name for this collection is the word 'chunks' prefixed by
-the bucket name. The default is "fs.chunks".</p>
+<p>A collection in which chunks of a user file are stored. The name for this collection is the word ‘chunks’ prefixed by
+the bucket name. The default is “fs.chunks”.</p>
 <p><strong>Empty chunk</strong></p>
-<p>A chunk with a zero length "data" field.</p>
+<p>A chunk with a zero length “data” field.</p>
 <p><strong>Files collection</strong></p>
 <p>A collection in which information about stored files is stored. There will be one files collection document per stored
-file. The name for this collection is the word "files" prefixed by the bucket name. The default is "fs.files".</p>
+file. The name for this collection is the word “files” prefixed by the bucket name. The default is “fs.files”.</p>
 <p><strong>Files collection document</strong></p>
 <p>A document stored in the files collection that contains information about a single stored file. Files collection
 documents have the following form:</p>
@@ -250,7 +249,7 @@ files collection documents that might have additional fields.</p>
 be able to handle existing GridFS files where the length and chunkSize fields might have been stored using a different
 numeric data type.</p>
 <p><strong>Orphaned chunk</strong></p>
-<p>A document in the chunks collections for which the "files_id" does not match any <code>_id</code> in the files collection. Orphaned
+<p>A document in the chunks collections for which the “files_id” does not match any <code>_id</code> in the files collection. Orphaned
 chunks may be created if write or delete operations on GridFS fail part-way through.</p>
 <p><strong>Stored File</strong></p>
 <p>A user file that has been stored in GridFS, consisting of a files collection document in the files collection and zero
@@ -259,7 +258,7 @@ or more documents in the chunks collection.</p>
 <p>An abstraction that represents streamed I/O. In some languages a different word is used to represent this abstraction.</p>
 <p><strong>TFileId</strong></p>
 <p>While GridFS file id values are ObjectIds by default, an application may choose to use custom file id values, which may
-be of any type. In this spec the term TFileId refers to whatever data type is appropriate in the driver's programming
+be of any type. In this spec the term TFileId refers to whatever data type is appropriate in the driver’s programming
 language to represent a file id. This would be something like object, BsonValue or a generic <code>&lt;TFileId&gt;</code> type parameter.</p>
 <p><strong>User File</strong></p>
 <p>A data added by a user to GridFS. This data may map to an actual file on disk, a stream of input, a large data object,
@@ -304,14 +303,14 @@ pipeline (like options). Required parameters are still required to be on the ini
 the user of another driver.</p>
 <p>A non-exhaustive list of acceptable naming deviations are as follows:</p>
 <ul>
-<li>Using "bucketName" as an example, Java would use "bucketName" while Python would use "bucket_name". However, calling
-it "bucketPrefix" would not be acceptable.</li>
-<li>Using "maxTimeMS" as an example, .NET would use "MaxTime" where its type is a TimeSpan structure that includes units.
-However, calling it "MaximumTime" would not be acceptable.</li>
-<li>Using "GridFSUploadOptions" as an example, Javascript wouldn't need to name it while other drivers might prefer to
-call it "GridFSUploadArgs" or "GridFSUploadParams". However, calling it "UploadOptions" would not be acceptable.</li>
-<li>Languages that use a different word than "Stream" to represent a streamed I/O abstraction may replace the word
-"Stream" with their language's equivalent word. For example, open_upload_stream might be called open_upload_file or
+<li>Using “bucketName” as an example, Java would use “bucketName” while Python would use “bucket_name”. However, calling
+it “bucketPrefix” would not be acceptable.</li>
+<li>Using “maxTimeMS” as an example, .NET would use “MaxTime” where its type is a TimeSpan structure that includes units.
+However, calling it “MaximumTime” would not be acceptable.</li>
+<li>Using “GridFSUploadOptions” as an example, Javascript wouldn’t need to name it while other drivers might prefer to
+call it “GridFSUploadArgs” or “GridFSUploadParams”. However, calling it “UploadOptions” would not be acceptable.</li>
+<li>Languages that use a different word than “Stream” to represent a streamed I/O abstraction may replace the word
+“Stream” with their language’s equivalent word. For example, open_upload_stream might be called open_upload_file or
 open_upload_writer if appropriate.</li>
 <li>Languages that support overloading MAY shorten the name of some methods as appropriate. For example,
 download_to_stream and download_to_stream_by_name MAY be overloaded download_to_stream methods with different
@@ -373,7 +372,7 @@ class GridFSBucket {
 <p>GridFSBucket objects MUST allow the following options to be configurable:</p>
 <ul>
 <li><strong>bucketName:</strong> the name of this GridFS bucket. The files and chunks collection for this GridFS bucket are prefixed by
-this name followed by a dot. Defaults to "fs". This allows multiple GridFS buckets, each with a unique name, to
+this name followed by a dot. Defaults to “fs”. This allows multiple GridFS buckets, each with a unique name, to
 exist within the same database.</li>
 <li><strong>chunkSizeBytes:</strong> the number of bytes stored in chunks for new user files added through this GridFSBucket object.
 This will not reformat existing files in the system that use a different chunk size. Defaults to 255 KiB.</li>
@@ -392,7 +391,7 @@ write concern).</li>
 <ul>
 <li><strong>disableMD5:</strong> this allows users to disable MD5 when operating under FIPS restrictions. It is provided to allow a
 transition period as drivers remove MD5 support. Until a driver removes MD5 support, drivers MUST support this
-option. Following a driver's normal feature removal cycle, when MD5 support is removed, this option MUST be removed
+option. Following a driver’s normal feature removal cycle, when MD5 support is removed, this option MUST be removed
 or otherwise made into a no-op option.</li>
 </ul>
 <p>GridFSBucket instances are immutable. Their properties MUST NOT be changed after the instance has been created. If your
@@ -540,49 +539,55 @@ a property named Id on the Stream that is returned. In languages where that is n
 available in a way that is appropriate for that language.</p>
 <p>In the case of upload_from_stream, the driver reads the contents of the user file by consuming the the source Stream
 until end of file is reached. The driver does NOT close the source Stream.</p>
-<p>Drivers MUST take an "options" document with configurable parameters. Drivers for dynamic languages MUST ignore any
+<p>Drivers MUST take an “options” document with configurable parameters. Drivers for dynamic languages MUST ignore any
 unrecognized fields in the options for this method (this does not apply to drivers for static languages which define an
 Options class that by definition only contains valid fields).</p>
-<p>Note that in GridFS, "filename" is not a unique identifier. There may be many stored files with the same filename stored
-in a GridFS bucket under different ids. Multiple stored files with the same filename are called 'revisions', and the
-'uploadDate' is used to distinguish newer revisions from older ones.</p>
+<p>Note that in GridFS, “filename” is not a unique identifier. There may be many stored files with the same filename stored
+in a GridFS bucket under different ids. Multiple stored files with the same filename are called ‘revisions’, and the
+‘uploadDate’ is used to distinguish newer revisions from older ones.</p>
 <p><strong>Implementation details:</strong></p>
-<p>If "chunkSizeBytes" is set through the options, that value MUST be used as the chunk size for this stored file. If this
+<p>If “chunkSizeBytes” is set through the options, that value MUST be used as the chunk size for this stored file. If this
 parameter is not specified, the default chunkSizeBytes setting for this GridFSBucket object MUST be used instead.</p>
 <p>To store a user file, the file must have a unique id. In some cases the driver can generate a unique ObjectId to serve
 as the id for the file being uploaded. Otherwise the application provides the value. Drivers store the contents of the
-user file in the chunks collection by breaking up the contents into chunks of size "chunkSizeBytes". For a non-empty
+user file in the chunks collection by breaking up the contents into chunks of size “chunkSizeBytes”. For a non-empty
 user file, for each n<sup>th</sup> section of the file, drivers create a chunk document and set its fields as follows:</p>
 <ul>
 <li>Files_id: the id generated for this stored file.</li>
 <li>N: this is the n<sup>th</sup> section of the stored file, zero based.</li>
 <li>Data: a section of file data, stored as BSON binary data with subtype 0x00. All chunks except the last one must be
-exactly 'chunkSizeBytes' long. The last chunk can be smaller, and should only be as large as necessary.</li>
+exactly ‘chunkSizeBytes’ long. The last chunk can be smaller, and should only be as large as necessary.</li>
 </ul>
-<p>Historically, while streaming the user file, drivers computed an MD5 digest for the (now deprecated) 'md5' field of the
+<p>Historically, while streaming the user file, drivers computed an MD5 digest for the (now deprecated) ‘md5’ field of the
 files collection document. If drivers preserve this behavior for backwards compatibility, they MUST provide the
-'disableMD5' member of GridFSBucketOptions. When 'disableMD5' is true, drivers MUST NOT compute an MD5 digest or include
-it in the files collection document. If drivers no longer support the deprecated 'md5' field, they MUST NOT provide the
-'disableMD5' member (or it MUST be a no-op) and MUST NOT compute MD5.</p>
-<p>After storing all chunk documents generated for the user file in the "chunks" collection, drivers create a files
+‘disableMD5’ member of GridFSBucketOptions. When ‘disableMD5’ is true, drivers MUST NOT compute an MD5 digest or include
+it in the files collection document. If drivers no longer support the deprecated ‘md5’ field, they MUST NOT provide the
+‘disableMD5’ member (or it MUST be a no-op) and MUST NOT compute MD5.</p>
+<p>After storing all chunk documents generated for the user file in the “chunks” collection, drivers create a files
 collection document for the file and store it in the files collection. The fields in the files collection document are
 set as follows:</p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>length</td><td>the length of this stored file, in bytes.</td></tr>
-<tr><td>chunksize</td><td>the chunk size in bytes used to break the user file into chunks. While the configuration option is named "chunkSizeBytes" for clarity, for legacy reasons, the files collection document uses only "chunkSize".</td></tr>
+<tr><td>chunksize</td><td>the chunk size in bytes used to break the user file into chunks. While the configuration option is named “chunkSizeBytes” for clarity, for legacy reasons, the files collection document uses only “chunkSize”.</td></tr>
 <tr><td>uploaddate</td><td>a BSON datetime object for the current time, in UTC, when the files collection document was created.</td></tr>
-<tr><td>md5</td><td>MD5 checksum for this user file, computed from the file's data, stored as a hex string, if computed, otherwise omitted.</td></tr>
+<tr><td>md5</td><td>MD5 checksum for this user file, computed from the file’s data, stored as a hex string, if computed, otherwise omitted.</td></tr>
 <tr><td>filename</td><td>the filename passed to this function, UTF-8 encoded.</td></tr>
-<tr><td>contenttype</td><td>the "contentType" passed in the options, if provided; otherwise omitted.</td></tr>
+<tr><td>contenttype</td><td>the “contentType” passed in the options, if provided; otherwise omitted.</td></tr>
 <tr><td>aliases</td><td>the array passed in the options, if provided; otherwise omitted.</td></tr>
-<tr><td>metadata</td><td>the "metadata" document passed in the options, if provided; otherwise omitted.</td></tr>
-</tbody></table>
+<tr><td>metadata</td><td>the “metadata” document passed in the options, if provided; otherwise omitted.</td></tr>
+</tbody>
+</table>
 </div>
 <p>If a user file contains no data, drivers MUST still create a files collection document for it with length set to zero.
 Drivers MUST NOT create any empty chunks for this file.</p>
-<p>Drivers MUST NOT run the 'filemd5' database command to confirm that all chunks were successfully uploaded. We assume
-that if none of the inserts failed then the chunks must have been successfully inserted, and running the 'filemd5'
-command would just be unnecessary overhead and doesn't work for sharded chunk keys anyway.</p>
+<p>Drivers MUST NOT run the ‘filemd5’ database command to confirm that all chunks were successfully uploaded. We assume
+that if none of the inserts failed then the chunks must have been successfully inserted, and running the ‘filemd5’
+command would just be unnecessary overhead and doesn’t work for sharded chunk keys anyway.</p>
 <p><strong>Operation Failure</strong></p>
 <p>If any of the above operations fail against the server, drivers MUST raise an error. If some inserts succeeded before
 the failed operation, these become orphaned chunks. Drivers MUST NOT attempt to clean up these orphaned chunks. The
@@ -631,15 +636,15 @@ does NOT call close (or its equivalent) on the Stream.</p>
 <p>Drivers must first retrieve the files collection document for this file. If there is no files collection document, the
 file either never existed, is in the process of being deleted, or has been corrupted, and the driver MUST raise an
 error.</p>
-<p>Then, implementers retrieve all chunks with files_id equal to id, sorted in ascending order on "n".</p>
+<p>Then, implementers retrieve all chunks with files_id equal to id, sorted in ascending order on “n”.</p>
 <p>However, when downloading a zero length stored file the driver MUST NOT issue a query against the chunks collection,
 since that query is not necessary. For a zero length file, drivers return either an empty stream or send nothing to the
 provided stream (depending on the download method).</p>
 <p>If a networking error or server error occurs, drivers MUST raise an error.</p>
 <p>As drivers stream the stored file they MUST check that each chunk received is the next expected chunk (i.e. it has the
-expected "n" value) and that the data field is of the expected length. In the case of open_download_stream, if the
+expected “n” value) and that the data field is of the expected length. In the case of open_download_stream, if the
 application stops reading from the stream before reaching the end of the stored file, any errors that might exist beyond
-the point at which the application stopped reading won't be detected by the driver.</p>
+the point at which the application stopped reading won’t be detected by the driver.</p>
 <h3 id="file-deletion"><a class="header" href="#file-deletion">File Deletion</a></h3>
 <pre><code class="language-javascript">class GridFSBucket {
 
@@ -651,14 +656,14 @@ the point at which the application stopped reading won't be detected by the driv
 
 }
 </code></pre>
-<p>Deletes the stored file's files collection document and associated chunks from the underlying database.</p>
-<p>As noted for download(), drivers that previously used id's of a different type MAY implement a delete() method that
+<p>Deletes the stored file’s files collection document and associated chunks from the underlying database.</p>
+<p>As noted for download(), drivers that previously used id’s of a different type MAY implement a delete() method that
 accepts that type, but MUST mark that method as deprecated.</p>
 <p><strong>Implementation details:</strong></p>
 <p>There is an inherent race condition between the chunks and files collections. Without some transaction-like behavior
 between these two collections, it is always possible for one client to delete a stored file while another client is
-attempting a read of the stored file. For example, imagine client A retrieves a stored file's files collection document,
-client B deletes the stored file, then client A attempts to read the stored file's chunks. Client A wouldn"t find any
+attempting a read of the stored file. For example, imagine client A retrieves a stored file’s files collection document,
+client B deletes the stored file, then client A attempts to read the stored file’s chunks. Client A wouldn“t find any
 chunks for the given stored file. To minimize the window of vulnerability of reading a stored file that is the process
 of being deleted, drivers MUST first delete the files collection document for a stored file, then delete its associated
 chunks.</p>
@@ -749,7 +754,7 @@ return a fixed-size array type.</p>
 collection documents, then an empty result set will be returned.</p>
 <p>Drivers MUST propagate the GridFSFindOptions to the FindOptions passed to the underlying Find operation.</p>
 <p>Drivers MUST document how users query files collection documents, including how to query metadata, e.g. using a filter
-like { metadata.fieldname : "some_criteria" }.</p>
+like { metadata.fieldname : “some_criteria” }.</p>
 <h2 id="advanced-api"><a class="header" href="#advanced-api">Advanced API</a></h2>
 <h3 id="file-download-by-filename"><a class="header" href="#file-download-by-filename">File Download by Filename</a></h3>
 <pre><code class="language-javascript">class GridFSDownloadByNameOptions {
@@ -806,13 +811,13 @@ only part of the stream. If a driver does support reading only part of the strea
 stream methods of its language for seeking to a position in a stream and reading the desired amount of data from that
 position. This is the preferred method of supporting partial file retrieval.</p>
 <p>In the case of download_to_stream, drivers are not required to support partial file retrieval. If they choose to do so,
-drivers can support this operation by adding "start" and "end" to their supported options for download_to_stream. These
-values represent non-negative byte offsets from the beginning of the file. When "start" and "end" are specified, drivers
-return the bytes of the file in <code>[start, end)</code>. If "start" and "end" are equal no data is returned.</p>
-<p>If either "start" or "end" is invalid, drivers MUST raise an error. These values are considered invalid if they are
-negative, greater than the file length, or if "start" is greater than "end".</p>
-<p>When performing partial reads, drivers SHOULD use the file's "chunkSize" to calculate which chunks contain the desired
-section and avoid reading unneeded documents from the "chunks" collection.</p>
+drivers can support this operation by adding “start” and “end” to their supported options for download_to_stream. These
+values represent non-negative byte offsets from the beginning of the file. When “start” and “end” are specified, drivers
+return the bytes of the file in <code>[start, end)</code>. If “start” and “end” are equal no data is returned.</p>
+<p>If either “start” or “end” is invalid, drivers MUST raise an error. These values are considered invalid if they are
+negative, greater than the file length, or if “start” is greater than “end”.</p>
+<p>When performing partial reads, drivers SHOULD use the file’s “chunkSize” to calculate which chunks contain the desired
+section and avoid reading unneeded documents from the “chunks” collection.</p>
 <h3 id="renaming-stored-files"><a class="header" href="#renaming-stored-files">Renaming stored files</a></h3>
 <pre><code class="language-javascript">class GridFSBucket {
 
@@ -823,12 +828,12 @@ section and avoid reading unneeded documents from the "chunks" collection.</p>
 
 }
 </code></pre>
-<p>Sets the filename field in the stored file's files collection document to the new filename.</p>
+<p>Sets the filename field in the stored file’s files collection document to the new filename.</p>
 <p><strong>Implementation details:</strong></p>
 <p>Drivers construct and execute an update_one command on the files collection using <code>{ _id: @id }</code> as the filter and
 <code>{ $set : { filename : "new_filename" } }</code> as the update parameter.</p>
 <p>If <code>renameByName</code> is not implemented to rename multiple revisions of the same filename, users must retrieve the full
-list of files collection documents for a given filename and execute "rename" on each corresponding <code>_id</code>.</p>
+list of files collection documents for a given filename and execute “rename” on each corresponding <code>_id</code>.</p>
 <p>If there is no file with the given id, drivers MUST raise an error.</p>
 <h3 id="renaming-stored-files-by-filename"><a class="header" href="#renaming-stored-files-by-filename">Renaming stored files by filename</a></h3>
 <p>To rename all revisions of a stored file with the specified filename, drivers SHOULD provide the method
@@ -872,20 +877,20 @@ and should not be supported. Additionally, this spec validates and clarifies the
 that are undesirable or incorrect.</p>
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
 <p>Why is the default chunk size 255 KiB?</p>
-<p>On MMAPv1, the server provides documents with extra padding to allow for in-place updates. When the "data" field of a
+<p>On MMAPv1, the server provides documents with extra padding to allow for in-place updates. When the “data” field of a
 chunk is limited to 255 KiB, it ensures that the whole chunk document (the chunk data along with an <code>_id</code> and other
 information) will fit into a 256 KiB section of memory, making the best use of the provided padding. Users setting
 custom chunk sizes are advised not to use round power-of-two values, as the whole chunk document is likely to exceed
 that space and demand extra padding from the system. WiredTiger handles its memory differently, and this optimization
-does not apply. However, because application code generally won"t know what storage engine will be used in the database,
+does not apply. However, because application code generally won“t know what storage engine will be used in the database,
 always avoiding round power-of-two chunk sizes is recommended.</p>
-<p>Why can"t I alter documents once they are in the system?</p>
+<p>Why can“t I alter documents once they are in the system?</p>
 <p>GridFS works with documents stored in multiple collections within MongoDB. Because there is currently no way to
 atomically perform operations across collections in MongoDB, there is no way to alter stored files in a way that
 prevents race conditions between GridFS clients. Updating GridFS stored files without that server functionality would
 involve a data model that could support this type of concurrency, and changing the GridFS data model is outside of the
 scope of this spec.</p>
-<p>Why provide a "rename" method?</p>
+<p>Why provide a “rename” method?</p>
 <p>By providing users with a reasonable alternative for renaming a file, we can discourage users from writing directly to
 the files collections under GridFS. With this approach we can prevent critical files collection documents fields from
 being mistakenly altered.</p>
@@ -894,11 +899,11 @@ being mistakenly altered.</p>
 documents in other, more granular ways might be helpful for some users, validating such updates to ensure that other
 files collection document fields remain protected is a complicated task. We leave the decision of how best to provide
 this functionality to a future spec.</p>
-<p>What is the "md5" field of a files collection document and how was it used?</p>
-<p>"md5" holds an MD5 checksum that is computed from the original contents of a user file. Historically, GridFS did not use
+<p>What is the “md5” field of a files collection document and how was it used?</p>
+<p>“md5” holds an MD5 checksum that is computed from the original contents of a user file. Historically, GridFS did not use
 acknowledged writes, so this checksum was necessary to ensure that writes went through properly. With acknowledged
 writes, the MD5 checksum is still useful to ensure that files in GridFS have not been corrupted. A third party directly
-accessing the 'files' and "chunks" collections under GridFS could, inadvertently or maliciously, make changes to
+accessing the ‘files’ and “chunks” collections under GridFS could, inadvertently or maliciously, make changes to
 documents that would make them unusable by GridFS. Comparing the MD5 in the files collection document to a re-computed
 MD5 allows detecting such errors and corruption. However, drivers now assume that the stored file is not corrupted, and
 applications that want to use the MD5 value to check for corruption must do so themselves.</p>
@@ -932,33 +937,33 @@ files_id. Normally only the chunks collection benefits from sharding, since the 
 Otherwise, there are no limitations to GridFS on sharded systems.</p>
 <p>Why is contentType deprecated?</p>
 <p>Most fields in the files collection document are directly used by the driver, with the exception of: metadata,
-contentType and aliases. All information that is purely for use of the application should be embedded in the 'metadata'
+contentType and aliases. All information that is purely for use of the application should be embedded in the ‘metadata’
 document. Users of GridFS who would like to store a contentType for use in their applications are encouraged to add a
-'contentType' field to the "metadata" document instead of using the deprecated top-level "contentType" field.</p>
+‘contentType’ field to the “metadata” document instead of using the deprecated top-level “contentType” field.</p>
 <p>Why are aliases deprecated?</p>
-<p>The "aliases" field of the files collection documents was misleading. It implies that a file in GridFS could be accessed
+<p>The “aliases” field of the files collection documents was misleading. It implies that a file in GridFS could be accessed
 by alternate names when, in fact, none of the existing implementations offer this functionality. For GridFS
 implementations that retrieve stored files by filename or support specifying specific revisions of a stored file, it is
-unclear how "aliases" should be interpreted. Users of GridFS who would like to store alternate filenames for use in
-their applications are encouraged to add an "aliases" field to the "metadata" document instead of using the deprecated
-top-level "aliases" field.</p>
+unclear how “aliases” should be interpreted. Users of GridFS who would like to store alternate filenames for use in
+their applications are encouraged to add an “aliases” field to the “metadata” document instead of using the deprecated
+top-level “aliases” field.</p>
 <p>What happened to the put and get methods from earlier drafts?</p>
 <p>Upload and download are more idiomatic names that more clearly indicate their purpose. Get and put are often associated
 with getting and setting properties of a class, and using them instead of download and upload was confusing.</p>
-<p>Why aren't there methods to upload and download byte arrays?</p>
+<p>Why aren’t there methods to upload and download byte arrays?</p>
 <p>We assume that GridFS files are usually quite large and therefore that the GridFS API must support streaming. Most
 languages have easy ways to wrap a stream around a byte array. Drivers are free to add helper methods that directly
 support uploading and downloading GridFS files as byte arrays.</p>
 <p>Should drivers report an error if a stored file has extra chunks?</p>
 <p>The length and the chunkSize fields of the files collection document together imply exactly how many chunks a stored
 file should have. If the chunks collection has any extra chunks the stored file is in an inconsistent state. Ideally we
-would like to report that as an error, but this is an extremely unlikely state and we don't want to pay a performance
+would like to report that as an error, but this is an extremely unlikely state and we don’t want to pay a performance
 penalty checking for an error that is almost never there. Therefore, drivers MAY ignore extra chunks.</p>
 <p>Why have we changed our mind about requiring the file id to be an ObjectId?</p>
 <p>This spec originally required the file id for all new GridFS files to be an ObjectId and specified that the driver
 itself would be the one to generate the ObjectId when a new file was uploaded. While this sounded like a good idea, it
 has since become evident that there are valid use cases for an application to want to generate its own file id, and that
-an application wouldn't necessarily want to use ObjectId as the type of the file id. The most common case where an
+an application wouldn’t necessarily want to use ObjectId as the type of the file id. The most common case where an
 application would want to use a custom file id is when the chunks collection is to be sharded and the application wants
 to use a custom file id that is suitable for sharding. Accordingly, we have relaxed this spec to allow an application to
 supply a custom file id (of any type) when uploading a new file.</p>
@@ -982,22 +987,22 @@ the methods for file insertion are the same whether specifying specific revision
 those methods under their existing names. In this case, drivers SHOULD make it clear in their documentation that these
 methods have equivalents defined in the spec under a different name.</p>
 <p>ContentType field</p>
-<p>Drivers MAY continue to create a "contentType'" field within files collection documents, so that applications depending
+<p>Drivers MAY continue to create a “contentType’” field within files collection documents, so that applications depending
 on this field continue to work. However, drivers SHOULD make it clear in their documentation that this field is
 deprecated, and is not used at all in driver code. Documentation SHOULD encourage users to store contentType in the
-"metadata" document instead.</p>
+“metadata” document instead.</p>
 <p>Aliases field</p>
-<p>Drivers MAY continue to create an "aliases" field within files collection documents, so that applications depending on
+<p>Drivers MAY continue to create an “aliases” field within files collection documents, so that applications depending on
 this field continue to work. However, drivers SHOULD make it clear in their documentation that this field is deprecated,
-and is not used at all in driver code. Documentation SHOULD encourage users to store aliases in the "metadata" document
+and is not used at all in driver code. Documentation SHOULD encourage users to store aliases in the “metadata” document
 instead.</p>
 <h2 id="reference-implementation"><a class="header" href="#reference-implementation">Reference Implementation</a></h2>
 <p>TBD</p>
 <h2 id="future-work"><a class="header" href="#future-work">Future work</a></h2>
 <p>Changes to the GridFS data model are out-of-scope for this spec, but may be considered for the future.</p>
 <p>The ability to alter or append to existing GridFS files has been cited as something that would greatly improve the
-system. While this functionality is not in-scope for this spec (see "Why can"t I alter documents once they are in the
-system?") it is a potential area of growth for the future.</p>
+system. While this functionality is not in-scope for this spec (see “Why can“t I alter documents once they are in the
+system?”) it is a potential area of growth for the future.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
 <li>2024-10-30: Add <code>delete_by_name</code> and <code>rename_by_name</code></li>
@@ -1008,7 +1013,7 @@ system?") it is a potential area of growth for the future.</p>
 <li>2016-10-07: Added ReadConcern to the GridFS spec</li>
 <li>2016-10-07: Modified a JSON test that was testing optional behavior</li>
 <li>2018-01-31: Deprecated MD5, and specified an option to disable MD5 until removed</li>
-<li>2018-07-05: Must not use 'filemd5'</li>
+<li>2018-07-05: Must not use ‘filemd5’</li>
 <li>2020-01-17: Added allowDiskUse to GridFSFindOptions</li>
 <li>2022-01-19: Require that timeouts be applied per the client-side operations timeout spec</li>
 <li>2022-10-05: Remove spec front matter and reformat changelog.</li>
@@ -1022,27 +1027,12 @@ system?") it is a potential area of growth for the future.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../find_getmore_killcursors_commands/find_getmore_killcursors_commands.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../client-side-encryption/client-side-encryption.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../find_getmore_killcursors_commands/find_getmore_killcursors_commands.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../client-side-encryption/client-side-encryption.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

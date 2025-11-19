@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -161,14 +160,14 @@
 <li>Minimum Server Version: 4.2 (CSFLE), 7.0 (QE)</li>
 <li>Version: 1.14.0</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>MongoDB 4.2 introduced support for client side encryption, guaranteeing that sensitive data can only be encrypted and
 decrypted with access to both MongoDB and a separate key management provider (supporting AWS, Azure, GCP, a local
 provider, and KMIP). Once enabled, data can be seamlessly encrypted and decrypted with minimal application code changes.
 7.0 introduced the next generation of client side encryption based on a Structured Encryption framework which allows
-expressive encrypted search operations. This spec covers both capabilities - 1st generation, "Client Side Field Level
-Encryption" and generation 2, "Queryable Encryption" - as the associated core cryptographic library and supporting
+expressive encrypted search operations. This spec covers both capabilities - 1st generation, “Client Side Field Level
+Encryption” and generation 2, “Queryable Encryption” - as the associated core cryptographic library and supporting
 drivers share a common codebase.</p>
 <h3 id="naming"><a class="header" href="#naming">Naming</a></h3>
 <p>The public name of this feature is
@@ -195,8 +194,8 @@ QEv1 and QEv2 are incompatible.</p>
 (<a href="https://jira.mongodb.org/browse/SPM-3583">SPM-3583</a>).</p>
 <p>MongoDB 8.2 added unstable support for QE text queries (<a href="https://jira.mongodb.org/browse/SPM-2880">SPM-2880</a>)</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="terms"><a class="header" href="#terms">Terms</a></h2>
 <p><strong>encrypted MongoClient</strong></p>
 <p>A MongoClient with client side encryption enabled.</p>
@@ -342,7 +341,7 @@ decrypted = clientencryption.decrypt(encrypted)
 <p>There are many moving parts to client side encryption with lots of similar sounding terms. Before proceeding to
 implement the specification, the following background should provide some context.</p>
 <p>The driver interacts with multiple components to implement client side encryption.</p>
-<p><img src="includes/components.png" alt="image" /></p>
+<p><img src="includes/components.png" alt="image"></p>
 <p>The driver communicates with…</p>
 <ul>
 <li><strong>MongoDB cluster</strong> to get remote JSON Schemas.</li>
@@ -416,7 +415,7 @@ handle <a href="#crypt_shared">crypt_shared</a> communication automatically.</p>
 <p>Drivers MAY represent the options types in a way that is idiomatic to the driver or language. E.g. options MAY be a BSON
 document or dictionary type. The driver MAY forego validating options and instead defer validation to the underlying
 implementation.</p>
-<p>Drivers MAY deviate the spelling of option names to conform to their language's naming conventions and implement options
+<p>Drivers MAY deviate the spelling of option names to conform to their language’s naming conventions and implement options
 in an idiomatic way (e.g. keyword arguments, builder classes, etc.).</p>
 <p>Drivers MAY use a native UUID type in place of a parameter or return type specified as a BSON binary with subtype 0x04
 as described in <a href="../bson-binary-uuid/uuid.html">Handling of Native UUID Types</a>.</p>
@@ -486,7 +485,7 @@ optional keyVaultClient can be used to route data key queries to a separate Mong
 <a href="#keyvaultclient-metadataclient-and-the-internal-mongoclient">keyVaultClient, metadataClient, and the internal MongoClient</a>
 for configuration behavior.</p>
 <p>See
-<a href="#whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client">What's the deal with metadataClient, keyVaultClient, and the internal client?</a></p>
+<a href="#whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client">What’s the deal with metadataClient, keyVaultClient, and the internal client?</a></p>
 <h4 id="keyvaultclient-metadataclient-and-the-internal-mongoclient"><a class="header" href="#keyvaultclient-metadataclient-and-the-internal-mongoclient">keyVaultClient, metadataClient, and the internal MongoClient</a></h4>
 <p>The following pseudo-code describes the configuration behavior for the three <code>MongoClient</code> objects:</p>
 <pre><code class="language-python">def getOrCreateInternalClient (client, clientOpts):
@@ -528,7 +527,7 @@ configuration (monitoring callbacks, stable API, etc.).</p>
 <code>minPoolSize</code> is set to <code>0</code> and <code>AutoEncryptionOpts</code> is omitted.</p>
 </blockquote>
 <p>See
-<a href="#whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client">What's the deal with metadataClient, keyVaultClient, and the internal client?</a></p>
+<a href="#whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client">What’s the deal with metadataClient, keyVaultClient, and the internal client?</a></p>
 <p><span id="GCPKMSOptions"></span> <span id="AWSKMSOptions"></span> <span id="KMSProvider"></span>
 <span id="KMSProviders"></span> <span id="AzureAccessToken"></span> <span id="kmsproviders"></span></p>
 <h4 id="credentialproviders"><a class="header" href="#credentialproviders">credentialProviders</a></h4>
@@ -565,7 +564,7 @@ const client = new MongoClient(process.env.MONGODB_URI, {
 <h4 id="kmsproviders"><a class="header" href="#kmsproviders">kmsProviders</a></h4>
 <p>The <code>kmsProviders</code> property may be specified on <a href="#ClientEncryptionOpts">ClientEncryptionOpts</a> or
 <a href="#AutoEncryptionOpts">AutoEncryptionOpts</a>. Multiple KMS providers may be specified, each using a specific property on
-the <a href="#kmsproviders">KMSProviders</a> object. The options differ for each KMS provider type. The "local" KMS provider type
+the <a href="#kmsproviders">KMSProviders</a> object. The options differ for each KMS provider type. The “local” KMS provider type
 is configured with master key material. The external providers are configured with credentials to authenticate.</p>
 <p>Throughout this document, the KMS provider is annotated as - <code>KMSProvider</code>, but this name is for <em>exposition only</em>:
 drivers MUST accept arbitrary strings at runtime for forward-compatibility.</p>
@@ -658,9 +657,9 @@ if-and-only-if such respective credentials are needed. The request for KMS crede
 a name (e.g. <code>aws:myname</code>) do not support automatic credentials. Attempting to configure a KMS provider with a name for
 automatic credentials results in a runtime error from <a href="#libmongocrypt">libmongocrypt</a>. See
 <a href="#why-do-on-demand-kms-credentials-not-support-named-kms-providers">Why do on-demand KMS credentials not support named KMS providers?</a></p>
-<blockquote>
-<p>[!NOTE]
-Drivers MUST NOT eagerly fill an empty KMS options property.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Drivers MUST NOT eagerly fill an empty KMS options property.</p>
 </blockquote>
 <p>Once requested, drivers MUST create a new <a href="#kmsproviders">KMSProviders</a> $P$ according to the following process:</p>
 <ol>
@@ -718,16 +717,16 @@ header <code>Metadata-Flavor: Google</code>.</p>
 <p>If the HTTP response code is not 200, return an error including the body of the HTTP response in the error message.</p>
 <p>Parse the HTTP response body as JSON. If parsing fails, return an error including the body of the HTTP response in the
 error message.</p>
-<p>Check the parsed JSON for the field "access_token". If "access_token" is not present, return an error including the body
+<p>Check the parsed JSON for the field “access_token”. If “access_token” is not present, return an error including the body
 of the HTTP response in the error message.</p>
-<p>Return "access_token" as the credential.</p>
+<p>Return “access_token” as the credential.</p>
 <h5 id="obtaining-an-access-token-for-azure-key-vault"><a class="header" href="#obtaining-an-access-token-for-azure-key-vault">Obtaining an Access Token for Azure Key Vault</a></h5>
 <p>Virtual machines running on the Azure platform have one or more <em>Managed Identities</em> associated with them. From within
 the VM, an identity can be used by obtaining an access token via HTTP from the <em>Azure Instance Metadata Service</em> (IMDS).
 <a href="https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http">See this documentation for more information</a></p>
-<blockquote>
-<p>[!NOTE]
-To optimize for testability, it is recommended to implement an isolated abstraction for communication with IMDS. This
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>To optimize for testability, it is recommended to implement an isolated abstraction for communication with IMDS. This
 will aide in the implementation of the prose tests of the communication with an IMDS server.</p>
 </blockquote>
 <p>The below steps should be taken:</p>
@@ -743,9 +742,9 @@ will aide in the implementation of the prose tests of the communication with an 
 </li>
 <li>
 <p>Prepare an HTTP GET request $Req$ based on $U$.</p>
-<blockquote>
-<p>[!NOTE]
-All query parameters on $U$ should be appropriately percent-encoded</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>All query parameters on $U$ should be appropriately percent-encoded</p>
 </blockquote>
 </li>
 <li>
@@ -769,18 +768,18 @@ token.</p>
 access token.</p>
 </li>
 <li>
-<p>The resulting "expires in" duration $d_{exp}$ is a count of seconds given as an ASCII-encoded integer string
+<p>The resulting “expires in” duration $d_{exp}$ is a count of seconds given as an ASCII-encoded integer string
 <code>expires_in</code> property of $J$.</p>
 </li>
 </ol>
-<blockquote>
-<p>[!NOTE]
-If JSON decoding of $Resp$ fails, or the <code>access_token</code> property is absent from $J$, this is a protocol error from
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>If JSON decoding of $Resp$ fails, or the <code>access_token</code> property is absent from $J$, this is a protocol error from
 IMDS. Indicate this error to the requester of the access token.</p>
 </blockquote>
-<blockquote>
-<p>[!NOTE]
-If an Azure VM has more than one managed identity, requesting an access token requires additional query parameters to
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>If an Azure VM has more than one managed identity, requesting an access token requires additional query parameters to
 disambiguate the request. For simplicity, these parameters are omitted, and only VMs that have a single managed
 identity are supported.</p>
 </blockquote>
@@ -805,10 +804,10 @@ class ClientEncryptionOpts {
    setTLSOptions (opts: KMSProvidersTLSOptions)
 }
 </code></pre>
-<p>Drivers MUST raise an error if the TLS options are set to disable TLS. The error MUST contain the message "TLS is
-required".</p>
-<p>Drivers SHOULD raise an error if insecure TLS options are set. The error MUST contain the message "Insecure TLS options
-prohibited". This includes options equivalent to the following URI options:</p>
+<p>Drivers MUST raise an error if the TLS options are set to disable TLS. The error MUST contain the message “TLS is
+required”.</p>
+<p>Drivers SHOULD raise an error if insecure TLS options are set. The error MUST contain the message “Insecure TLS options
+prohibited”. This includes options equivalent to the following URI options:</p>
 <ul>
 <li><code>tlsInsecure</code></li>
 <li><code>tlsAllowInvalidCertificates</code></li>
@@ -824,7 +823,7 @@ MUST NOT modify the default value of <code>tlsDisableOCSPEndpointCheck</code> an
 TLS connections.</p>
 <p>See <a href="#why-do-kms-providers-require-tls-options">Why do KMS providers require TLS options?</a></p>
 <h4 id="schemamap"><a class="header" href="#schemamap">schemaMap</a></h4>
-<p>Automatic encryption is configured with an "encrypt" field in a collection's JSONSchema. By default, a collection's
+<p>Automatic encryption is configured with an “encrypt” field in a collection’s JSONSchema. By default, a collection’s
 JSONSchema is periodically polled with the listCollections command. But a JSONSchema may be specified locally with the
 schemaMap option. Drivers MUST document that a local schema is more secure and MUST include the following in the driver
 documentation for MongoClient:</p>
@@ -841,7 +840,7 @@ MongoClient:</p>
 validation rules in the JSON schema will not be enforced by the driver and will result in an error.</p>
 </blockquote>
 <h4 id="bypassautoencryption"><a class="header" href="#bypassautoencryption">bypassAutoEncryption</a></h4>
-<p>Drivers MUST disable auto encryption when the 'bypassAutoEncryption' option is true and not try to spawn mongocryptd.
+<p>Drivers MUST disable auto encryption when the ‘bypassAutoEncryption’ option is true and not try to spawn mongocryptd.
 Automatic encryption may be disabled with the bypassAutoEncryption option. See
 <a href="#why-is-there-a-bypassautoencryption">Why is there a bypassAutoEncryption?</a>.</p>
 <h4 id="extraoptions"><a class="header" href="#extraoptions">extraOptions</a></h4>
@@ -941,9 +940,9 @@ $EF$ is $L$ <code>["options"]["encryptedFields"]</code>.</li>
 <a href="https://www.mongodb.com/docs/manual/reference/command/create">create</a> command helpers (e.g.
 <code>Database.createCollection()</code>). This option will be interpreted by the helper method and MUST be passed to the
 <a href="https://www.mongodb.com/docs/manual/reference/command/create">create</a> command.</p>
-<blockquote>
-<p>[!NOTE]
-Users are not expected to set the <code>escCollection</code> and <code>ecocCollection</code> options in <code>encryptedFields</code>.
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Users are not expected to set the <code>escCollection</code> and <code>ecocCollection</code> options in <code>encryptedFields</code>.
 <a href="https://jira.mongodb.org/browse/SERVER-74069">SERVER-74069</a> added server-side validation for those fields and no
 longer allows names to deviate from the following:</p>
 <ul>
@@ -959,8 +958,8 @@ collectionName, dbName, false)$ (<a href="#GetEncryptedFields">See here</a>).</p
 remaining operations are not attempted:</p>
 <ul>
 <li>Check the wire version of the writable server. If the wire version is less than 21 (for server 7.0.0), return an error
-containing the error message: "Driver support of Queryable Encryption is incompatible with server. Upgrade server to
-use Queryable Encryption."</li>
+containing the error message: “Driver support of Queryable Encryption is incompatible with server. Upgrade server to
+use Queryable Encryption.”</li>
 <li>Create the collection with name <code>encryptedFields["escCollection"]</code> as a clustered collection using the options
 <code>{clusteredIndex: {key: {_id: 1}, unique: true}}</code>. If <code>encryptedFields["escCollection"]</code> is not set, use the
 collection name <code>enxcol_.&lt;collectionName&gt;.esc</code>. Creating this collection MUST NOT check if the collection namespace
@@ -982,9 +981,9 @@ $kmsProvider$ is a <a href="#KMSProvider">KMSProvider</a> and $masterKey$ is equ
 <ul>
 <li>If $collOpts$ contains an <code>"encryptedFields"</code> property, then $EF$ is the value of that property. Otherwise, report an
 error that there are no <code>encryptedFields</code> defined for the collection.</li>
-<li>Let $EF'$ be a copy of $EF$. Update $EF'$ in the following manner:
+<li>Let $EF’$ be a copy of $EF$. Update $EF’$ in the following manner:
 <ul>
-<li>Let $Fields$ be the <code>"fields"</code> element within $EF'$.</li>
+<li>Let $Fields$ be the <code>"fields"</code> element within $EF’$.</li>
 <li>If $Fields$ is present and is an array value, then for each element $F$ of <code>Fields</code>:
 <ul>
 <li>If $F$ is not a document element, skip it.</li>
@@ -993,7 +992,7 @@ error that there are no <code>encryptedFields</code> defined for the collection.
 <li>Create a <a href="#datakeyopts">DataKeyOpts</a> named $dkOpts$ with the $masterKey$ argument.</li>
 <li>Let $D$ be the result of <code>CE.createDataKey(kmsProvider, dkOpts)</code>.</li>
 <li>If generating $D$ resulted in an error $E$, the entire $CreateEncryptedCollection$ must now fail with error $E$.
-Return the partially-formed $EF'$ with the error so that the caller may know what datakeys have already been
+Return the partially-formed $EF’$ with the error so that the caller may know what datakeys have already been
 created by the helper.</li>
 <li>Replace $K$ in $F$ with $D$.</li>
 </ul>
@@ -1002,10 +1001,10 @@ created by the helper.</li>
 </li>
 </ul>
 </li>
-<li>Create a new set of options $collOpts'$ duplicating $collOpts$. Set the <code>"encryptedFields"</code> named element of
-$collOpts'$ to $EF'$.</li>
-<li>Invoke the <code>CreateCollection</code> helper as $CreateCollection(database, collName, collOpts')$. Return the resulting
-collection and the generated $EF'$. If an error occurred, return the resulting $EF$ with the error so that the
+<li>Create a new set of options $collOpts’$ duplicating $collOpts$. Set the <code>"encryptedFields"</code> named element of
+$collOpts’$ to $EF’$.</li>
+<li>Invoke the <code>CreateCollection</code> helper as $CreateCollection(database, collName, collOpts’)$. Return the resulting
+collection and the generated $EF’$. If an error occurred, return the resulting $EF$ with the error so that the
 caller may know what datakeys have already been created by the helper.</li>
 </ul>
 <p>Drivers MUST document that $createEncryptedCollection$ does not affect any auto encryption settings on existing
@@ -1016,9 +1015,9 @@ encrypted collection with the $createEncryptedCollection$ helper.</p>
 <a href="https://www.mongodb.com/docs/manual/reference/command/drop">drop</a> command helpers (e.g. <code>Database.dropCollection()</code>,
 <code>Collection.drop()</code>). This option will only be interpreted by the helper method and MUST NOT be passed to the
 <a href="https://www.mongodb.com/docs/manual/reference/command/drop">drop</a> command.</p>
-<blockquote>
-<p>[!NOTE]
-Users are not expected to set the <code>escCollection</code> and <code>ecocCollection</code> options in <code>encryptedFields</code>.
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Users are not expected to set the <code>escCollection</code> and <code>ecocCollection</code> options in <code>encryptedFields</code>.
 <a href="https://jira.mongodb.org/browse/SERVER-74069">SERVER-74069</a> added server-side validation for those fields and no
 longer allows names to deviate from the following:</p>
 <ul>
@@ -1136,7 +1135,7 @@ index in the key vault collection on the <code>keyAltNames</code> field with a p
 enforce the existence of the unique index, but MUST still be capable of handling errors that such a unique index may
 yield.</p>
 <p>See
-<a href="#why-arent-we-creating-a-unique-index-in-the-key-vault-collection">Why aren't we creating a unique index in the key vault collection?</a></p>
+<a href="#why-arent-we-creating-a-unique-index-in-the-key-vault-collection">Why aren’t we creating a unique index in the key vault collection?</a></p>
 <h3 id="datakeyopts"><a class="header" href="#datakeyopts">DataKeyOpts</a></h3>
 <pre><code class="language-typescript">class DataKeyOpts {
    masterKey: Optional&lt;Document&gt;
@@ -1146,21 +1145,21 @@ yield.</p>
 </code></pre>
 <h4 id="masterkey"><a class="header" href="#masterkey">masterKey</a></h4>
 <p>The masterKey document identifies a KMS-specific key used to encrypt the new data key. If kmsProvider has KMS provider
-type "aws", the masterKey is required and has the following fields:</p>
+type “aws”, the masterKey is required and has the following fields:</p>
 <pre><code class="language-typescript">{
    region: String,
    key: String, // The Amazon Resource Name (ARN) to the AWS customer master key (KMS key).
    endpoint: Optional&lt;String&gt; // An alternate host identifier to send KMS requests to. May include port number. Defaults to "kms.&lt;region&gt;.amazonaws.com"
 }
 </code></pre>
-<p>If the kmsProvider has KMS provider type "azure", the masterKey is required and has the following fields:</p>
+<p>If the kmsProvider has KMS provider type “azure”, the masterKey is required and has the following fields:</p>
 <pre><code class="language-typescript">{
    keyVaultEndpoint: String, // Host with optional port. Example: "example.vault.azure.net".
    keyName: String,
    keyVersion: Optional&lt;String&gt; // A specific version of the named key, defaults to using the key's primary version.
 }
 </code></pre>
-<p>If the kmsProvider has KMS provider type "gcp", the masterKey is required and has the following fields:</p>
+<p>If the kmsProvider has KMS provider type “gcp”, the masterKey is required and has the following fields:</p>
 <pre><code class="language-typescript">{
    projectId: String,
    location: String,
@@ -1170,8 +1169,8 @@ type "aws", the masterKey is required and has the following fields:</p>
    endpoint: Optional&lt;String&gt; // Host with optional port. Defaults to "cloudkms.googleapis.com".
 }
 </code></pre>
-<p>If the kmsProvider has KMS provider type "local", the masterKey is not applicable.</p>
-<p>If the kmsProvider has KMS provider type "kmip", the masterKey is required and has the following fields:</p>
+<p>If the kmsProvider has KMS provider type “local”, the masterKey is not applicable.</p>
+<p>If the kmsProvider has KMS provider type “kmip”, the masterKey is required and has the following fields:</p>
 <pre><code class="language-javascript">{
    keyId: Optional&lt;String&gt;, // keyId is the KMIP Unique Identifier to a 96 byte KMIP Secret Data managed object.
                             // If keyId is omitted, the driver creates a random 96 byte KMIP Secret Data managed object.
@@ -1179,12 +1178,12 @@ type "aws", the masterKey is required and has the following fields:</p>
    delegated: Optional&lt;Boolean&gt; // If true, this key should be decrypted by the KMIP server.
 }
 </code></pre>
-<p>Drivers MUST document the expected fields in the masterKey document for the "aws", "azure", "gcp", and "kmip" KMS
+<p>Drivers MUST document the expected fields in the masterKey document for the “aws”, “azure”, “gcp”, and “kmip” KMS
 provider types. Additionally, they MUST document that masterKey is <strong>required</strong> for these KMS provider types and is not
 optional.</p>
 <p>The value of <code>endpoint</code> or <code>keyVaultEndpoint</code> is a host name with optional port number separated by a colon. E.g.
-"kms.us-east-1.amazonaws.com" or "kms.us-east-1.amazonaws.com:443". It is assumed that the host name is not an IP
-address or IP literal. Though drivers MUST NOT inspect the value of "endpoint" that a user sets when creating a data
+“kms.us-east-1.amazonaws.com” or “kms.us-east-1.amazonaws.com:443”. It is assumed that the host name is not an IP
+address or IP literal. Though drivers MUST NOT inspect the value of “endpoint” that a user sets when creating a data
 key, a driver will inspect it when connecting to KMS to determine a port number if present.</p>
 <h4 id="keyaltnames"><a class="header" href="#keyaltnames">keyAltNames</a></h4>
 <p>An optional list of string alternate names used to reference a key. If a key is created with alternate names, then
@@ -1297,45 +1296,45 @@ is required.</p>
 <h4 id="keyid"><a class="header" href="#keyid">keyId</a></h4>
 <p>Identifies a data key by <code>_id</code>. The value is a UUID (binary subtype 4).</p>
 <h4 id="keyaltname"><a class="header" href="#keyaltname">keyAltName</a></h4>
-<p>Identifies a key vault collection document by 'keyAltName'.</p>
+<p>Identifies a key vault collection document by ‘keyAltName’.</p>
 <h4 id="algorithm"><a class="header" href="#algorithm">algorithm</a></h4>
 <p>One of the strings:</p>
 <ul>
-<li>"AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"</li>
-<li>"AEAD_AES_256_CBC_HMAC_SHA_512-Random"</li>
-<li>"Indexed"</li>
-<li>"Unindexed"</li>
-<li>"Range"</li>
-<li>"TextPreview"</li>
+<li>“AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic”</li>
+<li>“AEAD_AES_256_CBC_HMAC_SHA_512-Random”</li>
+<li>“Indexed”</li>
+<li>“Unindexed”</li>
+<li>“Range”</li>
+<li>“TextPreview”</li>
 </ul>
-<p>The result of explicit encryption with the "Indexed", "Range", or "TextPreview" algorithm must be processed by the
+<p>The result of explicit encryption with the “Indexed”, “Range”, or “TextPreview” algorithm must be processed by the
 server to insert or query. Drivers MUST document the following behavior:</p>
 <blockquote>
-<p>To insert or query with an "Indexed", "Range", or "TextPreview" encrypted payload, use a <code>MongoClient</code> configured with
+<p>To insert or query with an “Indexed”, “Range”, or “TextPreview” encrypted payload, use a <code>MongoClient</code> configured with
 <code>AutoEncryptionOpts</code>. <code>AutoEncryptionOpts.bypassQueryAnalysis</code> may be true. <code>AutoEncryptionOpts.bypassAutoEncryption</code>
-must be false. The "TextPreview" algorithm is in preview and should be used for experimental workloads only. These
+must be false. The “TextPreview” algorithm is in preview and should be used for experimental workloads only. These
 features are unstable and their security is not guaranteed until released as Generally Available (GA). The GA version
 of these features may not be backwards compatible with the preview version.</p>
 </blockquote>
 <h4 id="contentionfactor"><a class="header" href="#contentionfactor">contentionFactor</a></h4>
-<p>contentionFactor may be used to tune performance. Only applies when algorithm is "Indexed", "Range", or "TextPreview".
+<p>contentionFactor may be used to tune performance. Only applies when algorithm is “Indexed”, “Range”, or “TextPreview”.
 libmongocrypt returns an error if contentionFactor is set for a non-applicable algorithm.</p>
 <h4 id="querytype"><a class="header" href="#querytype">queryType</a></h4>
 <p>One of the strings:</p>
 <ul>
-<li>"equality"</li>
-<li>"range"</li>
-<li>"prefixPreview"</li>
-<li>"suffixPreview"</li>
-<li>"substringPreview"</li>
+<li>“equality”</li>
+<li>“range”</li>
+<li>“prefixPreview”</li>
+<li>“suffixPreview”</li>
+<li>“substringPreview”</li>
 </ul>
-<p>queryType only applies when algorithm is "Indexed", "Range", or "TextPreview". libmongocrypt returns an error if
+<p>queryType only applies when algorithm is “Indexed”, “Range”, or “TextPreview”. libmongocrypt returns an error if
 queryType is set for a non-applicable algorithm.</p>
 <h4 id="rangeopts"><a class="header" href="#rangeopts">rangeOpts</a></h4>
-<p>rangeOpts only applies when algorithm is "Range". libmongocrypt returns an error if rangeOpts is set for a
+<p>rangeOpts only applies when algorithm is “Range”. libmongocrypt returns an error if rangeOpts is set for a
 non-applicable algorithm.</p>
 <h4 id="textopts"><a class="header" href="#textopts">textOpts</a></h4>
-<p>textOpts only applies when algorithm is "TextPreview". libmongocrypt returns an error if textOpts is set for a
+<p>textOpts only applies when algorithm is “TextPreview”. libmongocrypt returns an error if textOpts is set for a
 non-applicable algorithm.</p>
 <h2 id="user-facing-api-when-auto-encryption-fails"><a class="header" href="#user-facing-api-when-auto-encryption-fails">User facing API: When Auto Encryption Fails</a></h2>
 <p>Auto encryption requires parsing the MongoDB query language client side (with the <a href="#mongocryptd">mongocryptd</a> process or
@@ -1446,9 +1445,9 @@ search criteria that are provided by the driver.</p>
 API does not expose this full search path functionality. This extended search path customization is intended to
 facilitate driver testing with <a href="#crypt_shared">crypt_shared</a> (Refer:
 <a href="#search-paths-for-testing">Search Paths for Testing</a> and <a href="#path-resolution-behavior">Path Resolution Behavior</a>).</p>
-<blockquote>
-<p>[!NOTE]
-The driver MUST NOT manipulate or do any validation on the <a href="#crypt_shared">crypt_shared</a> path options provided in
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The driver MUST NOT manipulate or do any validation on the <a href="#crypt_shared">crypt_shared</a> path options provided in
 <a href="#extraoptions">extraOptions</a>. They should be passed through to <a href="#libmongocrypt">libmongocrypt</a> unchanged.</p>
 </blockquote>
 <p><span id="search-path"></span> <span id="search-paths"></span></p>
@@ -1468,9 +1467,9 @@ execution from the ambient state of the host system.</p>
 <h3 id="overriding-the-crypt_shared-library-path"><a class="header" href="#overriding-the-crypt_shared-library-path">Overriding the <code>crypt_shared</code> Library Path</a></h3>
 <p>If <a href="#extraoptions.cryptsharedlibpath">extraOptions.cryptSharedLibPath</a> was specified by the user, the driver MUST set
 the <a href="#crypt_shared">crypt_shared</a> path override on the <code>libmongocrypt_handle</code>.</p>
-<blockquote>
-<p>[!NOTE]
-If a path override is set on a <code>libmongocrypt_handle</code> and <a href="#libmongocrypt">libmongocrypt</a> fails to load
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>If a path override is set on a <code>libmongocrypt_handle</code> and <a href="#libmongocrypt">libmongocrypt</a> fails to load
 <a href="#crypt_shared">crypt_shared</a> from that filepath, then that will result in a hard-error when initializing
 <a href="#libmongocrypt">libmongocrypt</a>.</p>
 </blockquote>
@@ -1489,9 +1488,9 @@ library file <em>itself</em>, and not simply the directory that contains it.</p>
 mimics the <code>$ORIGIN</code> behavior of the <code>RUNPATH</code>/<code>RPATH</code> properties of ELF executable files. This permits bundling the
 <a href="#crypt_shared">crypt_shared</a> library along with <a href="#libmongocrypt">libmongocrypt</a> for creating portable application
 distributions without relying on a externally/globally available <a href="#crypt_shared">crypt_shared</a> library.</p>
-<blockquote>
-<p>[!NOTE]
-No other <code>RPATH</code>/<code>RUNPATH</code>-style substitutions are available.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>No other <code>RPATH</code>/<code>RUNPATH</code>-style substitutions are available.</p>
 </blockquote>
 </li>
 <li>
@@ -1517,7 +1516,7 @@ the following behavior:</p>
 <li>
 <p>For <a href="#crypt_shared">crypt_shared</a> <a href="#search-paths">search paths</a>, if a search path string is <code>"$SYSTEM"</code>, then —
 instead of <a href="#libmongocrypt">libmongocrypt</a> searching for <a href="#crypt_shared">crypt_shared</a> in a directory named
-"<code>$SYSTEM</code>" — <a href="#libmongocrypt">libmongocrypt</a> will defer to the operating system's own dynamic-library resolution
+“<code>$SYSTEM</code>” — <a href="#libmongocrypt">libmongocrypt</a> will defer to the operating system’s own dynamic-library resolution
 mechanism when processing that search-path. For this reason, <code>"$SYSTEM"</code> is the only search path appended when the
 driver is used via the user-facing API.</p>
 </li>
@@ -1543,10 +1542,10 @@ successfully loaded by asking <a href="#libmongocrypt">libmongocrypt</a> for the
 the result is an empty string, <a href="#libmongocrypt">libmongocrypt</a> did not load <a href="#crypt_shared">crypt_shared</a> and the driver
 must rely on <a href="#mongocryptd">mongocryptd</a> to mark command documents for encryption.</p>
 <p><span id="disabling-crypt_shared"></span></p>
-<h3 id="disabling-crypt_shared"><a class="header" href="#disabling-crypt_shared">"Disabling" <code>crypt_shared</code></a></h3>
-<p>For purposes of testing, a driver can "disable" <a href="#crypt_shared">crypt_shared</a> searching to ensure that
+<h3 id="disabling-crypt_shared"><a class="header" href="#disabling-crypt_shared">“Disabling” <code>crypt_shared</code></a></h3>
+<p>For purposes of testing, a driver can “disable” <a href="#crypt_shared">crypt_shared</a> searching to ensure that
 <a href="#mongocryptd">mongocryptd</a> is used instead, even if a <a href="#crypt_shared">crypt_shared</a> library would be available.</p>
-<p>As noted in <a href="#path-resolution-behavior">Path Resolution Behavior</a>, <a href="#crypt_shared">crypt_shared</a> can be "disabled" on a
+<p>As noted in <a href="#path-resolution-behavior">Path Resolution Behavior</a>, <a href="#crypt_shared">crypt_shared</a> can be “disabled” on a
 <code>libmongocrypt_handle</code> by omission:</p>
 <ol>
 <li>Do not specify any <a href="#search-paths">search paths</a>,</li>
@@ -1586,7 +1585,7 @@ handles within a single process.</p>
 <h2 id="managing-mongocryptd"><a class="header" href="#managing-mongocryptd">Managing mongocryptd</a></h2>
 <p>If the following conditions are met:</p>
 <ul>
-<li>The user's <code>MongoClient</code> is configured for client-side encryption (i.e. <code>bypassAutoEncryption</code> is not <code>false</code>)</li>
+<li>The user’s <code>MongoClient</code> is configured for client-side encryption (i.e. <code>bypassAutoEncryption</code> is not <code>false</code>)</li>
 <li><strong>AND</strong> the user has not disabled <code>mongocryptd</code> spawning (i.e. by setting <code>extraOptions.mongocryptdBypassSpawn</code> to
 <code>true</code>),</li>
 <li><strong>AND</strong> the <a href="#crypt_shared">crypt_shared</a> library is unavailable (Refer:
@@ -1596,9 +1595,9 @@ handles within a single process.</p>
 <p><strong>then</strong> <code>mongocryptd</code> MUST be spawned by the driver.</p>
 <p>If the <a href="#extraoptions.cryptsharedlibrequired">extraOptions.cryptSharedLibRequired</a> option is <code>true</code> then the driver MUST
 NOT attempt to spawn or connect to <code>mongocryptd</code>.</p>
-<blockquote>
-<p>[!NOTE]
-Since spawning <a href="#mongocryptd">mongocryptd</a> requires checking whether <a href="#crypt_shared">crypt_shared</a> is loaded, and
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Since spawning <a href="#mongocryptd">mongocryptd</a> requires checking whether <a href="#crypt_shared">crypt_shared</a> is loaded, and
 checking whether <a href="#crypt_shared">crypt_shared</a> is available can only be done <em>after</em> having initialized the
 <code>libmongocrypt_handle</code>, drivers will need to defer spawning <a href="#mongocryptd">mongocryptd</a> until <em>after</em> initializing
 <a href="#libmongocrypt">libmongocrypt</a> and checking for <a href="#crypt_shared">crypt_shared</a>.</p>
@@ -1627,9 +1626,9 @@ fails. If the MongoClient fails to connect after spawning, the server selection 
 <p>If the ClientEncryption is configured with <code>mongocryptdBypassSpawn=true</code>, then the driver is not responsible for
 spawning mongocryptd. If server selection ever fails when connecting to mongocryptd, the server selection error is
 propagated to the user.</p>
-<blockquote>
-<p>[!NOTE]
-A correctly-behaving driver will never attempt to connect to <a href="#mongocryptd">mongocryptd</a> when
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>A correctly-behaving driver will never attempt to connect to <a href="#mongocryptd">mongocryptd</a> when
 <a href="#extraoptions.cryptsharedlibrequired">extraOptions.cryptSharedLibRequired</a> is set to <code>true</code> or
 <a href="#crypt_shared">crypt_shared</a> is loaded.</p>
 </blockquote>
@@ -1669,7 +1668,7 @@ encrypted data (e.g. ping). See the appendix section:
 <a href="#libmongocrypt-auto-encryption-allow-list">libmongocrypt: Auto Encryption Allow-List</a>.</p>
 <p>An encrypted MongoClient MUST attempt to auto decrypt the results of all commands.</p>
 <p>Drivers MUST raise an error when attempting to auto encrypt a command if the maxWireVersion is less than 8. The error
-message MUST contain "Auto-encryption requires a minimum MongoDB version of 4.2".</p>
+message MUST contain “Auto-encryption requires a minimum MongoDB version of 4.2”.</p>
 <p>Note, all client side features (including all of <code>ClientEncryption</code>) are only supported against 4.2 or higher servers.
 However, errors are only raised for automatic encryption/decryption against older servers. See
 <a href="#why-is-a-42-server-required">Why is a 4.2 server required?</a></p>
@@ -1697,7 +1696,12 @@ documentation in MongoClient:</p>
 metadata.</p>
 <h3 id="key-vault-collection-schema-for-data-keys"><a class="header" href="#key-vault-collection-schema-for-data-keys">Key vault collection schema for data keys</a></h3>
 <p>Data keys are stored in the MongoDB key vault collection with the following schema:</p>
-<div class="table-wrapper"><table><thead><tr><th></th><th></th><th></th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
 <tr><td><strong>Name</strong></td><td><strong>Type</strong></td><td><strong>Description</strong></td></tr>
 <tr><td>_id</td><td>UUID</td><td>A unique identifier for the key.</td></tr>
 <tr><td>version</td><td>Int64</td><td>A numeric identifier for the schema version of this document. Implicitly 0 if unset.</td></tr>
@@ -1707,48 +1711,83 @@ metadata.</p>
 <tr><td>updateDate</td><td>Date</td><td>The datetime the wrapped data key material was last modified. On initial import, this value will be set to creationDate.</td></tr>
 <tr><td>status</td><td>Int</td><td>0 = enabled, 1 = disabled</td></tr>
 <tr><td>masterKey</td><td>Document</td><td>Per provider master key definition, see below</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h4 id="masterkey-contents"><a class="header" href="#masterkey-contents">masterKey contents</a></h4>
-<div class="table-wrapper"><table><thead><tr><th></th><th></th><th></th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
 <tr><td><strong>Name</strong></td><td><strong>Type</strong></td><td><strong>Description</strong></td></tr>
-<tr><td>provider</td><td>"aws"</td><td></td></tr>
-<tr><td>key</td><td>String</td><td>AWS ARN. Only applicable for "aws" provider.</td></tr>
-<tr><td>region</td><td>String</td><td>AWS Region that contains AWS ARN. Only applicable for "aws" provider.</td></tr>
+<tr><td>provider</td><td>“aws”</td><td></td></tr>
+<tr><td>key</td><td>String</td><td>AWS ARN. Only applicable for “aws” provider.</td></tr>
+<tr><td>region</td><td>String</td><td>AWS Region that contains AWS ARN. Only applicable for “aws” provider.</td></tr>
 <tr><td>endpoint</td><td>String</td><td>Alternate AWS endpoint (needed for FIPS endpoints)</td></tr>
-</tbody></table>
-</div><div class="table-wrapper"><table><thead><tr><th></th><th></th><th></th></tr></thead><tbody>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
 <tr><td><strong>Name</strong></td><td><strong>Type</strong></td><td><strong>Description</strong></td></tr>
-<tr><td>provider</td><td>"azure"</td><td></td></tr>
-<tr><td>keyVaultEndpoint</td><td>String</td><td>Required key vault endpoint. (e.g. "example.vault.azure.net")</td></tr>
+<tr><td>provider</td><td>“azure”</td><td></td></tr>
+<tr><td>keyVaultEndpoint</td><td>String</td><td>Required key vault endpoint. (e.g. “example.vault.azure.net”)</td></tr>
 <tr><td>keyName</td><td>String</td><td>Required key name.</td></tr>
 <tr><td>keyVersion</td><td>String</td><td>Optional key version.</td></tr>
-</tbody></table>
-</div><div class="table-wrapper"><table><thead><tr><th></th><th></th><th></th></tr></thead><tbody>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
 <tr><td><strong>Name</strong></td><td><strong>Type</strong></td><td><strong>Description</strong></td></tr>
-<tr><td>provider</td><td>"gcp"</td><td></td></tr>
+<tr><td>provider</td><td>“gcp”</td><td></td></tr>
 <tr><td>projectId</td><td>String</td><td>Required project ID.</td></tr>
-<tr><td>location</td><td>String</td><td>Required location name (e.g. "global")</td></tr>
+<tr><td>location</td><td>String</td><td>Required location name (e.g. “global”)</td></tr>
 <tr><td>keyRing</td><td>String</td><td>Required key ring name.</td></tr>
 <tr><td>keyName</td><td>String</td><td>Required key name.</td></tr>
 <tr><td>keyVersion</td><td>String</td><td>Optional key version.</td></tr>
 <tr><td>endpoint</td><td>String</td><td>Optional, KMS URL, defaults to <a href="https://cloudkms.googleapis.com">https://cloudkms.googleapis.com</a></td></tr>
-</tbody></table>
-</div><div class="table-wrapper"><table><thead><tr><th></th><th></th><th></th></tr></thead><tbody>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
 <tr><td><strong>Name</strong></td><td><strong>Type</strong></td><td><strong>Description</strong></td></tr>
-<tr><td>provider</td><td>"local"</td><td></td></tr>
-</tbody></table>
-</div><div class="table-wrapper"><table><thead><tr><th></th><th></th><th></th></tr></thead><tbody>
+<tr><td>provider</td><td>“local”</td><td></td></tr>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
 <tr><td><strong>Name</strong></td><td><strong>Type</strong></td><td><strong>Description</strong></td></tr>
-<tr><td>provider</td><td>"kmip"</td><td></td></tr>
+<tr><td>provider</td><td>“kmip”</td><td></td></tr>
 <tr><td>endpoint</td><td>String</td><td>Optional. Defaults to kmip.endpoint from KMS providers.</td></tr>
 <tr><td>delegated</td><td>Boolean</td><td>Optional. Defaults to false.</td></tr>
 <tr><td>keyId</td><td>String</td><td>Required. keyId is the Unique Identifier to a 96 byte KMIP Secret Data managed object.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>Data keys are needed for encryption and decryption. They are identified in the intent-to-encrypt marking and ciphertext.
-Data keys may be retrieved by querying the "_id" with a UUID or by querying the "keyAltName" with a string.</p>
-<p>Note, "status" is unused and is purely informational.</p>
+Data keys may be retrieved by querying the “_id” with a UUID or by querying the “keyAltName” with a string.</p>
+<p>Note, “status” is unused and is purely informational.</p>
 <h4 id="example-data-key-document"><a class="header" href="#example-data-key-document">Example data key document</a></h4>
 <pre><code class="language-javascript">{
    "_id" : UUID("00000000-0000-0000-0000-000000000000"),
@@ -1790,7 +1829,7 @@ Data keys may be retrieved by querying the "_id" with a UUID or by querying the 
 }
 </code></pre>
 <p>See <a href="../bson-binary-encrypted/binary-encrypted.html">Driver Spec: BSON Binary Encrypted</a> for more information.</p>
-<h3 id="jsonschema-encrypt"><a class="header" href="#jsonschema-encrypt">JSONSchema "encrypt"</a></h3>
+<h3 id="jsonschema-encrypt"><a class="header" href="#jsonschema-encrypt">JSONSchema “encrypt”</a></h3>
 <p>The additional support for encryption in JSONSchema will be documented in the MongoDB manual. But the following is an
 example:</p>
 <pre><code class="language-typescript">encrypt : {
@@ -1800,11 +1839,17 @@ example:</p>
 }
 </code></pre>
 <p>Each field is briefly described as follows:</p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>bsonType</td><td>string</td><td>The bsonType of the underlying encrypted field.</td></tr>
-<tr><td>algorithm</td><td>string</td><td>"AEAD_AES_256_CBC_HMAC_SHA_512-Random" or <br>"AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"</td></tr>
+<tr><td>algorithm</td><td>string</td><td>“AEAD_AES_256_CBC_HMAC_SHA_512-Random” or <br>“AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic”</td></tr>
 <tr><td>keyId</td><td>string or array of UUID</td><td>If string, it is a JSON pointer to a field with a scalar value <br>identifying a key by keyAltName.<br>If array, an array of eligible keys.</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <h3 id="libmongocrypt-prohibitions-and-warnings"><a class="header" href="#libmongocrypt-prohibitions-and-warnings">libmongocrypt: Prohibitions and warnings</a></h3>
 <p>libmongocrypt MUST validate options. The following noteworthy cases are prohibited:</p>
@@ -1836,16 +1881,21 @@ does not know the schema of the underlying collection.</p>
 <h3 id="libmongocrypt-data-key-caching"><a class="header" href="#libmongocrypt-data-key-caching">libmongocrypt: Data key caching</a></h3>
 <p>Data keys are cached in libmongocrypt for one minute. This is not configurable, and there is no maximum number of keys
 in the cache. The data key material is stored securely. It will not be paged to disk and the memory will be properly
-zero'ed out after freeing.</p>
+zero’ed out after freeing.</p>
 <h3 id="libmongocrypt-crypto-implementation"><a class="header" href="#libmongocrypt-crypto-implementation">libmongocrypt: Crypto implementation</a></h3>
-<p>libmongocrypt uses AEAD_SHA256_CBC_HMAC512 for both "randomized" and "deterministic" encryption algorithms. It is
+<p>libmongocrypt uses AEAD_SHA256_CBC_HMAC512 for both “randomized” and “deterministic” encryption algorithms. It is
 described in this <a href="https://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05">IETF document draft</a>. For
-"randomized", libmongocrypt securely creates a random IV. For "deterministic", libmongocrypt securely creates a random
+“randomized”, libmongocrypt securely creates a random IV. For “deterministic”, libmongocrypt securely creates a random
 IV key and any given encryption operation will derive the IV from the IV key and the field plaintext data.</p>
 <h3 id="libmongocrypt-auto-encryption-allow-list"><a class="header" href="#libmongocrypt-auto-encryption-allow-list">libmongocrypt: Auto Encryption Allow-List</a></h3>
 <p>libmongocrypt determines whether or not the command requires encryption (i.e. is sent to mongocryptd) based on the table
 below. Commands not listed in this table will result in an error returned by libmongocrypt.</p>
-<div class="table-wrapper"><table><thead><tr><th></th><th></th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th></tr>
+</thead>
+<tbody>
 <tr><td><strong>Command</strong></td><td><strong>Action</strong></td></tr>
 <tr><td>aggregate (collection)</td><td>AUTOENCRYPT</td></tr>
 <tr><td>count</td><td>AUTOENCRYPT</td></tr>
@@ -1884,7 +1934,8 @@ below. Commands not listed in this table will result in an error returned by lib
 <tr><td>killAllSessionsByPattern</td><td>BYPASS</td></tr>
 <tr><td>refreshSessions</td><td>BYPASS</td></tr>
 <tr><td>updateSearchIndex</td><td>BYPASS</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>All AUTOENCRYPT commands are sent to mongocryptd, even if there is no JSONSchema. This is to ensure that commands that
 reference other collections (e.g. aggregate with <code>$lookup</code>) are handled properly.</p>
@@ -1898,17 +1949,17 @@ principles specific to this project.</p>
 <p>Users should be able to enable encryption with minimal application change.</p>
 <h3 id="2-minimize-risk-of-exposing-sensitive-data"><a class="header" href="#2-minimize-risk-of-exposing-sensitive-data">2. Minimize risk of exposing sensitive data</a></h3>
 <p>Storing or querying with unencrypted data can have dire consequences, because users may not be made aware immediately.
-When in doubt, we should error. It should be clear to the user when an operation gets encrypted and when one doesn't.</p>
+When in doubt, we should error. It should be clear to the user when an operation gets encrypted and when one doesn’t.</p>
 <h3 id="3-minimize-api"><a class="header" href="#3-minimize-api">3. Minimize API</a></h3>
 <p>The first version of Client Side Encryption is to get signal. If it becomes popular, further improvements will be made
 (removing mongocryptd process, support for more queries, better performance). But the public API we provide now will
-stick around for the long-term. So let's keep it minimal to accomplish our goals.</p>
+stick around for the long-term. So let’s keep it minimal to accomplish our goals.</p>
 <h3 id="how-did-we-arrive-at-this-api"><a class="header" href="#how-did-we-arrive-at-this-api">How did we arrive at this API?</a></h3>
 <p>The API for client side encryption underwent multiple iterations during the design process.</p>
 <h4 id="why-is-client-side-encryption-configured-on-a-mongoclient"><a class="header" href="#why-is-client-side-encryption-configured-on-a-mongoclient">Why is client side encryption configured on a MongoClient?</a></h4>
 <p>There is state that must be shared among all auto encrypted collections: the MongoClient to mongocryptd and the handle
 to libmongocrypt (because key caching + JSONSchema caching occurs in libmongocrypt).</p>
-<h4 id="why-not-make-auto-encryption-opt-in"><a class="header" href="#why-not-make-auto-encryption-opt-in">Why not make auto encryption "opt-in"?</a></h4>
+<h4 id="why-not-make-auto-encryption-opt-in"><a class="header" href="#why-not-make-auto-encryption-opt-in">Why not make auto encryption “opt-in”?</a></h4>
 <p>Because auto encryption is specified with a collection JSONSchema, we cannot auto encrypt database or client operations.
 So we cannot know if the user is passing sensitive data as a filter to a database/client change stream or a currentOp
 command for example. We also must always fail on view operations. We considered making auto encryption opt-in for
@@ -1921,11 +1972,11 @@ may end up sending unencrypted data.</p>
 <p>In a previous iteration of the design, we proposed enabling auto encryption only in db.getCollection() for better
 usability. But this better aligns with our design principles.</p>
 <ul>
-<li>Safer. Users won't forget to enable auto encryption on one call to db.getCollection()</li>
+<li>Safer. Users won’t forget to enable auto encryption on one call to db.getCollection()</li>
 <li>Easier. It only requires changing MongoClient code instead of every db.getCollection()</li>
 </ul>
 <h4 id="why-do-we-have-a-separate-top-level-type-for-clientencryption"><a class="header" href="#why-do-we-have-a-separate-top-level-type-for-clientencryption">Why do we have a separate top level type for ClientEncryption?</a></h4>
-<p>The encrypt/decrypt and createDataKey functions were originally placed on MongoClient. But, then we'd have API that
+<p>The encrypt/decrypt and createDataKey functions were originally placed on MongoClient. But, then we’d have API that
 depends on optional configuration. A new top level type seemed warranted.</p>
 <h4 id="why-not-pass-the-clientencryption-into-dbgetcollection-to-enable-auto-encryption"><a class="header" href="#why-not-pass-the-clientencryption-into-dbgetcollection-to-enable-auto-encryption">Why not pass the ClientEncryption into db.getCollection() to enable auto encryption?</a></h4>
 <p>As it is now, a ClientEncryption and a MongoClient cannot share state (libmongocrypt handle or MongoClient to
@@ -1938,40 +1989,40 @@ language dependent to implement and makes mocking out the ClientEncryption diffi
 <h4 id="why-do-we-need-to-pass-a-client-to-create-a-clientencryption"><a class="header" href="#why-do-we-need-to-pass-a-client-to-create-a-clientencryption">Why do we need to pass a client to create a ClientEncryption?</a></h4>
 <p>We need to support an external key vault collection (i.e. on another MongoDB cluster).</p>
 <h4 id="why-are-extraoptions-and-kmsproviders-maps"><a class="header" href="#why-are-extraoptions-and-kmsproviders-maps">Why are extraOptions and kmsProviders maps?</a></h4>
-<p>Because we don't want AWS as part of the public types and we don't want to put <a href="#mongocryptd">mongocryptd</a> and
-<a href="#crypt_shared">crypt_shared</a> options as types since mongocryptd is an implementation detail we'd like to hide as much
+<p>Because we don’t want AWS as part of the public types and we don’t want to put <a href="#mongocryptd">mongocryptd</a> and
+<a href="#crypt_shared">crypt_shared</a> options as types since mongocryptd is an implementation detail we’d like to hide as much
 as possible.</p>
 <h4 id="why-is-there-a-bypassautoencryption"><a class="header" href="#why-is-there-a-bypassautoencryption">Why is there a bypassAutoEncryption?</a></h4>
 <p>bypassAutoEncryption still supports auto decryption. In cases where <a href="#mongocryptd">mongocryptd</a> or
-<a href="#crypt_shared">crypt_shared</a> cannot analyze a query, it's still useful to provide auto decryption. Just like static
+<a href="#crypt_shared">crypt_shared</a> cannot analyze a query, it’s still useful to provide auto decryption. Just like static
 program analysis cannot always prove that a runtime invariant holds,
 <a href="#mongocryptd">mongocryptd</a>/<a href="#crypt_shared">crypt_shared</a> cannot always prove that a query will be safe with respect to
 encryption at runtime.</p>
 <h3 id="why-not-require-compatibility-between-mongocryptd-and-the-server"><a class="header" href="#why-not-require-compatibility-between-mongocryptd-and-the-server">Why not require compatibility between mongocryptd and the server?</a></h3>
-<p>It isn't necessary or unsafe if mongocryptd parses an old version of MQL. Consider what happens when we add a new
+<p>It isn’t necessary or unsafe if mongocryptd parses an old version of MQL. Consider what happens when we add a new
 operator, <code>$newOperator</code>. If it properly encrypts a value in the <code>$newOperator</code> expression and sends it to an old server
-that doesn't have <code>$newOperator</code>, that's a mistake but not a security hole. Also if the app passes a query with
-<code>$newOperator</code> to mongocryptd, and mongocryptd doesn't know about <code>$newOperator</code>, then it will error,
+that doesn’t have <code>$newOperator</code>, that’s a mistake but not a security hole. Also if the app passes a query with
+<code>$newOperator</code> to mongocryptd, and mongocryptd doesn’t know about <code>$newOperator</code>, then it will error,
 <code>"Unrecognized operator $newOperator"</code> or something. Also a mistake, not a security hole.</p>
-<p>So long as mongocryptd errors on unrecognized expressions, we don't need version compatibility between the mongocryptd
+<p>So long as mongocryptd errors on unrecognized expressions, we don’t need version compatibility between the mongocryptd
 and server for the sake of security.</p>
 <h3 id="why-cache-keys"><a class="header" href="#why-cache-keys">Why cache keys?</a></h3>
-<p>We can't re-fetch the key on each operation, the performance goal for this project requires us to cache. We do need a
+<p>We can’t re-fetch the key on each operation, the performance goal for this project requires us to cache. We do need a
 revocation mechanism, based upon periodic checking from the client. Initially this window will not be configurable.</p>
 <h3 id="why-require-including-a-c-library"><a class="header" href="#why-require-including-a-c-library">Why require including a C library?</a></h3>
 <ul>
 <li>libmongocrypt deduplicates a lot of the work: JSONSchema cache, KMS message construction/parsing, key caching, and
 encryption/decryption.</li>
-<li>Our "best-effort" of storing decrypted key material securely is best accomplished with a C library.</li>
+<li>Our “best-effort” of storing decrypted key material securely is best accomplished with a C library.</li>
 <li>Having crypto done in one centralized C library makes it much easier to audit the crypto code.</li>
 </ul>
 <h3 id="why-warn-if-a-local-schema-does-not-have-encrypted-fields"><a class="header" href="#why-warn-if-a-local-schema-does-not-have-encrypted-fields">Why warn if a local schema does not have encrypted fields?</a></h3>
-<p>Because that is the only use of local schemas. No other JSONSchema validators have any function. It's likely the user
+<p>Because that is the only use of local schemas. No other JSONSchema validators have any function. It’s likely the user
 misconfigured encryption.</p>
 <h3 id="why-limit-to-one-top-level-jsonschema"><a class="header" href="#why-limit-to-one-top-level-jsonschema">Why limit to one top-level <code>$jsonSchema</code>?</a></h3>
 <ul>
 <li>If we allow siblings, we can run into cases where the user specifies a top-level <code>$and/$or</code> or any arbitrary
-match-expression that could have nested <code>$jsonSchema</code>'s.</li>
+match-expression that could have nested <code>$jsonSchema</code>’s.</li>
 <li>Furthermore, the initial versions of <a href="#mongocryptd">mongocryptd</a> and <a href="#crypt_shared">crypt_shared</a> are only
 implementing query analysis when the validator consists of a single <code>$jsonSchema</code> predicate. This helps to simplify
 the <a href="#mongocryptd">mongocryptd</a> and <a href="#crypt_shared">crypt_shared</a> logic, and unifies it with the case where users
@@ -1982,16 +2033,16 @@ configure their schemas directly in the driver.</li>
 local schemas.</p>
 <h3 id="why-not-support-other-aws-auth-mechanisms"><a class="header" href="#why-not-support-other-aws-auth-mechanisms">Why not support other AWS auth mechanisms?</a></h3>
 <p>We could potentially authenticate against AWS in a more sophisticated way, like read credentials from ~/.aws/credentials
-or assuming a role with EC2 instance metadata. But we've decided to implement the simplest authentication mechanism for
+or assuming a role with EC2 instance metadata. But we’ve decided to implement the simplest authentication mechanism for
 v1, and defer more sophisticated ones as future work.</p>
 <h3 id="why-not-pass-a-uri-for-external-key-vault-collections-instead-of-a-mongoclient"><a class="header" href="#why-not-pass-a-uri-for-external-key-vault-collections-instead-of-a-mongoclient">Why not pass a URI for external key vault collections instead of a MongoClient?</a></h3>
 <p>Some configuration on a MongoClient can only be done programmatically. E.g. in Java TLS configuration can only be done
 at runtime since it is abstracted in an SSLContext which cannot be accessed or altered by the driver.</p>
 <h3 id="what-happened-to-multiple-key-vault-collections"><a class="header" href="#what-happened-to-multiple-key-vault-collections">What happened to multiple key vault collections?</a></h3>
-<p>An earlier revision of this specification supported multiple active key vaults with the notion of a "key vault
-collection alias". The key vault collection alias identified one of possibly many key vault collections that stored the
+<p>An earlier revision of this specification supported multiple active key vaults with the notion of a “key vault
+collection alias”. The key vault collection alias identified one of possibly many key vault collections that stored the
 key to decrypt the ciphertext. However, enforcing one key vault collection is a reasonable restriction for users. There
-isn't clear value in having multiple key vault collections. And having active multiple key vault collections is not
+isn’t clear value in having multiple key vault collections. And having active multiple key vault collections is not
 necessary to migrate key vault collections.</p>
 <h3 id="why-auto-encrypt-a-command-instead-of-a-wire-protocol-message"><a class="header" href="#why-auto-encrypt-a-command-instead-of-a-wire-protocol-message">Why auto encrypt a command instead of a wire protocol message?</a></h3>
 <ul>
@@ -2002,13 +2053,13 @@ passed to run command.</li>
 sequence, it does not seem worthwhile to impose extra complexity in this case.</li>
 </ul>
 <h3 id="why-is-a-failure-to-decrypt-always-an-error"><a class="header" href="#why-is-a-failure-to-decrypt-always-an-error">Why is a failure to decrypt always an error?</a></h3>
-<p>In the original design we proposed <em>not</em> to error if decryption failed due to a missing key. But, it's not clear this is
-a needed functionality, it goes against our principle of "Minimize API", and there's a simple recourse for users: bypass
+<p>In the original design we proposed <em>not</em> to error if decryption failed due to a missing key. But, it’s not clear this is
+a needed functionality, it goes against our principle of “Minimize API”, and there’s a simple recourse for users: bypass
 mongocryptd and explicitly decrypt instead.</p>
 <h3 id="why-are-there-no-apm-events-for-mongocryptd"><a class="header" href="#why-are-there-no-apm-events-for-mongocryptd">Why are there no APM events for mongocryptd?</a></h3>
 <p>Though it may be helpful for debugging to expose APM events for mongocryptd, mongocryptd is an implementation detail
-we'd like to have the freedom to remove in the future. So we want to expose mongocryptd as little as possible.</p>
-<h3 id="why-arent-we-creating-a-unique-index-in-the-key-vault-collection"><a class="header" href="#why-arent-we-creating-a-unique-index-in-the-key-vault-collection">Why aren't we creating a unique index in the key vault collection?</a></h3>
+we’d like to have the freedom to remove in the future. So we want to expose mongocryptd as little as possible.</p>
+<h3 id="why-arent-we-creating-a-unique-index-in-the-key-vault-collection"><a class="header" href="#why-arent-we-creating-a-unique-index-in-the-key-vault-collection">Why aren’t we creating a unique index in the key vault collection?</a></h3>
 <p>There should be a unique index on the <code>keyAltNames</code> field with a partial index filter for only documents where
 <code>keyAltNames</code> exists. Although GridFS automatically creates indexes as a convenience upon first write, it has been
 problematic before due to requiring the <code>createIndex</code> privilege, which a user might not have if they are just querying
@@ -2036,7 +2087,7 @@ sockets. See the SDAM spec description of
 <a href="../server-discovery-and-monitoring/server-monitoring.html#cooldownms">cooldownMS</a>.</p>
 <p>Because single threaded drivers may exceed <code>serverSelectionTimeoutMS</code> by the duration of the topology scan,
 <code>connectTimeoutMS</code> is also reduced.</p>
-<h3 id="whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client"><a class="header" href="#whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client">What's the deal with metadataClient, keyVaultClient, and the internal client?</a></h3>
+<h3 id="whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client"><a class="header" href="#whats-the-deal-with-metadataclient-keyvaultclient-and-the-internal-client">What’s the deal with metadataClient, keyVaultClient, and the internal client?</a></h3>
 <p>When automatically encrypting a command, the driver runs:</p>
 <ul>
 <li>a <code>listCollections</code> command to determine if the target collection has a remote schema. This uses the <code>metadataClient</code>.</li>
@@ -2099,7 +2150,7 @@ not a compelling use case to use both CSFLE and Queryable Encryption in the same
 <code>encryptedFieldsMap</code> and <code>schemaMap</code>. <a href="#libmongocrypt">libmongocrypt</a> will error if the same collection is specified in
 a <code>schemaMap</code> and <code>encryptedFieldsMap</code>.</p>
 <h3 id="why-is-bypassqueryanalysis-needed"><a class="header" href="#why-is-bypassqueryanalysis-needed">Why is bypassQueryAnalysis needed?</a></h3>
-<p>Commands containing payloads for encrypted indexed fields require a top-level "encryptionInformation" field for the
+<p>Commands containing payloads for encrypted indexed fields require a top-level “encryptionInformation” field for the
 server processing. <code>bypassQueryAnalysis</code> enables the use case of Explicit Encryption without the MongoDB Enterprise
 Advanced licensed <a href="#crypt_shared">crypt_shared</a> library or mongocryptd process.</p>
 <p>Here is an example:</p>
@@ -2186,9 +2237,9 @@ desired.</p>
 <h3 id="why-do-on-demand-kms-credentials-not-support-named-kms-providers"><a class="header" href="#why-do-on-demand-kms-credentials-not-support-named-kms-providers">Why do on-demand KMS credentials not support named KMS providers?</a></h3>
 <p>libmongocrypt supports supplying KMS providers credentials on-demand. This enables obtaining credentials from the host
 machine. Supporting on-demand credentials was added as part of these projects:
-<a href="https://jira.mongodb.org/browse/DRIVERS-2280">DRIVERS-2280</a> ("aws"),
-<a href="https://jira.mongodb.org/browse/DRIVERS-2377">DRIVERS-2377</a> ("gcp"),
-<a href="https://jira.mongodb.org/browse/DRIVERS-2411">DRIVERS-2411</a> ("azure").</p>
+<a href="https://jira.mongodb.org/browse/DRIVERS-2280">DRIVERS-2280</a> (“aws”),
+<a href="https://jira.mongodb.org/browse/DRIVERS-2377">DRIVERS-2377</a> (“gcp”),
+<a href="https://jira.mongodb.org/browse/DRIVERS-2411">DRIVERS-2411</a> (“azure”).</p>
 <p>On-demand credentials are primarily intended to support passing credentials assigned in an environment. Supporting
 on-demand credentials for more than one KMS provider of the same type is not expected to be useful. Supporting on-demand
 KMS credentials would require added work in drivers inspecting the KMS providers when obtaining credentials, as well as
@@ -2200,13 +2251,13 @@ if needed.</p>
 ensuring that the key encryption key never leaves the server.</p>
 <h2 id="future-work"><a class="header" href="#future-work">Future work</a></h2>
 <h3 id="make-libmonogocrypt-cache-window-configurable"><a class="header" href="#make-libmonogocrypt-cache-window-configurable">Make libmonogocrypt cache window configurable</a></h3>
-<p>There's a principle at MongoDB, "no knobs", that we should honor wherever possible. Configurability is bad, mandating
+<p>There’s a principle at MongoDB, “no knobs”, that we should honor wherever possible. Configurability is bad, mandating
 one well-chosen value is good. But if our default caching behavior is discovered unsuitable for some use cases we may
 add configuration as part of future work.</p>
 <h3 id="apm-events-for-encryption-or-key-service-interaction"><a class="header" href="#apm-events-for-encryption-or-key-service-interaction">APM events for encryption or key service interaction</a></h3>
 <p>APM events include the encrypted data before it is sent to the server, or before it is decrypted in a reply. Therefore,
 app developers can determine whether or not encryption occurred by inspecting the values in their command monitoring
-events. However, it might be useful to offer separate "encryption" and "decryption" events, as well as interactions with
+events. However, it might be useful to offer separate “encryption” and “decryption” events, as well as interactions with
 the key service.</p>
 <h3 id="remove-mongocryptd"><a class="header" href="#remove-mongocryptd">Remove mongocryptd</a></h3>
 <p>A future version plans to remove the <a href="#mongocryptd">mongocryptd</a> process and fold the logic into <code>libmongocrypt</code> using
@@ -2221,11 +2272,11 @@ connect to the external key vault collection without additional user supplied co
 <h3 id="batch-listcollections-requests-on-expired-schema-cache-entries"><a class="header" href="#batch-listcollections-requests-on-expired-schema-cache-entries">Batch listCollections requests on expired schema cache entries</a></h3>
 <p>Currently libmongocrypt will refresh schemas one at a time.</p>
 <h3 id="add-a-maximum-size-for-the-jsonschemakey-cache"><a class="header" href="#add-a-maximum-size-for-the-jsonschemakey-cache">Add a maximum size for the JSONSchema/key cache.</a></h3>
-<p>They're unbounded currently.</p>
+<p>They’re unbounded currently.</p>
 <h3 id="recalculate-message-size-bounds-dynamically"><a class="header" href="#recalculate-message-size-bounds-dynamically">Recalculate message size bounds dynamically</a></h3>
 <p>Instead of using one reduced maxMessageSizeBytes, libmongocrypt could hide the complexity of properly resplitting bulk
 writes after encryption. It could use a simple back-off algorithm: try marking a command with maxMessageSizeBytes=24MB.
-If after marking we determine that's too large, try again with maxMessageSizeBytes=12MB and so on. And in the end
+If after marking we determine that’s too large, try again with maxMessageSizeBytes=12MB and so on. And in the end
 libmongocrypt would create multiple OP_MSGs to send.</p>
 <h3 id="support-sessions-in-key-management-functions"><a class="header" href="#support-sessions-in-key-management-functions">Support sessions in key management functions</a></h3>
 <p>Key management functions currently assume there are no concurrent accesses of the key vault collection being operated
@@ -2259,7 +2310,7 @@ explicit session parameter as described in the <a href="../sessions/driver-sessi
 <p>2024-05-31: Replace rangePreview with range.</p>
 </li>
 <li>
-<p>2024-03-20: Add <code>delegated</code> option to "kmip" KMS provider</p>
+<p>2024-03-20: Add <code>delegated</code> option to “kmip” KMS provider</p>
 </li>
 <li>
 <p>2024-02-27: Migrated from reStructuredText to Markdown.</p>
@@ -2365,7 +2416,7 @@ queryable encrypted fields in a new collection.</p>
 <p>2022-05-11: Update create state collections to use clustered collections. Drop data collection after state collection.</p>
 </li>
 <li>
-<p>2022-05-03: Add queryType, contentionFactor, and "Indexed" and "Unindexed" to algorithm.</p>
+<p>2022-05-03: Add queryType, contentionFactor, and “Indexed” and “Unindexed” to algorithm.</p>
 </li>
 <li>
 <p>2022-04-29: Add bypassQueryAnalysis option</p>
@@ -2380,22 +2431,22 @@ queryable encrypted fields in a new collection.</p>
 <p>2022-01-19: Require that timeouts be applied per the CSOT spec</p>
 </li>
 <li>
-<p>2021-11-04: Add "kmip" KMS provider</p>
+<p>2021-11-04: Add “kmip” KMS provider</p>
 </li>
 <li>
 <p>2021-04-08: Updated to use hello and legacy hello</p>
 </li>
 <li>
-<p>2021-01-22: Add sessionToken option to "aws" KMS provider</p>
+<p>2021-01-22: Add sessionToken option to “aws” KMS provider</p>
 </li>
 <li>
 <p>2020-12-12: Add metadataClient option and internal client</p>
 </li>
 <li>
-<p>2020-10-19: Add "azure" and "gcp" KMS providers</p>
+<p>2020-10-19: Add “azure” and “gcp” KMS providers</p>
 </li>
 <li>
-<p>2019-10-11: Add "endpoint" to AWS masterkey</p>
+<p>2019-10-11: Add “endpoint” to AWS masterkey</p>
 </li>
 <li>
 <p>2019-12-17: Clarified <code>bypassAutoEncryption</code> and managing <code>mongocryptd</code></p>
@@ -2410,27 +2461,12 @@ queryable encrypted fields in a new collection.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../gridfs/gridfs-spec.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../bson-binary-encrypted/binary-encrypted.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../gridfs/gridfs-spec.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../bson-binary-encrypted/binary-encrypted.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

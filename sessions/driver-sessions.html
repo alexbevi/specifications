@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,32 +159,32 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.6</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>Version 3.6 of the server introduces the concept of logical sessions for clients. A session is an abstract concept that
 represents a set of sequential operations executed by an application that are related in some way. This specification is
 limited to how applications start and end sessions. Other specifications define various ways in which sessions are used
 (e.g. causally consistent reads, retryable writes, or transactions).</p>
 <p>This specification also discusses how drivers participate in distributing the cluster time throughout a deployment, a
-process known as "gossipping the cluster time". While gossipping the cluster time is somewhat orthogonal to sessions,
+process known as “gossipping the cluster time”. While gossipping the cluster time is somewhat orthogonal to sessions,
 any driver that implements sessions MUST also implement gossipping the cluster time, so it is included in this
 specification.</p>
 <h2 id="definitions"><a class="header" href="#definitions">Definitions</a></h2>
 <h3 id="meta"><a class="header" href="#meta">META</a></h3>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <p><strong>ClientSession</strong></p>
 <p>The driver object representing a client session and the operations that can be performed on it. Depending on the
 language a driver is written in this might be an interface or a class. See also <code>ServerSession</code>.</p>
 <p><strong>Deployment</strong></p>
-<p>A set of servers that are all part of a single MongoDB cluster. We avoid the word "cluster" because some people
-interpret "cluster" to mean "sharded cluster".</p>
+<p>A set of servers that are all part of a single MongoDB cluster. We avoid the word “cluster” because some people
+interpret “cluster” to mean “sharded cluster”.</p>
 <p><strong>Explicit session</strong></p>
 <p>A session that was started explicitly by the application by calling <code>startSession</code> and passed as an argument to an
 operation.</p>
 <p><strong>MongoClient</strong></p>
-<p>The root object of a driver's API. MAY be named differently in some drivers.</p>
+<p>The root object of a driver’s API. MAY be named differently in some drivers.</p>
 <p><strong>Implicit session</strong></p>
 <p>A session that was started implicitly by the driver because the application called an operation without providing an
 explicit session.</p>
@@ -209,22 +208,22 @@ include causally consistent reads and retryable writes.</p>
 <p>The current configuration and state of a deployment.</p>
 <p><strong>Unacknowledged writes</strong></p>
 <p>Unacknowledged writes are write operations that are sent to the server without waiting for a reply acknowledging the
-write. See the "When using unacknowledged writes" section below for information on how unacknowledged writes interact
+write. See the “When using unacknowledged writes” section below for information on how unacknowledged writes interact
 with sessions.</p>
 <p><strong>Network error</strong></p>
 <p>Any network exception writing to or reading from a socket (e.g. a socket timeout or error).</p>
 <p><strong>SDAM</strong></p>
-<p>An abbreviated form of "Server Discovery and Monitoring", specification defined in
+<p>An abbreviated form of “Server Discovery and Monitoring”, specification defined in
 <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring Specification</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <p>Drivers currently have no concept of a session. The driver API will be expanded to provide a way for applications to
 start and end sessions and to execute operations in the context of a session. The goal is to expand the API in a way
-that introduces no backward breaking changes. Existing applications that don't use sessions don't need to be changed,
-and new applications that don't need sessions can continue to be written using the existing API.</p>
+that introduces no backward breaking changes. Existing applications that don’t use sessions don’t need to be changed,
+and new applications that don’t need sessions can continue to be written using the existing API.</p>
 <p>To use sessions an application will call new (or overloaded) methods that take a session parameter.</p>
 <h2 id="naming-variations"><a class="header" href="#naming-variations">Naming variations</a></h2>
 <p>This specification defines names for new methods and types. To the extent possible, these names SHOULD be used by
-drivers. However, where a driver and/or language's naming conventions differ, those naming conventions SHOULD be used.
+drivers. However, where a driver and/or language’s naming conventions differ, those naming conventions SHOULD be used.
 For example, a driver might name a method <code>StartSession</code> or <code>start_session</code> instead of <code>startSession</code>, or might name a
 type <code>client_session</code> instead of <code>ClientSession</code>.</p>
 <h2 id="high-level-summary-of-the-api-changes-for-sessions"><a class="header" href="#high-level-summary-of-the-api-changes-for-sessions">High level summary of the API changes for sessions</a></h2>
@@ -281,7 +280,7 @@ reported the first time the session is used for an operation (See
 started implicitly by the driver because the application called an operation without providing an explicit session.
 Internally, a driver must be able to distinguish between explicit and implicit sessions, but no public API for this is
 necessary because an application will never see an implicit session.</p>
-<p>The motivation for starting an implicit session for all methods that don't take an explicit session parameter is to make
+<p>The motivation for starting an implicit session for all methods that don’t take an explicit session parameter is to make
 sure that all commands that are sent to the server are tagged with a session ID. This improves the ability of an
 operations team to monitor (and kill if necessary) long running operations. Tagging an operation with a session ID is
 specially useful if a deployment wide operation needs to be killed.</p>
@@ -290,9 +289,9 @@ specially useful if a deployment wide operation needs to be killed.</p>
 authenticating multiple users at once MAY continue to do so, but MUST NOT allow sessions to be used under such
 circumstances.</p>
 <p>If <code>startSession</code> is called when multiple users are authenticated drivers MUST raise an error with the error message
-"Cannot call startSession when multiple users are authenticated."</p>
+“Cannot call startSession when multiple users are authenticated.”</p>
 <p>If a driver allows authentication to be changed on the fly (presumably few still do) the driver MUST either prevent
-<code>ClientSession</code> instances from being used with a connection that doesn't have matching authentication or MUST return an
+<code>ClientSession</code> instances from being used with a connection that doesn’t have matching authentication or MUST return an
 error if such use is attempted.</p>
 <h2 id="clientsession"><a class="header" href="#clientsession">ClientSession</a></h2>
 <p><code>ClientSession</code> instances are not thread safe or fork safe. They can only be used by one thread or process at a time.</p>
@@ -326,9 +325,9 @@ does not report cluster times.</p>
 <p>This property returns the session ID of this session. Note that since <code>ServerSessions</code> are pooled, different
 <code>ClientSession</code> instances can have the same session ID, but never at the same time.</p>
 <h3 id="advanceclustertime"><a class="header" href="#advanceclustertime">advanceClusterTime</a></h3>
-<p>This method advances the <code>clusterTime</code> for a session. If the new <code>clusterTime</code> is greater than the session's current
-<code>clusterTime</code> then the session's <code>clusterTime</code> MUST be advanced to the new <code>clusterTime</code>. If the new <code>clusterTime</code> is
-less than or equal to the session's current <code>clusterTime</code> then the session's <code>clusterTime</code> MUST NOT be changed.</p>
+<p>This method advances the <code>clusterTime</code> for a session. If the new <code>clusterTime</code> is greater than the session’s current
+<code>clusterTime</code> then the session’s <code>clusterTime</code> MUST be advanced to the new <code>clusterTime</code>. If the new <code>clusterTime</code> is
+less than or equal to the session’s current <code>clusterTime</code> then the session’s <code>clusterTime</code> MUST NOT be changed.</p>
 <p>This method MUST NOT advance the <code>clusterTime</code> in <code>MongoClient</code> because we have no way of verifying that the supplied
 <code>clusterTime</code> is valid. If the <code>clusterTime</code> in <code>MongoClient</code> were set to an invalid value all future operations with
 this <code>MongoClient</code> would result in the server returning an error. The <code>clusterTime</code> in <code>MongoClient</code> should only be
@@ -359,7 +358,7 @@ merely to describe the operation of the server session pool.</p>
 <p>This property returns the server session ID.</p>
 <h3 id="lastuse"><a class="header" href="#lastuse">lastUse</a></h3>
 <p>The driver MUST update the value of this property with the current DateTime every time the server session ID is sent to
-the server. This allows the driver to track with reasonable accuracy the server's view of when a server session was last
+the server. This allows the driver to track with reasonable accuracy the server’s view of when a server session was last
 used.</p>
 <h3 id="creating-a-serversession"><a class="header" href="#creating-a-serversession">Creating a ServerSession</a></h3>
 <p>When a driver needs to create a new <code>ServerSession</code> instance the only information it needs is the session ID to use for
@@ -430,7 +429,7 @@ the same session ID.</p>
 <p>If a driver decides to run a <code>KILLCURSORS</code> command on the cursor, it also MAY be run using the same session ID. See the
 Exceptions below for when it is permissible to not include a session ID in a <code>KILLCURSORS</code> command.</p>
 <h2 id="sessions-and-connections"><a class="header" href="#sessions-and-connections">Sessions and Connections</a></h2>
-<p>To reduce the number of <code>ServerSessions</code> created, the driver MUST only obtain an implicit session's <code>ServerSession</code>
+<p>To reduce the number of <code>ServerSessions</code> created, the driver MUST only obtain an implicit session’s <code>ServerSession</code>
 after it successfully checks out a connection. A driver SHOULD NOT attempt to release the acquired session before
 connection check in.</p>
 <p>Explicit sessions MAY be changed to allocate a server session similarly.</p>
@@ -473,10 +472,10 @@ these are fundamentally incompatible goals, drivers MUST NOT append session ID t
 so that the resulting cursors have no associated session ID and thus can be used in parallel.</p>
 <h3 id="when-sending-a-killcursors-command"><a class="header" href="#when-sending-a-killcursors-command">When sending a killCursors command</a></h3>
 <p>A driver MAY omit a session ID in <code>killCursors</code> commands for two reasons. First, <code>killCursors</code> is only ever sent to a
-particular server, so operation teams wouldn't need the <code>lsid</code> for cluster-wide killOp. An admin can manually kill the
+particular server, so operation teams wouldn’t need the <code>lsid</code> for cluster-wide killOp. An admin can manually kill the
 op with its operation id in the case that it is slow. Secondly, some drivers have a background cursor reaper to kill
-cursors that aren't exhausted and closed. Due to GC semantics, it can't use the same <code>lsid</code> for <code>killCursors</code> as was
-used for a cursor's <code>find</code> and <code>getMore</code>, so there's no point in using any <code>lsid</code> at all.</p>
+cursors that aren’t exhausted and closed. Due to GC semantics, it can’t use the same <code>lsid</code> for <code>killCursors</code> as was
+used for a cursor’s <code>find</code> and <code>getMore</code>, so there’s no point in using any <code>lsid</code> at all.</p>
 <h3 id="when-multiple-users-are-authenticated-and-the-session-is-implicit"><a class="header" href="#when-multiple-users-are-authenticated-and-the-session-is-implicit">When multiple users are authenticated and the session is implicit</a></h3>
 <p>The driver MUST NOT send a session ID from an implicit session when multiple users are authenticated. If possible the
 driver MUST NOT start an implicit session when multiple users are authenticated. Alternatively, if the driver cannot
@@ -484,7 +483,7 @@ determine whether multiple users are authenticated at the point in time that an 
 driver MUST ignore any implicit sessions that subsequently end up being used on a connection that has multiple users
 authenticated.</p>
 <h3 id="when-using-unacknowledged-writes"><a class="header" href="#when-using-unacknowledged-writes">When using unacknowledged writes</a></h3>
-<p>A session ID MUST NOT be used simultaneously by more than one operation. Since drivers don't wait for a response for an
+<p>A session ID MUST NOT be used simultaneously by more than one operation. Since drivers don’t wait for a response for an
 unacknowledged write a driver would not know when the session ID could be reused. In theory a driver could use a new
 session ID for each unacknowledged write, but that would result in many orphaned sessions building up at the server.</p>
 <p>Therefore drivers MUST NOT send a session ID with unacknowledged writes under any circumstances:</p>
@@ -535,8 +534,8 @@ interface IncorrectLSIDUsageExample {
   $clusterTime?: ClusterTime;
 }
 </code></pre>
-<p>The <code>$clusterTime</code> field should only be sent when gossipping the cluster time. See the section "Gossipping the cluster
-time" for information on <code>$clusterTime</code>.</p>
+<p>The <code>$clusterTime</code> field should only be sent when gossipping the cluster time. See the section “Gossipping the cluster
+time” for information on <code>$clusterTime</code>.</p>
 <p>The <code>startSession</code> command MUST be sent to the <code>admin</code> database.</p>
 <p>The server response has the following format:</p>
 <pre><code class="language-typescript">interface StartSessionResponse {
@@ -563,8 +562,8 @@ command requires a network round trip.</p>
   $clusterTime?: ClusterTime;
 }
 </code></pre>
-<p>The <code>$clusterTime</code> field should only be sent when gossipping the cluster time. See the section of "Gossipping the
-cluster time" for information on <code>$clusterTime</code>.</p>
+<p>The <code>$clusterTime</code> field should only be sent when gossipping the cluster time. See the section of “Gossipping the
+cluster time” for information on <code>$clusterTime</code>.</p>
 <p>The <code>endSessions</code> command MUST be sent to the <code>admin</code> database.</p>
 <p>The server response has the following format:</p>
 <pre><code class="language-typescript">interface EndSessionResponse {
@@ -658,7 +657,7 @@ collected)</li>
 <ul>
 <li>If this session is marked dirty (i.e. it was involved in a network error) discard it (let it be garbage collected)</li>
 <li>If it will expire in less than one minute discard it (let it be garbage collected)</li>
-<li>If it won't expire for at least one minute add it to the front of the queue</li>
+<li>If it won’t expire for at least one minute add it to the front of the queue</li>
 </ul>
 </li>
 </ol>
@@ -666,7 +665,7 @@ collected)</li>
 <p>Drivers MUST gossip the cluster time when connected to a deployment that uses cluster times. However, drivers MUST NOT
 gossip cluster time on SDAM commands.</p>
 <p>Gossipping the cluster time is a process in which the driver participates in distributing the logical cluster time in a
-deployment. Drivers learn the current cluster time (from a particular server's perspective) in responses they receive
+deployment. Drivers learn the current cluster time (from a particular server’s perspective) in responses they receive
 from servers. Drivers in turn forward the highest cluster time they have seen so far to any server they subsequently
 send commands to.</p>
 <p>A driver detects that it MUST participate in gossipping the cluster time when it sees a <code>$clusterTime</code> in a response
@@ -698,7 +697,7 @@ field called <code>$clusterTime</code>, in the same format as it was received in
 below).</p>
 <h3 id="how-to-compute-the-clustertime-to-send-to-a-server"><a class="header" href="#how-to-compute-the-clustertime-to-send-to-a-server">How to compute the <code>$clusterTime</code> to send to a server</a></h3>
 <p>When sending <code>$clusterTime</code> to the server the driver MUST send the greater of the <code>clusterTime</code> values from
-<code>MongoClient</code> and <code>ClientSession</code>. Normally a session's <code>clusterTime</code> will be less than or equal to the <code>clusterTime</code> in
+<code>MongoClient</code> and <code>ClientSession</code>. Normally a session’s <code>clusterTime</code> will be less than or equal to the <code>clusterTime</code> in
 <code>MongoClient</code>, but it could be greater than the <code>clusterTime</code> in <code>MongoClient</code> if <code>advanceClusterTime</code> was called with a
 <code>clusterTime</code> that came from somewhere else.</p>
 <p>A driver MUST NOT use the <code>clusterTime</code> of a <code>ClientSession</code> anywhere else except when executing an operation with this
@@ -743,28 +742,28 @@ restarted. To fix this issue we decided it was more robust to stop gossiping on 
 <h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
 <p>Drivers currently have no concept of a session. The driver API needs to be extended to support sessions.</p>
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
-<p>The goal is to modify the driver API in such a way that existing programs that don't use sessions continue to compile
+<p>The goal is to modify the driver API in such a way that existing programs that don’t use sessions continue to compile
 and run correctly. This goal is met by defining new methods (or overloads) that take a session parameter. An application
 does not need to be modified unless it wants to take advantage of the new features supported by sessions.</p>
 <h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
 <p>The API changes to support sessions extend the existing API but do not introduce any backward breaking changes. Existing
-programs that don't use sessions continue to compile and run correctly.</p>
+programs that don’t use sessions continue to compile and run correctly.</p>
 <h2 id="reference-implementation-always-required"><a class="header" href="#reference-implementation-always-required">Reference Implementation (always required)</a></h2>
-<p>A reference implementation must be completed before any spec is given status "Final", but it need not be completed
-before the spec is "Accepted". While there is merit to the approach of reaching consensus on the specification and
-rationale before writing code, the principle of "rough consensus and running code" is still useful when it comes to
+<p>A reference implementation must be completed before any spec is given status “Final”, but it need not be completed
+before the spec is “Accepted”. While there is merit to the approach of reaching consensus on the specification and
+rationale before writing code, the principle of “rough consensus and running code” is still useful when it comes to
 resolving many discussions of spec details. A final reference implementation must include test code and documentation.</p>
 <p>The C and C# drivers will do initial POC implementations.</p>
 <h2 id="future-work-optional"><a class="header" href="#future-work-optional">Future work (optional)</a></h2>
 <p>Use this section to discuss any possible work for a future spec. This could cover issues where no consensus could be
-reached but that don't block this spec, changes that were rejected due to unclear use cases, etc.</p>
+reached but that don’t block this spec, changes that were rejected due to unclear use cases, etc.</p>
 <h2 id="open-questions"><a class="header" href="#open-questions">Open questions</a></h2>
 <h2 id="qa"><a class="header" href="#qa">Q&amp;A</a></h2>
 <h3 id="why-do-we-say-drivers-must-not-attempt-to-detect-unsafe-multi-threaded-or-multi-process-use-of-clientsession"><a class="header" href="#why-do-we-say-drivers-must-not-attempt-to-detect-unsafe-multi-threaded-or-multi-process-use-of-clientsession">Why do we say drivers MUST NOT attempt to detect unsafe multi-threaded or multi-process use of <code>ClientSession</code>?</a></h3>
-<p>Because doing so would provide an illusion of safety. It doesn't make these instances thread safe. And even if when
-testing an application no such exceptions are encountered, that doesn't prove anything. The application might still be
-using the instances in a thread-unsafe way and just didn't happen to do so during a test run. The final argument is that
-checking this would require overhead that doesn't provide any clear benefit.</p>
+<p>Because doing so would provide an illusion of safety. It doesn’t make these instances thread safe. And even if when
+testing an application no such exceptions are encountered, that doesn’t prove anything. The application might still be
+using the instances in a thread-unsafe way and just didn’t happen to do so during a test run. The final argument is that
+checking this would require overhead that doesn’t provide any clear benefit.</p>
 <h3 id="why-is-session-an-explicit-parameter"><a class="header" href="#why-is-session-an-explicit-parameter">Why is session an explicit parameter?</a></h3>
 <p>A previous draft proposed that ClientSession would be a MongoClient-like object added to the object hierarchy:</p>
 <pre><code class="language-javascript">session = client.startSession(...)
@@ -779,7 +778,7 @@ with a session, which is then an implied parameter to any operations executed us
 <p>This API was rejected, with the justification that a ClientSession does not naturally belong to the state of a
 MongoCollection. MongoCollection has up to now been a stable long-lived object that could be widely shared, and in most
 drivers it is thread safe. Once we associate a ClientSession with it, the MongoCollection object becomes short-lived and
-is no longer thread safe. It is a bad sign that MongoCollection's thread safety and lifetime vary depending on how its
+is no longer thread safe. It is a bad sign that MongoCollection’s thread safety and lifetime vary depending on how its
 parent MongoDatabase is created.</p>
 <p>Instead, we require users to pass session as a parameter to each function:</p>
 <pre><code class="language-javascript">session = client.startSession(...)
@@ -803,9 +802,9 @@ the previous operation to complete. For example, a transactional write will bloc
 block the retry attempt until the initial attempt completes at which point the retry attempt will continue executing.</p>
 <p>For retryable reads that use an implicit session, drivers could choose to use a new server session for the retry attempt
 however this would lose the information that these two reads are related.</p>
-<h3 id="why-dont-drivers-run-the-endsessions-command-to-cleanup-dirty-server-sessions"><a class="header" href="#why-dont-drivers-run-the-endsessions-command-to-cleanup-dirty-server-sessions">Why don't drivers run the endSessions command to cleanup dirty server sessions?</a></h3>
+<h3 id="why-dont-drivers-run-the-endsessions-command-to-cleanup-dirty-server-sessions"><a class="header" href="#why-dont-drivers-run-the-endsessions-command-to-cleanup-dirty-server-sessions">Why don’t drivers run the endSessions command to cleanup dirty server sessions?</a></h3>
 <p>Drivers do not run the endSessions command when discarding a dirty server session because disconnects should be
-relatively rare and the server won't normally accumulate a large number of abandoned dirty sessions. Any abandoned
+relatively rare and the server won’t normally accumulate a large number of abandoned dirty sessions. Any abandoned
 sessions will be automatically cleaned up by the server after the configured <code>logicalSessionTimeoutMinutes</code>.</p>
 <h3 id="why-must-drivers-wait-to-consume-a-server-session-until-after-a-connection-is-checked-out"><a class="header" href="#why-must-drivers-wait-to-consume-a-server-session-until-after-a-connection-is-checked-out">Why must drivers wait to consume a server session until after a connection is checked out?</a></h3>
 <p>The problem that may occur is when the number of concurrent application requests are larger than the number of available
@@ -813,14 +812,14 @@ connections, the driver may generate many more implicit sessions than connection
 100 threads, 100 implicit sessions may be created. This increases the load on the server since session state is cached
 in memory. In the worst case this kind of workload can hit the session limit and trigger TooManyLogicalSessions.</p>
 <p>In order to address this, drivers MUST NOT consume a server session id until after the connection is checked out. This
-change will limit the number of "in use" server sessions to no greater than an application's maxPoolSize.</p>
+change will limit the number of “in use” server sessions to no greater than an application’s maxPoolSize.</p>
 <p>The language here is specific about obtaining a server session as opposed to creating the implicit session to permit
 drivers to take an implementation approach where the implicit session creation logic largely remains unchanged. Implicit
-session creation can be left as is, as long as the underlying server resource isn't allocated until it is needed and,
+session creation can be left as is, as long as the underlying server resource isn’t allocated until it is needed and,
 known it will be used, after connection checkout succeeds.</p>
 <p>It is still possible that via explicit sessions or cursors, which hold on to the session they started with, a driver
 could over allocate sessions. But those scenarios are extenuating and outside the scope of solving in this spec.</p>
-<h3 id="why-should-drivers-not-attempt-to-release-a-serversession-before-checking-back-in-the-operations-connection"><a class="header" href="#why-should-drivers-not-attempt-to-release-a-serversession-before-checking-back-in-the-operations-connection">Why should drivers NOT attempt to release a serverSession before checking back in the operation's connection?</a></h3>
+<h3 id="why-should-drivers-not-attempt-to-release-a-serversession-before-checking-back-in-the-operations-connection"><a class="header" href="#why-should-drivers-not-attempt-to-release-a-serversession-before-checking-back-in-the-operations-connection">Why should drivers NOT attempt to release a serverSession before checking back in the operation’s connection?</a></h3>
 <p>There are a variety of cases, such as retryable operations or cursor creating operations, where a <code>serverSession</code> must
 remain acquired by the <code>ClientSession</code> after an operation is attempted. Attempting to account for all these scenarios
 has risks that do not justify the potential guaranteed <code>ServerSession</code> allocation limiting.</p>
@@ -869,27 +868,12 @@ has risks that do not justify the potential guaranteed <code>ServerSession</code
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../client-side-operations-timeout/client-side-operations-timeout.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../causal-consistency/causal-consistency.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../client-side-operations-timeout/client-side-operations-timeout.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../causal-consistency/causal-consistency.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

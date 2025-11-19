@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,15 +159,15 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>MongoDB Extended JSON is a string format for representing BSON documents. This specification defines the canonical
 format for representing each BSON type in the Extended JSON format. Thus, a tool that implements Extended JSON will be
 able to parse the output of any tool that emits Canonical Extended JSON. It also defines a Relaxed Extended JSON format
 that improves readability at the expense of type information preservation.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="naming"><a class="header" href="#naming">Naming</a></h3>
 <p>Acceptable naming deviations should fall within the basic style of the language. For example, <code>CanonicalExtendedJSON</code>
 would be a name in Java, where camel-case method names are used, but in Ruby <code>canonical_extended_json</code> would be
@@ -224,7 +223,12 @@ but MUST be read in a case-insensitive fashion.</li>
 <li>[Square brackets] specify a type constraint that restricts the specification to a particular range or set of values.</li>
 </ul>
 <h4 id="conversion-table"><a class="header" href="#conversion-table">Conversion table</a></h4>
-<div class="table-wrapper"><table><thead><tr><th><strong>BSON 1.1 Type or Convention</strong></th><th><strong>Canonical Extended JSON Format</strong></th><th><strong>Relaxed Extended JSON Format</strong></th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th><strong>BSON 1.1 Type or Convention</strong></th><th><strong>Canonical Extended JSON Format</strong></th><th><strong>Relaxed Extended JSON Format</strong></th></tr>
+</thead>
+<tbody>
 <tr><td>ObjectId</td><td><code>{"$oid": </code> &lt; ObjectId bytes as 24-character, big-endian <em>hex string</em> &gt; <code>}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
 <tr><td>Symbol</td><td><code>{"$symbol": </code> <em>string</em> <code>}</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
 <tr><td>String</td><td><em>string</em></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
@@ -249,24 +253,31 @@ but MUST be read in a case-insensitive fashion.</li>
 <tr><td>Array</td><td><em>array</em></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
 <tr><td>Boolean</td><td><code>true</code> or <code>false</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
 <tr><td>Null</td><td><code>null</code></td><td>&lt; Same as Canonical Extended JSON &gt;</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
-<hr />
+<hr>
 <h4 id="representation-of-non-finite-numeric-values"><a class="header" href="#representation-of-non-finite-numeric-values">Representation of Non-finite Numeric Values</a></h4>
 <p>Following the <a href="../bson-decimal128/decimal128.html#to-string-representation">Extended JSON format for the Decimal128 type</a>,
 non-finite numeric values are encoded as follows:</p>
-<div class="table-wrapper"><table><thead><tr><th><strong>Value</strong></th><th><strong>String</strong></th></tr></thead><tbody>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th><strong>Value</strong></th><th><strong>String</strong></th></tr>
+</thead>
+<tbody>
 <tr><td>Positive Infinity</td><td><code>Infinity</code></td></tr>
 <tr><td>Negative Infinity</td><td><code>-Infinity</code></td></tr>
 <tr><td>NaN (all variants)</td><td><code>NaN</code></td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>For example, a BSON floating-point number with a value of negative infinity would be encoded as Extended JSON as
 follows:</p>
 <pre><code class="language-javascript">{"$numberDouble": "-Infinity"}
 </code></pre>
 <h3 id="parsers"><a class="header" href="#parsers">Parsers</a></h3>
-<p>An Extended JSON parser (hereafter just "parser") is a tool that transforms an Extended JSON string into another
+<p>An Extended JSON parser (hereafter just “parser”) is a tool that transforms an Extended JSON string into another
 representation, such as BSON or a language-native data structure.</p>
 <p>By default, a parser MUST accept values in either Canonical Extended JSON format or Relaxed Extended JSON format as
 described in this specification. A parser MAY allow users to restrict parsing to only Canonical Extended JSON format or
@@ -356,9 +367,9 @@ Consequently, UUIDs are handled as per the convention described for the <code>Bi
     }
 }
 </code></pre>
-<blockquote>
-<p>[!NOTE]
-The above described type conversion assumes that UUID representation is set to <code>STANDARD</code>. See the
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The above described type conversion assumes that UUID representation is set to <code>STANDARD</code>. See the
 <a href="../bson-binary-uuid/uuid.html">UUID specification</a> for more information about UUID representations.</p>
 </blockquote>
 <p>While this transformation preserves BSON subtype information (since UUIDs can be represented as BSON subtype 3 <em>or</em> 4),
@@ -379,7 +390,7 @@ extended JSON representation of the UUID from the previous example:</p>
 that omit the URN prefix (usually <code>urn:uuid:</code>). Parsers MAY also accept textual representations of UUIDs that omit the
 hyphens between hex character groups (e.g. <code>c8edabc3f7384ca3b68dab92a91478a3</code>).</p>
 <h3 id="generators"><a class="header" href="#generators">Generators</a></h3>
-<p>An Extended JSON generator (hereafter just "generator") produces strings in an Extended JSON format.</p>
+<p>An Extended JSON generator (hereafter just “generator”) produces strings in an Extended JSON format.</p>
 <p>A generator MUST allow users to produce strings in either the Canonical Extended JSON format or the Relaxed Extended
 JSON format. If generators provide a default format, the default SHOULD be the Relaxed Extended JSON format.</p>
 <p>A generator MAY be capable of exporting strings that adhere to other formats, such as Legacy Extended JSON formats.</p>
@@ -572,11 +583,11 @@ for slightly broader use as well.</p>
 <p>There are various use cases for expressing BSON documents in a text rather that binary format. They broadly fall into
 two categories:</p>
 <ul>
-<li>Type preserving: for things like testing, where one has to describe the expected form of a BSON document, it's helpful
+<li>Type preserving: for things like testing, where one has to describe the expected form of a BSON document, it’s helpful
 to be able to precisely specify expected types. In particular, numeric types need to differentiate between Int32,
 Int64 and Double forms.</li>
 <li>JSON-like: for things like a web API, where one is sending a document (or a projection of a document) that only uses
-ordinary JSON type primitives, it's desirable to represent numbers in the native JSON format. This output is also
+ordinary JSON type primitives, it’s desirable to represent numbers in the native JSON format. This output is also
 the most human readable and is useful for debugging and documentation.</li>
 </ul>
 <p>The two formats in this specification address these two categories of use cases.</p>
@@ -586,7 +597,7 @@ to accept and output strings in other formats as well for backwards compatibilit
 <p><span id="levels of nesting"></span></p>
 <p>Acceptable nesting depth has implications for resource usage so unlimited nesting is not permitted.</p>
 <p>Generators support at least 100 levels of nesting in a BSON document being transformed to Extended JSON. This aligns
-with MongoDB's own limitation of 100 levels of nesting.</p>
+with MongoDB’s own limitation of 100 levels of nesting.</p>
 <p>Parsers support at least 200 levels of nesting in Extended JSON text, since the Extended JSON language can double the
 level of apparent nesting of a BSON document by wrapping certain types in their own documents.</p>
 <h3 id="of-canonical-type-wrapper-formats"><a class="header" href="#of-canonical-type-wrapper-formats">Of Canonical Type Wrapper Formats</a></h3>
@@ -613,7 +624,7 @@ accept any MongoDB query filter, even one containing the <code>$type</code> oper
 <p>If a BSON type fell into category (2), this specification selects a new common representation for the type to be
 canonical. Conflicting formats were gathered by surveying a number of Extended JSON generators, including the MongoDB
 Java Driver (version 3.3.0), the MongoDB Python Driver (version 3.4.0.dev0), the MongoDB Extended JSON module on NPM
-(version 1.7.1), and each minor version of mongoexport from 2.4.14 through 3.3.12. When possible, we set the "strict"
+(version 1.7.1), and each minor version of mongoexport from 2.4.14 through 3.3.12. When possible, we set the “strict”
 option on the JSON codec. The following BSON types had conflicting Extended JSON representations:</p>
 <h5 id="binary-1"><a class="header" href="#binary-1">Binary</a></h5>
 <p>Some implementations write the Extended JSON form of a Binary object with a strict two-hexadecimal digit subtype (e.g.
@@ -657,13 +668,13 @@ following new Extended JSON type wrappers are introduced by this spec:</p>
 <p><code>$dbPointer</code>- See above.</p>
 </li>
 <li>
-<p><code>$numberInt</code> - This is used to preserve the "int32" BSON type in Canonical Extended JSON. Without using <code>$numberInt</code>,
+<p><code>$numberInt</code> - This is used to preserve the “int32” BSON type in Canonical Extended JSON. Without using <code>$numberInt</code>,
 this type will be indistinguishable from a double in certain languages where the distinction does not exist, such as
 Javascript.</p>
 </li>
 <li>
 <p><code>$numberDouble</code> - This is used to preserve the <code>double</code>type in Canonical Extended JSON, as some JSON generators might
-omit a trailing ".0" for integral types.</p>
+omit a trailing “.0” for integral types.</p>
 <p>It also supports representing non-finite values like NaN or Infinity which are prohibited in the JSON specification
 for numbers.</p>
 </li>
@@ -697,7 +708,7 @@ conflict with a future change by either specification.</p>
 <p><strong>A</strong>. After Version 1 was released, several stakeholders raised concerns that not providing an option to output BSON
 numbers as ordinary JSON numbers limited the utility of Extended JSON for common historical uses. We decided to provide
 a second format option and more clearly distinguish the use cases (and limitations) inherent in each format.</p>
-<p><strong>Q</strong>. My BSON parser doesn't distinguish every BSON type. Does my Extended JSON generator need to distinguish these
+<p><strong>Q</strong>. My BSON parser doesn’t distinguish every BSON type. Does my Extended JSON generator need to distinguish these
 types?</p>
 <p><strong>A</strong>. No. Some BSON parsers do not emit a unique type for each BSON type, making round-tripping BSON through such
 libraries impossible without changing the document. For example, a <code>DBPointer</code> will be parsed into a <code>DBRef</code> by PyMongo.
@@ -724,8 +735,8 @@ application to specify one or the other. Making that work for the <code>$type</c
 rules set forth in the 1.0.0 version of this specification are followed for <code>$type</code>; specifically, that a document with
 a <code>$type</code> key whose value is an integral type, or a document with a <code>$type</code> key but without a <code>$binary</code> key, should be
 parsed as a normal document and not reported as an error.</p>
-<p><strong>Q</strong>. Sometimes I see the term "extjson" used in other specifications. Is "extjson" related to this specification?</p>
-<p><strong>A</strong>. Yes, "extjson" is short for "Extended JSON".</p>
+<p><strong>Q</strong>. Sometimes I see the term “extjson” used in other specifications. Is “extjson” related to this specification?</p>
+<p><strong>A</strong>. Yes, “extjson” is short for “Extended JSON”.</p>
 <h3 id="changelog"><a class="header" href="#changelog">Changelog</a></h3>
 <ul>
 <li>2024-05-29: Migrated from reStructuredText to Markdown.</li>
@@ -736,8 +747,8 @@ parsed as a normal document and not reported as an error.</p>
 longer enforce such restrictions.</li>
 <li>Objects that resemble a DBRef without fully complying to its structure should be left as-is during parsing. -
 2020-09-01: Note that <code>$</code>-prefixed keys not matching a known type MUST be left as-is when parsing. This is
-patch-level change as this behavior was already required in the BSON corpus tests ("Document with keys that start
-with <code>$</code>").</li>
+patch-level change as this behavior was already required in the BSON corpus tests (“Document with keys that start
+with <code>$</code>”).</li>
 </ul>
 </li>
 <li>2020-09-08:
@@ -754,7 +765,7 @@ excludes the following BSON types that are unsupported in Python - <code>Symbol<
 <p>Bumped specification to version 2.0.</p>
 </li>
 <li>
-<p>Added "Relaxed" format.</p>
+<p>Added “Relaxed” format.</p>
 </li>
 <li>
 <p>Changed BSON timestamp type wrapper back to <code>{"t": *int*, "i": *int*}</code> for backwards compatibility. (The change in
@@ -768,7 +779,7 @@ v1 to unsigned 64-bit string was premature optimization)</p>
 <code>{"$binary": {"base64": &lt;base64-encoded payload as a *string*&gt;, "subType": &lt;BSON binary type as a one- or two-character *hex string*&gt;}}</code></p>
 </li>
 <li>
-<p>Added "Restrictions and limitations" section.</p>
+<p>Added “Restrictions and limitations” section.</p>
 </li>
 <li>
 <p>Clarified parser and generator rules.</p>
@@ -778,7 +789,8 @@ v1 to unsigned 64-bit string was premature optimization)</p>
 <li>2017-02-01: Initial specification version 1.0.</li>
 </ul>
 <hr>
-<ol class="footnote-definition"><li id="footnote-1">
+<ol class="footnote-definition">
+<li id="footnote-1">
 <p>This MUST conform to the <a href="../bson-decimal128/decimal128.html#writing-to-extended-json">Decimal128 specification</a> <a href="#fr-1-1">↩</a></p>
 </li>
 <li id="footnote-2">
@@ -798,6 +810,7 @@ seconds SHOULD be omitted if zero. <a href="#fr-5-1">↩</a></p>
 <p>See <a href="https://www.mongodb.com/docs/manual/reference/database-references/#dbrefs">the docs manual</a> <a href="#fr-6-1">↩</a></p>
 </li>
 </ol>
+
                         </div>
                         <div id="sidetoc">
                             <nav id="pagetoc"></nav>
@@ -806,27 +819,12 @@ seconds SHOULD be omitted if zero. <a href="#fr-5-1">↩</a></p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../dbref/dbref.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../message/OP_MSG.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../dbref/dbref.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../message/OP_MSG.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

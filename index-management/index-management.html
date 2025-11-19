@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,24 +159,24 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.6</li>
 </ul>
-<hr />
+<hr>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <p>The index management spec defines a set of behaviour in the drivers for creating, removing and viewing indexes in a
 collection. It defines implementation details when required but also provides flexibility in the driver in that one or
 both of 2 unique APIs can be chosen to be implemented.</p>
 <h3 id="definitions"><a class="header" href="#definitions">Definitions</a></h3>
 <h4 id="meta"><a class="header" href="#meta">META</a></h4>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h4 id="terms"><a class="header" href="#terms">Terms</a></h4>
 <p><strong>Collection</strong></p>
 <p>The term <code>Collection</code> references the object in the driver that represents a collection on the server.</p>
 <p><strong>Cursor</strong></p>
-<p>The term <code>Cursor</code> references the driver's cursor object.</p>
+<p>The term <code>Cursor</code> references the driver’s cursor object.</p>
 <p><strong>Iterable</strong></p>
 <p>The term <code>Iterable</code> is to describe an object that is a sequence of elements that can be iterated over.</p>
 <p><strong>Document</strong></p>
-<p>The term <code>Document</code> refers to the implementation in the driver's language of a BSON document.</p>
+<p>The term <code>Document</code> refers to the implementation in the driver’s language of a BSON document.</p>
 <p><strong>Result</strong></p>
 <p>The term <code>Result</code> references the object that is normally returned by the driver as the result of a command execution. In
 the case of situations where an actual command is not executed, rather an insert or a query, an object that adheres to
@@ -194,7 +193,7 @@ Within each API, all methods are REQUIRED unless noted otherwise in the comments
 <p>All drivers MUST include the specified parameters in each operation. This does not preclude a driver from offering more.
 A driver SHOULD NOT require a user to specify the options parameter if they wish to use the server defaults.</p>
 <p>As of 3.4 (see <a href="https://jira.mongodb.org/browse/SERVER-769">https://jira.mongodb.org/browse/SERVER-769</a>) the server validates options passed to the <code>createIndexes</code>
-command -- drivers should be aware when testing that passing arbitrary options when the driver does not validate them
+command – drivers should be aware when testing that passing arbitrary options when the driver does not validate them
 could fail on the server.</p>
 <h4 id="deviations"><a class="header" href="#deviations">Deviations</a></h4>
 <p>A non-exhaustive list of acceptable deviations are as follows:</p>
@@ -213,10 +212,10 @@ in the appropriate section. Class and interface names may vary according to the 
 the user of another driver.</p>
 <p>A non-exhaustive list of acceptable naming deviations are as follows:</p>
 <ul>
-<li>Using "maxTimeMS" as an example, .NET would use "MaxTime" where it's type is a TimeSpan structure that includes units.
-However, calling it "MaximumTime" would not be acceptable.</li>
-<li>Using "CreateIndexOptions" as an example, Javascript wouldn't need to name it while other drivers might prefer to call
-it "CreateIndexArgs" or "CreateIndexParams".</li>
+<li>Using “maxTimeMS” as an example, .NET would use “MaxTime” where it’s type is a TimeSpan structure that includes units.
+However, calling it “MaximumTime” would not be acceptable.</li>
+<li>Using “CreateIndexOptions” as an example, Javascript wouldn’t need to name it while other drivers might prefer to call
+it “CreateIndexArgs” or “CreateIndexParams”.</li>
 <li>Acceptable naming deviations should fall within the basic style of the language. For example, <code>createIndex</code> would be a
 required name in Java, where camel-case method names are used, but in Ruby <code>create_index</code> would be acceptable.</li>
 </ul>
@@ -901,11 +900,11 @@ choose to implement either the standard API or the index view API.</p>
 <h4 id="search-index-management-helper-options"><a class="header" href="#search-index-management-helper-options">Search Index Management Helper Options</a></h4>
 <p>There are currently no supported options for any of the search index management commands. To future proof drivers
 implementations so that any options added in the future do not constitute a breaking change to drivers, empty options
-structs have been added as placeholders. If a driver's language has a mechanism to add options in a non-breaking manner
+structs have been added as placeholders. If a driver’s language has a mechanism to add options in a non-breaking manner
 (i.e., method overloading) drivers MAY omit the empty options structs from their search index management helpers.</p>
-<p><code>listSearchIndexes</code> is implemented using an aggregation pipeline. The list helper MUST support a driver's aggregation
+<p><code>listSearchIndexes</code> is implemented using an aggregation pipeline. The list helper MUST support a driver’s aggregation
 options as outline in the <a href="../crud/crud.html#read">CRUD specification</a>. Drivers MAY combine the aggregation options with
-any future <code>listSearchIndexes</code> stage options, if that is idiomatic for a driver's language.</p>
+any future <code>listSearchIndexes</code> stage options, if that is idiomatic for a driver’s language.</p>
 <h4 id="asynchronicity"><a class="header" href="#asynchronicity">Asynchronicity</a></h4>
 <p>The search index commands are asynchronous and return from the server before the index is successfully updated, created
 or dropped. In order to determine when an index has been created / updated, users are expected to run the
@@ -1104,7 +1103,7 @@ interface SearchIndexView extends Iterable&lt;Document&gt; {
 <h3 id="q--a"><a class="header" href="#q--a">Q &amp; A</a></h3>
 <p>Q: Where is write concern?</p>
 <p>The <code>createIndexes</code> and <code>dropIndexes</code> commands take a write concern that indicates how the write is acknowledged. Since
-all operations defined in this specification are performed on a collection, it's uncommon that two different index
+all operations defined in this specification are performed on a collection, it’s uncommon that two different index
 operations on the same collection would use a different write concern. As such, the most natural place to indicate write
 concern is on the client, the database, or the collection itself and not the operations within it.</p>
 <p>However, it might be that a driver needs to expose write concern to a user per operation for various reasons. It is
@@ -1124,17 +1123,17 @@ replicate the commit too. If a secondary had already completed the index build, 
 replication lag would be introduced. If a secondary had not finished building the index before the primary committed it
 (e.g. if <code>commitQuorum: 0</code> was used), then that secondary may lag behind the primary while it finishes building and
 committing the index.</p>
-<p>The server-default value for <code>commitQuorum</code> is "votingMembers", which means the primary will wait for all voting
+<p>The server-default value for <code>commitQuorum</code> is “votingMembers”, which means the primary will wait for all voting
 data-bearing nodes to complete building the index before it commits it.</p>
 <p>Q: Why would a user want to specify a non-default <code>commitQuorum</code></p>
-<p>Like <code>w: "majority"</code>, <code>commitQuorum: "votingMembers"</code> doesn't consider non-voting data-bearing nodes such as analytics
-nodes. If a user wanted to ensure these nodes didn't lag behind, then they would specify
+<p>Like <code>w: "majority"</code>, <code>commitQuorum: "votingMembers"</code> doesn’t consider non-voting data-bearing nodes such as analytics
+nodes. If a user wanted to ensure these nodes didn’t lag behind, then they would specify
 <code>commitQuorum: &lt;total number of data-bearing nodes, including non-voting nodes&gt;</code>. Alternatively, if they wanted to
-ensure only specific non-voting nodes didn't lag behind, they could specify a
-<a href="https://www.mongodb.com/docs/manual/reference/replica-configuration/#rsconf.settings.getLastErrorModes">custom getLastErrorMode based on the nodes' tag sets</a>
+ensure only specific non-voting nodes didn’t lag behind, they could specify a
+<a href="https://www.mongodb.com/docs/manual/reference/replica-configuration/#rsconf.settings.getLastErrorModes">custom getLastErrorMode based on the nodes’ tag sets</a>
 (e.g. <code>commitQuorum: &lt;custom getLastErrorMode name&gt;</code>).</p>
 <p>Additionally, if a user has a high tolerance for replication lag, they can set a lower value for <code>commitQuorum</code>. This is
-useful for situations where certain secondaries take longer to build indexes than the primaries, and the user doesn't
+useful for situations where certain secondaries take longer to build indexes than the primaries, and the user doesn’t
 care if they lag behind.</p>
 <p>Q: What is the difference between write concern and <code>commitQuorum</code>?</p>
 <p>While these two options share a lot in terms of how they are specified, they configure entirely different things.
@@ -1223,7 +1222,7 @@ for the <code>_id</code> index.</p>
 </li>
 <li>
 <p>2015-09-17: Added <code>partialFilterExpression</code> attribute to <code>IndexOptions</code> in order to support partial indexes. Fixed
-"provides" typo.</p>
+“provides” typo.</p>
 </li>
 </ul>
 
@@ -1235,27 +1234,12 @@ for the <code>_id</code> index.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../enumerate-collections/enumerate-collections.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../crud/crud.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../enumerate-collections/enumerate-collections.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../crud/crud.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

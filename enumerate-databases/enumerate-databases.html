@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,17 +159,17 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 3.6</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>A driver can provide functionality to enumerate all databases on a server. This specification defines several methods
 for enumerating databases.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
 <p><strong>MongoClient</strong></p>
-<p>Driver object representing a connection to MongoDB. This is the root object of a driver's API and MAY be named
+<p>Driver object representing a connection to MongoDB. This is the root object of a driver’s API and MAY be named
 differently in some drivers.</p>
 <p><strong>MongoDatabase</strong></p>
 <p>Driver object representing a database and the operations that can be performed on it. MAY be named differently in some
@@ -183,7 +182,7 @@ means as different drivers will have different requirements, types, and idioms.<
 different drivers will have different requirements, types, and idioms.</p>
 <h3 id="naming-deviations"><a class="header" href="#naming-deviations">Naming Deviations</a></h3>
 <p>This specification defines names for methods. To the extent possible, drivers SHOULD use the defined names. However,
-where a driver or language's naming conventions would conflict, drivers SHOULD honor their existing conventions. For
+where a driver or language’s naming conventions would conflict, drivers SHOULD honor their existing conventions. For
 example, a driver may use <code>list_databases</code> instead of <code>listDatabases</code>.</p>
 <h3 id="filters"><a class="header" href="#filters">Filters</a></h3>
 <p>Drivers SHOULD support the <code>filter</code> option when implementing the
@@ -196,7 +195,7 @@ condition on any of the database fields returned in the command output:</p>
 <li><code>empty</code></li>
 <li><code>shards</code></li>
 </ul>
-<p>For example, to list only databases whose names begin with "foo":</p>
+<p>For example, to list only databases whose names begin with “foo”:</p>
 <pre><code class="language-javascript">db.adminCommand({listDatabases: 1, filter: {name: /^foo/}});
 </code></pre>
 <h3 id="authorizeddatabases"><a class="header" href="#authorizeddatabases">AuthorizedDatabases</a></h3>
@@ -211,7 +210,7 @@ used to limit the command result to only include databases the user is authorize
 <li><code>false</code></li>
 <li><code>true</code></li>
 </ul>
-<p>See the server's <a href="https://www.mongodb.com/docs/manual/reference/command/listDatabases/">listDatabases</a> documentation for
+<p>See the server’s <a href="https://www.mongodb.com/docs/manual/reference/command/listDatabases/">listDatabases</a> documentation for
 an explanation of what each value means.</p>
 <h3 id="comment"><a class="header" href="#comment">Comment</a></h3>
 <p>MongoDB 4.4 introduced a <code>comment</code> option to the <code>listDatabases</code> command. This option enables users to specify a comment
@@ -368,27 +367,12 @@ where <code>nameOnly</code> and <code>filter</code> options were first introduce
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../versioned-api/versioned-api.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../enumerate-collections/enumerate-collections.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../versioned-api/versioned-api.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../enumerate-collections/enumerate-collections.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

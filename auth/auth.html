@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,14 +159,14 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 2.6</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>MongoDB supports various authentication strategies across various versions. When authentication is turned on in the
 database, a driver must authenticate before it is allowed to communicate with the server. This spec defines when and how
 a driver performs authentication with a MongoDB server.</p>
 <h3 id="meta"><a class="header" href="#meta">META</a></h3>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="references"><a class="header" href="#references">References</a></h3>
 <p><a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a></p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
@@ -215,7 +214,7 @@ database to which sasl authentication commands are sent.</p>
 <p>source (string)</p>
 <ul>
 <li>Applies to all mechanisms.</li>
-<li>Always '$external' for GSSAPI and MONGODB-X509.</li>
+<li>Always ‘$external’ for GSSAPI and MONGODB-X509.</li>
 <li>This is the database to which the authenticate command will be sent.</li>
 <li>This is the database to which sasl authentication commands will be sent.</li>
 </ul>
@@ -240,7 +239,7 @@ database to which sasl authentication commands are sent.</p>
 </li>
 </ul>
 <p>Each mechanism requires certain properties to be present in a MongoCredential for authentication to occur. See the
-individual mechanism definitions in the "MongoCredential Properties" section. All requirements listed for a mechanism
+individual mechanism definitions in the “MongoCredential Properties” section. All requirements listed for a mechanism
 must be met for authentication to occur.</p>
 <h4 id="credential-delimiter-in-uri-implies-authentication"><a class="header" href="#credential-delimiter-in-uri-implies-authentication">Credential delimiter in URI implies authentication</a></h4>
 <p>The presence of a credential delimiter (i.e. @) in the URI connection string is evidence that the user has unambiguously
@@ -260,8 +259,8 @@ property does not apply.</p>
 <p>Drivers MUST raise an error if any required information for a mechanism is missing. For instance, if a <code>username</code> is not
 specified for SCRAM-SHA-256, the driver must raise an error indicating the the property is missing.</p>
 <h4 id="naming"><a class="header" href="#naming">Naming</a></h4>
-<p>Naming of this information MUST be idiomatic to the driver's language/framework but still remain consistent. For
-instance, python would use "mechanism_properties" and .NET would use "MechanismProperties".</p>
+<p>Naming of this information MUST be idiomatic to the driver’s language/framework but still remain consistent. For
+instance, python would use “mechanism_properties” and .NET would use “MechanismProperties”.</p>
 <p>Naming of mechanism properties MUST be case-insensitive. For instance, SERVICE_NAME and service_name refer to the same
 property.</p>
 <h3 id="authentication-1"><a class="header" href="#authentication-1">Authentication</a></h3>
@@ -292,8 +291,8 @@ authentication error.</li>
 <li>If credentials exist: 3.1. A driver MUST authenticate with all credentials provided to the MongoClient. 3.2. A single
 invalid credential is the same as all credentials being invalid.</li>
 </ol>
-<p>If the authentication handshake fails for a socket, drivers MUST mark the server Unknown and clear the server's
-connection pool. (See <a href="#q-and-a">Q &amp; A</a> below and SDAM's
+<p>If the authentication handshake fails for a socket, drivers MUST mark the server Unknown and clear the server’s
+connection pool. (See <a href="#q-and-a">Q &amp; A</a> below and SDAM’s
 <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#why-mark-a-server-unknown-after-an-auth-error">Why mark a server Unknown after an auth error</a>
 for rationale.)</p>
 <p>All blocking operations executed as part of the authentication handshake MUST apply timeouts per the
@@ -303,11 +302,11 @@ for rationale.)</p>
 <li>Since: 4.0</li>
 </ul>
 <p>If an application provides a username but does not provide an authentication mechanism, drivers MUST negotiate a
-mechanism via a <code>hello</code> or legacy hello command requesting a user's supported SASL mechanisms:</p>
+mechanism via a <code>hello</code> or legacy hello command requesting a user’s supported SASL mechanisms:</p>
 <pre><code class="language-javascript">{hello: 1, saslSupportedMechs: "&lt;dbname&gt;.&lt;username&gt;"}
 </code></pre>
 <p>In this example <code>&lt;dbname&gt;</code> is the authentication database name that either SCRAM-SHA-1 or SCRAM-SHA-256 would use (they
-are the same; either from the connection string or else defaulting to 'admin') and <code>&lt;username&gt;</code> is the username provided
+are the same; either from the connection string or else defaulting to ‘admin’) and <code>&lt;username&gt;</code> is the username provided
 in the auth credential. The username MUST NOT be modified from the form provided by the user (i.e. do not normalize with
 SASLprep), as the server uses the raw form to look for conflicts with legacy credentials.</p>
 <p>If the handshake response includes a <code>saslSupportedMechs</code> field, then drivers MUST use the contents of that field to
@@ -336,12 +335,12 @@ response.</li>
 <h3 id="caching-credentials-in-scram"><a class="header" href="#caching-credentials-in-scram">Caching credentials in SCRAM</a></h3>
 <p>In the implementation of SCRAM authentication mechanisms (e.g. SCRAM-SHA-1 and SCRAM-SHA-256), drivers MUST maintain a
 cache of computed SCRAM credentials. The cache entries SHOULD be identified by the password, salt, iteration count, and
-a value that uniquely identifies the authentication mechanism (e.g. "SHA1" or "SCRAM-SHA-256").</p>
+a value that uniquely identifies the authentication mechanism (e.g. “SHA1” or “SCRAM-SHA-256”).</p>
 <p>The cache entry value MUST be either the <code>saltedPassword</code> parameter or the combination of the <code>clientKey</code> and
 <code>serverKey</code> parameters.</p>
 <h3 id="reauthentication"><a class="header" href="#reauthentication">Reauthentication</a></h3>
 <p>On any operation that requires authentication, the server may raise the error <code>ReauthenticationRequired</code> (391),
-typically if the user's credential has expired. Drivers MUST immediately attempt a reauthentication on the connection
+typically if the user’s credential has expired. Drivers MUST immediately attempt a reauthentication on the connection
 using suitable credentials, as specified by the particular authentication mechanism when this error is raised, and then
 re-attempt the operation. This attempt MUST be irrespective of whether the operation is considered retryable. Drivers
 MUST NOT resend a <code>hello</code> message during reauthentication, instead using SASL messages directly. Any errors that could
@@ -374,7 +373,7 @@ mechanism (e.g. PLAIN) as the default.</p>
 used when talking to servers &gt;= 3.0. Prior to server 3.0, MONGODB-CR MUST be used.</p>
 <p>When a user has specified a mechanism, regardless of the server version, the driver MUST honor this.</p>
 <h4 id="determining-server-version"><a class="header" href="#determining-server-version">Determining Server Version</a></h4>
-<p>Drivers SHOULD use the server's wire version ranges to determine the server's version.</p>
+<p>Drivers SHOULD use the server’s wire version ranges to determine the server’s version.</p>
 <h3 id="mongodb-cr"><a class="header" href="#mongodb-cr">MONGODB-CR</a></h3>
 <ul>
 <li>Since: 1.4</li>
@@ -403,7 +402,7 @@ key = HEX( MD5( UTF8( nonce + username + passwordDigest )))
 </code></pre>
 </li>
 </ol>
-<p>As an example, given a username of "user" and a password of "pencil", the conversation would appear as follows:</p>
+<p>As an example, given a username of “user” and a password of “pencil”, the conversation would appear as follows:</p>
 <pre><code class="language-javascript">CMD = {getnonce : 1}
 RESP = {nonce: "2375531c32080ae8", ok: 1}
 CMD = {authenticate: 1, user: "user", nonce: "2375531c32080ae8", key: "21742f26431831d5cfca035a08c5bdf6"}
@@ -425,7 +424,7 @@ RESP = {ok: 1}
 </li>
 <li>
 <p>mechanism</p>
-<p>MUST be "MONGODB-CR"</p>
+<p>MUST be “MONGODB-CR”</p>
 </li>
 <li>
 <p>mechanism_properties</p>
@@ -478,7 +477,7 @@ RESP = {"dbname" : "$external", "user" : "C=IS,ST=Reykjavik,L=Reykjavik,O=MongoD
 </li>
 <li>
 <p>source</p>
-<p>MUST be "$external". Defaults to <code>$external</code>.</p>
+<p>MUST be “$external”. Defaults to <code>$external</code>.</p>
 </li>
 <li>
 <p>password</p>
@@ -486,7 +485,7 @@ RESP = {"dbname" : "$external", "user" : "C=IS,ST=Reykjavik,L=Reykjavik,O=MongoD
 </li>
 <li>
 <p>mechanism</p>
-<p>MUST be "MONGODB-X509"</p>
+<p>MUST be “MONGODB-X509”</p>
 </li>
 <li>
 <p>mechanism_properties</p>
@@ -524,7 +523,7 @@ RESP = { conversationId: &lt;number&gt;, code: &lt;code&gt;, done: &lt;boolean&g
 <a href="https://www.cyrusimap.org/sasl/">cyrus-sasl</a> and it would make sense for drivers with a choice to also choose
 cyrus. However, it is important to ensure that when utilizing a 3rd party library it does implement the mechanism
 on all supported OS versions and that it interoperates with the server. For instance, the cyrus sasl library
-offered on RHEL 6 does not implement SCRAM-SHA-1. As such, if your driver supports RHEL 6, you'll need to implement
+offered on RHEL 6 does not implement SCRAM-SHA-1. As such, if your driver supports RHEL 6, you’ll need to implement
 SCRAM-SHA-1 from scratch.</p>
 </li>
 </ol>
@@ -546,7 +545,7 @@ proprietary implementation called SSPI which is compatible with both Windows and
 </li>
 <li>
 <p>source</p>
-<p>MUST be "$external". Defaults to <code>$external</code>.</p>
+<p>MUST be “$external”. Defaults to <code>$external</code>.</p>
 </li>
 <li>
 <p>password</p>
@@ -555,24 +554,24 @@ the default credentials.</p>
 </li>
 <li>
 <p>mechanism</p>
-<p>MUST be "GSSAPI"</p>
+<p>MUST be “GSSAPI”</p>
 </li>
 <li>
 <p>mechanism_properties</p>
 <ul>
 <li>
 <p>SERVICE_NAME</p>
-<p>Drivers MUST allow the user to specify a different service name. The default is "mongodb".</p>
+<p>Drivers MUST allow the user to specify a different service name. The default is “mongodb”.</p>
 </li>
 <li>
 <p>CANONICALIZE_HOST_NAME</p>
 <p>Drivers MAY allow the user to request canonicalization of the hostname. This might be required when the hosts report
-different hostnames than what is used in the kerberos database. The value is a string of either "none", "forward",
-or "forwardAndReverse". "none" is the default and performs no canonicalization. "forward" performs a forward DNS
-lookup to canonicalize the hostname. "forwardAndReverse" performs a forward DNS lookup and then a reverse lookup
+different hostnames than what is used in the kerberos database. The value is a string of either “none”, “forward”,
+or “forwardAndReverse”. “none” is the default and performs no canonicalization. “forward” performs a forward DNS
+lookup to canonicalize the hostname. “forwardAndReverse” performs a forward DNS lookup and then a reverse lookup
 on that value to canonicalize the hostname. The driver MUST fallback to the provided host if any lookup errors or
 returns no results. Drivers MAY decide to also keep the legacy boolean values where <code>true</code> equals the
-"forwardAndReverse" behaviour and <code>false</code> equals "none".</p>
+“forwardAndReverse” behaviour and <code>false</code> equals “none”.</p>
 </li>
 <li>
 <p>SERVICE_REALM</p>
@@ -589,11 +588,11 @@ localhost but the actual service host would differ.</p>
 </li>
 </ul>
 <h4 id="hostname-canonicalization"><a class="header" href="#hostname-canonicalization">Hostname Canonicalization</a></h4>
-<p>Valid values for CANONICALIZE_HOST_NAME are <code>true</code>, <code>false</code>, "none", "forward", "forwardAndReverse". If a value is
+<p>Valid values for CANONICALIZE_HOST_NAME are <code>true</code>, <code>false</code>, “none”, “forward”, “forwardAndReverse”. If a value is
 provided that does not match one of these the driver MUST raise an error.</p>
-<p>If CANONICALIZE_HOST_NAME is <code>false</code>, "none", or not provided, the driver MUST NOT canonicalize the host name.</p>
-<p>If CANONICALIZE_HOST_NAME is <code>true</code>, "forward", or "forwardAndReverse", the client MUST canonicalize the name of each
-host it uses for authentication. There are two options. First, if the client's underlying GSSAPI library provides
+<p>If CANONICALIZE_HOST_NAME is <code>false</code>, “none”, or not provided, the driver MUST NOT canonicalize the host name.</p>
+<p>If CANONICALIZE_HOST_NAME is <code>true</code>, “forward”, or “forwardAndReverse”, the client MUST canonicalize the name of each
+host it uses for authentication. There are two options. First, if the client’s underlying GSSAPI library provides
 hostname canonicalization, the client MAY rely on it. For example, MIT Kerberos has
 <a href="https://web.mit.edu/kerberos/krb5-1.13/doc/admin/princ_dns.html#service-principal-canonicalization">a configuration option for canonicalization</a>.</p>
 <p>Second, the client MAY implement its own canonicalization. If so, the canonicalization algorithm MUST be:</p>
@@ -657,11 +656,11 @@ configuration option is set to <code>false</code>.</p>
 authentication. It cannot be used to perform any other type of authentication. Since the credentials are stored outside
 of MongoDB, the <code>$external</code> database must be used for authentication.</p>
 <h4 id="conversation-2"><a class="header" href="#conversation-2">Conversation</a></h4>
-<p>As an example, given a username of "user" and a password of "pencil", the conversation would appear as follows:</p>
+<p>As an example, given a username of “user” and a password of “pencil”, the conversation would appear as follows:</p>
 <pre><code class="language-javascript">CMD = {saslStart: 1, mechanism: "PLAIN", payload: BinData(0, "AHVzZXIAcGVuY2ls")}
 RESP = {conversationId: 1, payload: BinData(0,""), done: true, ok: 1}
 </code></pre>
-<p>If your sasl client is also sending the authzid, it would be "user" and the conversation would appear as follows:</p>
+<p>If your sasl client is also sending the authzid, it would be “user” and the conversation would appear as follows:</p>
 <pre><code class="language-javascript">CMD = {saslStart: 1, mechanism: "PLAIN", payload: BinData(0, "dXNlcgB1c2VyAHBlbmNpbA==")}
 RESP = {conversationId: 1, payload: BinData(0,""), done: true, ok: 1}
 </code></pre>
@@ -682,7 +681,7 @@ RESP = {conversationId: 1, payload: BinData(0,""), done: true, ok: 1}
 </li>
 <li>
 <p>mechanism</p>
-<p>MUST be "PLAIN"</p>
+<p>MUST be “PLAIN”</p>
 </li>
 <li>
 <p>mechanism_properties</p>
@@ -696,7 +695,7 @@ RESP = {conversationId: 1, payload: BinData(0,""), done: true, ok: 1}
 <p>SCRAM-SHA-1 is defined in <a href="http://tools.ietf.org/html/rfc5802">RFC 5802</a>.</p>
 <p><a href="http://tools.ietf.org/html/rfc5802#page-11">Page 11 of the RFC</a> specifies that user names be prepared with SASLprep,
 but drivers MUST NOT do so.</p>
-<p><a href="http://tools.ietf.org/html/rfc5802#page-8">Page 8 of the RFC</a> identifies the "SaltedPassword" as
+<p><a href="http://tools.ietf.org/html/rfc5802#page-8">Page 8 of the RFC</a> identifies the “SaltedPassword” as
 <code>:= Hi(Normalize(password), salt, i)</code>. The <code>password</code> variable MUST be the mongodb hashed variant. The mongo hashed
 variant is computed as <code>hash = HEX( MD5( UTF8( username + ':mongo:' + plain_text_password )))</code>, where
 <code>plain_text_password</code> is actually plain text. The <code>username</code> and <code>password</code> MUST NOT be prepared with SASLprep before
@@ -719,18 +718,18 @@ specifies a lower count. This mitigates downgrade attacks by a man-in-the-middle
 authentication if drivers advertise support. I.e. the client-first-message MUST start with <code>n,</code>.</p>
 <p>Drivers MUST add a top-level <code>options</code> field to the saslStart command, whose value is a document containing a field
 named <code>skipEmptyExchange</code> whose value is true. Older servers will ignore the <code>options</code> field and continue with the
-longer conversation as shown in the "Backwards Compatibility" section. Newer servers will set the <code>done</code> field to <code>true</code>
+longer conversation as shown in the “Backwards Compatibility” section. Newer servers will set the <code>done</code> field to <code>true</code>
 when it responds to the client at the end of the second round trip, showing proof that it knows the password. This will
 shorten the conversation by one round trip.</p>
 <h4 id="conversation-3"><a class="header" href="#conversation-3">Conversation</a></h4>
-<p>As an example, given a username of "user" and a password of "pencil" and an r value of "fyko+d2lbbFgONRv9qkxdawL", a
+<p>As an example, given a username of “user” and a password of “pencil” and an r value of “fyko+d2lbbFgONRv9qkxdawL”, a
 SCRAM-SHA-1 conversation would appear as follows:</p>
 <pre><code class="language-javascript">CMD = "n,,n=user,r=fyko+d2lbbFgONRv9qkxdawL"
 RESP = "r=fyko+d2lbbFgONRv9qkxdawLHo+Vgk7qvUOKUwuWLIWg4l/9SraGMHEE,s=rQ9ZY3MntBeuP3E1TDVC4w==,i=10000"
 CMD = "c=biws,r=fyko+d2lbbFgONRv9qkxdawLHo+Vgk7qvUOKUwuWLIWg4l/9SraGMHEE,p=MC2T8BvbmWRckDw8oWl5IVghwCY="
 RESP = "v=UMWeI25JD1yNYZRMpZ4VHvhZ9e0="
 </code></pre>
-<p>This same conversation over MongoDB's SASL implementation would appear as follows:</p>
+<p>This same conversation over MongoDB’s SASL implementation would appear as follows:</p>
 <pre><code class="language-javascript">CMD = {saslStart: 1, mechanism: "SCRAM-SHA-1", payload: BinData(0, "biwsbj11c2VyLHI9ZnlrbytkMmxiYkZnT05Sdjlxa3hkYXdM"), options: { skipEmptyExchange: true }}
 RESP = {conversationId : 1, payload: BinData(0,"cj1meWtvK2QybGJiRmdPTlJ2OXFreGRhd0xIbytWZ2s3cXZVT0tVd3VXTElXZzRsLzlTcmFHTUhFRSxzPXJROVpZM01udEJldVAzRTFURFZDNHc9PSxpPTEwMDAw"), done: false, ok: 1}
 CMD = {saslContinue: 1, conversationId: 1, payload: BinData(0, "Yz1iaXdzLHI9ZnlrbytkMmxiYkZnT05Sdjlxa3hkYXdMSG8rVmdrN3F2VU9LVXd1V0xJV2c0bC85U3JhR01IRUUscD1NQzJUOEJ2Ym1XUmNrRHc4b1dsNUlWZ2h3Q1k9")}
@@ -752,7 +751,7 @@ RESP = {conversationId: 1, payload: BinData(0,"dj1VTVdlSTI1SkQxeU5ZWlJNcFo0Vkh2a
 </li>
 <li>
 <p>mechanism</p>
-<p>MUST be "SCRAM-SHA-1"</p>
+<p>MUST be “SCRAM-SHA-1”</p>
 </li>
 <li>
 <p>mechanism_properties</p>
@@ -768,7 +767,7 @@ RESP = {conversationId: 1, payload: BinData(0,"dj1VTVdlSTI1SkQxeU5ZWlJNcFo0Vkh2a
 <p>The MongoDB SCRAM-SHA-256 mechanism works similarly to the SCRAM-SHA-1 mechanism, with the following changes:</p>
 <ul>
 <li>The SCRAM algorithm MUST use SHA-256 as the hash function instead of SHA-1.</li>
-<li>User names MUST NOT be prepared with SASLprep. This intentionally contravenes the "SHOULD" provision of RFC 5802.</li>
+<li>User names MUST NOT be prepared with SASLprep. This intentionally contravenes the “SHOULD” provision of RFC 5802.</li>
 <li>Passwords MUST be prepared with SASLprep, per RFC 5802. Passwords are used directly for key derivation ; they MUST NOT
 be digested as they are in SCRAM-SHA-1.</li>
 </ul>
@@ -776,18 +775,18 @@ be digested as they are in SCRAM-SHA-1.</li>
 specifies a lower count. This mitigates downgrade attacks by a man-in-the-middle attacker.</p>
 <p>Drivers MUST add a top-level <code>options</code> field to the saslStart command, whose value is a document containing a field
 named <code>skipEmptyExchange</code> whose value is true. Older servers will ignore the <code>options</code> field and continue with the
-longer conversation as shown in the "Backwards Compatibility" section. Newer servers will set the <code>done</code> field to <code>true</code>
+longer conversation as shown in the “Backwards Compatibility” section. Newer servers will set the <code>done</code> field to <code>true</code>
 when it responds to the client at the end of the second round trip, showing proof that it knows the password. This will
 shorten the conversation by one round trip.</p>
 <h4 id="conversation-4"><a class="header" href="#conversation-4">Conversation</a></h4>
-<p>As an example, given a username of "user" and a password of "pencil" and an r value of "rOprNGfwEbeRWgbNEkqO", a
+<p>As an example, given a username of “user” and a password of “pencil” and an r value of “rOprNGfwEbeRWgbNEkqO”, a
 SCRAM-SHA-256 conversation would appear as follows:</p>
 <pre><code class="language-javascript">CMD = "n,,n=user,r=rOprNGfwEbeRWgbNEkqO"
 RESP = "r=rOprNGfwEbeRWgbNEkqO%hvYDpWUa2RaTCAfuxFIlj)hNlF$k0,s=W22ZaJ0SNY7soEsUEjb6gQ==,i=4096"
 CMD = "c=biws,r=rOprNGfwEbeRWgbNEkqO%hvYDpWUa2RaTCAfuxFIlj)hNlF$k0,p=dHzbZapWIk4jUhN+Ute9ytag9zjfMHgsqmmiz7AndVQ="
 RESP = "v=6rriTRBi23WpRR/wtup+mMhUZUn/dB5nLTJRsjl95G4="
 </code></pre>
-<p>This same conversation over MongoDB's SASL implementation would appear as follows:</p>
+<p>This same conversation over MongoDB’s SASL implementation would appear as follows:</p>
 <pre><code class="language-javascript">CMD = {saslStart: 1, mechanism:"SCRAM-SHA-256", options: {skipEmptyExchange: true}, payload: BinData(0, "biwsbj11c2VyLHI9ck9wck5HZndFYmVSV2diTkVrcU8=")}
 RESP = {conversationId: 1, payload: BinData(0, "cj1yT3ByTkdmd0ViZVJXZ2JORWtxTyVodllEcFdVYTJSYVRDQWZ1eEZJbGopaE5sRiRrMCxzPVcyMlphSjBTTlk3c29Fc1VFamI2Z1E9PSxpPTQwOTY="), done: false, ok: 1}
 CMD = {saslContinue: 1, conversationId: 1, payload: BinData(0, "Yz1iaXdzLHI9ck9wck5HZndFYmVSV2diTkVrcU8laHZZRHBXVWEyUmFUQ0FmdXhGSWxqKWhObEYkazAscD1kSHpiWmFwV0lrNGpVaE4rVXRlOXl0YWc5empmTUhnc3FtbWl6N0FuZFZRPQ==")}
@@ -809,7 +808,7 @@ RESP = {conversationId: 1, payload: BinData(0, "dj02cnJpVFJCaTIzV3BSUi93dHVwK21N
 </li>
 <li>
 <p>mechanism</p>
-<p>MUST be "SCRAM-SHA-256"</p>
+<p>MUST be “SCRAM-SHA-256”</p>
 </li>
 <li>
 <p>mechanism_properties</p>
@@ -833,17 +832,23 @@ Temporary credentials, in addition to an access key ID and a secret access key, 
 as secure and truly random as possible. Additionally, the secret access key and only the secret access key is sensitive.
 Drivers MUST take proper precautions to ensure we do not leak this info.</p>
 <p>All messages between MongoDB clients and servers are sent as BSON V1.1 Objects in the payload field of saslStart and
-saslContinue. All fields in these messages have a "short name" which is used in the serialized BSON representation and a
-human-readable "friendly name" which is used in this specification. They are as follows:</p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Friendly Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+saslContinue. All fields in these messages have a “short name” which is used in the serialized BSON representation and a
+human-readable “friendly name” which is used in this specification. They are as follows:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Friendly Name</th><th>Type</th><th>Description</th></tr>
+</thead>
+<tbody>
 <tr><td>r</td><td>client nonce</td><td>BinData Subtype 0</td><td>32 byte cryptographically secure random number</td></tr>
-<tr><td>p</td><td>gs2-cb-flag</td><td>int32</td><td>The integer representation of the ASCII character 'n' or 'y', i.e., <code>110</code> or <code>121</code></td></tr>
+<tr><td>p</td><td>gs2-cb-flag</td><td>int32</td><td>The integer representation of the ASCII character ‘n’ or ‘y’, i.e., <code>110</code> or <code>121</code></td></tr>
 <tr><td>s</td><td>server nonce</td><td>BinData Subtype 0</td><td>64 bytes total, 32 bytes from the client first message and a 32 byte cryptographically secure random number generated by the server</td></tr>
 <tr><td>h</td><td>sts host</td><td>string</td><td>FQDN of the STS service</td></tr>
 <tr><td>a</td><td>authorization header</td><td>string</td><td>Authorization header for <a href="https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html?shortFooter=true">AWS Signature Version 4</a></td></tr>
 <tr><td>d</td><td>X-AMZ-Date</td><td>string</td><td>Current date in UTC. See <a href="https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html?shortFooter=true">AWS Signature Version 4</a></td></tr>
 <tr><td>t</td><td>X-AMZ-Security-Token</td><td>string</td><td>Optional AWS security token</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
 <p>Drivers MUST NOT advertise support for channel binding, as the server does not support it and legacy servers may fail
 authentication if drivers advertise support. The client-first-message MUST set the gs2-cb-flag to the integer
@@ -853,9 +858,9 @@ representation of the ASCII character <code>n</code>, i.e., <code>110</code>.</p
 <code>server nonce</code> and <code>sts host</code>. Drivers MUST validate that the server nonce is exactly 64 bytes and the first 32 bytes
 are the same as the client nonce. Drivers MUST also validate that the length of the host is greater than 0 and less than
 or equal to 255 bytes per <a href="https://tools.ietf.org/html/rfc1035">RFC 1035</a>. Drivers MUST reject FQDN names with empty
-labels (e.g., "abc..def"), names that start with a period (e.g., ".abc.def") and names that end with a period (e.g.,
-"abc.def."). Drivers MUST respond to the server's message with an <code>authorization header</code> and a <code>date</code>.</p>
-<p>As an example, given a client nonce value of "dzw1U2IwSEtgaWI0IUxZMVJqc2xuQzNCcUxBc05wZjI=", a MONGODB-AWS conversation
+labels (e.g., “abc..def”), names that start with a period (e.g., “.abc.def”) and names that end with a period (e.g.,
+“abc.def.”). Drivers MUST respond to the server’s message with an <code>authorization header</code> and a <code>date</code>.</p>
+<p>As an example, given a client nonce value of “dzw1U2IwSEtgaWI0IUxZMVJqc2xuQzNCcUxBc05wZjI=”, a MONGODB-AWS conversation
 decoded from BSON to JSON would appear as follows:</p>
 <p>Client First</p>
 <pre><code class="language-javascript">{
@@ -913,8 +918,13 @@ specified in the table below. The following pseudocode shows the construction of
 <pre><code class="language-text">Authorization: AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-amz-date, Signature=5d672d79c15b13162d9279b0855cfba6789a8edb4c82c400e06b5924a6f2b5d7
 </code></pre>
 <p>The following diagram is a summary of the steps drivers MUST follow to calculate the signature.</p>
-<p><img src="includes/calculating_a_signature.png" alt="image" /></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Value</th></tr></thead><tbody>
+<p><img src="includes/calculating_a_signature.png" alt="image"></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Value</th></tr>
+</thead>
+<tbody>
 <tr><td>HTTP Request Method</td><td>POST</td></tr>
 <tr><td>URI</td><td>/</td></tr>
 <tr><td>Content-Type*</td><td>application/x-www-form-urlencoded</td></tr>
@@ -924,14 +934,15 @@ specified in the table below. The following pseudocode shows the construction of
 <tr><td>X-Amz-Date*</td><td>See <a href="https://docs.aws.amazon.com/general/latest/gr/sigv4_elements.html">Amazon Documentation</a></td></tr>
 <tr><td>X-Amz-Security-Token*</td><td>Optional, see <a href="https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html?shortFooter=true">Amazon Documentation</a></td></tr>
 <tr><td>X-MongoDB-Server-Nonce*</td><td>Base64 string of server nonce</td></tr>
-<tr><td>X-MongoDB-GS2-CB-Flag*</td><td>ASCII lower-case character 'n' or 'y' or 'p'</td></tr>
+<tr><td>X-MongoDB-GS2-CB-Flag*</td><td>ASCII lower-case character ‘n’ or ‘y’ or ‘p’</td></tr>
 <tr><td>X-MongoDB-Optional-Data*</td><td>Optional data, base64 encoded representation of the optional object provided by the client</td></tr>
 <tr><td>Body</td><td>Action=GetCallerIdentity&amp;Version=2011-06-15</td></tr>
-</tbody></table>
+</tbody>
+</table>
 </div>
-<blockquote>
-<p>[!NOTE]
-<code>*</code>, Denotes a header that MUST be included in SignedHeaders, if present.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p><code>*</code>, Denotes a header that MUST be included in SignedHeaders, if present.</p>
 </blockquote>
 <h4 id="region-calculation"><a class="header" href="#region-calculation">Region Calculation</a></h4>
 <p>To get the region from the host, the driver MUST follow the algorithm expressed in pseudocode below. :</p>
@@ -945,18 +956,24 @@ else // the valid host string contains no periods and is not "aws.amazonaws.com"
     the region is "us-east-1"
 </code></pre>
 <p>Examples are provided below.</p>
-<div class="table-wrapper"><table><thead><tr><th>Host</th><th>Region</th><th>Notes</th></tr></thead><tbody>
-<tr><td>sts.amazonaws.com</td><td>us-east-1</td><td>the host is "sts.amazonaws.com"; use <code>us-east-1</code></td></tr>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Host</th><th>Region</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>sts.amazonaws.com</td><td>us-east-1</td><td>the host is “sts.amazonaws.com”; use <code>us-east-1</code></td></tr>
 <tr><td>sts.us-west-2.amazonaws.com</td><td>us-west-2</td><td>use the second label</td></tr>
 <tr><td>sts.us-west-2.amazonaws.com.ch</td><td>us-west-2</td><td>use the second label</td></tr>
 <tr><td>example.com</td><td>com</td><td>use the second label</td></tr>
-<tr><td>localhost</td><td>us-east-1</td><td>no "<code>.</code>" character; use the default region</td></tr>
+<tr><td>localhost</td><td>us-east-1</td><td>no “<code>.</code>” character; use the default region</td></tr>
 <tr><td>sts..com</td><td>&lt; Error &gt;</td><td>second label is empty</td></tr>
 <tr><td>.amazonaws.com</td><td>&lt; Error &gt;</td><td>starts with a period</td></tr>
 <tr><td>sts.amazonaws.</td><td>&lt; Error &gt;</td><td>ends with a period</td></tr>
-<tr><td>""</td><td>&lt; Error &gt;</td><td>empty string</td></tr>
-<tr><td>"string longer than 255"</td><td>&lt; Error &gt;</td><td>string longer than 255 bytes</td></tr>
-</tbody></table>
+<tr><td>“”</td><td>&lt; Error &gt;</td><td>empty string</td></tr>
+<tr><td>“string longer than 255”</td><td>&lt; Error &gt;</td><td>string longer than 255 bytes</td></tr>
+</tbody>
+</table>
 </div>
 <h4 id="mongocredential-properties-5"><a class="header" href="#mongocredential-properties-5"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
 <ul>
@@ -966,7 +983,7 @@ else // the valid host string contains no periods and is not "aws.amazonaws.com"
 </li>
 <li>
 <p>source</p>
-<p>MUST be "$external". Defaults to <code>$external</code>.</p>
+<p>MUST be “$external”. Defaults to <code>$external</code>.</p>
 </li>
 <li>
 <p>password</p>
@@ -974,7 +991,7 @@ else // the valid host string contains no periods and is not "aws.amazonaws.com"
 </li>
 <li>
 <p>mechanism</p>
-<p>MUST be "MONGODB-AWS"</p>
+<p>MUST be “MONGODB-AWS”</p>
 </li>
 <li>
 <p>mechanism_properties</p>
@@ -983,7 +1000,7 @@ else // the valid host string contains no periods and is not "aws.amazonaws.com"
 <p>AWS_CREDENTIAL_PROVIDER</p>
 <p>An AWS <a href="#custom-credential-providers">Custom Credential Provider</a> that returns AWS credentials. Drivers MAY allow
 the user to specify an object or function, depending on what is idiomatic for the driver. This property MUST
-follow the same API as the driver language's AWS SDK credential provider.</p>
+follow the same API as the driver language’s AWS SDK credential provider.</p>
 </li>
 </ul>
 </li>
@@ -996,26 +1013,26 @@ Regardless of how Drivers obtain credentials the only valid combination of crede
 access key or an access key ID, a secret access key and a session token. These values MUST be present in the environment
 or be retrieved via the optional AWS SDK. If credentials are provided in the URI or client options, the driver MUST
 raise an error.</p>
-<p>AWS recommends using an SDK to "take care of some of the heavy lifting necessary in successfully making API calls,
-including authentication, retry behavior, and more".</p>
+<p>AWS recommends using an SDK to “take care of some of the heavy lifting necessary in successfully making API calls,
+including authentication, retry behavior, and more”.</p>
 <p>A recommended pattern for drivers with existing custom implementation is to not further enhance existing
 implementations, and take an optional dependency on the AWS SDK. If the SDK is available, use it, otherwise fallback to
 the existing implementation.</p>
 <p>One thing to be mindful of when adopting an AWS SDK is that they typically will check for credentials in a shared AWS
 credentials file when one is present, which may be confusing for users relying on the previous authentication handling
 behavior. It would be helpful to include a note like the following:</p>
-<p>"Because we are now using the AWS SDK to handle credentials, if you have a shared AWS credentials or config file, then
+<p>“Because we are now using the AWS SDK to handle credentials, if you have a shared AWS credentials or config file, then
 those credentials will be used by default if AWS auth environment variables are not set. To override this behavior, set
 <code>AWS_SHARED_CREDENTIALS_FILE=""</code> in your shell or set the equivalent environment variable value in your script or
 application. Alternatively, you can create an AWS profile specifically for your MongoDB credentials and set the
-<code>AWS_PROFILE</code> environment variable to that profile name."</p>
+<code>AWS_PROFILE</code> environment variable to that profile name.”</p>
 <h5 id="custom-credential-providers"><a class="header" href="#custom-credential-providers">Custom Credential Providers</a></h5>
 <p>Drivers that choose to use the AWS SDK to fetch credentials MAY also allow users to provide a custom credential provider
 as an option to the <code>MongoClient</code>. The interface for the option provided depends on the individual language SDK and
 drivers MUST consult AWS SDK documentation to determine that format when implementing. The name of the option MUST be
 <code>AWS_CREDENTIAL_PROVIDER</code> and be part of the authentication mechanism properties options that can be provided to the
 client.</p>
-<p>Drivers MAY expose API for default providers for the following scenarios when applicable in their language's SDK:</p>
+<p>Drivers MAY expose API for default providers for the following scenarios when applicable in their language’s SDK:</p>
 <ol>
 <li>The default SDK credential provider.</li>
 <li>A custom credential provider chain.</li>
@@ -1029,9 +1046,9 @@ client.</p>
 <li>Using <code>AssumeRoleWithWebIdentity</code> if <code>AWS_WEB_IDENTITY_TOKEN_FILE</code> and <code>AWS_ROLE_ARN</code> are set.</li>
 <li>The ECS endpoint if <code>AWS_CONTAINER_CREDENTIALS_RELATIVE_URI</code> is set. Otherwise, the EC2 endpoint.</li>
 </ol>
-<blockquote>
-<p>[!NOTE]
-See <em>Should drivers support accessing Amazon EC2 instance metadata in Amazon ECS</em> in <a href="#q-and-a">Q &amp; A</a></p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>See <em>Should drivers support accessing Amazon EC2 instance metadata in Amazon ECS</em> in <a href="#q-and-a">Q &amp; A</a></p>
 <p>Drivers are not expected to handle
 <a href="https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html">AssumeRole</a> requests directly. See
 description of <code>AssumeRole</code> below, which is distinct from <code>AssumeRoleWithWebIdentity</code> requests that are meant to be
@@ -1107,7 +1124,7 @@ return the JSON response:</p>
 <p>with the required header,</p>
 <pre><code class="language-text">X-aws-ec2-metadata-token: &lt;secret-token&gt;
 </code></pre>
-<p>to access the EC2 instance's metadata. Drivers MUST obtain the role name from querying the URI</p>
+<p>to access the EC2 instance’s metadata. Drivers MUST obtain the role name from querying the URI</p>
 <pre><code class="language-text">http://169.254.169.254/latest/meta-data/iam/security-credentials/
 </code></pre>
 <p>The role name request also requires the header <code>X-aws-ec2-metadata-token</code>. Drivers MUST use v2 of the EC2 Instance
@@ -1128,8 +1145,8 @@ should remain valid with a max of six hours (<code>21600</code> seconds).</li>
 <code>X-aws-ec2-metadata-token</code>.</p>
 </li>
 </ul>
-<p>The curl recipe below demonstrates the above. It retrieves a secret token that's valid for 30 seconds. It then uses that
-token to access the EC2 instance's credentials:</p>
+<p>The curl recipe below demonstrates the above. It retrieves a secret token that’s valid for 30 seconds. It then uses that
+token to access the EC2 instance’s credentials:</p>
 <pre><code class="language-bash">$ TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 30"`
 $ ROLE_NAME=`curl http://169.254.169.254/latest/meta-data/iam/security-credentials/ -H "X-aws-ec2-metadata-token: $TOKEN"`
 $ curl http://169.254.169.254/latest/meta-data/iam/security-credentials/$ROLE_NAME -H "X-aws-ec2-metadata-token: $TOKEN"
@@ -1164,7 +1181,7 @@ the
 <p>Credentials fetched by the driver using AWS endpoints MUST be cached and reused to avoid hitting AWS rate limitations.
 AWS recommends using a suitable Software Development Kit (SDK) for your language. If that SDK supports credential fetch
 and automatic refresh/caching, then that mechanism can be used in lieu of manual caching.</p>
-<p>If using manual caching, the "Expiration" field MUST be stored and used to determine when to clear the cache.
+<p>If using manual caching, the “Expiration” field MUST be stored and used to determine when to clear the cache.
 Credentials are considered valid if they are more than five minutes away from expiring; to the reduce the chance of
 expiration before they are validated by the server. Credentials that are retrieved from environment variables MUST NOT
 be cached.</p>
@@ -1172,11 +1189,11 @@ be cached.</p>
 bottleneck that would override the <code>maxConnecting</code> setting, the driver MUST not place a lock on making a request. The
 cache MUST be written atomically.</p>
 <p>If AWS authentication fails for any reason, the cache MUST be cleared.</p>
-<blockquote>
-<p>[!NOTE]
-Five minutes was chosen based on the AWS documentation for
-<a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html">IAM roles for EC2</a> : "We make new
-credentials available at least five minutes before the expiration of the old credentials". The intent is to have some
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Five minutes was chosen based on the AWS documentation for
+<a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html">IAM roles for EC2</a> : “We make new
+credentials available at least five minutes before the expiration of the old credentials”. The intent is to have some
 buffer between when the driver fetches the credentials and when the server verifies them.</p>
 </blockquote>
 <h3 id="mongodb-oidc"><a class="header" href="#mongodb-oidc">MONGODB-OIDC</a></h3>
@@ -1185,8 +1202,8 @@ buffer between when the driver fetches the credentials and when the server verif
 </ul>
 <p>MONGODB-OIDC authenticates using an <a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect (OIDC)</a>
 access token.</p>
-<p>There are two OIDC authentication flows that drivers can support: machine-to-machine ("machine") and human-in-the-loop
-("human"). Drivers MUST support the machine authentication flow. Drivers MAY support the human authentication flow.</p>
+<p>There are two OIDC authentication flows that drivers can support: machine-to-machine (“machine”) and human-in-the-loop
+(“human”). Drivers MUST support the machine authentication flow. Drivers MAY support the human authentication flow.</p>
 <p>The MONGODB-OIDC specification refers to the following OIDC concepts:</p>
 <ul>
 <li><strong>Identity Provider (IdP)</strong>: A service that manages user accounts and authenticates users or applications, such as
@@ -1201,12 +1218,12 @@ typically only supported by the <a href="#human-authentication-flow">Human Authe
 <h4 id="machine-authentication-flow"><a class="header" href="#machine-authentication-flow">Machine Authentication Flow</a></h4>
 <p>The machine authentication flow is intended to be used in cases where human interaction is not necessary or practical,
 such as to authenticate database access for a web service. Some OIDC documentation refers to the machine authentication
-flow as "workload authentication".</p>
+flow as “workload authentication”.</p>
 <p>Drivers MUST implement all behaviors described in the MONGODB-OIDC specification, unless the section or block
 specifically says that it only applies to the <a href="#human-authentication-flow">Human Authentication Flow</a>.</p>
 <h4 id="human-authentication-flow"><a class="header" href="#human-authentication-flow">Human Authentication Flow</a></h4>
 <p>The human authentication flow is intended to be used for applications that involve direct human interaction, such as
-database tools or CLIs. Some OIDC documentation refers to the human authentication flow as "workforce authentication".</p>
+database tools or CLIs. Some OIDC documentation refers to the human authentication flow as “workforce authentication”.</p>
 <p>Drivers that support the <a href="#human-authentication-flow">Human Authentication Flow</a> MUST implement all behaviors described
 in the MONGODB-OIDC specification, including sections or blocks that specifically say that it only applies the
 <a href="#human-authentication-flow">Human Authentication Flow</a>.</p>
@@ -1218,7 +1235,7 @@ in the MONGODB-OIDC specification, including sections or blocks that specificall
 </li>
 <li>
 <p>source</p>
-<p>MUST be "$external". Defaults to <code>$external</code>.</p>
+<p>MUST be “$external”. Defaults to <code>$external</code>.</p>
 </li>
 <li>
 <p>password</p>
@@ -1226,7 +1243,7 @@ in the MONGODB-OIDC specification, including sections or blocks that specificall
 </li>
 <li>
 <p>mechanism</p>
-<p>MUST be "MONGODB-OIDC"</p>
+<p>MUST be “MONGODB-OIDC”</p>
 </li>
 <li>
 <p>mechanism_properties</p>
@@ -1265,7 +1282,7 @@ is only required for drivers that support the <a href="#human-authentication-flo
 <li>
 <p>ALLOWED_HOSTS</p>
 <p>The list of allowed hostnames or ip-addresses (ignoring ports) for MongoDB connections. The hostnames may include a
-leading "*." wildcard, which allows for matching (potentially nested) subdomains. <code>ALLOWED_HOSTS</code> is a security
+leading “*.” wildcard, which allows for matching (potentially nested) subdomains. <code>ALLOWED_HOSTS</code> is a security
 feature and MUST default to
 <code>["*.mongodb.net", "*.mongodb-qa.net", "*.mongodb-dev.net", "*.mongodbgov.net", "localhost", "127.0.0.1", "::1"]</code>.
 When MONGODB-OIDC authentication using a <a href="#oidc-human-callback">OIDC Human Callback</a> is attempted against a
@@ -1283,7 +1300,7 @@ idiomatic for the driver.</p>
 </ul>
 </li>
 </ul>
-<span id="built-in-provider-integrations"/>
+<span id="built-in-provider-integrations" />
 <h4 id="built-in-oidc-environment-integrations"><a class="header" href="#built-in-oidc-environment-integrations">Built-in OIDC Environment Integrations</a></h4>
 <p>Drivers MUST support all of the following built-in OIDC application environment integrations.</p>
 <p><strong>Test</strong></p>
@@ -1294,8 +1311,8 @@ purposes, and is not meant to be documented as a user-facing feature.</p>
 Evergreen Tools. The driver MUST then set the <code>OIDC_TOKEN_FILE</code> environment variable to the path to that file. At
 runtime, the driver MUST use the <code>OIDC_TOKEN_FILE</code> environment variable and read the OIDC access token from that path.
 The driver MUST use the contents of that file as value in the <code>jwt</code> field of the <code>saslStart</code> payload.</p>
-<p>Drivers MAY implement the "test" integration so that it conforms to the function signature of the
-<a href="#oidc-callback">OIDC Callback</a> to prevent having to re-implement the "test" integration logic in the OIDC prose tests.</p>
+<p>Drivers MAY implement the “test” integration so that it conforms to the function signature of the
+<a href="#oidc-callback">OIDC Callback</a> to prevent having to re-implement the “test” integration logic in the OIDC prose tests.</p>
 <p><strong>Azure</strong></p>
 <p>The Azure provider integration is enabled by setting auth mechanism property <code>ENVIRONMENT:azure</code>.</p>
 <p>If enabled, drivers MUST use an internal machine callback that calls the
@@ -1418,10 +1435,10 @@ eventually lead to some drivers having different callback version numbers.</p>
 <li><code>accessToken</code>: An OIDC access token string. The driver MUST NOT attempt to validate <code>accessToken</code> directly.</li>
 <li><code>expiresIn</code>: An optional expiry duration for the access token. Drivers with optional parameters MAY interpret a
 missing value as infinite. Drivers MUST error if a negative value is returned. Drivers SHOULD use the most idiomatic
-type for representing a duration in the driver's language. Note that the access token expiry value is currently not
+type for representing a duration in the driver’s language. Note that the access token expiry value is currently not
 used in <a href="#credential-caching">Credential Caching</a>, but is intended to support future caching optimizations.</li>
 </ul>
-<p>The signature and naming of the callback API is up to the driver's discretion. Drivers MUST ensure that additional
+<p>The signature and naming of the callback API is up to the driver’s discretion. Drivers MUST ensure that additional
 optional input parameters and return values can be added to the callback signature in the future without breaking
 backward compatibility.</p>
 <p>An example callback API might look like:</p>
@@ -1460,7 +1477,7 @@ return the following information:</p>
 <ul>
 <li><code>refreshToken</code>: An optional refresh token that can be used to fetch new access tokens.</li>
 </ul>
-<p>The signature and naming of the callback API is up to the driver's discretion. Drivers MAY use a single callback API for
+<p>The signature and naming of the callback API is up to the driver’s discretion. Drivers MAY use a single callback API for
 both callback types or separate callback APIs for each callback type. Drivers MUST ensure that additional optional input
 parameters and return values can be added to the callback signature in the future without breaking backward
 compatibility.</p>
@@ -1515,7 +1532,7 @@ OIDC access token string.</p>
     jwt: string;
 }
 </code></pre>
-<p>An example OIDC one-step SASL conversation with access token string "abcd1234" looks like:</p>
+<p>An example OIDC one-step SASL conversation with access token string “abcd1234” looks like:</p>
 <pre><code class="language-javascript">// Client:
 {
   saslStart: 1,
@@ -1573,7 +1590,7 @@ the OIDC access token string.</p>
     jwt: string;
 }
 </code></pre>
-<p>An example OIDC two-step SASL conversation with username "myidp" and access token string "abcd1234" looks like:</p>
+<p>An example OIDC two-step SASL conversation with username “myidp” and access token string “abcd1234” looks like:</p>
 <pre><code class="language-javascript">// Client:
 {
   saslStart: 1,
@@ -1803,7 +1820,7 @@ SCRAM-SHA-256 authMechanisms, the authSource defaults to the database name if su
 <h4 id="implementation"><a class="header" href="#implementation">Implementation</a></h4>
 <ol>
 <li>
-<p>Credentials MAY be specified in the connection string immediately after the scheme separator "//".</p>
+<p>Credentials MAY be specified in the connection string immediately after the scheme separator “//”.</p>
 </li>
 <li>
 <p>A realm MAY be passed as a part of the username in the url. It would be something like <a href="mailto:dev@MONGODB.COM">dev@MONGODB.COM</a>, where dev
@@ -1815,7 +1832,7 @@ is the username and MONGODB.COM is the realm. Per the RFC, the @ symbol should b
 </li>
 <li>
 <p>It is permissible for only the username to appear in the connection string. This would be identified by having no
-colon follow the username before the '@' hostname separator.</p>
+colon follow the username before the ‘@’ hostname separator.</p>
 </li>
 <li>
 <p>The source is determined by the following:</p>
@@ -1832,7 +1849,7 @@ colon follow the username before the '@' hostname separator.</p>
 <li><a href="./tests/legacy/connection-string.json">Connection String</a>.</li>
 </ul>
 <h3 id="scram-sha-256-and-mechanism-negotiation"><a class="header" href="#scram-sha-256-and-mechanism-negotiation">SCRAM-SHA-256 and mechanism negotiation</a></h3>
-<p>Testing SCRAM-SHA-256 requires server version 3.7.3 or later with <code>featureCompatibilityVersion</code> of "4.0" or later.</p>
+<p>Testing SCRAM-SHA-256 requires server version 3.7.3 or later with <code>featureCompatibilityVersion</code> of “4.0” or later.</p>
 <p>Drivers that allow specifying auth parameters in code as well as via connection string should test both for the test
 cases described below.</p>
 <h4 id="step-1"><a class="header" href="#step-1">Step 1</a></h4>
@@ -1860,8 +1877,8 @@ themselves.)</p>
 <h4 id="step-4"><a class="header" href="#step-4">Step 4</a></h4>
 <p>To test SASLprep behavior, create two users:</p>
 <ol>
-<li>username: "IX", password "IX"</li>
-<li>username: "\u2168" (ROMAN NUMERAL NINE), password "\u2163" (ROMAN NUMERAL FOUR)</li>
+<li>username: “IX”, password “IX”</li>
+<li>username: “\u2168” (ROMAN NUMERAL NINE), password “\u2163” (ROMAN NUMERAL FOUR)</li>
 </ol>
 <p>To create the users, use the exact bytes for username and password without SASLprep or other normalization and specify
 SCRAM-SHA-256 credentials:</p>
@@ -1871,8 +1888,8 @@ db.runCommand({createUser: '\\u2168', pwd: '\\u2163', roles: ['root'], mechanism
 <p>For each user, verify that the driver can authenticate with the password in both SASLprep normalized and non-normalized
 forms:</p>
 <ul>
-<li>User "IX": use password forms "IX" and "I\u00ADX"</li>
-<li>User "\u2168": use password forms "IV" and "I\u00ADV"</li>
+<li>User “IX”: use password forms “IX” and “I\u00ADX”</li>
+<li>User “\u2168”: use password forms “IV” and “I\u00ADV”</li>
 </ul>
 <p>As a URI, those have to be UTF-8 encoded and URL-escaped, e.g.:</p>
 <ul>
@@ -1892,7 +1909,7 @@ of an underlying SCRAM library.</p>
 <li>Deprecation and removal of MongoClient constructors that take as an argument more than a single credential</li>
 <li>Deprecation and removal of methods that allow lazy authentication (i.e post-MongoClient construction)</li>
 </ul>
-<p>Drivers need to support both the shorter and longer SCRAM-SHA-1 and SCRAM-SHA-256 conversations over MongoDB's SASL
+<p>Drivers need to support both the shorter and longer SCRAM-SHA-1 and SCRAM-SHA-256 conversations over MongoDB’s SASL
 implementation. Earlier versions of the server required an extra round trip due to an implementation decision. This was
 accomplished by sending no bytes back to the server, as seen in the following conversation (extra round trip
 emphasized):</p>
@@ -1911,31 +1928,31 @@ during <code>saslStart</code>.</p>
 <p><span id="q-and-a"></span></p>
 <h2 id="q--a"><a class="header" href="#q--a">Q &amp; A</a></h2>
 <p>Q: According to <a href="#authentication-handshake">Authentication Handshake</a>, we are calling <code>hello</code> or legacy hello for every
-socket. Isn't this a lot?</p>
-<p>Drivers should be pooling connections and, as such, new sockets getting opened should be relatively infrequent. It's
+socket. Isn’t this a lot?</p>
+<p>Drivers should be pooling connections and, as such, new sockets getting opened should be relatively infrequent. It’s
 simply part of the protocol for setting up a socket to be used.</p>
 <p>Q: Where is information related to user management?</p>
 <p>Not here currently. Should it be? This is about authentication, not user management. Perhaps a new spec is necessary.</p>
-<p>Q: It's possible to continue using authenticated sockets even if new sockets fail authentication. Why can't we do that
+<p>Q: It’s possible to continue using authenticated sockets even if new sockets fail authentication. Why can’t we do that
 so that applications continue to work.</p>
-<p>Yes, that's technically true. The issue with doing that is for drivers using connection pooling. An application would
+<p>Yes, that’s technically true. The issue with doing that is for drivers using connection pooling. An application would
 function normally until an operation needed an additional connection(s) during a spike. Each new connection would fail
 to authenticate causing intermittent failures that would be very difficult to understand for a user.</p>
 <p>Q: Should a driver support multiple credentials?</p>
 <p>No.</p>
 <p>Historically, the MongoDB server and drivers have supported multiple credentials, one per authSource, on a single
 connection. It was necessary because early versions of MongoDB allowed a user to be granted privileges to access the
-database in which the user was defined (or all databases in the special case of the "admin" database). But with the
+database in which the user was defined (or all databases in the special case of the “admin” database). But with the
 introduction of role-based access control in MongoDB 2.6, that restriction was removed and it became possible to create
 applications that access multiple databases with a single authenticated user.</p>
 <p>Role-based access control also introduces the potential for accidental privilege escalation. An application may, for
 example, authenticate user A from authSource X, and user B from authSource Y, thinking that user A has privileges only
 on collections in X and user B has privileges only on collections in Y. But with role-based access control that
-restriction no longer exists, and it's possible that user B has, for example, more privileges on collections in X than
-user A does. Due to this risk it's generally safer to create a single user with only the privileges required for a given
+restriction no longer exists, and it’s possible that user B has, for example, more privileges on collections in X than
+user A does. Due to this risk it’s generally safer to create a single user with only the privileges required for a given
 application, and authenticate only that one user in the application.</p>
 <p>In addition, since only a single credential is supported per authSource, certain mechanisms are restricted to a single
-credential and some credentials cannot be used in conjunction (GSSAPI and X509 both use the "$external" database).</p>
+credential and some credentials cannot be used in conjunction (GSSAPI and X509 both use the “$external” database).</p>
 <p>Finally, MongoDB 3.6 introduces sessions, and allows at most a single authenticated user on any connection which makes
 use of one. Therefore any application that requires multiple authenticated users will not be able to make use of any
 feature that builds on sessions (e.g. retryable writes).</p>
@@ -1947,7 +1964,7 @@ multiple credentials to be associated with a single MongoClient instance.</p>
 <p>Q: Why does SCRAM sometimes SASLprep and sometimes not?</p>
 <p>When MongoDB implemented SCRAM-SHA-1, it required drivers to <em>NOT</em> SASLprep usernames and passwords. The primary reason
 for this was to allow a smooth upgrade path from MongoDB-CR using existing usernames and passwords. Also, because
-MongoDB's SCRAM-SHA-1 passwords are hex characters of a digest, SASLprep of passwords was irrelevant.</p>
+MongoDB’s SCRAM-SHA-1 passwords are hex characters of a digest, SASLprep of passwords was irrelevant.</p>
 <p>With the introduction of SCRAM-SHA-256, MongoDB requires users to explicitly create new SCRAM-SHA-256 credentials
 distinct from those used for MONGODB-CR and SCRAM-SHA-1. This means SCRAM-SHA-256 passwords are not digested and any
 Unicode character could now appear in a password. Therefore, the SCRAM-SHA-256 mechanism requires passwords to be
@@ -1959,7 +1976,7 @@ SASLprep username. After considering various options to address or workaround th
 best user experience on upgrade and lowest technical risk of implementation is to require drivers to continue to not
 SASLprep usernames in SCRAM-SHA-256.</p>
 <p>Q: Should drivers support accessing Amazon EC2 instance metadata in Amazon ECS?</p>
-<p>No. While it's possible to allow access to EC2 instance metadata in ECS, for security reasons, Amazon states it's best
+<p>No. While it’s possible to allow access to EC2 instance metadata in ECS, for security reasons, Amazon states it’s best
 practice to avoid this. (See
 <a href="https://aws.amazon.com/premiumsupport/knowledge-center/ecs-container-ec2-metadata/">accessing EC2 metadata in ECS</a> and
 <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html">IAM Roles for Tasks</a>)</p>
@@ -2078,7 +2095,7 @@ additional prose test for the behavior of <code>ALLOWED_HOSTS</code>.</p>
 </ul>
 </li>
 <li>
-<p>2018-08-08: Unknown users don't cause handshake errors. This was changed before server 4.0 GA in SERVER-34421, so the
+<p>2018-08-08: Unknown users don’t cause handshake errors. This was changed before server 4.0 GA in SERVER-34421, so the
 auth spec no longer refers to such a possibility.</p>
 </li>
 <li>
@@ -2125,8 +2142,7 @@ should be available in server 4.0-rc0.</li>
 </ul>
 </li>
 </ul>
-<hr />
-
+<hr>
                         </div>
                         <div id="sidetoc">
                             <nav id="pagetoc"></nav>
@@ -2135,27 +2151,12 @@ should be available in server 4.0-rc0.</li>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../load-balancers/load-balancers.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../server-discovery-and-monitoring/server-monitoring.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../load-balancers/load-balancers.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../server-discovery-and-monitoring/server-monitoring.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

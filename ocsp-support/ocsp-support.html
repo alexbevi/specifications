@@ -21,7 +21,6 @@
 
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css" id="highlight-css">
@@ -160,7 +159,7 @@
 <li>Status: Accepted</li>
 <li>Minimum Server Version: 4.4</li>
 </ul>
-<hr />
+<hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>This specification is about the ability for drivers to to support
 <a href="https://en.wikipedia.org/wiki/Online_Certificate_Status_Protocol">OCSP</a>—Online Certificate Status Protocol
@@ -168,20 +167,20 @@
 <a href="https://en.wikipedia.org/wiki/OCSP_stapling">OCSP stapling</a> (<a href="https://tools.ietf.org/html/rfc6066">RFC 6066</a>) and
 <a href="https://scotthelme.co.uk/ocsp-must-staple/">Must-Staple</a> (<a href="https://tools.ietf.org/html/rfc7633">RFC 7633</a>).</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
+<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="required-server-versions"><a class="header" href="#required-server-versions">Required Server Versions</a></h3>
 <p>The server supports attaching a stapled OCSP response with versions ≥ 4.4. Future backports will bring stapling support
-to server versions ≥ 3.6. Drivers need not worry about the version of the server as a driver's TLS library should
+to server versions ≥ 3.6. Drivers need not worry about the version of the server as a driver’s TLS library should
 automatically perform the proper certificate revocation checking behavior once OCSP is enabled.</p>
 <h3 id="enabling-ocsp-support-by-default"><a class="header" href="#enabling-ocsp-support-by-default">Enabling OCSP Support by Default</a></h3>
-<p>Drivers whose TLS libraries utilize application-wide settings for OCSP MUST respect the application's settings and MUST
+<p>Drivers whose TLS libraries utilize application-wide settings for OCSP MUST respect the application’s settings and MUST
 NOT change any OCSP settings. Otherwise:</p>
 <ul>
-<li>If a driver's TLS library supports OCSP, OCSP MUST be enabled by default whenever possible (even if this also enables
+<li>If a driver’s TLS library supports OCSP, OCSP MUST be enabled by default whenever possible (even if this also enables
 Certificate Revocation List (CRL) checking).</li>
-<li>If a driver's TLS library supports verifying stapled OCSP responses, this option MUST be enabled by default whenever
+<li>If a driver’s TLS library supports verifying stapled OCSP responses, this option MUST be enabled by default whenever
 possible (even if this also enables CRL checking).</li>
 </ul>
 <h3 id="suggested-ocsp-behavior"><a class="header" href="#suggested-ocsp-behavior">Suggested OCSP Behavior</a></h3>
@@ -189,12 +188,12 @@ possible (even if this also enables CRL checking).</li>
 the steps defined below, if a certificate in or necessary to validate the chain is found to be invalid, the driver
 SHOULD end the connection.</p>
 <ol>
-<li>If a driver's TLS library supports Stapled OCSP, the server has a Must-Staple certificate and the server does not
+<li>If a driver’s TLS library supports Stapled OCSP, the server has a Must-Staple certificate and the server does not
 present a stapled OCSP response, a driver SHOULD end the connection.</li>
-<li>If a driver's TLS library supports Stapled OCSP and the server staples an OCSP response that does not cover the
+<li>If a driver’s TLS library supports Stapled OCSP and the server staples an OCSP response that does not cover the
 certificate it presents or is invalid per <a href="https://tools.ietf.org/html/rfc6960#section-3.2">RFC 6960 Section 3.2</a>,
 a driver SHOULD end the connection.</li>
-<li>If a driver's TLS library supports Stapled OCSP and the server staples an OCSP response that does cover the
+<li>If a driver’s TLS library supports Stapled OCSP and the server staples an OCSP response that does cover the
 certificate it presents, a driver SHOULD accept the stapled OCSP response and validate all of the certificates
 that are presented in the response.</li>
 <li>If any unvalidated certificates in the chain remain and the client possesses an OCSP cache, the driver SHOULD
@@ -204,7 +203,7 @@ attempt to validate the status of the unvalidated certificates using the user-sp
 <li>If any unvalidated certificates in the chain remain and the driver has access to cached CRLs (e.g.
 OS-level/application-level/user-level caches), the driver SHOULD attempt to validate the status of the unvalidated
 certificates using the cached CRLs.</li>
-<li>If the server's certificate remains unvalidated, that certificate has a list of OCSP responder endpoints, and
+<li>If the server’s certificate remains unvalidated, that certificate has a list of OCSP responder endpoints, and
 <code>tlsDisableOCSPEndpointCheck</code> or <code>tlsDisableCertificateRevocationCheck</code> is false
 (<a href="#mongoclient-configuration">if the driver supports these options</a>), the driver SHOULD send HTTP requests to the
 responders in parallel. The first valid response that concretely marks the certificate status as good or revoked
@@ -219,7 +218,7 @@ certificate.*</li>
 SHOULD NOT download those CRLs and attempt to validate the status of all the other certificates using those
 CRLs.*</li>
 <li>Finally, the driver SHOULD continue the connection, even if the status of all the unvalidated certificates has not
-been confirmed yet. This means that the driver SHOULD default to "soft fail" behavior, connecting as long as there
+been confirmed yet. This means that the driver SHOULD default to “soft fail” behavior, connecting as long as there
 are no explicitly invalid certificates—i.e. the driver will connect even if the status of all the unvalidated
 certificates has not been confirmed yet (e.g. because an OCSP responder is down).</li>
 </ol>
@@ -228,7 +227,7 @@ certificates has not been confirmed yet (e.g. because an OCSP responder is down)
 <p>Drivers SHOULD validate OCSP Responses in the manner specified in
 <a href="https://tools.ietf.org/html/rfc6960#section-3.2">RFC 6960: 3.2</a> to the extent that their TLS library allows.</p>
 <h3 id="suggested-ocsp-caching-behavior"><a class="header" href="#suggested-ocsp-caching-behavior">Suggested OCSP Caching Behavior</a></h3>
-<p>Drivers with sufficient control over their TLS library's OCSP behavior SHOULD implement an OCSP cache. The key for this
+<p>Drivers with sufficient control over their TLS library’s OCSP behavior SHOULD implement an OCSP cache. The key for this
 cache SHOULD be the certificate identifier (CertID) of the OCSP request as specified in
 <a href="https://tools.ietf.org/html/rfc6960#section-4.1.1">RFC 6960: 4.1.1</a>. For convenience, the relevant section has been
 duplicated below:</p>
@@ -243,7 +242,7 @@ define a conclusive OCSP response as an OCSP response that indicates that a cert
 Thus, an unknown certificate status SHOULD NOT be considered conclusive, and the corresponding OCSP response SHOULD NOT
 be cached.</p>
 <p>In accordance with <a href="https://tools.ietf.org/html/rfc6960#section-3.2">RFC: 6960: 3.2</a>, a cached response SHOULD be
-considered valid up to and excluding the time specified in the response's <code>nextUpdate</code> field. In other words, if the
+considered valid up to and excluding the time specified in the response’s <code>nextUpdate</code> field. In other words, if the
 current time is <em>t</em>, then the cache entry SHOULD be considered valid if <em>thisUpdate ⩽ t &lt; nextUpdate</em>.</p>
 <p>If a driver would accept a stapled OCSP response and that response has a later <code>nextUpdate</code> than the response already in
 the cache, drivers SHOULD replace the older entry in the cache with the fresher response.</p>
@@ -256,9 +255,9 @@ this option.</p>
 non-stapled OCSP should be disabled. When set to true, a driver MUST NOT reach out to OCSP endpoints. When set to false,
 a driver MUST reach out to OCSP endpoints if needed (as described in
 <a href="#suggested-ocsp-behavior">Specification: Suggested OCSP Behavior</a>).</p>
-<p>For drivers that pass the <a href="tests/README.html#integration-tests-permutations-to-be-tested">"Soft Fail Test"</a>, this option
+<p>For drivers that pass the <a href="tests/README.html#integration-tests-permutations-to-be-tested">“Soft Fail Test”</a>, this option
 MUST default to false.</p>
-<p>For drivers that fail the "Soft Fail Test" because their TLS library exhibits hard-fail behavior when a responder is
+<p>For drivers that fail the “Soft Fail Test” because their TLS library exhibits hard-fail behavior when a responder is
 unreachable, this option MUST default to true, and a driver MUST document this behavior. If this hard-failure behavior
 is specific to a particular platform (e.g. the TLS library hard-fails only on Windows) then this option MUST default to
 true only on the platform where the driver exhibits hard-fail behavior, and a driver MUST document this behavior.</p>
@@ -270,9 +269,9 @@ available (i.e. no methods are defined or the CRL distribution points/OCSP endpo
 true, a driver MUST NOT check certificate revocation status via CRLs or OCSP. When set to false, a driver MUST check
 certificate revocation status, reach out to OCSP endpoints if needed (as described in
 <a href="#suggested-ocsp-behavior">Specification: Suggested OCSP Behavior</a>).</p>
-<p>For drivers that pass the <a href="tests/README.html#integration-tests-permutations-to-be-tested">"Soft Fail Test"</a> , this option
+<p>For drivers that pass the <a href="tests/README.html#integration-tests-permutations-to-be-tested">“Soft Fail Test”</a> , this option
 MUST default to false.</p>
-<p>If a driver does not support <code>tlsDisableOCSPEndpointCheck</code> and that driver fails the "Soft Fail Test" because their TLS
+<p>If a driver does not support <code>tlsDisableOCSPEndpointCheck</code> and that driver fails the “Soft Fail Test” because their TLS
 library exhibits hard-fail behavior when a responder is unreachable, then that driver must default
 <code>tlsDisableCertificateRevocationCheck</code> to true. Such a driver also MUST document this behavior. If this hard-failure
 behavior is specific to a particular platform (e.g. the TLS library hard-fails only on Windows) then this option MUST
@@ -313,7 +312,7 @@ throw an error.</li>
 </ol>
 <h3 id="tls-requirements"><a class="header" href="#tls-requirements">TLS Requirements</a></h3>
 <p><a href="https://en.wikipedia.org/wiki/Server_Name_Indication">Server Name Indication</a> (SNI) MUST BE used in the TLS connection
-that obtains the server's certificate, otherwise the server may present the incorrect certificate. This requirement is
+that obtains the server’s certificate, otherwise the server may present the incorrect certificate. This requirement is
 especially relevant to drivers whose TLS libraries allow for finer-grained control over their TLS behavior (e.g. Python,
 C).</p>
 <h3 id="documentation-requirements"><a class="header" href="#documentation-requirements">Documentation Requirements</a></h3>
@@ -328,23 +327,23 @@ certificates, then the driver cannot perform certificate revocation checking.</l
 <p>Drivers that support OCSP without stapling MUST document this lack of support for stapling. They also MUST document
 their behavior when an OCSP responder is unavailable and a server has a Must-Staple certificate. If a driver is able to
 connect in such a scenario due to the prevalence of
-"<a href="https://www.imperialviolet.org/2014/04/19/revchecking.html">soft-fail</a>" behavior in TLS libraries (where a certificate
+“<a href="https://www.imperialviolet.org/2014/04/19/revchecking.html">soft-fail</a>” behavior in TLS libraries (where a certificate
 is accepted when an answer from an OCSP responder cannot be obtained), they additionally MUST document that this ability
 to connect to a server with a Must-Staple certificate when an OCSP responder is unavailable differs from the mongo shell
-or a driver that does support OCSP-stapling, both of which will fail to connect (i.e. "hard-fail") in such a scenario.</p>
+or a driver that does support OCSP-stapling, both of which will fail to connect (i.e. “hard-fail”) in such a scenario.</p>
 <p>If a driver (e.g. <a href="https://www.mongodb.com/docs/languages/python/pymongo-driver/current/connect/tls/">Python</a>,
 <a href="http://mongoc.org/libmongoc/current/mongoc_ssl_opt_t.html">C</a>) allows the user to provide their own certificate
-revocation list (CRL), then that driver MUST document their TLS library's preference between the user-provided CRL and
+revocation list (CRL), then that driver MUST document their TLS library’s preference between the user-provided CRL and
 OCSP.</p>
 <p>Drivers that cannot enable OCSP by default on a per MongoClient basis (e.g. Java) MUST document this limitation.</p>
-<p>Drivers that fail either of the "Malicious Server Tests" (i.e. the driver connects to a test server without TLS
+<p>Drivers that fail either of the “Malicious Server Tests” (i.e. the driver connects to a test server without TLS
 constraints being relaxed) as defined in the test plan below MUST document that their chosen TLS library will connect in
 the case that a server with a Must-Staple certificate does not staple a response.</p>
-<p>Drivers that fail "Malicious Server Test 2" (i.e. the driver connects to the test server without TLS constraints being
+<p>Drivers that fail “Malicious Server Test 2” (i.e. the driver connects to the test server without TLS constraints being
 relaxed) as defined in the test plan below MUST document that their chosen TLS library will connect in the case that a
 server with a Must-Staple certificate does not staple a response and the OCSP responder is down.</p>
-<p>Drivers that fail "Soft Fail Test" MUST document that their driver's TLS library utilizes "hard fail" behavior in the
-case of an unavailable OCSP responder in contrast to the mongo shell and drivers that utilize "soft fail" behavior. They
+<p>Drivers that fail “Soft Fail Test” MUST document that their driver’s TLS library utilizes “hard fail” behavior in the
+case of an unavailable OCSP responder in contrast to the mongo shell and drivers that utilize “soft fail” behavior. They
 also MUST document the change in defaults for the applicable options (see
 <a href="#mongoclient-configuration">MongoClient Configuration</a>).</p>
 <p>If any changes related to defaults for OCSP behavior are made after a driver version that supports OCSP has been
@@ -356,34 +355,34 @@ released, the driver MUST document potential backwards compatibility issues as n
 <p>MongoDB Atlas intends to use <a href="https://letsencrypt.org/">LetsEncrypt</a>, a Certificate Authority (CA) that does not use
 CRLs and only uses OCSP. (Atlas currently uses DigiCert certificates which specify both OCSP endpoints and CRL
 distribution points.) Therefore, the MongoDB server is adding support for OCSP, and drivers need to support OCSP in
-order for applications to continue to have the ability to verify the revocation status of an Atlas server's certificate.
-Other CAs have also stopped using CRLs, so enabling OCSP support will ensure that a customer's choice in CAs is not
-limited by a driver's lack of OCSP support.</p>
-<p>OCSP stapling will also help applications deployed behind a firewall with an outbound allowList. It's a very natural
+order for applications to continue to have the ability to verify the revocation status of an Atlas server’s certificate.
+Other CAs have also stopped using CRLs, so enabling OCSP support will ensure that a customer’s choice in CAs is not
+limited by a driver’s lack of OCSP support.</p>
+<p>OCSP stapling will also help applications deployed behind a firewall with an outbound allowList. It’s a very natural
 mistake to neglect to allowList the CRL distribution points and the OCSP endpoints, which can prevent an application
 from connecting to a MongoDB instance if certificate revocation checking is enabled but the driver does not support OCSP
 stapling.</p>
 <p>Finally, drivers whose TLS libraries support <a href="https://en.wikipedia.org/wiki/OCSP_stapling">OCSP stapling</a> extension will
-be able to minimize the number of network round trips for the client because the driver's TLS library will read an OCSP
-response stapled to the server's certificate that the server provides as part of the TLS handshake. Drivers whose TLS
+be able to minimize the number of network round trips for the client because the driver’s TLS library will read an OCSP
+response stapled to the server’s certificate that the server provides as part of the TLS handshake. Drivers whose TLS
 libraries support OCSP but not stapling will need to make an additional round trip to contact the OCSP endpoint.</p>
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
-<p>We have chosen not to force drivers whose TLS libraries do not support OCSP/stapling "out of the box" to implement OCSP
-support due to the extra work and research that this might require. Similarly, this specification uses "SHOULD" more
-commonly (when other specs would prefer "MUST") to account for the fact that some drivers may not be able to fully
+<p>We have chosen not to force drivers whose TLS libraries do not support OCSP/stapling “out of the box” to implement OCSP
+support due to the extra work and research that this might require. Similarly, this specification uses “SHOULD” more
+commonly (when other specs would prefer “MUST”) to account for the fact that some drivers may not be able to fully
 customize OCSP behavior in their TLS library.</p>
 <p>We are requiring drivers to support both stapled OCSP and non-stapled OCSP in order to support revocation checking for
-server versions in Atlas that do not support stapling, especially after Atlas switches to Let's Encrypt certificates
-(which do not have CRLs). Additionally, even when servers do support stapling, in the case of a non-"Must Staple"
+server versions in Atlas that do not support stapling, especially after Atlas switches to Let’s Encrypt certificates
+(which do not have CRLs). Additionally, even when servers do support stapling, in the case of a non-“Must Staple”
 certificate (which is the type that Atlas is planning to use), if the server is unable to contact the OCSP responder
-(e.g. due to a network error) and staple a certificate, the driver being able to query the certificate's OCSP endpoint
-allows for one final chance to attempt to verify the certificate's validity.</p>
+(e.g. due to a network error) and staple a certificate, the driver being able to query the certificate’s OCSP endpoint
+allows for one final chance to attempt to verify the certificate’s validity.</p>
 <h3 id="malicious-server-tests"><a class="header" href="#malicious-server-tests">Malicious Server Tests</a></h3>
-<p>"Malicious Server Test 2" is designed to reveal the behavior of TLS libraries of drivers in one of the worst case
+<p>“Malicious Server Test 2” is designed to reveal the behavior of TLS libraries of drivers in one of the worst case
 scenarios. Since a majority of the drivers will not have fine-grained control over their OCSP behavior, this test case
-provides signal about the soft/hard fail behavior in a driver's TLS library so that we can document this.</p>
-<p>A driver with control over its OCSP behavior will react the same in "Malicious Server Test 1" and "Malicious Server Test
-2", terminating the connection as long as TLS constraints have not been relaxed.</p>
+provides signal about the soft/hard fail behavior in a driver’s TLS library so that we can document this.</p>
+<p>A driver with control over its OCSP behavior will react the same in “Malicious Server Test 1” and “Malicious Server Test
+2”, terminating the connection as long as TLS constraints have not been relaxed.</p>
 <h3 id="atlas-connectivity-tests"><a class="header" href="#atlas-connectivity-tests">Atlas Connectivity Tests</a></h3>
 <p>No additional Atlas connectivity tests will be added because the existing tests should provide sufficient coverage
 (provided that one of the non-free tier clusters is upgraded ≥ 3.6).</p>
@@ -395,9 +394,9 @@ order to verify the revocation status of intermediate certificates.</p>
 <h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
 <p>An application behind a firewall with an outbound allowList that upgrades to a driver implementing this specification
 may experience connectivity issues when OCSP is enabled. This is because the driver may need to contact OCSP endpoints
-or CRL distribution points<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup> specified in the server's certificate and if these OCSP endpoints and/or CRL distribution
+or CRL distribution points<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup> specified in the server’s certificate and if these OCSP endpoints and/or CRL distribution
 points are not accessible, then the connection to the server may fail. (N.B.: TLS libraries
-<a href="https://blog.hboeck.de/archives/886-The-Problem-with-OCSP-Stapling-and-Must-Staple-and-why-Certificate-Revocation-is-still-broken.html">typically implement "soft fail"</a>
+<a href="https://blog.hboeck.de/archives/886-The-Problem-with-OCSP-Stapling-and-Must-Staple-and-why-Certificate-Revocation-is-still-broken.html">typically implement “soft fail”</a>
 such that connections can continue even if the OCSP server is inaccessible, so this issue is much more likely in the
 case of a server with a certificate that only contains CRL distribution points.) In such a scenario, connectivity may be
 able to be restored by disabling non-stapled OCSP via <code>tlsDisableOCSPEndpointCheck</code> or by disabling certificate
@@ -406,7 +405,7 @@ revocation checking altogether via <code>tlsDisableCertificateRevocationCheck</c
 available may also experience connectivity issue. Cases in which no certificate revocation mechanisms being available
 include:</p>
 <ol>
-<li>When a server's certificate defines neither OCSP endpoints nor CRL distribution points</li>
+<li>When a server’s certificate defines neither OCSP endpoints nor CRL distribution points</li>
 <li>When a certificate defines CRL distribution points and/or OCSP endpoints but these points are unavailable (e.g. the
 points are down or the application is deployed behind a restrictive firewall).</li>
 </ol>
@@ -424,22 +423,22 @@ certificate validity in drivers that cannot support OCSP.</p>
 <p>In the case that the server has a Must-Staple certificate and its OCSP responder is down (for longer than the server is
 able to cache and staple a previously acquired response), the mongo shell or a driver that supports OCSP stapling will
 not be able to connect while a driver that supports OCSP but not stapling will be able to connect.</p>
-<p>TLS libraries may implement "<a href="https://www.imperialviolet.org/2014/04/19/revchecking.html">soft-fail</a>" in the case of
+<p>TLS libraries may implement “<a href="https://www.imperialviolet.org/2014/04/19/revchecking.html">soft-fail</a>” in the case of
 non-stapled OCSP which may be undesirable in highly secure contexts.</p>
-<p>Drivers that fail the "Malicious Server" tests as defined in Test Plan will connect in the case that server with a
+<p>Drivers that fail the “Malicious Server” tests as defined in Test Plan will connect in the case that server with a
 Must-Staple certificate does not staple a response.</p>
 <h3 id="testing-against-valid-certificate-chains"><a class="header" href="#testing-against-valid-certificate-chains">Testing Against Valid Certificate Chains</a></h3>
-<p>Some TLS libraries are stricter about the types of certificate chains they're willing to accept (and it can be difficult
+<p>Some TLS libraries are stricter about the types of certificate chains they’re willing to accept (and it can be difficult
 to debug why a particular certificate chain is considered invalid by a TLS library). Clients and servers with more
 control over their OCSP implementation may run into fewer up front costs, but this may be at the cost of not fully
 implementing every single aspect of OCSP.</p>
-<p>For example, the server team's certificate generation tool generated X509 V1 certificates which were used for testing
-OCSP without any issues in the server team's tests. However, while we were creating a test plan for drivers, we
-discovered that Java's keytool refused to import X509 V1 certificates into its trust store and thus had to modify the
-server team's certificate generation tool to generate V3 certificates.</p>
+<p>For example, the server team’s certificate generation tool generated X509 V1 certificates which were used for testing
+OCSP without any issues in the server team’s tests. However, while we were creating a test plan for drivers, we
+discovered that Java’s keytool refused to import X509 V1 certificates into its trust store and thus had to modify the
+server team’s certificate generation tool to generate V3 certificates.</p>
 <p>Another example comes from <a href="https://github.com/dotnet/corefx/issues/41475">.NET on Linux</a>, which currently enforces the
-CA/Browser forum requirement that while a leaf certificate can be covered solely by OCSP, "public CAs have to have
-CRL[s] covering their issuing CAs". This requirement is not enforced with Java's default TLS libraries. See also:
+CA/Browser forum requirement that while a leaf certificate can be covered solely by OCSP, “public CAs have to have
+CRL[s] covering their issuing CAs”. This requirement is not enforced with Java’s default TLS libraries. See also:
 <a href="#cabrowser-forum-requirements-complications">Future Work: CA/Browser Forum Requirements Complications</a>.</p>
 <h2 id="future-work"><a class="header" href="#future-work">Future Work</a></h2>
 <p>When the server work is backported, drivers will need to update their prose tests so that tests are run against a wider
@@ -451,13 +450,13 @@ Automated Atlas connectivity tests will automatically get updated to 4.4 when it
 plan to enable OCSP for free and shared tier instances (i.e. Atlas Proxy).</p>
 <p>Options to configure failure behavior (e.g. to maximize security or availability) may be added in the future.</p>
 <h3 id="cabrowser-forum-requirements-complications"><a class="header" href="#cabrowser-forum-requirements-complications">CA/Browser Forum Requirements Complications</a></h3>
-<p>The test plan may need to be reworked if we discover that a driver's TLS library strictly implements CA/Browser forum
+<p>The test plan may need to be reworked if we discover that a driver’s TLS library strictly implements CA/Browser forum
 requirements (e.g. <a href="https://github.com/dotnet/corefx/issues/41475">.NET on Linux</a>). This is because our current chain of
-certificates does not fulfill the following requirement: while a leaf certificate can be covered solely by OCSP, "public
-CAs have to have CRL[s] covering their issuing CAs." This rework of the test plan may happen during the initial
-implementation of OCSP support or happen later if a driver's TLS library implements the relevant CA/Browser forum
+certificates does not fulfill the following requirement: while a leaf certificate can be covered solely by OCSP, “public
+CAs have to have CRL[s] covering their issuing CAs.” This rework of the test plan may happen during the initial
+implementation of OCSP support or happen later if a driver’s TLS library implements the relevant CA/Browser forum
 requirement.</p>
-<p>Extending the chain to fulfill the CA/Browser requirement should solve this issue, although drivers that don't support
+<p>Extending the chain to fulfill the CA/Browser requirement should solve this issue, although drivers that don’t support
 manually supplying a CRL may need to host a web server that serves the required CRL during testing.</p>
 <h2 id="qa"><a class="header" href="#qa">Q&amp;A</a></h2>
 <h3 id="can-we-use-one-evergreen-task-combined-with-distinct-certificates-for-each-column-in-the-test-matrix-to-prevent-ocsp-caching-from-affecting-testing"><a class="header" href="#can-we-use-one-evergreen-task-combined-with-distinct-certificates-for-each-column-in-the-test-matrix-to-prevent-ocsp-caching-from-affecting-testing">Can we use one Evergreen task combined with distinct certificates for each column in the test matrix to prevent OCSP caching from affecting testing?</a></h3>
@@ -476,7 +475,7 @@ allows for the configuration of a tolerance period for the acceptance of OCSP re
 not adhering to that RFC.</p>
 <h3 id="why-was-the-decision-made-to-allow-ocsp-endpoint-checking-to-be-enableddisabled-via-a-uri-option"><a class="header" href="#why-was-the-decision-made-to-allow-ocsp-endpoint-checking-to-be-enableddisabled-via-a-uri-option">Why was the decision made to allow OCSP endpoint checking to be enabled/disabled via a URI option?</a></h3>
 <p>We initially hoped that we would be able to not expose any options specifically related to OCSP to the user, in
-accordance with the "No Knobs" <a href="../driver-mantras.html">drivers mantra</a> However, we later decided that users may benefit
+accordance with the “No Knobs” <a href="../driver-mantras.html">drivers mantra</a> However, we later decided that users may benefit
 from having the ability to disable OCSP endpoint checking when applications are deployed behind restrictive firewall
 with outbound allowLists, and this benefit is worth adding another URI option.</p>
 <h2 id="appendix"><a class="header" href="#appendix">Appendix</a></h2>
@@ -485,13 +484,13 @@ with outbound allowLists, and this benefit is worth adding another URI option.</
 <p>On Windows, the OCSP cache can be viewed like so:</p>
 <pre><code class="language-bash">certutil -urlcache
 </code></pre>
-<p>To search the cache for "Lets Encrypt" OCSP cache entries, the following command could be used:</p>
+<p>To search the cache for “Lets Encrypt” OCSP cache entries, the following command could be used:</p>
 <pre><code class="language-bash">certutil -urlcache | findstr letsencrypt.org
 </code></pre>
 <p>On Windows, the OCSP cache can be cleared like so:</p>
 <pre><code class="language-bash">certutil -urlcache * delete
 </code></pre>
-<p>To delete only "Let's Encrypt" related entries, the following command could be used:</p>
+<p>To delete only “Let’s Encrypt” related entries, the following command could be used:</p>
 <pre><code class="language-bash">certutil -urlcache letsencrypt.org delete
 </code></pre>
 <h4 id="macos"><a class="header" href="#macos">macOS</a></h4>
@@ -499,7 +498,7 @@ with outbound allowLists, and this benefit is worth adding another URI option.</
 <pre><code class="language-bash">find ~/profile/Library/Keychains -name 'ocspcache.sqlite3' \
 -exec sqlite3 "{}" 'SELECT responderURI FROM responses;' \;
 </code></pre>
-<p>To search the cache for "Let's Encrypt" OCSP cache entries, the following command could be used:</p>
+<p>To search the cache for “Let’s Encrypt” OCSP cache entries, the following command could be used:</p>
 <pre><code class="language-bash">find ~/profile/Library/Keychains \
 -name 'ocspcache.sqlite3' \
 -exec sqlite3 "{}" \
@@ -509,7 +508,7 @@ with outbound allowLists, and this benefit is worth adding another URI option.</
 <pre><code class="language-bash">find ~/profile/Library/Keychains -name 'ocspcache.sqlite3' \
 -exec sqlite3 "{}" 'DELETE FROM responses ;' \;
 </code></pre>
-<p>To delete only "Let's Encrypt" related entries, the following command could be used:</p>
+<p>To delete only “Let’s Encrypt” related entries, the following command could be used:</p>
 <pre><code class="language-bash">find ~/profile/Library/Keychains -name 'ocspcache.sqlite3' \
 -exec sqlite3 "{}" \
 'DELETE FROM responses WHERE responderURI LIKE "http://%.letsencrypt.org%";' \;
@@ -518,7 +517,7 @@ with outbound allowLists, and this benefit is worth adding another URI option.</
 <p>These optional validation tests are not a required part of the test plan. However, these optional tests may be useful
 for drivers trying to quickly determine if their TLS library supports OCSP and/or as an initial manual testing goal when
 implementing OCSP support.</p>
-<h4 id="optional-test-to-ensure-that-the-drivers-tls-library-supports-ocsp-stapling"><a class="header" href="#optional-test-to-ensure-that-the-drivers-tls-library-supports-ocsp-stapling">Optional test to ensure that the driver's TLS library supports OCSP stapling</a></h4>
+<h4 id="optional-test-to-ensure-that-the-drivers-tls-library-supports-ocsp-stapling"><a class="header" href="#optional-test-to-ensure-that-the-drivers-tls-library-supports-ocsp-stapling">Optional test to ensure that the driver’s TLS library supports OCSP stapling</a></h4>
 <p>Create a test application with a connection string with TLS enabled that connects to any server that has OCSP-only
 certificate and supports OCSP stapling.</p>
 <p>For example, the test application could connect to C<sub>V</sub>, one of the special testing Atlas clusters with a valid
@@ -527,34 +526,34 @@ OCSP-only certificate. see Future Work for additional information).</p>
 has a valid an OCSP-only certificate. The connection will fail of course, but we are only interested in the TLS
 handshake and the OCSP requests that may follow. For example, the following connection string could be used:
 <code>mongodb://valid-isrgrootx1.letsencrypt.org:443/?tls=true</code></p>
-<p>Run the test application and verify through packet analysis that the driver's ClientHello message's TLS extension
+<p>Run the test application and verify through packet analysis that the driver’s ClientHello message’s TLS extension
 section includes the <code>status_request</code> extension, thus indicating that the driver is advertising that it supports OCSP
 stapling.</p>
 <p>Note: If using <a href="https://www.wireshark.org/">WireShark</a> as your chosen packet analyzer, the <code>tls</code> (case-sensitive)
 display filter may be useful in this endeavor.</p>
-<h4 id="ocsp-caching-and-the-optional-test-to-ensure-that-the-drivers-tls-library-supports-non-stapled-ocsp"><a class="header" href="#ocsp-caching-and-the-optional-test-to-ensure-that-the-drivers-tls-library-supports-non-stapled-ocsp">OCSP Caching and the optional test to ensure that the driver's TLS library supports non-stapled OCSP</a></h4>
-<p>The "Optional test to ensure that the driver's TLS library supports non-stapled OCSP" is complicated by the fact that
+<h4 id="ocsp-caching-and-the-optional-test-to-ensure-that-the-drivers-tls-library-supports-non-stapled-ocsp"><a class="header" href="#ocsp-caching-and-the-optional-test-to-ensure-that-the-drivers-tls-library-supports-non-stapled-ocsp">OCSP Caching and the optional test to ensure that the driver’s TLS library supports non-stapled OCSP</a></h4>
+<p>The “Optional test to ensure that the driver’s TLS library supports non-stapled OCSP” is complicated by the fact that
 OCSP allows the client to <a href="https://tools.ietf.org/html/rfc5019#section-6.1">cache the OCSP responses</a>, so clearing an
 OCSP cache may be needed in order to force the TLS library to reach out to an OCSP endpoint. This cache may exist at the
 OS-level, application-level and/or at the user-level.</p>
-<h4 id="optional-test-to-ensure-that-the-drivers-tls-library-supports-non-stapled-ocsp"><a class="header" href="#optional-test-to-ensure-that-the-drivers-tls-library-supports-non-stapled-ocsp">Optional test to ensure that the driver's TLS library supports non-stapled OCSP</a></h4>
+<h4 id="optional-test-to-ensure-that-the-drivers-tls-library-supports-non-stapled-ocsp"><a class="header" href="#optional-test-to-ensure-that-the-drivers-tls-library-supports-non-stapled-ocsp">Optional test to ensure that the driver’s TLS library supports non-stapled OCSP</a></h4>
 <p>Create a test application with a connection string with TLS enabled that connects to any server with an OCSP-only
 certificate.</p>
 <p>Alternatively, the test application can attempt to connect to a <strong>non-mongod server</strong> that does not support
 OCSP-stapling and has a valid an OCSP-only certificate. The connection will fail of course, but we are only interested
 in the TLS handshake and the OCSP requests that may follow.</p>
-<p>Alternatively, if it's known that a driver's TLS library does not support stapling or if stapling support can be toggled
+<p>Alternatively, if it’s known that a driver’s TLS library does not support stapling or if stapling support can be toggled
 off, then any <strong>non-mongod server</strong> that has a valid an OCSP-only certificate will work, including the example shown in
-the "Optional test to ensure that the driver's TLS library supports OCSP stapling."</p>
+the “Optional test to ensure that the driver’s TLS library supports OCSP stapling.”</p>
 <p>Clear the OS/user/application OCSP cache, if one exists and the TLS library makes use of it.</p>
-<p>Run the test application and ensure that the TLS handshake succeeds. connection succeeds. Ensure that the driver's TLS
-library has contacted the OCSP endpoint specified in the server's certificate. Two simple ways of checking this are:</p>
+<p>Run the test application and ensure that the TLS handshake succeeds. connection succeeds. Ensure that the driver’s TLS
+library has contacted the OCSP endpoint specified in the server’s certificate. Two simple ways of checking this are:</p>
 <ul>
-<li>Use a packet analyzer while the test application is running to ensure that the driver's TLS library contacts the OCSP
+<li>Use a packet analyzer while the test application is running to ensure that the driver’s TLS library contacts the OCSP
 endpoint. When using WireShark, the <code>ocsp</code> and <code>tls</code> (case-sensitive) display filters may be useful in this
 endeavor.</li>
 <li>If the TLS library utilizes an OCSP cache and the cache was cleared prior to starting the test application, check the
-OCSP cache for a response from an OCSP endpoint specified in the server's certificate.</li>
+OCSP cache for a response from an OCSP endpoint specified in the server’s certificate.</li>
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
@@ -572,7 +571,7 @@ OCSP cache for a response from an OCSP endpoint specified in the server's certif
 </li>
 <li>
 <p>2020-07-01: Default tlsDisableOCSPEndpointCheck or tlsDisableCertificateRevocationCheck to true in the case that a
-driver's TLS library exhibits hard-fail behavior and add provision for platform-specific defaults.</p>
+driver’s TLS library exhibits hard-fail behavior and add provision for platform-specific defaults.</p>
 </li>
 <li>
 <p>2020-03-20: Clarify OCSP documentation requirements for drivers unable to enable OCSP by default on a per MongoClient
@@ -603,12 +602,14 @@ backwards compatibility documentation requirements.</p>
 </ul>
 <h2 id="endnotes"><a class="header" href="#endnotes">Endnotes</a></h2>
 <hr>
-<ol class="footnote-definition"><li id="footnote-1">
+<ol class="footnote-definition">
+<li id="footnote-1">
 <p>Since this specification mandates that a driver must enable OCSP when possible, this may involve enabling
 certificate revocation checking in general, and thus the accessibility of CRL distribution points can become a
 factor. <a href="#fr-1-1">↩</a></p>
 </li>
 </ol>
+
                         </div>
                         <div id="sidetoc">
                             <nav id="pagetoc"></nav>
@@ -617,27 +618,12 @@ factor. <a href="#fr-1-1">↩</a></p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../uri-options/uri-options.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-
-                            <a rel="next prefetch" href="../mongodb-handshake/handshake.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../uri-options/uri-options.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-
-                    <a rel="next prefetch" href="../mongodb-handshake/handshake.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>
