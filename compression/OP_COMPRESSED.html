@@ -16,7 +16,7 @@
         <link rel="shortcut icon" href="../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../css/variables-8adf115d.css">
         <link rel="stylesheet" href="../css/general-2459343d.css">
-        <link rel="stylesheet" href="../css/chrome-9dfbd86b.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
         <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -36,10 +36,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-af35376e.js";
+            window.path_to_searchindex_js = "../searchindex-2e18110a.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-818697f5.js"></script>
+        <script src="../toc-86bd5116.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -186,7 +186,7 @@
 </ul>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>This specification describes how to implement Wire Protocol Compression between MongoDB drivers and mongo[d|s].</p>
-<p>Compression is achieved through a new bi-directional wire protocol opcode, referred to as OP_COMPRESSED.</p>
+<p>Compression is achieved through a new bi-directional wire protocol opcode, referred to as <code>OP_COMPRESSED</code>.</p>
 <p>Server side compressor support is checked during the initial MongoDB Handshake, and is compatible with all historical
 versions of MongoDB. If a client detects a compatible compressor it will use the compressor for all valid requests.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
@@ -230,9 +230,9 @@ server had both snappy and zlib enabled and the client requested snappy, it woul
 <p>If the server has no compression algorithms in common with the client, it sends back a handshake response without a
 compression field. Clients MAY issue a log level event to inform the user, but MUST NOT error.</p>
 <p>When MongoDB server receives a compressor it can support it MAY reply to any and all requests using the selected
-compressor, including the reply of the initial MongoDB Handshake. As each OP_COMPRESSED message contains the compressor
-ID, clients MUST NOT assume which compressor each message uses, but MUST decompress the message using the compressor
-identified in the OP_COMPRESSED opcode header.</p>
+compressor, including the reply of the initial MongoDB Handshake. As each <code>OP_COMPRESSED</code> message contains the
+compressor ID, clients MUST NOT assume which compressor each message uses, but MUST decompress the message using the
+compressor identified in the <code>OP_COMPRESSED</code> opcode header.</p>
 <p>When compressing, clients MUST use the first compressor in the client’s configured compressors list that is also in the
 servers list.</p>
 <h3 id="connection-string-options"><a class="header" href="#connection-string-options">Connection String Options</a></h3>
@@ -265,7 +265,7 @@ clients SHOULD NOT issue a warning.</p>
 </div>
 <p>Note that this value only applies to the client side compression level, not the response.</p>
 <h3 id="op_compressed"><a class="header" href="#op_compressed">OP_COMPRESSED</a></h3>
-<p>The new opcode, called OP_COMPRESSED, has the following structure:</p>
+<p>The new opcode, called <code>OP_COMPRESSED</code>, has the following structure:</p>
 <pre><code class="language-c">struct OP_COMPRESSED {
     struct MsgHeader {
         int32  messageLength;
@@ -276,7 +276,7 @@ clients SHOULD NOT issue a warning.</p>
     int32_t  originalOpcode;
     int32_t  uncompressedSize;
     uint8_t  compressorId;
-    char    *compressedMessage;
+    char     *compressedMessage;
 };
 </code></pre>
 <div class="table-wrapper">
@@ -326,17 +326,17 @@ compressed, when compression has been negotiated and the driver has implemented 
 authentication requests.</p>
 <p>Messages using the following commands MUST NOT be compressed:</p>
 <ul>
-<li>hello</li>
+<li><code>hello</code></li>
 <li>legacy hello (see <a href="../mongodb-handshake/handshake.html">MongoDB Handshake Protocol</a> for details)</li>
-<li>saslStart</li>
-<li>saslContinue</li>
-<li>getnonce</li>
-<li>authenticate</li>
-<li>createUser</li>
-<li>updateUser</li>
-<li>copydbSaslStart</li>
-<li>copydbgetnonce</li>
-<li>copydb</li>
+<li><code>saslStart</code></li>
+<li><code>saslContinue</code></li>
+<li><code>getnonce</code></li>
+<li><code>authenticate</code></li>
+<li><code>createUser</code></li>
+<li><code>updateUser</code></li>
+<li><code>copydbSaslStart</code></li>
+<li><code>copydbgetnonce</code></li>
+<li><code>copydb</code></li>
 </ul>
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
 <p>There are no automated tests accompanying this specification, instead the following is a description of test scenarios
@@ -432,12 +432,12 @@ normally.</p>
 </li>
 <li>
 <p>Create example program that authenticates to the server using SCRAM-SHA-1, then creates another user (MONGODB-CR),
-then runs hello followed with serverStatus.</p>
+then runs <code>hello</code> followed with <code>serverStatus</code>.</p>
 </li>
 <li>
 <p>Reconnect to the same server using the created MONGODB-CR credentials. Observe that the only command that was
-decompressed on the server was <code>serverStatus</code>, while the server replied with OP_COMPRESSED for at least the
-serverStatus command.</p>
+decompressed on the server was <code>serverStatus</code>, while the server replied with <code>OP_COMPRESSED</code> for at least the
+<code>serverStatus</code> command.</p>
 </li>
 </ul>
 <h2 id="motivation-for-change"><a class="header" href="#motivation-for-change">Motivation For Change</a></h2>
@@ -458,7 +458,7 @@ adding support for configuring that library (if any is needed) should be handled
 <h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
 <p>The new argument provided to the MongoDB Handshake has no backwards compatible implications as servers that do not
 expect it will simply ignore it. This means a server will therefore never reply with a list of acceptable compressors
-which in turns means a client CANNOT use the OP_COMPRESSED opcode.</p>
+which in turns means a client CANNOT use the <code>OP_COMPRESSED</code> opcode.</p>
 <h2 id="reference-implementation"><a class="header" href="#reference-implementation">Reference Implementation</a></h2>
 <ul>
 <li><a href="https://jira.mongodb.org/browse/CDRIVER-2116">mongoc</a></li>
@@ -494,15 +494,15 @@ needing to (not) compress very few operations.</p>
 </ul>
 </li>
 <li>
-<p>Can the server reply to the MongoDB Handshake/hello compressed?</p>
+<p>Can the server reply to the MongoDB Handshake/hello be compressed?</p>
 <ul>
 <li>Yes, yes it can. Be aware it is completely acceptable for the server to use compression for any and all replies,
 using any supported compressor, when the client announced support for compression - this includes the reply to the
-actual MongoDB Handshake/hello where the support was announced.</li>
+actual MongoDB Handshake/<code>hello</code> where the support was announced.</li>
 </ul>
 </li>
 <li>
-<p>This is billed a MongoDB 3.6 feature – but I hear it works with MongoDB3.4?</p>
+<p>This is billed a MongoDB 3.6 feature – but I hear it works with MongoDB 3.4?</p>
 <ul>
 <li>Yes, it does. All MongoDB versions support the <code>compression</code> argument to the initial handshake and all MongoDB
 versions will reply with an intersection of compressors it supports. This works even with MongoDB 3.0, as it will
@@ -521,7 +521,7 @@ the driver’s list. MongoDB 3.6 will likely include zlib support.</li>
 <li>
 <p>My language supports xyz compressor, should I announce them all in the handshake?</p>
 <ul>
-<li>No. But you are allowed to if you really want to make sure you can use that compressor with MongoDB 42 and your
+<li>No. But you are allowed to if you really want to make sure you can use that compressor with MongoDB 4.2 and your
 current driver versions.</li>
 </ul>
 </li>
