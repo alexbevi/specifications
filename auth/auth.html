@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-2e18110a.js";
+            window.path_to_searchindex_js = "../searchindex-89ed8e57.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-86bd5116.js"></script>
@@ -1305,7 +1305,7 @@ is only required for drivers that support the <a href="#human-authentication-flo
 <p>The list of allowed hostnames or ip-addresses (ignoring ports) for MongoDB connections. The hostnames may include a
 leading “*.” wildcard, which allows for matching (potentially nested) subdomains. <code>ALLOWED_HOSTS</code> is a security
 feature and MUST default to
-<code>["*.mongodb.net", "*.mongodb-qa.net", "*.mongodb-dev.net", "*.mongodbgov.net", "localhost", "127.0.0.1", "::1"]</code>.
+<code>["*.mongodb.net", "*.mongodb-qa.net", "*.mongodb-dev.net", "*.mongodbgov.net", "localhost", "127.0.0.1", "::1", "*.mongo.com", "*.mongodbgov.net"]</code>.
 When MONGODB-OIDC authentication using a <a href="#oidc-human-callback">OIDC Human Callback</a> is attempted against a
 hostname that does not match any of list of allowed hosts, the driver MUST raise a client-side error without
 invoking any user-provided callbacks. This value MUST NOT be allowed in the URI connection string. The hostname
@@ -2003,6 +2003,9 @@ practice to avoid this. (See
 <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html">IAM Roles for Tasks</a>)</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-11-19: Extend <code>ALLOWED_HOSTS</code> with <code>*.mongo.com</code> and <code>*.mongodbgov.net</code></p>
+</li>
 <li>
 <p>2025-09-30: Remove support for explicitly specifying MONGODDB-AWS authentication properties.</p>
 </li>
