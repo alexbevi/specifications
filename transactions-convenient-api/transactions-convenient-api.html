@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-89ed8e57.js";
+            window.path_to_searchindex_js = "../searchindex-77c012f7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-86bd5116.js"></script>
@@ -246,7 +246,8 @@ has not been exceeded, the driver MUST retry a transaction that fails with an er
 “TransientTransactionError” label. Since retrying the entire transaction will entail invoking the callback again,
 drivers MUST document that the callback may be invoked multiple times (i.e. one additional time per retry attempt) and
 MUST document the risk of side effects from using a non-idempotent callback. If the retry timeout has been exceeded,
-drivers MUST NOT retry the transaction and allow <code>withTransaction</code> to propagate the error to its caller.</p>
+drivers MUST NOT retry the transaction and allow <code>withTransaction</code> to propagate the error to its caller. When retrying,
+drivers MUST implement an exponential backoff with jitter following the algorithm described below.</p>
 <p>If an error bearing neither the UnknownTransactionCommitResult nor the TransientTransactionError label is encountered at
 any point, the driver MUST NOT retry and MUST allow <code>withTransaction</code> to propagate the error to its caller.</p>
 <p>This method MUST receive a <a href="#callback">callback</a> as its first parameter. An optional
@@ -256,7 +257,14 @@ needed (e.g. user data to pass as a parameter to the callback).</p>
 <h5 id="sequence-of-actions"><a class="header" href="#sequence-of-actions">Sequence of Actions</a></h5>
 <p>This method should perform the following sequence of actions:</p>
 <ol>
-<li>Record the current monotonic time, which will be used to enforce the 120-second timeout before later retry attempts.</li>
+<li>Define the following:
+<ol>
+<li>Record the current monotonic time, which will be used to enforce the 120-second / CSOT timeout before later retry
+attempts.</li>
+<li>Set <code>retry</code> to <code>0</code>. This will be used for backoff later in step 7.</li>
+<li>Set <code>TIMEOUT_MS</code> to be <code>timeoutMS</code> if given, otherwise 120-seconds.</li>
+</ol>
+</li>
 <li>Invoke <a href="../transactions/transactions.html#starttransaction">startTransaction</a> on the session. If TransactionOptions
 were specified in the call to <code>withTransaction</code>, those MUST be used for <code>startTransaction</code>. Note that
 <code>ClientSession.defaultTransactionOptions</code> will be used in the absence of any explicit TransactionOptions.</li>
@@ -270,14 +278,31 @@ ClientSession as the first parameter, rely on lexical scoping). Drivers MAY pass
 reported an error (e.g. thrown exception, error output parameter).</li>
 <li>If the callback reported an error:
 <ol>
-<li>If the ClientSession is in the “starting transaction” or “transaction in progress” state, invoke
-<a href="../transactions/transactions.html#aborttransaction">abortTransaction</a> on the session.</li>
-<li>If the callback’s error includes a “TransientTransactionError” label and the elapsed time of <code>withTransaction</code> is
-less than 120 seconds, jump back to step two.</li>
-<li>If the callback’s error includes a “UnknownTransactionCommitResult” label, the callback must have manually
+<li>
+<p>If the ClientSession is in the “starting transaction” or “transaction in progress” state, invoke
+<a href="../transactions/transactions.html#aborttransaction">abortTransaction</a> on the session.</p>
+</li>
+<li>
+<p>If the callback’s error includes a “TransientTransactionError” label and the elapsed time of <code>withTransaction</code> is
+less than TIMEOUT_MS, calculate the backoffMS to be <code>jitter * min(BACKOFF_INITIAL * (1.5**retry), BACKOFF_MAX)</code>
+where:</p>
+<ol>
+<li>jitter is a random float between [0, 1)</li>
+<li>retry is the variable defined in step 1.</li>
+<li><code>BACKOFF_INITIAL</code> is 5ms</li>
+<li><code>BACKOFF_MAX</code> is 500ms</li>
+</ol>
+<p>If elapsed time + <code>backoffMS</code> &gt; <code>TIMEOUT_MS</code>, then raise last known error. Otherwise, sleep for <code>backoffMS</code>,
+increment <code>retry</code>, and jump back to step two.</p>
+</li>
+<li>
+<p>If the callback’s error includes a “UnknownTransactionCommitResult” label, the callback must have manually
 committed a transaction, propagate the callback’s error to the caller of <code>withTransaction</code> and return
-immediately.</li>
-<li>Otherwise, propagate the callback’s error to the caller of <code>withTransaction</code> and return immediately.</li>
+immediately.</p>
+</li>
+<li>
+<p>Otherwise, propagate the callback’s error to the caller of <code>withTransaction</code> and return immediately.</p>
+</li>
 </ol>
 </li>
 <li>If the ClientSession is in the “no transaction”, “transaction aborted”, or “transaction committed” state, assume the
@@ -287,13 +312,13 @@ callback intentionally aborted or committed the transaction and return immediate
 <ol>
 <li>
 <p>If the <code>commitTransaction</code> error includes a “UnknownTransactionCommitResult” label and the error is not
-MaxTimeMSExpired and the elapsed time of <code>withTransaction</code> is less than 120 seconds, jump back to step eight.
-We will trust <code>commitTransaction</code> to apply a majority write concern on retry attempts (see:
+MaxTimeMSExpired and the elapsed time of <code>withTransaction</code> is less than TIMEOUT_MS, jump back to step eight. We
+will trust <code>commitTransaction</code> to apply a majority write concern on retry attempts (see:
 <a href="#majority-write-concern-is-used-when-retrying-committransaction">Majority write concern is used when retrying commitTransaction</a>).</p>
 </li>
 <li>
 <p>If the <code>commitTransaction</code> error includes a “TransientTransactionError” label and the elapsed time of
-<code>withTransaction</code> is less than 120 seconds, jump back to step two.</p>
+<code>withTransaction</code> is less than TIMEOUT_MS, jump back to step two.</p>
 </li>
 <li>
 <p>Otherwise, propagate the <code>commitTransaction</code> error to the caller of <code>withTransaction</code> and return immediately.</p>
@@ -304,23 +329,39 @@ We will trust <code>commitTransaction</code> to apply a majority write concern o
 </ol>
 <h5 id="pseudo-code"><a class="header" href="#pseudo-code">Pseudo-code</a></h5>
 <p>This method can be expressed by the following pseudo-code:</p>
-<pre><code class="language-typescript">withTransaction(callback, options) {
+<pre><code class="language-typescript">var BACKOFF_INITIAL = 5  // 5ms initial backoff
+var BACKOFF_MAX = 500  // 500ms max backoff
+withTransaction(callback, options) {
     // Note: drivers SHOULD use a monotonic clock to determine elapsed time
     var startTime = Date.now(); // milliseconds since Unix epoch
+    // See the CSOT specification for information on calculating timeoutMS for a convenient transaction API call.
+    var timeout = getCSOTTimeoutIfSet() ?? 120_000;
+    var retry = 0;
 
     retryTransaction: while (true) {
+        if (retry &gt; 0) {
+            var backoff = Math.random() * min(BACKOFF_INITIAL * (1.5**retry), 
+                                              BACKOFF_MAX);
+
+            if (Date.now() + backoff - startTime &gt;= timeout) {
+                throw last_error;
+            }
+            sleep(backoff);
+        }
+        retry += 1
         this.startTransaction(options); // may throw on error
 
         try {
             callback(this);
         } catch (error) {
+            var last_error = error;
             if (this.transactionState == STARTING ||
                 this.transactionState == IN_PROGRESS) {
                 this.abortTransaction();
             }
 
             if (error.hasErrorLabel("TransientTransactionError") &amp;&amp;
-                Date.now() - startTime &lt; 120000) {
+                Date.now() - startTime &lt; timeout) {
                 continue retryTransaction;
             }
 
@@ -348,12 +389,12 @@ We will trust <code>commitTransaction</code> to apply a majority write concern o
                  */
                 if (!isMaxTimeMSExpiredError(error) &amp;&amp;
                     error.hasErrorLabel("UnknownTransactionCommitResult") &amp;&amp;
-                    Date.now() - startTime &lt; 120000) {
+                    Date.now() - startTime &lt; timeout) {
                     continue retryCommit;
                 }
 
                 if (error.hasErrorLabel("TransientTransactionError") &amp;&amp;
-                    Date.now() - startTime &lt; 120000) {
+                    Date.now() - startTime &lt; timeout) {
                     continue retryTransaction;
                 }
 
@@ -444,8 +485,8 @@ exceed the user’s original intention for <code>maxTimeMS</code>.</p>
 <h3 id="the-transaction-and-commit-may-be-retried-any-number-of-times-within-a-timeout-period"><a class="header" href="#the-transaction-and-commit-may-be-retried-any-number-of-times-within-a-timeout-period">The transaction and commit may be retried any number of times within a timeout period</a></h3>
 <p>The callback may be executed any number of times. Drivers are free to encourage their users to design idempotent
 callbacks.</p>
-<p>A previous design had no limits for retrying commits or entire transactions. The callback is always able indicate that
-<code>withTransaction</code> should return to its caller (without future retry attempts) by aborting the transaction directly;
+<p>A previous design had no limits for retrying commits or entire transactions. The callback is always able to indicate
+that <code>withTransaction</code> should return to its caller (without future retry attempts) by aborting the transaction directly;
 however, that puts the onus on avoiding very long (or infinite) retry loops on the application. We expect the most
 common cause of retry loops will be due to TransientTransactionErrors caused by write conflicts, as those can occur
 regularly in a healthy application, as opposed to UnknownTransactionCommitResult, which would typically be caused by an
@@ -456,6 +497,13 @@ non-configurable default and is intentionally twice the value of MongoDB 4.0’s
 <a href="https://www.mongodb.com/docs/manual/reference/parameters/#param.transactionLifetimeLimitSeconds">transactionLifetimeLimitSeconds</a>
 parameter (60 seconds). Applications that desire longer retry periods may call <code>withTransaction</code> additional times as
 needed. Applications that desire shorter retry periods should not use this method.</p>
+<h3 id="backoff-benefits"><a class="header" href="#backoff-benefits">Backoff Benefits</a></h3>
+<p>Previously, the driver would retry transactions immediately, which is fine for low levels of contention. But, as the
+server load increases, immediate retries can result in retry storms, unnecessarily further overloading the server.</p>
+<p>Exponential backoff is well-researched and accepted backoff strategy that is simple to implement. A low initial backoff
+(1-millisecond) and growth value (1.25x) were chosen specifically to mitigate latency in low levels of contention.
+Empirical evidence suggests that 500-millisecond max backoff ensured that a transaction did not wait so long as to
+exceed the 120-second timeout and reduced load spikes.</p>
 <h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
 <p>The specification introduces a new method on the ClientSession class and does not introduce any backward breaking
 changes. Existing programs that do not make use of this new method will continue to compile and run correctly.</p>
@@ -469,6 +517,9 @@ provides an implementation of a technique already described in the MongoDB 4.0 d
 (<a href="https://jira.mongodb.org/browse/DRIVERS-488">DRIVERS-488</a>).</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-11-20: withTransaction applies exponential backoff when retrying.</p>
+</li>
 <li>
 <p>2024-09-06: Migrated from reStructuredText to Markdown.</p>
 </li>
