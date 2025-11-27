@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-30e910a7.js";
+            window.path_to_searchindex_js = "../searchindex-737722f5.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-86bd5116.js"></script>
@@ -524,7 +524,7 @@ merged into “RSOther”. Additionally, states like Standalone and Mongos are n
 <tr><th>State</th><th>Symptoms</th></tr>
 </thead>
 <tbody>
-<tr><td>Unknown</td><td>Initial, or after a network error or failed hello or legacy hello call, or “ok: 1” not in hello or legacy hello response.</td></tr>
+<tr><td>Unknown</td><td>Initial, or after a failed hello or legacy hello call, or “ok: 1” not in hello or legacy hello response.</td></tr>
 <tr><td>Standalone</td><td>No “msg: isdbgrid”, no setName, and no “isreplicaset: true”.</td></tr>
 <tr><td>Mongos</td><td>“msg: isdbgrid”.</td></tr>
 <tr><td>PossiblePrimary</td><td>Not yet checked, but another member thinks it is the primary.</td></tr>
@@ -1039,7 +1039,10 @@ Drivers may use the following pseudocode to guide their implementation:</p>
                 # next full scan.
                 if isNotWritablePrimary(error):
                     check failing server
-        elif isNetworkError(error) or (not error.completedHandshake and (isNetworkTimeout(error) or isAuthError(error))):
+        elif isNetworkError(error) or (not error.completedHandshake):
+            # Ignore errors that have a backpressure error label applied.
+            if error.hasLabel("SystemOverloadedError"):
+                continue
             if type != LoadBalanced
               # Mark the server Unknown
               unknown = new ServerDescription(type=Unknown, error=error)
@@ -1117,16 +1120,19 @@ def parseQueryResponse(response):
 <p>The following sections describe the handling of different classes of application errors in detail including network
 errors, network timeout errors, state change errors, and authentication errors.</p>
 <h5 id="network-error-when-reading-or-writing"><a class="header" href="#network-error-when-reading-or-writing">Network error when reading or writing</a></h5>
-<p>To describe how the client responds to network errors during application operations, we distinguish two phases of
+<p>To describe how the client responds to network errors during application operations, we distinguish three phases of
 connecting to a server and using it for application operations:</p>
 <ul>
-<li><em>Before the handshake completes</em>: the client establishes a new connection to the server and completes an initial
-handshake by calling “hello” or legacy hello and reading the response, and optionally completing authentication</li>
+<li><em>Connection establishment and hello</em>: the client establishes a new connection to the server and completes an initial
+handshake by calling “hello” or legacy hello and reading the response</li>
+<li><em>Authentication step</em>: the client optionally completes an authentication step</li>
 <li><em>After the handshake completes</em>: the client uses the established connection for application operations</li>
 </ul>
-<p>If there is a network error or timeout on the connection before the handshake completes, the client MUST replace the
-server’s description with a default ServerDescription of type Unknown when the TopologyType is not LoadBalanced, and
-fill the ServerDescription’s error field with useful information.</p>
+<p>If there is a network error or timeout on the connection establishment or the hello, the client MUST NOT change the
+server’s description.</p>
+<p>If there is an network error or timeout during the authentication step, the client MUST replace the server’s description
+with a default ServerDescription of type Unknown when the TopologyType is not LoadBalanced, and fill the
+ServerDescription’s error field with useful information.</p>
 <p>If there is a network error or timeout on the connection before the handshake completes, and the TopologyType is
 LoadBalanced, the client MUST keep the ServerDescription as LoadBalancer.</p>
 <p>If there is a network timeout on the connection after the handshake completes, the client MUST NOT mark the server
@@ -1227,10 +1233,11 @@ if and only if the error is “node is shutting down” or the error originated 
 <a href="#use-error-messages-to-detect-not-master-and-node-is-recovering">use error messages to detect “not master” and “node is recovering”</a>,
 and <a href="#other-transient-errors">other transient errors</a> and
 <a href="#why-close-connections-when-a-node-is-shutting-down">Why close connections when a node is shutting down?</a>.)</p>
-<h5 id="authentication-and-handshake-errors"><a class="header" href="#authentication-and-handshake-errors">Authentication and Handshake errors</a></h5>
-<p>If the driver encounters errors when establishing application connections (this includes the initial handshake and
-authentication), the driver MUST mark the server Unknown and clear the server’s connection pool if the TopologyType is
-not LoadBalanced. (See <a href="#why-mark-a-server-unknown-after-an-auth-error">Why mark a server Unknown after an auth error?</a>)</p>
+<h5 id="mongodb-handshake-errors"><a class="header" href="#mongodb-handshake-errors">MongoDB Handshake errors</a></h5>
+<p>If the driver encounters errors that do not have the backpressure error label (<code>SystemOverloadedError</code>) applied when
+establishing application connections (this includes the initial handshake and authentication), the driver MUST mark the
+server Unknown and clear the server’s connection pool if the TopologyType is not LoadBalanced. (See
+<a href="#why-mark-a-server-unknown-after-an-auth-error">Why mark a server Unknown after an auth error?</a>)</p>
 <h3 id="monitoring-sdam-events"><a class="header" href="#monitoring-sdam-events">Monitoring SDAM events</a></h3>
 <p>The required driver specification for providing lifecycle hooks into server discovery and monitoring for applications to
 consume can be found in the <a href="server-discovery-and-monitoring-logging-and-monitoring.html">SDAM Monitoring Specification</a>.</p>
@@ -1916,6 +1923,9 @@ used.</p>
 <li>
 <p>2025-01-22: Add error messages when a new primary is elected or a primary with a stale electionId or setVersion is
 discovered.</p>
+</li>
+<li>
+<p>2025-11-21: Add handling of backpressure error labels.</p>
 </li>
 </ul>
 <hr>

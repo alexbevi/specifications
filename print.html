@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-30e910a7.js";
+            window.path_to_searchindex_js = "searchindex-737722f5.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-86bd5116.js"></script>
@@ -5926,7 +5926,7 @@ merged into “RSOther”. Additionally, states like Standalone and Mongos are n
 <tr><th>State</th><th>Symptoms</th></tr>
 </thead>
 <tbody>
-<tr><td>Unknown</td><td>Initial, or after a network error or failed hello or legacy hello call, or “ok: 1” not in hello or legacy hello response.</td></tr>
+<tr><td>Unknown</td><td>Initial, or after a failed hello or legacy hello call, or “ok: 1” not in hello or legacy hello response.</td></tr>
 <tr><td>Standalone</td><td>No “msg: isdbgrid”, no setName, and no “isreplicaset: true”.</td></tr>
 <tr><td>Mongos</td><td>“msg: isdbgrid”.</td></tr>
 <tr><td>PossiblePrimary</td><td>Not yet checked, but another member thinks it is the primary.</td></tr>
@@ -6441,7 +6441,10 @@ Drivers may use the following pseudocode to guide their implementation:</p>
                 # next full scan.
                 if isNotWritablePrimary(error):
                     check failing server
-        elif isNetworkError(error) or (not error.completedHandshake and (isNetworkTimeout(error) or isAuthError(error))):
+        elif isNetworkError(error) or (not error.completedHandshake):
+            # Ignore errors that have a backpressure error label applied.
+            if error.hasLabel("SystemOverloadedError"):
+                continue
             if type != LoadBalanced
               # Mark the server Unknown
               unknown = new ServerDescription(type=Unknown, error=error)
@@ -6519,16 +6522,19 @@ def parseQueryResponse(response):
 <p>The following sections describe the handling of different classes of application errors in detail including network
 errors, network timeout errors, state change errors, and authentication errors.</p>
 <h5 id="network-error-when-reading-or-writing"><a class="header" href="#network-error-when-reading-or-writing">Network error when reading or writing</a></h5>
-<p>To describe how the client responds to network errors during application operations, we distinguish two phases of
+<p>To describe how the client responds to network errors during application operations, we distinguish three phases of
 connecting to a server and using it for application operations:</p>
 <ul>
-<li><em>Before the handshake completes</em>: the client establishes a new connection to the server and completes an initial
-handshake by calling “hello” or legacy hello and reading the response, and optionally completing authentication</li>
+<li><em>Connection establishment and hello</em>: the client establishes a new connection to the server and completes an initial
+handshake by calling “hello” or legacy hello and reading the response</li>
+<li><em>Authentication step</em>: the client optionally completes an authentication step</li>
 <li><em>After the handshake completes</em>: the client uses the established connection for application operations</li>
 </ul>
-<p>If there is a network error or timeout on the connection before the handshake completes, the client MUST replace the
-server’s description with a default ServerDescription of type Unknown when the TopologyType is not LoadBalanced, and
-fill the ServerDescription’s error field with useful information.</p>
+<p>If there is a network error or timeout on the connection establishment or the hello, the client MUST NOT change the
+server’s description.</p>
+<p>If there is an network error or timeout during the authentication step, the client MUST replace the server’s description
+with a default ServerDescription of type Unknown when the TopologyType is not LoadBalanced, and fill the
+ServerDescription’s error field with useful information.</p>
 <p>If there is a network error or timeout on the connection before the handshake completes, and the TopologyType is
 LoadBalanced, the client MUST keep the ServerDescription as LoadBalancer.</p>
 <p>If there is a network timeout on the connection after the handshake completes, the client MUST NOT mark the server
@@ -6629,10 +6635,11 @@ if and only if the error is “node is shutting down” or the error originated 
 <a href="#use-error-messages-to-detect-not-master-and-node-is-recovering">use error messages to detect “not master” and “node is recovering”</a>,
 and <a href="#other-transient-errors">other transient errors</a> and
 <a href="#why-close-connections-when-a-node-is-shutting-down">Why close connections when a node is shutting down?</a>.)</p>
-<h5 id="authentication-and-handshake-errors"><a class="header" href="#authentication-and-handshake-errors">Authentication and Handshake errors</a></h5>
-<p>If the driver encounters errors when establishing application connections (this includes the initial handshake and
-authentication), the driver MUST mark the server Unknown and clear the server’s connection pool if the TopologyType is
-not LoadBalanced. (See <a href="#why-mark-a-server-unknown-after-an-auth-error">Why mark a server Unknown after an auth error?</a>)</p>
+<h5 id="mongodb-handshake-errors"><a class="header" href="#mongodb-handshake-errors">MongoDB Handshake errors</a></h5>
+<p>If the driver encounters errors that do not have the backpressure error label (<code>SystemOverloadedError</code>) applied when
+establishing application connections (this includes the initial handshake and authentication), the driver MUST mark the
+server Unknown and clear the server’s connection pool if the TopologyType is not LoadBalanced. (See
+<a href="#why-mark-a-server-unknown-after-an-auth-error">Why mark a server Unknown after an auth error?</a>)</p>
 <h3 id="monitoring-sdam-events"><a class="header" href="#monitoring-sdam-events">Monitoring SDAM events</a></h3>
 <p>The required driver specification for providing lifecycle hooks into server discovery and monitoring for applications to
 consume can be found in the <a href="#sdam-logging-and-monitoring-specification">SDAM Monitoring Specification</a>.</p>
@@ -7319,6 +7326,9 @@ used.</p>
 <p>2025-01-22: Add error messages when a new primary is elected or a primary with a stale electionId or setVersion is
 discovered.</p>
 </li>
+<li>
+<p>2025-11-21: Add handling of backpressure error labels.</p>
+</li>
 </ul>
 <hr>
 <hr>
@@ -7590,6 +7600,14 @@ of <a href="#connection">Connections</a> (including available and in use) MUST N
 <li><strong>Rate-limited:</strong> A Pool MUST limit the number of <a href="#connection">Connections</a> being
 <a href="#establishing-a-connection-internal-implementation">established</a> concurrently via the <strong>maxConnecting</strong>
 <a href="#connection-pool-options">pool option</a>.</li>
+<li><strong>Backpressure-enabled</strong> - The pool MUST add the error labels <code>SystemOverloadedError</code> and <code>RetryableError</code> to network
+errors or network timeouts it encounters during the connection establishment or the <code>hello</code> message. These labels
+are used by the
+<a href="#error-handling-pseudocode">SDAM error handling</a>
+to avoid clearing the pool. The pool MUST NOT add the backpressure error labels during an authentication step
+after the <code>hello</code> message. For errors that the driver can distinguish as never occurring due to server overload,
+such as DNS lookup failures, TLS related errors, or errors encountered establishing a connection to a socks5 proxy,
+the driver MUST clear the connection pool and MUST mark the server Unknown for these error types.</li>
 </ul>
 <pre><code class="language-typescript">interface ConnectionPool {
   /**
@@ -7743,6 +7761,7 @@ involves performing the initial handshake, handling OP_COMPRESSED, and performin
   return connection
 except error:
   close connection
+  add `SystemOverloadedError` label if appropriate (see "backpressure-enabled" in [Connection Pool](#connection-pool))
   throw error # Propagate error in manner idiomatic to language.
 </code></pre>
 <h4 id="closing-a-connection-internal-implementation"><a class="header" href="#closing-a-connection-internal-implementation">Closing a Connection (Internal Implementation)</a></h4>
@@ -8601,6 +8620,9 @@ Connection.</li>
 to close and remove from its pool a <a href="#connection">Connection</a> which has unread exhaust messages.</p>
 <h2 id="changelog-16"><a class="header" href="#changelog-16">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-11-21: Add handling of backpressure error labels.</p>
+</li>
 <li>
 <p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
 </li>
@@ -11017,7 +11039,8 @@ MUST be used to satisfy the check and update the topology.</p>
 <p>When a client successfully calls hello or legacy hello to handshake a new connection for application operations, it
 SHOULD use the hello or legacy hello reply to update the ServerDescription and TopologyDescription, the same as with a
 hello or legacy hello reply on a monitoring socket. If the hello or legacy hello call fails, the client SHOULD mark the
-server Unknown and update its TopologyDescription, the same as a failed server check on monitoring socket.</p>
+server Unknown and update its TopologyDescription, the same as a failed server check on monitoring socket, unless the
+connection pool has added the <code>SystemOverloadedError</code> label to the error.</p>
 <h5 id="clients-use-the-streaming-protocol-when-supported"><a class="header" href="#clients-use-the-streaming-protocol-when-supported">Clients use the streaming protocol when supported</a></h5>
 <p>When a monitor discovers that the server supports the streamable hello or legacy hello command and the client does not
 have <a href="#streaming-disabled">streaming disabled</a>, it MUST use the <a href="#streaming-protocol">streaming protocol</a>.</p>
@@ -11088,6 +11111,10 @@ list. Any new hosts in the list are added to the TopologyDescription with lastUp
 default lastUpdateTime “infinity ago”, so it scans them in random order. This randomness provides some load-balancing if
 many clients start at once. A client’s subsequent scans of the mongoses are always in the same order, since their
 lastUpdateTimes are always in the same order by the time a scan ends.</p>
+<h5 id="handling-of-backpressure-labels"><a class="header" href="#handling-of-backpressure-labels">Handling of backpressure labels</a></h5>
+<p>Because the scan may occur on an authenticated connection in single-threaded monitors, the server may apply backpressure
+by failing the command with a <code>SystemOverloadedError</code> label. The driver MUST not close the connection when this label is
+encountered.</p>
 <h4 id="minheartbeatfrequencyms-1"><a class="header" href="#minheartbeatfrequencyms-1">minHeartbeatFrequencyMS</a></h4>
 <p>If a client frequently rechecks a server, it MUST wait at least minHeartbeatFrequencyMS milliseconds since the previous
 check ended, to avoid pointless effort. This value MUST be 500 ms, and it MUST NOT be configurable (no knobs).</p>
