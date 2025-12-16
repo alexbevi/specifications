@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-737722f5.js";
+            window.path_to_searchindex_js = "../searchindex-120d7569.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -386,8 +386,8 @@ the driver MUST update its topology according to the Server Discovery and Monito
 <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#error-handling">SDAM: Error Handling</a>) and
 capture this original retryable error. Drivers should then proceed with selecting a server for a retry attempt.</p>
 <h6 id="3a-selecting-the-server-for-retry"><a class="header" href="#3a-selecting-the-server-for-retry">3a. Selecting the server for retry</a></h6>
-<p>In a sharded cluster, the server on which the operation failed MUST be provided to the server selection mechanism as a
-deprioritized server.</p>
+<p>The server address on which the operation failed MUST be provided to the server selection mechanism as a member of the
+deprioritized server address list.</p>
 <p>If the driver cannot select a server for a retry attempt or the newly selected server does not support retryable reads,
 retrying is not possible and drivers MUST raise the previous retryable error. In both cases, the caller is able to infer
 that an attempt was made.</p>
@@ -451,6 +451,7 @@ function executeRetryableRead(command, session) {
   Exception previousError = null;
   retrying = false;
   Server previousServer = null;
+  deprioritizedServers = [];
   while true {
     if (previousError != null) {
       retrying = true;
@@ -459,9 +460,9 @@ function executeRetryableRead(command, session) {
       if (previousServer == null) {
         server = selectServer();
       } else {
-        // If a previous attempt was made, deprioritize the previous server
+        // If a previous attempt was made, deprioritize the previous server address
         // where the command failed.
-        deprioritizedServers = [ previousServer ];
+        deprioritizedServers.push(previousServer.address);
         server = selectServer(deprioritizedServers);
       }
     } catch (ServerSelectionException exception) {
@@ -677,6 +678,9 @@ reads because the resilience benefit of retryable reads outweighs the minor risk
 any customers experiencing degraded performance can simply disable <code>retryableReads</code>.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-12-08: Clarified that server deprioritization during retries must use a list of server addresses.</p>
+</li>
 <li>
 <p>2024-04-30: Migrated from reStructuredText to Markdown.</p>
 </li>

@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-737722f5.js";
+            window.path_to_searchindex_js = "searchindex-120d7569.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-d281c31f.js"></script>
@@ -12450,9 +12450,13 @@ for the rationale behind the way this value is used.</p>
 <a href="#server-selection-started-message">“Server selection started” message</a>.</li>
 <li>If the topology wire version is invalid, raise an error and log a
 <a href="#server-selection-failed-message">“Server selection failed” message</a>.</li>
-<li>Find suitable servers by topology type and operation type. If a list of deprioritized servers is provided, and the
-topology is a sharded cluster, these servers should be selected only if there are no other suitable servers. The
-server selection algorithm MUST ignore the deprioritized servers if the topology is not a sharded cluster.</li>
+<li>Find suitable servers as follows:
+<ul>
+<li>Filter out any deprioritized server addresses.</li>
+<li>Find suitable servers from the filtered list by topology type and operation type.</li>
+<li>If there are no suitable servers, perform the previous step again without filtering out deprioritized servers.</li>
+</ul>
+</li>
 <li>Filter the suitable servers by calling the optional, application-provided server selector.</li>
 <li>If there are any suitable servers, filter them according to
 <a href="#filtering-suitable-servers-based-on-the-latency-window">Filtering suitable servers based on the latency window</a>
@@ -12497,9 +12501,13 @@ longer stale)</li>
 </li>
 <li>If the topology wire version is invalid, raise an error and log a
 <a href="#server-selection-failed-message">“Server selection failed” message</a>.</li>
-<li>Find suitable servers by topology type and operation type. If a list of deprioritized servers is provided, and the
-topology is a sharded cluster, these servers should be selected only if there are no other suitable servers. The
-server selection algorithm MUST ignore the deprioritized servers if the topology is not a sharded cluster.</li>
+<li>Find suitable servers as follows:
+<ul>
+<li>Filter out any deprioritized server addresses.</li>
+<li>Find suitable servers from the filtered list by topology type and operation type.</li>
+<li>If there are no suitable servers, perform the previous step again without filtering out deprioritized servers.</li>
+</ul>
+</li>
 <li>Filter the suitable servers by calling the optional, application-provided server selector.</li>
 <li>If there are any suitable servers, filter them according to
 <a href="#filtering-suitable-servers-based-on-the-latency-window">Filtering suitable servers based on the latency window</a>
@@ -12572,9 +12580,11 @@ ReplicaSetNoPrimary.</p>
 details on each step, and
 <a href="#why-is-maxstalenessseconds-applied-before-tag_sets">why is maxStalenessSeconds applied before tag_sets?</a>.)</p>
 <p>If <code>mode</code> is ‘secondaryPreferred’, attempt the selection algorithm with <code>mode</code> ‘secondary’ and the user’s
-<code>maxStalenessSeconds</code> and <code>tag_sets</code>. If no server matches, select the primary.</p>
+<code>maxStalenessSeconds</code> and <code>tag_sets</code>. If no server matches, select the primary. Note that if all secondaries are
+deprioritized, the primary MUST be selected if it is available.</p>
 <p>If <code>mode</code> is ‘primaryPreferred’, select the primary if it is known, otherwise attempt the selection algorithm with
-<code>mode</code> ‘secondary’ and the user’s <code>maxStalenessSeconds</code> and <code>tag_sets</code>.</p>
+<code>mode</code> ‘secondary’ and the user’s <code>maxStalenessSeconds</code> and <code>tag_sets</code>. Note that if the primary is deprioritized, a
+secondary MUST be selected if one is available.</p>
 <p>For all read preferences modes except ‘primary’, clients MUST set the <code>SecondaryOk</code> wire protocol flag (OP_QUERY) or
 <code>$readPreference</code> global command argument (OP_MSG) to ensure that any suitable server can handle the request. If the
 read preference mode is ‘primary’, clients MUST NOT set the <code>SecondaryOk</code> wire protocol flag (OP_QUERY) or
@@ -13232,6 +13242,13 @@ criteria.</p>
 filter it out because it is too stale, and be left with no eligible servers.</p>
 <p>The user’s intent in specifying two tag sets was to fall back to the second set if needed, so we filter by
 maxStalenessSeconds first, then tag_sets, and select Node 2.</p>
+<h3 id="why-does-server-deprioritization-use-only-server-addresses-and-not-serverdescription-objects"><a class="header" href="#why-does-server-deprioritization-use-only-server-addresses-and-not-serverdescription-objects">Why does server deprioritization use only server addresses and not ServerDescription objects?</a></h3>
+<p>A server’s address is the minimum identifying attribute that stays constant for across topology changes. Drivers create
+new ServerDescription objects on each topology change, and since ServerDescription objects check multiple attributes to
+determine equality comparisons, a deprioritized server could become non-equal to itself after a change and therefore
+incorrectly be considered suitable for a retry operation.</p>
+<p>By using addresses, we ensure that once a server is marked as deprioritized by an operation, it cannot be used again for
+a retry on that operation unless there are no other suitable servers.</p>
 <h2 id="references-1"><a class="header" href="#references-1">References</a></h2>
 <ul>
 <li><a href="#server-discovery-and-monitoring">Server Discovery and Monitoring</a> specification</li>
@@ -13241,6 +13258,10 @@ specification</li>
 </ul>
 <h2 id="changelog-21"><a class="header" href="#changelog-21">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-12-08: Require server deprioritization for all topology types and clarify the order of server candidate
+filtering.</p>
+</li>
 <li>
 <p>2015-06-26: Updated single-threaded selection logic with “stale” and serverSelectionTryOnce.</p>
 </li>
@@ -13941,8 +13962,8 @@ the driver MUST update its topology according to the Server Discovery and Monito
 <a href="#error-handling">SDAM: Error Handling</a>) and
 capture this original retryable error. Drivers should then proceed with selecting a server for a retry attempt.</p>
 <h6 id="3a-selecting-the-server-for-retry"><a class="header" href="#3a-selecting-the-server-for-retry">3a. Selecting the server for retry</a></h6>
-<p>In a sharded cluster, the server on which the operation failed MUST be provided to the server selection mechanism as a
-deprioritized server.</p>
+<p>The server address on which the operation failed MUST be provided to the server selection mechanism as a member of the
+deprioritized server address list.</p>
 <p>If the driver cannot select a server for a retry attempt or the newly selected server does not support retryable reads,
 retrying is not possible and drivers MUST raise the previous retryable error. In both cases, the caller is able to infer
 that an attempt was made.</p>
@@ -14006,6 +14027,7 @@ function executeRetryableRead(command, session) {
   Exception previousError = null;
   retrying = false;
   Server previousServer = null;
+  deprioritizedServers = [];
   while true {
     if (previousError != null) {
       retrying = true;
@@ -14014,9 +14036,9 @@ function executeRetryableRead(command, session) {
       if (previousServer == null) {
         server = selectServer();
       } else {
-        // If a previous attempt was made, deprioritize the previous server
+        // If a previous attempt was made, deprioritize the previous server address
         // where the command failed.
-        deprioritizedServers = [ previousServer ];
+        deprioritizedServers.push(previousServer.address);
         server = selectServer(deprioritizedServers);
       }
     } catch (ServerSelectionException exception) {
@@ -14232,6 +14254,9 @@ reads because the resilience benefit of retryable reads outweighs the minor risk
 any customers experiencing degraded performance can simply disable <code>retryableReads</code>.</p>
 <h2 id="changelog-23"><a class="header" href="#changelog-23">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-12-08: Clarified that server deprioritization during retries must use a list of server addresses.</p>
+</li>
 <li>
 <p>2024-04-30: Migrated from reStructuredText to Markdown.</p>
 </li>
@@ -14553,8 +14578,8 @@ original retryable error.</p>
 <p>CSOT is not enabled and one retry was attempted.</p>
 </li>
 </ul>
-<p>For each retry attempt, drivers MUST select a writable server. In a sharded cluster, the server on which the operation
-failed MUST be provided to the server selection mechanism as a deprioritized server.</p>
+<p>For each retry attempt, drivers MUST select a writable server. The server address on which the operation failed MUST be
+provided to the server selection mechanism as a member of the deprioritized server address list.</p>
 <p>If the driver cannot select a server for a retry attempt or the selected server does not support retryable writes,
 retrying is not possible and drivers MUST raise the retryable error from the previous attempt. In both cases, the caller
 is able to infer that an attempt was made.</p>
@@ -14607,6 +14632,7 @@ function executeRetryableWrite(command, session) {
 
   Exception previousError = null;
   retrying = false;
+  deprioritizedServers = [];
   while true {
     try {
       return executeCommand(server, retryableCommand);
@@ -14648,13 +14674,13 @@ function executeRetryableWrite(command, session) {
     }
 
     /*
-     * We try to select server that is not the one that failed by passing the
-     * failed server as a deprioritized server.
+     * We try to select a server that has not already failed by adding the
+     * failed server to the list of deprioritized servers passed to selectServer.
      * If we cannot select a writable server, do not proceed with retrying and
      * throw the previous error. The caller can then infer that an attempt was
      * made and failed. */
     try {
-      deprioritizedServers = [ server ];
+      deprioritizedServers.push(server.address);
       server = selectServer("writable", deprioritizedServers);
     } catch (Exception ignoredError) {
       throw previousError;
@@ -14855,6 +14881,9 @@ which only happens when the retryWrites option is true on the client. For the dr
 retryWrites is not true would be inconsistent with the server and potentially confusing to developers.</p>
 <h2 id="changelog-24"><a class="header" href="#changelog-24">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-12-08: Clarified that server deprioritization during retries must use a list of server addresses.</p>
+</li>
 <li>
 <p>2024-05-08: Add guidance for client-level <code>bulkWrite()</code> retryability.</p>
 </li>
@@ -37471,12 +37500,15 @@ selection process. These sets are described below. Note that it is not required 
 <tbody>
 <tr><td><code>suitable_servers</code></td><td>the set of servers matching all server selection logic.</td></tr>
 <tr><td><code>in_latency_window</code></td><td>the subset of <code>suitable_servers</code> that falls within the allowable latency window (required). NOTE: tests use the default localThresholdMS of 15 ms.</td></tr>
+<tr><td><code>deprioritized_servers</code></td><td>the set of servers that are deprioritized and must only be selected if no other suitable server exists.</td></tr>
 </tbody>
 </table>
 </div>
 <p>Drivers implementing server selection MUST test that their implementations correctly return <strong>one</strong> of the servers in
 <code>in_latency_window</code>. Drivers SHOULD test against the full set of servers in <code>in_latency_window</code> and against
 <code>suitable_servers</code> if possible.</p>
+<p>For tests containing <code>deprioritized_servers</code>, drivers MUST pass the given list of deprioritized servers to each server
+selection call.</p>
 <h3 id="topology-type-single-1"><a class="header" href="#topology-type-single-1">Topology Type Single</a></h3>
 <ul>
 <li>The single server is always selected.</li>

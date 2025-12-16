@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-737722f5.js";
+            window.path_to_searchindex_js = "../searchindex-120d7569.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -219,12 +219,15 @@ selection process. These sets are described below. Note that it is not required 
 <tbody>
 <tr><td><code>suitable_servers</code></td><td>the set of servers matching all server selection logic.</td></tr>
 <tr><td><code>in_latency_window</code></td><td>the subset of <code>suitable_servers</code> that falls within the allowable latency window (required). NOTE: tests use the default localThresholdMS of 15 ms.</td></tr>
+<tr><td><code>deprioritized_servers</code></td><td>the set of servers that are deprioritized and must only be selected if no other suitable server exists.</td></tr>
 </tbody>
 </table>
 </div>
 <p>Drivers implementing server selection MUST test that their implementations correctly return <strong>one</strong> of the servers in
 <code>in_latency_window</code>. Drivers SHOULD test against the full set of servers in <code>in_latency_window</code> and against
 <code>suitable_servers</code> if possible.</p>
+<p>For tests containing <code>deprioritized_servers</code>, drivers MUST pass the given list of deprioritized servers to each server
+selection call.</p>
 <h3 id="topology-type-single"><a class="header" href="#topology-type-single">Topology Type Single</a></h3>
 <ul>
 <li>The single server is always selected.</li>

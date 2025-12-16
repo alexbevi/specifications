@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-737722f5.js";
+            window.path_to_searchindex_js = "../searchindex-120d7569.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -705,9 +705,13 @@ for the rationale behind the way this value is used.</p>
 <a href="#server-selection-started-message">“Server selection started” message</a>.</li>
 <li>If the topology wire version is invalid, raise an error and log a
 <a href="#server-selection-failed-message">“Server selection failed” message</a>.</li>
-<li>Find suitable servers by topology type and operation type. If a list of deprioritized servers is provided, and the
-topology is a sharded cluster, these servers should be selected only if there are no other suitable servers. The
-server selection algorithm MUST ignore the deprioritized servers if the topology is not a sharded cluster.</li>
+<li>Find suitable servers as follows:
+<ul>
+<li>Filter out any deprioritized server addresses.</li>
+<li>Find suitable servers from the filtered list by topology type and operation type.</li>
+<li>If there are no suitable servers, perform the previous step again without filtering out deprioritized servers.</li>
+</ul>
+</li>
 <li>Filter the suitable servers by calling the optional, application-provided server selector.</li>
 <li>If there are any suitable servers, filter them according to
 <a href="#filtering-suitable-servers-based-on-the-latency-window">Filtering suitable servers based on the latency window</a>
@@ -752,9 +756,13 @@ longer stale)</li>
 </li>
 <li>If the topology wire version is invalid, raise an error and log a
 <a href="#server-selection-failed-message">“Server selection failed” message</a>.</li>
-<li>Find suitable servers by topology type and operation type. If a list of deprioritized servers is provided, and the
-topology is a sharded cluster, these servers should be selected only if there are no other suitable servers. The
-server selection algorithm MUST ignore the deprioritized servers if the topology is not a sharded cluster.</li>
+<li>Find suitable servers as follows:
+<ul>
+<li>Filter out any deprioritized server addresses.</li>
+<li>Find suitable servers from the filtered list by topology type and operation type.</li>
+<li>If there are no suitable servers, perform the previous step again without filtering out deprioritized servers.</li>
+</ul>
+</li>
 <li>Filter the suitable servers by calling the optional, application-provided server selector.</li>
 <li>If there are any suitable servers, filter them according to
 <a href="#filtering-suitable-servers-based-on-the-latency-window">Filtering suitable servers based on the latency window</a>
@@ -827,9 +835,11 @@ ReplicaSetNoPrimary.</p>
 details on each step, and
 <a href="#why-is-maxstalenessseconds-applied-before-tag_sets">why is maxStalenessSeconds applied before tag_sets?</a>.)</p>
 <p>If <code>mode</code> is ‘secondaryPreferred’, attempt the selection algorithm with <code>mode</code> ‘secondary’ and the user’s
-<code>maxStalenessSeconds</code> and <code>tag_sets</code>. If no server matches, select the primary.</p>
+<code>maxStalenessSeconds</code> and <code>tag_sets</code>. If no server matches, select the primary. Note that if all secondaries are
+deprioritized, the primary MUST be selected if it is available.</p>
 <p>If <code>mode</code> is ‘primaryPreferred’, select the primary if it is known, otherwise attempt the selection algorithm with
-<code>mode</code> ‘secondary’ and the user’s <code>maxStalenessSeconds</code> and <code>tag_sets</code>.</p>
+<code>mode</code> ‘secondary’ and the user’s <code>maxStalenessSeconds</code> and <code>tag_sets</code>. Note that if the primary is deprioritized, a
+secondary MUST be selected if one is available.</p>
 <p>For all read preferences modes except ‘primary’, clients MUST set the <code>SecondaryOk</code> wire protocol flag (OP_QUERY) or
 <code>$readPreference</code> global command argument (OP_MSG) to ensure that any suitable server can handle the request. If the
 read preference mode is ‘primary’, clients MUST NOT set the <code>SecondaryOk</code> wire protocol flag (OP_QUERY) or
@@ -1487,6 +1497,13 @@ criteria.</p>
 filter it out because it is too stale, and be left with no eligible servers.</p>
 <p>The user’s intent in specifying two tag sets was to fall back to the second set if needed, so we filter by
 maxStalenessSeconds first, then tag_sets, and select Node 2.</p>
+<h3 id="why-does-server-deprioritization-use-only-server-addresses-and-not-serverdescription-objects"><a class="header" href="#why-does-server-deprioritization-use-only-server-addresses-and-not-serverdescription-objects">Why does server deprioritization use only server addresses and not ServerDescription objects?</a></h3>
+<p>A server’s address is the minimum identifying attribute that stays constant for across topology changes. Drivers create
+new ServerDescription objects on each topology change, and since ServerDescription objects check multiple attributes to
+determine equality comparisons, a deprioritized server could become non-equal to itself after a change and therefore
+incorrectly be considered suitable for a retry operation.</p>
+<p>By using addresses, we ensure that once a server is marked as deprioritized by an operation, it cannot be used again for
+a retry on that operation unless there are no other suitable servers.</p>
 <h2 id="references"><a class="header" href="#references">References</a></h2>
 <ul>
 <li><a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html">Server Discovery and Monitoring</a> specification</li>
@@ -1496,6 +1513,10 @@ specification</li>
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2025-12-08: Require server deprioritization for all topology types and clarify the order of server candidate
+filtering.</p>
+</li>
 <li>
 <p>2015-06-26: Updated single-threaded selection logic with “stale” and serverSelectionTryOnce.</p>
 </li>
