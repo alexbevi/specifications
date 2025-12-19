@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-120d7569.js";
+            window.path_to_searchindex_js = "../searchindex-18fb909f.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -263,7 +263,8 @@ snapshot time of the session:</p>
     // other options defined by other specs
 }
 </code></pre>
-<p>Getting the value of <code>snapshotTime</code> on a non-snapshot session MUST raise an error.</p>
+<p>On a non-snapshot session, the value of <code>snapshotTime</code> is undefined. Drivers MUST either raise an error when the
+property is accessed or return an unset value.</p>
 <p>Transactions are not allowed with snapshot sessions. Calling <code>session.startTransaction(options)</code> on a snapshot session
 MUST raise an error.</p>
 <h2 id="readconcern-changes"><a class="header" href="#readconcern-changes">ReadConcern changes</a></h2>
@@ -354,6 +355,10 @@ don’t have to be changed. This goal is met by defining a <code>SessionOptions<
 <code>cursor</code> object and passing it to read concern object was considered initially. A session-based approach was chosen as
 it aligns better with the existing API, and requires minimal API changes. Future extensibility for snapshot reads would
 be best served by a session-based approach, as no API changes will be required.</p>
+<h3 id="snapshottimeout-must-be-read-only"><a class="header" href="#snapshottimeout-must-be-read-only"><code>snapshotTimeout</code> must be read-only</a></h3>
+<p>Allowing callers to mutate <code>snapshotTime</code> enables misuse patterns where applications overwrite <code>snapshotTime</code> on an
+existing session and then use that session in transactions, combining an inconsistent timestamp with an existing server
+session and triggering hard-to-diagnose write conflicts.</p>
 <h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
 <p>The API changes to support snapshot reads extend the existing API but do not introduce any backward breaking changes.
 Existing programs that don’t use snapshot reads continue to compile and run correctly.</p>
@@ -363,6 +368,7 @@ Existing programs that don’t use snapshot reads continue to compile and run co
 <h2 id="qa"><a class="header" href="#qa">Q&amp;A</a></h2>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2025-12-18: Make snapshot getter optional.</li>
 <li>2025-09-23: Exposed snapshotTime to applications.</li>
 <li>2024-05-08: Migrated from reStructuredText to Markdown.</li>
 <li>2021-06-15: Initial version.</li>

@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-120d7569.js";
+            window.path_to_searchindex_js = "searchindex-18fb909f.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-d281c31f.js"></script>
@@ -16725,7 +16725,8 @@ snapshot time of the session:</p>
     // other options defined by other specs
 }
 </code></pre>
-<p>Getting the value of <code>snapshotTime</code> on a non-snapshot session MUST raise an error.</p>
+<p>On a non-snapshot session, the value of <code>snapshotTime</code> is undefined. Drivers MUST either raise an error when the
+property is accessed or return an unset value.</p>
 <p>Transactions are not allowed with snapshot sessions. Calling <code>session.startTransaction(options)</code> on a snapshot session
 MUST raise an error.</p>
 <h2 id="readconcern-changes"><a class="header" href="#readconcern-changes">ReadConcern changes</a></h2>
@@ -16816,6 +16817,10 @@ don’t have to be changed. This goal is met by defining a <code>SessionOptions<
 <code>cursor</code> object and passing it to read concern object was considered initially. A session-based approach was chosen as
 it aligns better with the existing API, and requires minimal API changes. Future extensibility for snapshot reads would
 be best served by a session-based approach, as no API changes will be required.</p>
+<h3 id="snapshottimeout-must-be-read-only"><a class="header" href="#snapshottimeout-must-be-read-only"><code>snapshotTimeout</code> must be read-only</a></h3>
+<p>Allowing callers to mutate <code>snapshotTime</code> enables misuse patterns where applications overwrite <code>snapshotTime</code> on an
+existing session and then use that session in transactions, combining an inconsistent timestamp with an existing server
+session and triggering hard-to-diagnose write conflicts.</p>
 <h2 id="backwards-compatibility-17"><a class="header" href="#backwards-compatibility-17">Backwards Compatibility</a></h2>
 <p>The API changes to support snapshot reads extend the existing API but do not introduce any backward breaking changes.
 Existing programs that don’t use snapshot reads continue to compile and run correctly.</p>
@@ -16825,6 +16830,7 @@ Existing programs that don’t use snapshot reads continue to compile and run co
 <h2 id="qa-10"><a class="header" href="#qa-10">Q&amp;A</a></h2>
 <h2 id="changelog-28"><a class="header" href="#changelog-28">Changelog</a></h2>
 <ul>
+<li>2025-12-18: Make snapshot getter optional.</li>
 <li>2025-09-23: Exposed snapshotTime to applications.</li>
 <li>2024-05-08: Migrated from reStructuredText to Markdown.</li>
 <li>2021-06-15: Initial version.</li>
@@ -17839,43 +17845,68 @@ needed (e.g. user data to pass as a parameter to the callback).</p>
 <h5 id="sequence-of-actions"><a class="header" href="#sequence-of-actions">Sequence of Actions</a></h5>
 <p>This method should perform the following sequence of actions:</p>
 <ol>
-<li>Define the following:
+<li>
+<p>Define the following:</p>
 <ol>
 <li>Record the current monotonic time, which will be used to enforce the 120-second / CSOT timeout before later retry
 attempts.</li>
-<li>Set <code>retry</code> to <code>0</code>. This will be used for backoff later in step 7.</li>
+<li>Set <code>transactionAttempt</code> to <code>0</code>.</li>
 <li>Set <code>TIMEOUT_MS</code> to be <code>timeoutMS</code> if given, otherwise 120-seconds.</li>
 </ol>
 </li>
-<li>Invoke <a href="#starttransaction">startTransaction</a> on the session. If TransactionOptions
-were specified in the call to <code>withTransaction</code>, those MUST be used for <code>startTransaction</code>. Note that
-<code>ClientSession.defaultTransactionOptions</code> will be used in the absence of any explicit TransactionOptions.</li>
-<li>If <code>startTransaction</code> reported an error, propagate that error to the caller of <code>withTransaction</code> and return
-immediately.</li>
-<li>Invoke the callback. Drivers MUST ensure that the ClientSession can be accessed within the callback (e.g. pass
+<li>
+<p>If <code>transactionAttempt</code> &gt; 0:</p>
+<ol>
+<li>
+<p>If elapsed time + <code>backoffMS</code> &gt; <code>TIMEOUT_MS</code>, then raise the previously encountered error. If the elapsed time of
+<code>withTransaction</code> is less than TIMEOUT_MS, calculate the backoffMS to be
+<code>jitter * min(BACKOFF_INITIAL * 1.5 ** (transactionAttempt - 1), BACKOFF_MAX)</code>. sleep for <code>backoffMS</code>.</p>
+<ol>
+<li>
+<p>jitter is a random float between [0, 1)</p>
+</li>
+<li>
+<p><code>transactionAttempt</code> is the variable defined in step 1.</p>
+</li>
+<li>
+<p><code>BACKOFF_INITIAL</code> is 5ms</p>
+</li>
+<li>
+<p><code>BACKOFF_MAX</code> is 500ms</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>
+<p>Invoke <a href="#starttransaction">startTransaction</a> on the session and increment
+<code>transactionAttempt</code>. If TransactionOptions were specified in the call to <code>withTransaction</code>, those MUST be used
+for <code>startTransaction</code>. Note that <code>ClientSession.defaultTransactionOptions</code> will be used in the absence of any
+explicit TransactionOptions.</p>
+</li>
+<li>
+<p>If <code>startTransaction</code> reported an error, propagate that error to the caller of <code>withTransaction</code> and return
+immediately.</p>
+</li>
+<li>
+<p>Invoke the callback. Drivers MUST ensure that the ClientSession can be accessed within the callback (e.g. pass
 ClientSession as the first parameter, rely on lexical scoping). Drivers MAY pass additional parameters as needed
-(e.g. user data solicited by withTransaction).</li>
-<li>Control returns to <code>withTransaction</code>. Determine the current
+(e.g. user data solicited by withTransaction).</p>
+</li>
+<li>
+<p>Control returns to <code>withTransaction</code>. Determine the current
 <a href="#clientsession-changes-2">state</a> of the ClientSession and whether the callback
-reported an error (e.g. thrown exception, error output parameter).</li>
-<li>If the callback reported an error:
+reported an error (e.g. thrown exception, error output parameter).</p>
+</li>
+<li>
+<p>If the callback reported an error:</p>
 <ol>
 <li>
 <p>If the ClientSession is in the “starting transaction” or “transaction in progress” state, invoke
 <a href="#aborttransaction">abortTransaction</a> on the session.</p>
 </li>
 <li>
-<p>If the callback’s error includes a “TransientTransactionError” label and the elapsed time of <code>withTransaction</code> is
-less than TIMEOUT_MS, calculate the backoffMS to be <code>jitter * min(BACKOFF_INITIAL * (1.5**retry), BACKOFF_MAX)</code>
-where:</p>
-<ol>
-<li>jitter is a random float between [0, 1)</li>
-<li>retry is the variable defined in step 1.</li>
-<li><code>BACKOFF_INITIAL</code> is 5ms</li>
-<li><code>BACKOFF_MAX</code> is 500ms</li>
-</ol>
-<p>If elapsed time + <code>backoffMS</code> &gt; <code>TIMEOUT_MS</code>, then raise last known error. Otherwise, sleep for <code>backoffMS</code>,
-increment <code>retry</code>, and jump back to step two.</p>
+<p>If the callback’s error includes a “TransientTransactionError” label, jump back to step two.</p>
 </li>
 <li>
 <p>If the callback’s error includes a “UnknownTransactionCommitResult” label, the callback must have manually
@@ -17887,27 +17918,33 @@ immediately.</p>
 </li>
 </ol>
 </li>
-<li>If the ClientSession is in the “no transaction”, “transaction aborted”, or “transaction committed” state, assume the
-callback intentionally aborted or committed the transaction and return immediately.</li>
-<li>Invoke <a href="#committransaction">commitTransaction</a> on the session.</li>
-<li>If <code>commitTransaction</code> reported an error:
+<li>
+<p>If the ClientSession is in the “no transaction”, “transaction aborted”, or “transaction committed” state, assume the
+callback intentionally aborted or committed the transaction and return immediately.</p>
+</li>
+<li>
+<p>Invoke <a href="#committransaction">commitTransaction</a> on the session.</p>
+</li>
+<li>
+<p>If <code>commitTransaction</code> reported an error:</p>
 <ol>
 <li>
 <p>If the <code>commitTransaction</code> error includes a “UnknownTransactionCommitResult” label and the error is not
-MaxTimeMSExpired and the elapsed time of <code>withTransaction</code> is less than TIMEOUT_MS, jump back to step eight. We
+MaxTimeMSExpired and the elapsed time of <code>withTransaction</code> is less than TIMEOUT_MS, jump back to step nine. We
 will trust <code>commitTransaction</code> to apply a majority write concern on retry attempts (see:
 <a href="#majority-write-concern-is-used-when-retrying-committransaction-1">Majority write concern is used when retrying commitTransaction</a>).</p>
 </li>
 <li>
-<p>If the <code>commitTransaction</code> error includes a “TransientTransactionError” label and the elapsed time of
-<code>withTransaction</code> is less than TIMEOUT_MS, jump back to step two.</p>
+<p>If the <code>commitTransaction</code> error includes a “TransientTransactionError” label, jump back to step two.</p>
 </li>
 <li>
 <p>Otherwise, propagate the <code>commitTransaction</code> error to the caller of <code>withTransaction</code> and return immediately.</p>
 </li>
 </ol>
 </li>
-<li>The transaction was committed successfully. Return immediately.</li>
+<li>
+<p>The transaction was committed successfully. Return immediately.</p>
+</li>
 </ol>
 <h5 id="pseudo-code"><a class="header" href="#pseudo-code">Pseudo-code</a></h5>
 <p>This method can be expressed by the following pseudo-code:</p>
@@ -17918,25 +17955,27 @@ withTransaction(callback, options) {
     var startTime = Date.now(); // milliseconds since Unix epoch
     // See the CSOT specification for information on calculating timeoutMS for a convenient transaction API call.
     var timeout = getCSOTTimeoutIfSet() ?? 120_000;
-    var retry = 0;
+    var transactionAttempt = 0;
+    var lastError = null;
 
     retryTransaction: while (true) {
-        if (retry &gt; 0) {
-            var backoff = Math.random() * min(BACKOFF_INITIAL * (1.5**retry), 
+        if (transactionAttempt &gt; 0) {
+            var backoff = Math.random() * min(BACKOFF_INITIAL * 1.5 ** (transactionAttempt - 1), 
                                               BACKOFF_MAX);
 
             if (Date.now() + backoff - startTime &gt;= timeout) {
-                throw last_error;
+                throw lastError;
             }
             sleep(backoff);
         }
-        retry += 1
+
         this.startTransaction(options); // may throw on error
+        transactionAttempt += 1;
 
         try {
             callback(this);
         } catch (error) {
-            var last_error = error;
+            lastError = error;
             if (this.transactionState == STARTING ||
                 this.transactionState == IN_PROGRESS) {
                 this.abortTransaction();
@@ -17977,6 +18016,7 @@ withTransaction(callback, options) {
 
                 if (error.hasErrorLabel("TransientTransactionError") &amp;&amp;
                     Date.now() - startTime &lt; timeout) {
+                    lastError = error;
                     continue retryTransaction;
                 }
 
@@ -19772,6 +19812,9 @@ internally by the server on those versions, and its value could have adverse eff
 from mistakenly specifying this option, drivers manually verify it is only sent to 4.4+ servers.</p>
 <h4 id="changelog-34"><a class="header" href="#changelog-34">Changelog</a></h4>
 <ul>
+<li>
+<p>2025-12-18: Search index tests only assert <code>latestDefinition.mappings.dynamic</code> values.</p>
+</li>
 <li>
 <p>2025-09-09: Clarify that <code>rawData</code> is for internal use only.</p>
 </li>
