@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-18fb909f.js";
+            window.path_to_searchindex_js = "../searchindex-a1e7a689.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -3116,11 +3116,6 @@ explicitly test sensitive commands via the <code>runCommand</code> helper.</p>
 <p>This section is reserved for future use. Any breaking changes to the test format SHOULD be described here in detail for
 historical reference, in addition to any shorter description that may be added to the <a href="#changelog">Changelog</a>.</p>
 <h2 id="future-work"><a class="header" href="#future-work">Future Work</a></h2>
-<h3 id="assert-expected-log-messages"><a class="header" href="#assert-expected-log-messages">Assert expected log messages</a></h3>
-<p>When drivers support standardized logging, the test format may need to support assertions for messages expected to be
-logged while executing operations. Since log messages are strings, this may require an operator to match regex patterns
-within strings. Additionally, the test runner may need to support ignoring extra log output, similar to
-<code>ignoreExtraEvents</code>.</p>
 <h3 id="target-failpoint-by-read-preference"><a class="header" href="#target-failpoint-by-read-preference">Target failPoint by read preference</a></h3>
 <p>The <a href="#failpoint">failPoint</a> operation currently uses a “primary” read preference. To date, no spec has needed behavior
 to configure a fail point on a non-primary node. If the need does arise, <a href="#failpoint">failPoint</a> can be enhanced to
@@ -3147,6 +3142,9 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-01-08: Remove Future Work entry for log message assertions (implemented in schema version 1.13).</p>
+</li>
 <li>
 <p>2025-10-22: Added <code>getSnapshotTime</code> operation on sessions.</p>
 </li>
