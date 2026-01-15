@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-a1e7a689.js";
+            window.path_to_searchindex_js = "searchindex-b0256c7d.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-d281c31f.js"></script>
@@ -5264,7 +5264,8 @@ the hostname to the proxy as-is.</p>
 <p>Drivers MUST NOT use the SOCKS5 proxy for connections to - Code:<code>mongocryptd</code> processes spawned for automatic
 client-side field-level encryption.</p>
 <p>Drivers MUST treat a connection failure when connecting to the SOCKS5 proxy or a SOCKS5 handshake or authentication
-failure the same as a network error (e.g. <code>ECONNREFUSED</code>).</p>
+failure the same as a network error (e.g. <code>ECONNREFUSED</code>) which does not indicate server overload for backpressure
+purposes.</p>
 <h3 id="events"><a class="header" href="#events">Events</a></h3>
 <p>SOCKS5 proxies are fully transparent to connection monitoring events. In particular, in <code>CommandStartedEvent</code>,
 <code>CommandSucceededEvent</code>, and - Code:<code>CommandFailedEvent</code>, the driver SHOULD NOT reference the SOCKS5 proxy as part of
@@ -7606,8 +7607,11 @@ are used by the
 <a href="#error-handling-pseudocode">SDAM error handling</a>
 to avoid clearing the pool. The pool MUST NOT add the backpressure error labels during an authentication step
 after the <code>hello</code> message. For errors that the driver can distinguish as never occurring due to server overload,
-such as DNS lookup failures, TLS related errors, or errors encountered establishing a connection to a socks5 proxy,
-the driver MUST clear the connection pool and MUST mark the server Unknown for these error types.</li>
+such as DNS lookup failures, non‑I/O TLS errors (e.g., certificate validation or hostname‑mismatch failures), or
+errors encountered while establishing a connection to a SOCKS5 proxy, the driver MUST clear the connection pool and
+MUST mark the server Unknown for these error types. In contrast, if an I/O error (for example, an EOF error) occurs
+during the TLS handshake, the driver MUST treat it as a potential overload condition and MUST add the backpressure
+error labels.</li>
 </ul>
 <pre><code class="language-typescript">interface ConnectionPool {
   /**
@@ -8620,6 +8624,9 @@ Connection.</li>
 to close and remove from its pool a <a href="#connection">Connection</a> which has unread exhaust messages.</p>
 <h2 id="changelog-16"><a class="header" href="#changelog-16">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-01-12: Clarify handling TLS I/O errors for backpressure error labels.</p>
+</li>
 <li>
 <p>2025-11-21: Add handling of backpressure error labels.</p>
 </li>

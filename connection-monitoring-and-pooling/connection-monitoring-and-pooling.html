@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-a1e7a689.js";
+            window.path_to_searchindex_js = "../searchindex-b0256c7d.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -439,8 +439,11 @@ are used by the
 <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#error-handling-pseudocode">SDAM error handling</a>
 to avoid clearing the pool. The pool MUST NOT add the backpressure error labels during an authentication step
 after the <code>hello</code> message. For errors that the driver can distinguish as never occurring due to server overload,
-such as DNS lookup failures, TLS related errors, or errors encountered establishing a connection to a socks5 proxy,
-the driver MUST clear the connection pool and MUST mark the server Unknown for these error types.</li>
+such as DNS lookup failures, non‑I/O TLS errors (e.g., certificate validation or hostname‑mismatch failures), or
+errors encountered while establishing a connection to a SOCKS5 proxy, the driver MUST clear the connection pool and
+MUST mark the server Unknown for these error types. In contrast, if an I/O error (for example, an EOF error) occurs
+during the TLS handshake, the driver MUST treat it as a potential overload condition and MUST add the backpressure
+error labels.</li>
 </ul>
 <pre><code class="language-typescript">interface ConnectionPool {
   /**
@@ -1453,6 +1456,9 @@ Connection.</li>
 to close and remove from its pool a <a href="#connection">Connection</a> which has unread exhaust messages.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-01-12: Clarify handling TLS I/O errors for backpressure error labels.</p>
+</li>
 <li>
 <p>2025-11-21: Add handling of backpressure error labels.</p>
 </li>
