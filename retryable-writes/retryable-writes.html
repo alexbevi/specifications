@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-b0256c7d.js";
+            window.path_to_searchindex_js = "../searchindex-b220bace.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -449,10 +449,22 @@ provided to the server selection mechanism as a member of the deprioritized serv
 retrying is not possible and drivers MUST raise the retryable error from the previous attempt. In both cases, the caller
 is able to infer that an attempt was made.</p>
 <p>If a retry attempt also fails, drivers MUST update their topology according to the SDAM spec (see:
-<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#error-handling">Error Handling</a>). If an error
-would not allow the caller to infer that an attempt was made (e.g. connection pool exception originating from the
-driver) or the error is labeled “NoWritesPerformed”, the error from the previous attempt should be raised. If all server
-errors are labeled “NoWritesPerformed”, then the first error should be raised.</p>
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html#error-handling">Error Handling</a>).</p>
+<p>If the driver is unable to retry an operation, an error MUST be returned to the user. Some errors that a driver
+encounters indicate that no writes were attempted (i.e., the operation is a no-op). These errors include any client-side
+error that occurs before a command is sent (e.g., a server selection or connection checkout error) or any server error
+with the <code>NoWritesPerformed</code> error label. When the driver encounters multiple errors, the driver MUST ensure that if an
+error has been encountered which indicates that a write was attempted, this error is returned. This behavior is
+summarized below in the following rules:</p>
+<ul>
+<li>If the driver has encountered only errors that indicate write attempts were made, the most recently encountered error
+must be returned.</li>
+<li>If all errors indicate no attempt was made (e.g., all errors contain the <code>NoWritesPerformed</code> error label or are
+client-side errors before a command is sent), the first error encountered must be returned.</li>
+<li>If the driver has encountered some errors which indicate a write attempt was made and some which indicate no write
+attempt was made (e.g., a retryable server error followed by a checkout error), the most recently encountered error
+which indicates a write attempt occurred must be returned.</li>
+</ul>
 <p>If a driver associates server information (e.g. the server address or description) with an error, the driver MUST ensure
 that the reported server information corresponds to the server that originated the error.</p>
 <p>The above rules are implemented in the following pseudo-code:</p>
@@ -747,7 +759,10 @@ retryWrites is not true would be inconsistent with the server and potentially co
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
 <li>
-<p>2026-12-08: Clarified that server deprioritization during retries must use a list of server addresses.</p>
+<p>2026-01-14: Clarify which error to return when more than one error with the <code>NoWritesPerformed</code> label is encountered.</p>
+</li>
+<li>
+<p>2025-12-08: Clarified that server deprioritization during retries must use a list of server addresses.</p>
 </li>
 <li>
 <p>2024-05-08: Add guidance for client-level <code>bulkWrite()</code> retryability.</p>
