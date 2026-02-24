@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-2a3b6390.js";
+            window.path_to_searchindex_js = "../searchindex-6478cc6b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -443,8 +443,11 @@ original retryable error.</p>
 <p>CSOT is not enabled and one retry was attempted.</p>
 </li>
 </ul>
-<p>For each retry attempt, drivers MUST select a writable server. The server address on which the operation failed MUST be
-provided to the server selection mechanism as a member of the deprioritized server address list.</p>
+<p>For each retry attempt, drivers MUST select a writable server. For sharded clusters, the server address on which the
+operation failed MUST be provided to the server selection mechanism as a member of the deprioritized server address
+list. For all other topologies, the server address on which the operation failed MUST be provided to the server
+selection mechanism as a member of the deprioritized server address list only if the error is labelled with
+<code>SystemOverloadedError</code>. This requirement preserves the existing behavior of retryable writes for non-overload errors.</p>
 <p>If the driver cannot select a server for a retry attempt or the selected server does not support retryable writes,
 retrying is not possible and drivers MUST raise the retryable error from the previous attempt. In both cases, the caller
 is able to infer that an attempt was made.</p>
@@ -556,8 +559,12 @@ function executeRetryableWrite(command, session) {
      * If we cannot select a writable server, do not proceed with retrying and
      * throw the previous error. The caller can then infer that an attempt was
      * made and failed. */
+    // Sharded clusters deprioritize on all retryable errors.
+    // Other topologies only deprioritize on overload errors.
     try {
-      deprioritizedServers.push(server.address);
+      if server.isSharded || previousError.hasLabel("SystemOverloadedError") {
+        deprioritizedServers.push(server.address);
+      }
       server = selectServer("writable", deprioritizedServers);
     } catch (Exception ignoredError) {
       throw previousError;
@@ -758,6 +765,9 @@ which only happens when the retryWrites option is true on the client. For the dr
 retryWrites is not true would be inconsistent with the server and potentially confusing to developers.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-02-19: Clarified that server deprioritization on replica sets only occurs for <code>SystemOverloadedError</code> errors.</p>
+</li>
 <li>
 <p>2026-01-14: Clarify which error to return when more than one error with the <code>NoWritesPerformed</code> label is encountered.</p>
 </li>
