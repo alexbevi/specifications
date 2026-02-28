@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-6478cc6b.js";
+            window.path_to_searchindex_js = "../searchindex-42193601.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -270,8 +270,8 @@ attempts.</li>
 <p>If <code>transactionAttempt</code> &gt; 0:</p>
 <ol>
 <li>
-<p>If elapsed time + <code>backoffMS</code> &gt; <code>TIMEOUT_MS</code>, then raise the previously encountered error. If the elapsed time of
-<code>withTransaction</code> is less than TIMEOUT_MS, calculate the backoffMS to be
+<p>If elapsed time + <code>backoffMS</code> &gt; <code>TIMEOUT_MS</code>, then raise the previously encountered error (see Note 1 below). If
+the elapsed time of <code>withTransaction</code> is less than TIMEOUT_MS, calculate the backoffMS to be
 <code>jitter * min(BACKOFF_INITIAL * 1.5 ** (transactionAttempt - 1), BACKOFF_MAX)</code>. sleep for <code>backoffMS</code>.</p>
 <ol>
 <li>
@@ -326,7 +326,8 @@ committed a transaction, propagate the callback’s error to the caller of <code
 immediately.</p>
 </li>
 <li>
-<p>Otherwise, propagate the callback’s error to the caller of <code>withTransaction</code> and return immediately.</p>
+<p>Otherwise, propagate the callback’s error (see Note 1 below) to the caller of <code>withTransaction</code> and return
+immediately.</p>
 </li>
 </ol>
 </li>
@@ -350,7 +351,8 @@ will trust <code>commitTransaction</code> to apply a majority write concern on r
 <p>If the <code>commitTransaction</code> error includes a “TransientTransactionError” label, jump back to step two.</p>
 </li>
 <li>
-<p>Otherwise, propagate the <code>commitTransaction</code> error to the caller of <code>withTransaction</code> and return immediately.</p>
+<p>Otherwise, propagate the <code>commitTransaction</code> error (see Note 1 below) to the caller of <code>withTransaction</code> and
+return immediately.</p>
 </li>
 </ol>
 </li>
@@ -358,6 +360,14 @@ will trust <code>commitTransaction</code> to apply a majority write concern on r
 <p>The transaction was committed successfully. Return immediately.</p>
 </li>
 </ol>
+<hr>
+<p><strong>Note 1:</strong> When the <code>TIMEOUT_MS</code> (calculated in step <a href="#sequence-of-actions">1.3</a>) is reached we MUST report a timeout
+error wrapping the last error that was encountered which triggered the retry behavior. If <code>timeoutMS</code> is set, then
+timeout error is a special type which is defined in CSOT
+<a href="https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.md#errors">specification</a>
+, If <code>timeoutMS</code> is not set, then propagate it as timeout error if the language allows to expose the underlying error as
+a cause of a timeout error (see <code>makeTimeoutError</code> below in <a href="#pseudo-code">pseudo-code</a>). If timeout error is thrown
+then it SHOULD expose error label(s) from the transient error.</p>
 <h5 id="pseudo-code"><a class="header" href="#pseudo-code">Pseudo-code</a></h5>
 <p>This method can be expressed by the following pseudo-code:</p>
 <pre><code class="language-typescript">var BACKOFF_INITIAL = 5  // 5ms initial backoff
@@ -376,7 +386,7 @@ withTransaction(callback, options) {
                                               BACKOFF_MAX);
 
             if (Date.now() + backoff - startTime &gt;= timeout) {
-                throw lastError;
+                throw makeTimeoutError(lastError);
             }
             sleep(backoff);
         }
@@ -393,9 +403,12 @@ withTransaction(callback, options) {
                 this.abortTransaction();
             }
 
-            if (error.hasErrorLabel("TransientTransactionError") &amp;&amp;
-                Date.now() - startTime &lt; timeout) {
-                continue retryTransaction;
+            if (error.hasErrorLabel("TransientTransactionError")) {
+                if (Date.now() - startTime &lt; timeout) {
+                    continue retryTransaction;
+                } else {
+                    throw makeTimeoutError(error)
+                }
             }
 
             throw error;
@@ -420,15 +433,16 @@ withTransaction(callback, options) {
                  * {ok:0, code: 50, codeName: "MaxTimeMSExpired"}
                  * {ok:1, writeConcernError: {code: 50, codeName: "MaxTimeMSExpired"}}
                  */
+                lastError = error;
+                if (Date.now() - startTime &gt;= timeout) {
+                    throw makeTimeoutError(error);
+                }
                 if (!isMaxTimeMSExpiredError(error) &amp;&amp;
-                    error.hasErrorLabel("UnknownTransactionCommitResult") &amp;&amp;
-                    Date.now() - startTime &lt; timeout) {
+                    error.hasErrorLabel("UnknownTransactionCommitResult")) {
                     continue retryCommit;
                 }
 
-                if (error.hasErrorLabel("TransientTransactionError") &amp;&amp;
-                    Date.now() - startTime &lt; timeout) {
-                    lastError = error;
+                if (error.hasErrorLabel("TransientTransactionError")) {
                     continue retryTransaction;
                 }
 
@@ -438,6 +452,10 @@ withTransaction(callback, options) {
         }
         break; // Transaction was successful
     }
+}
+
+function makeTimeoutError(error) {
+    return getCSOTTimeoutIfSet() != null ? createCSOTMongoTimeoutException(error) : createLegacyMongoTimeoutException(error);
 }
 </code></pre>
 <h3 id="clientsession-must-provide-access-to-a-mongoclient"><a class="header" href="#clientsession-must-provide-access-to-a-mongoclient">ClientSession must provide access to a MongoClient</a></h3>
@@ -551,6 +569,10 @@ provides an implementation of a technique already described in the MongoDB 4.0 d
 (<a href="https://jira.mongodb.org/browse/DRIVERS-488">DRIVERS-488</a>).</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-02-17: Clarify expected error when timeout is reached
+<a href="https://jira.mongodb.org/browse/DRIVERS-3391">DRIVERS-3391</a>.</p>
+</li>
 <li>
 <p>2025-11-20: withTransaction applies exponential backoff when retrying.</p>
 </li>
