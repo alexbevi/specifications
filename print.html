@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-42193601.js";
+            window.path_to_searchindex_js = "searchindex-7f27177c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-d281c31f.js"></script>
@@ -31037,7 +31037,7 @@ selection and serialization/deserialization.</p>
 below.</p>
 <h5 id="transactions-2"><a class="header" href="#transactions-2">Transactions</a></h5>
 <p>When a user starts a transaction with <code>startTransaction</code>, the driver SHOULD create a span for the pseudo operation
-<code>transaction</code>. This span MUST have only one attribute <code>db.system</code> with the value <code>mongodb</code>. All operations executed
+<code>transaction</code>. This span MUST have only one attribute <code>db.system.name</code> with the value <code>mongodb</code>. All operations executed
 within the transaction SHOULD be nested to the <code>transaction</code> span.</p>
 <p>When a user commits or aborts a transaction with <code>commitTransaction</code> or <code>abortTransaction</code>, the driver SHOULD finish the
 <code>transaction</code> span.</p>
@@ -31066,7 +31066,7 @@ span is <code>findAndModify</code>. This ensures consistency between drivers whe
 <tr><th style="text-align: left">Attribute</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th><th style="text-align: left">Requirement Level</th></tr>
 </thead>
 <tbody>
-<tr><td style="text-align: left"><code>db.system</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be ‘mongodb’</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.system.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be ‘mongodb’</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.namespace</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The database name</td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.collection.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The collection being accessed within the database stated in <code>db.namespace</code></td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.operation.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the driver operation being executed</td><td style="text-align: left">Required</td></tr>
@@ -31131,7 +31131,7 @@ span.</p>
 <tr><th style="text-align: left">Attribute</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th><th style="text-align: left">Requirement Level</th></tr>
 </thead>
 <tbody>
-<tr><td style="text-align: left"><code>db.system</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be ‘mongodb’</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.system.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be ‘mongodb’</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.namespace</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The database name</td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.collection.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The collection being accessed within the database stated in <code>db.namespace</code></td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.command.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the server command being executed</td><td style="text-align: left">Required</td></tr>
@@ -31286,6 +31286,11 @@ replace those binary values with placeholders (assuming the encrypted blobs are 
 tracing may have unexpected negative outcome.</p>
 <p>Further, we already have two attributes that configure tracing, and we expect there might be more.</p>
 <p>A URI options can be added later if we realise our users need it, while the opposite is not easily accomplished.</p>
+<h2 id="changelog-46"><a class="header" href="#changelog-46">Changelog</a></h2>
+<ul>
+<li>2026-02-09: Renamed <code>db.system</code> to <code>db.system.name</code> according to the corresponding update of OpenTelemetry semantic
+conventions.</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="command-logging-and-monitoring"><a class="header" href="#command-logging-and-monitoring">Command Logging and Monitoring</a></h1>
 <ul>
@@ -31694,7 +31699,7 @@ driver-generated ID {{driverConnectionId}} and server-generated ID {{serverConne
 server and stored in an internal buffer. By the time the server’s response is received, this buffer may have been
 released. Requiring the retention of this buffer until command completion could result in unacceptable performance
 penalties, particularly when event listeners are introduced.</p>
-<h2 id="changelog-46"><a class="header" href="#changelog-46">Changelog</a></h2>
+<h2 id="changelog-47"><a class="header" href="#changelog-47">Changelog</a></h2>
 <ul>
 <li>
 <p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
@@ -32310,7 +32315,7 @@ placeholders as appropriate:</p>
 </blockquote>
 <h3 id="tests-2"><a class="header" href="#tests-2">Tests</a></h3>
 <p>See the <a href="server-discovery-and-monitoring/tests/monitoring/README.html">README</a>.</p>
-<h2 id="changelog-47"><a class="header" href="#changelog-47">Changelog</a></h2>
+<h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
 <ul>
 <li>
 <p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
@@ -32691,7 +32696,7 @@ infinitely if each write to store a log message generates additional log message
 issue in drivers that already produce log messages, or with the command monitoring API, but if users start to run into
 this issue, we could try to address it at the specification level by e.g. requiring drivers to support disabling logging
 on individual clients or for particular namespaces.</p>
-<h2 id="changelog-48"><a class="header" href="#changelog-48">Changelog</a></h2>
+<h2 id="changelog-49"><a class="header" href="#changelog-49">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-03-06: Migrated from reStructuredText to Markdown.</p>
@@ -32779,7 +32784,7 @@ new schema file is introduced, any existing schema files MUST remain in place si
 For example: if an additive change is made to version 1.0 of the spec, the <code>schema-1.0.json</code> file will be copied to
 <code>schema-1.1.json</code> and modified accordingly. A new or existing test file using <a href="#schemaVersion">schemaVersion</a> “1.0”
 would then be expected to validate against both schema files. Schema version bumps MUST be noted in the
-<a href="#changelog-49">Changelog</a>.</p>
+<a href="#changelog-50">Changelog</a>.</p>
 <p>A particular minor version MUST be capable of validating any and all test files in that major version series up to and
 including the minor version. For example, <code>schema-2.1.json</code> should validate test files with
 <a href="#schemaVersion">schemaVersion</a> “2.0” and “2.1”, but would not be expected to validate files specifying “1.0”, “2.2”, or
@@ -35658,7 +35663,7 @@ have restricted use of this property to situations where authentication is disab
 explicitly test sensitive commands via the <code>runCommand</code> helper.</p>
 <h2 id="breaking-changes"><a class="header" href="#breaking-changes">Breaking Changes</a></h2>
 <p>This section is reserved for future use. Any breaking changes to the test format SHOULD be described here in detail for
-historical reference, in addition to any shorter description that may be added to the <a href="#changelog-49">Changelog</a>.</p>
+historical reference, in addition to any shorter description that may be added to the <a href="#changelog-50">Changelog</a>.</p>
 <h2 id="future-work-19"><a class="header" href="#future-work-19">Future Work</a></h2>
 <h3 id="target-failpoint-by-read-preference"><a class="header" href="#target-failpoint-by-read-preference">Target failPoint by read preference</a></h3>
 <p>The <a href="#failpoint">failPoint</a> operation currently uses a “primary” read preference. To date, no spec has needed behavior
@@ -35684,7 +35689,7 @@ CRUD spec and this spec and its schema.</p>
 <p>As discussed in <a href="#executing-an-operation">Executing an Operation</a>, test runners MUST raise errors for unsupported
 operations and arguments. This is a concession until such time that better processes can be established for versioning
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
-<h2 id="changelog-49"><a class="header" href="#changelog-49">Changelog</a></h2>
+<h2 id="changelog-50"><a class="header" href="#changelog-50">Changelog</a></h2>
 <ul>
 <li>
 <p>2026-01-08: Remove Future Work entry for log message assertions (implemented in schema version 1.13).</p>
@@ -36698,7 +36703,7 @@ minimize disk I/O impact?); same AWS zone as client</p>
 <p>TBD: spec system to hold scores over time</p>
 <h3 id="datasets"><a class="header" href="#datasets">Datasets</a></h3>
 <p>TBD: generated datasets should be park in S3 or somewhere for retrieval by URL</p>
-<h2 id="changelog-50"><a class="header" href="#changelog-50">Changelog</a></h2>
+<h2 id="changelog-51"><a class="header" href="#changelog-51">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-12-23: Add Client and Collection BulkWrite benchmarks</p>
@@ -37037,7 +37042,7 @@ to the Extended JSON Specification.</p>
 different in different cases, but the <code>canonical_bson</code> field is the same. This is by design so that each case stands
 alone and can be confirmed to be internally consistent via the assertions. This makes for easier and safer test case
 development.</p>
-<h2 id="changelog-51"><a class="header" href="#changelog-51">Changelog</a></h2>
+<h2 id="changelog-52"><a class="header" href="#changelog-52">Changelog</a></h2>
 <ul>
 <li>
 <p>2024-01-22: Migrated from reStructuredText to Markdown.</p>
@@ -37477,7 +37482,7 @@ limit. The variant itself MUST have the SAM CLI installed.</p>
 <li>Calls the frozen lambda function again.</li>
 <li>Deletes the Lambda function.</li>
 </ul>
-<h2 id="changelog-52"><a class="header" href="#changelog-52">Changelog</a></h2>
+<h2 id="changelog-53"><a class="header" href="#changelog-53">Changelog</a></h2>
 <ul>
 <li>2025-08-07: Added instructions for accessing secrets from the vault.</li>
 <li>2024-02-27: Migrated from reStructuredText to Markdown.</li>

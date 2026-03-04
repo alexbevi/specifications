@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-42193601.js";
+            window.path_to_searchindex_js = "../searchindex-7f27177c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -274,7 +274,7 @@ selection and serialization/deserialization.</p>
 below.</p>
 <h5 id="transactions"><a class="header" href="#transactions">Transactions</a></h5>
 <p>When a user starts a transaction with <code>startTransaction</code>, the driver SHOULD create a span for the pseudo operation
-<code>transaction</code>. This span MUST have only one attribute <code>db.system</code> with the value <code>mongodb</code>. All operations executed
+<code>transaction</code>. This span MUST have only one attribute <code>db.system.name</code> with the value <code>mongodb</code>. All operations executed
 within the transaction SHOULD be nested to the <code>transaction</code> span.</p>
 <p>When a user commits or aborts a transaction with <code>commitTransaction</code> or <code>abortTransaction</code>, the driver SHOULD finish the
 <code>transaction</code> span.</p>
@@ -303,7 +303,7 @@ span is <code>findAndModify</code>. This ensures consistency between drivers whe
 <tr><th style="text-align: left">Attribute</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th><th style="text-align: left">Requirement Level</th></tr>
 </thead>
 <tbody>
-<tr><td style="text-align: left"><code>db.system</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be ‘mongodb’</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.system.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be ‘mongodb’</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.namespace</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The database name</td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.collection.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The collection being accessed within the database stated in <code>db.namespace</code></td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.operation.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the driver operation being executed</td><td style="text-align: left">Required</td></tr>
@@ -368,7 +368,7 @@ span.</p>
 <tr><th style="text-align: left">Attribute</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th><th style="text-align: left">Requirement Level</th></tr>
 </thead>
 <tbody>
-<tr><td style="text-align: left"><code>db.system</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be ‘mongodb’</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.system.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be ‘mongodb’</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.namespace</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The database name</td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.collection.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The collection being accessed within the database stated in <code>db.namespace</code></td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.command.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the server command being executed</td><td style="text-align: left">Required</td></tr>
@@ -523,6 +523,11 @@ replace those binary values with placeholders (assuming the encrypted blobs are 
 tracing may have unexpected negative outcome.</p>
 <p>Further, we already have two attributes that configure tracing, and we expect there might be more.</p>
 <p>A URI options can be added later if we realise our users need it, while the opposite is not easily accomplished.</p>
+<h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
+<ul>
+<li>2026-02-09: Renamed <code>db.system</code> to <code>db.system.name</code> according to the corresponding update of OpenTelemetry semantic
+conventions.</li>
+</ul>
 
                     </main>
 
