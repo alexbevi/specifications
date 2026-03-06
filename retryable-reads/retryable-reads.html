@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-6d028b03.js";
+            window.path_to_searchindex_js = "../searchindex-da9d8688.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -189,6 +189,10 @@ any results—due to a transient network error, a “not writable primary” err
 <li>outline how an API for retryable read operations will be implemented in drivers</li>
 <li>define an option to enable retryable reads for an application.</li>
 </ul>
+<p>The changes in this specification are related to but distinct from the retryability behaviors defined in the
+<a href="../client-backpressure/client-backpressure.html">Client Backpressure Specification</a>, which defines a retryability
+mechanism for all commands under certain server conditions. Unless otherwise noted, the changes in this specification
+refer only to the retryability behaviors summarized above.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
 <p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
 “OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
@@ -440,6 +444,14 @@ that the reported server information corresponds to the server that originated t
 <p>The following pseudocode for executing retryable read commands has been adapted from
 <a href="../retryable-writes/retryable-writes.html#executing-retryable-write-commands">the pseudocode for executing retryable write commands</a>
 and reflects the flow described above.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The rules above and the pseudocode below only demonstrate the rules for retryable reads as outlined in this
+specification. For simplicity, and to make the retryable reads rules easier to follow, the pseudocode was
+intentionally unmodified. For a pseudocode block that contains both retryable reads logic as defined in this
+specification and backoff retryabilitity as defined in the client backpressure specification, see the pseudocode in
+the <a href="../client-backpressure/client-backpressure.html">Backpressure Specification</a>.</p>
+</blockquote>
 <pre><code class="language-typescript">/**
  * Checks if a connection supports retryable reads.
  */
@@ -699,6 +711,10 @@ any customers experiencing degraded performance can simply disable <code>retryab
 <ul>
 <li>
 <p>2026-02-19: Clarified that server deprioritization on replica sets only occurs for <code>SystemOverloadedError</code> errors.</p>
+</li>
+<li>
+<p>2026-02-11: Clarified that the retry logic and pseudocode does not include the modifications required by client
+backpressure.</p>
 </li>
 <li>
 <p>2025-12-08: Clarified that server deprioritization during retries must use a list of server addresses.</p>

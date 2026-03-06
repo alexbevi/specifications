@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-6d028b03.js";
+            window.path_to_searchindex_js = "searchindex-da9d8688.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-d281c31f.js"></script>
@@ -3716,6 +3716,7 @@ to URI options apply here.</p>
 <tr><th>Name</th><th>Accepted Values</th><th>Default Value</th><th>Optional to implement?</th><th>Description</th></tr>
 </thead>
 <tbody>
+<tr><td>adaptiveRetries</td><td>“true” or “false”</td><td>“false”</td><td>no</td><td>Whether to enable adaptive reries as described by the <a href="client-backpressure/client-backpressure.html#token-bucket">client backpressure spec</a></td></tr>
 <tr><td>appname</td><td>any string that meets the criteria listed in the <a href="#client-application-name">handshake spec</a></td><td>no appname specified</td><td>no</td><td>Passed into the server in the client metadata as part of the connection handshake</td></tr>
 <tr><td>authMechanism</td><td>any string; valid values are defined in the <a href="#supported-authentication-methods">auth spec</a></td><td>None; default values for authentication exist for constructing authentication credentials per the <a href="#supported-authentication-methods">auth spec</a>, but there is no default for the URI option itself.</td><td>no</td><td>The authentication mechanism method to use for connection to the server</td></tr>
 <tr><td>authMechanismProperties</td><td>comma separated key:value pairs, e.g. “opt1:val1,opt2:val2”</td><td>no properties specified</td><td>no</td><td>Additional options provided for authentication (e.g. to enable hostname canonicalization for GSSAPI)</td></tr>
@@ -4380,6 +4381,7 @@ if stable_api_configured or client_options.load_balanced:
 else:
     cmd = {"legacy hello": 1, "helloOk": 1}
     conn.supports_op_msg = False  # Send the initial command via OP_QUERY.
+cmd["backpressure"] = True
 cmd["client"] = client_metadata
 if client_options.compressors:
     cmd["compression"] = client_options.compressors
@@ -13771,6 +13773,10 @@ any results—due to a transient network error, a “not writable primary” err
 <li>outline how an API for retryable read operations will be implemented in drivers</li>
 <li>define an option to enable retryable reads for an application.</li>
 </ul>
+<p>The changes in this specification are related to but distinct from the retryability behaviors defined in the
+<a href="client-backpressure/client-backpressure.html">Client Backpressure Specification</a>, which defines a retryability
+mechanism for all commands under certain server conditions. Unless otherwise noted, the changes in this specification
+refer only to the retryability behaviors summarized above.</p>
 <h2 id="meta-23"><a class="header" href="#meta-23">META</a></h2>
 <p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
 “OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
@@ -14022,6 +14028,14 @@ that the reported server information corresponds to the server that originated t
 <p>The following pseudocode for executing retryable read commands has been adapted from
 <a href="#executing-retryable-write-commands">the pseudocode for executing retryable write commands</a>
 and reflects the flow described above.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The rules above and the pseudocode below only demonstrate the rules for retryable reads as outlined in this
+specification. For simplicity, and to make the retryable reads rules easier to follow, the pseudocode was
+intentionally unmodified. For a pseudocode block that contains both retryable reads logic as defined in this
+specification and backoff retryabilitity as defined in the client backpressure specification, see the pseudocode in
+the <a href="client-backpressure/client-backpressure.html">Backpressure Specification</a>.</p>
+</blockquote>
 <pre><code class="language-typescript">/**
  * Checks if a connection supports retryable reads.
  */
@@ -14283,6 +14297,10 @@ any customers experiencing degraded performance can simply disable <code>retryab
 <p>2026-02-19: Clarified that server deprioritization on replica sets only occurs for <code>SystemOverloadedError</code> errors.</p>
 </li>
 <li>
+<p>2026-02-11: Clarified that the retry logic and pseudocode does not include the modifications required by client
+backpressure.</p>
+</li>
+<li>
 <p>2025-12-08: Clarified that server deprioritization during retries must use a list of server addresses.</p>
 </li>
 <li>
@@ -14355,6 +14373,10 @@ obtain a write result (e.g. network error or “not writable primary” error af
 specification will outline how an API for retryable write operations will be implemented in drivers. The specification
 will define an option to enable retryable writes for an application and describe how a transaction ID will be provided
 to write commands executed therein.</p>
+<p>The changes in this specification are related to but distinct from the retryability behaviors defined in the
+<a href="client-backpressure/client-backpressure.html">Client Backpressure Specification</a>, which defines a retryability
+mechanism for all commands under certain server conditions. Unless otherwise noted, the changes in this specification
+refer only to the retryability behaviors summarized above.</p>
 <h2 id="meta-24"><a class="header" href="#meta-24">META</a></h2>
 <p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
 “OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
@@ -14371,9 +14393,9 @@ component is the corresponding server session ID. which is a BSON value defined 
 specification. This object is always associated with a server session; however, drivers will pool server sessions so
 that creating a ClientSession will not always entail creation of a new server session. The name of this object MAY vary
 across drivers.</p>
-<p><strong>Retryable Error</strong></p>
+<p><strong>Retryable Write Error</strong></p>
 <p>An error is considered retryable if it has a RetryableWriteError label in its top-level “errorLabels” field. See
-<a href="#determining-retryable-errors">Determining Retryable Errors</a> for more information.</p>
+<a href="#determining-retryable-write-errors">Determining Retryable Write Errors</a> for more information.</p>
 <p>Additional terms may be defined in the <a href="#sessions-specification">Driver Session</a> specification.</p>
 <h3 id="naming-deviations-3"><a class="header" href="#naming-deviations-3">Naming Deviations</a></h3>
 <p>This specification defines the name for a new MongoClient option, <code>retryWrites</code>. Drivers MUST use the defined name for
@@ -14411,7 +14433,7 @@ command and MUST not retry the command under any circumstances.</p>
 cluster do not (e.g. replica set shard is configured with feature compatibility version 3.4, a standalone is added as a
 new shard). In these rare cases, a write command that fans out to a shard that does not support retryable writes may
 partially fail and an error may be reported in the write result from mongos (e.g. <code>writeErrors</code> array in the bulk write
-result). This does not constitute a retryable error. Drivers MUST relay such errors to the user.</p>
+result). This does not constitute a retryable write error. Drivers MUST relay such errors to the user.</p>
 <h4 id="supported-write-operations"><a class="header" href="#supported-write-operations">Supported Write Operations</a></h4>
 <p>MongoDB 3.6 will support retryability for some, but not all, write operations.</p>
 <p>Supported single-statement write operations include <code>insertOne()</code>, <code>updateOne()</code>, <code>replaceOne()</code>, <code>deleteOne()</code>,
@@ -14456,7 +14478,7 @@ set to true on the <code>MongoClient</code>. In addition, drivers MUST NOT add t
 occurs during a write command within a transaction (excepting <code>commitTransation</code> and <code>abortTransaction</code>), even when
 <code>retryWrites</code> has been set to true on the <code>MongoClient</code>.</p>
 <h3 id="implementing-retryable-writes"><a class="header" href="#implementing-retryable-writes">Implementing Retryable Writes</a></h3>
-<h4 id="determining-retryable-errors"><a class="header" href="#determining-retryable-errors">Determining Retryable Errors</a></h4>
+<h4 id="determining-retryable-write-errors"><a class="header" href="#determining-retryable-write-errors">Determining Retryable Write Errors</a></h4>
 <p>When connected to a MongoDB instance that supports retryable writes (versions 3.6+), the driver MUST treat all errors
 with the RetryableWriteError label as retryable. This error label can be found in the top-level “errorLabels” field of
 the error.</p>
@@ -14633,6 +14655,14 @@ which indicates a write attempt occurred must be returned.</li>
 </ul>
 <p>If a driver associates server information (e.g. the server address or description) with an error, the driver MUST ensure
 that the reported server information corresponds to the server that originated the error.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The rules above and the pseudocode below only demonstrate the rules for retryable writes as outlined in this
+specification. For simplicity, and to make the retryable writes rules easier to follow, the pseudocode was
+intentionally unmodified. For a pseudocode block that contains both retryable writes logic as defined in this
+specification and backoff retryabilitity as defined in the client backpressure specification, see the pseudocode in
+the <a href="client-backpressure/client-backpressure.html">Backpressure Specification</a>.</p>
+</blockquote>
 <p>The above rules are implemented in the following pseudo-code:</p>
 <pre><code class="language-typescript">/**
  * Checks if a server supports retryable writes.
@@ -14930,6 +14960,10 @@ retryWrites is not true would be inconsistent with the server and potentially co
 <ul>
 <li>
 <p>2026-02-19: Clarified that server deprioritization on replica sets only occurs for <code>SystemOverloadedError</code> errors.</p>
+</li>
+<li>
+<p>2026-02-11: Clarified that the retry logic and pseudocode does not include the modifications required by client
+backpressure.</p>
 </li>
 <li>
 <p>2026-01-14: Clarify which error to return when more than one error with the <code>NoWritesPerformed</code> label is encountered.</p>
@@ -17156,7 +17190,19 @@ state. When the session is in the “starting transaction” state, meaning no o
 transaction, drivers MUST NOT run the commitTransaction command.</p>
 <p>commitTransaction is a retryable write command. Drivers MUST retry once after commitTransaction fails with a retryable
 error, including a handshake network error, according to the Retryable Writes Specification, regardless of whether
-retryWrites is set on the MongoClient or not.</p>
+retryWrites is set on the MongoClient or not. If a commitTransaction fails with a
+<a href="client-backpressure/client-backpressure.html#retryable-overload-error">retryable overload error</a>, the command MUST be
+retried as specified in <a href="#interaction-with-client-backpressure">Interaction with Client Backpressure</a>.</p>
+<p>When retrying a commitTransaction attempt, if the previous commitTransaction attempt failed with a
+<a href="client-backpressure/client-backpressure.html#retryable-overload-error">retryable overload error</a>, drivers MUST apply
+the write concern modification rules as outlined in the
+<a href="#interaction-with-client-backpressure">Interaction With Client Backpressure</a> to determine whether or not to modify the
+command’s writeConcern. If the command failed with any other error, drivers MUST follow the rules for write concern
+modification as outlined in <a href="#writeconcern-for-committransaction-attempts">writeConcern for commitTransaction attempts</a>.</p>
+<p>Drivers MUST add error labels to certain errors when commitTransaction fails. See the
+<a href="#error-reporting-changes">Error reporting changes</a> and <a href="#error-labels">Error Labels</a> sections for a precise
+description.</p>
+<h5 id="writeconcern-for-committransaction-attempts"><a class="header" href="#writeconcern-for-committransaction-attempts">writeConcern for commitTransaction attempts</a></h5>
 <p>When commitTransaction is retried, either by the driver’s internal retry logic or explicitly by the user calling
 commitTransaction again, drivers MUST apply <code>w: majority</code> to the write concern of the commitTransaction command. If the
 transaction is using a <a href="#writeconcern">writeConcern</a> that is not the server default (i.e. specified via
@@ -17165,9 +17211,6 @@ TransactionOptions during the <code>startTransaction</code> call or otherwise in
 <code>wtimeout</code> value, drivers MUST also apply <code>wtimeout: 10000</code> to the write concern in order to avoid waiting forever (or
 until a socket timeout) if the majority write concern cannot be satisfied. See
 <a href="#majority-write-concern-is-used-when-retrying-committransaction">Majority write concern is used when retrying commitTransaction</a>.</p>
-<p>Drivers MUST add error labels to certain errors when commitTransaction fails. See the
-<a href="#error-reporting-changes">Error reporting changes</a> and <a href="#error-labels">Error Labels</a> sections for a precise
-description.</p>
 <h4 id="aborttransaction"><a class="header" href="#aborttransaction">abortTransaction</a></h4>
 <p>This method aborts the currently active transaction on this session. Drivers MUST run an abortTransaction command with
 the transaction’s writeConcern. When this method completes the session moves to the “transaction aborted” state.</p>
@@ -17184,11 +17227,13 @@ state. When the session is in the “starting transaction” state, meaning, no 
 transaction, drivers MUST NOT run the abortTransaction command.</p>
 <p>abortTransaction is a retryable write command. Drivers MUST retry after abortTransaction fails with a retryable error
 according to the <a href="#retryable-writes">Retryable Writes Specification</a>, including a handshake
-network error, regardless of whether retryWrites is set on the MongoClient or not.</p>
-<p>If the operation times out or fails with a non-retryable error, drivers MUST ignore all errors from the abortTransaction
-command. Errors from abortTransaction are meaningless to the application because they cannot do anything to recover from
-the error. The transaction will ultimately be aborted by the server anyway either upon reaching an age limit or when the
-application starts a new transaction on this session, see
+network error, regardless of whether retryWrites is set on the MongoClient or not. If a abortTransaction fails with a
+<a href="client-backpressure/client-backpressure.html#retryable-overload-error">retryable overload error</a>, the command MUST be
+retried as specified in <a href="#interaction-with-client-backpressure">Interaction with Client Backpressure</a>.</p>
+<p>If the operation times out or fails with a non-retryable error, drivers MUST NOT propagate errors from the
+abortTransaction command. Errors from abortTransaction are meaningless to the application because they cannot do
+anything to recover from the error. The transaction will ultimately be aborted by the server anyway either upon reaching
+an age limit or when the application starts a new transaction on this session, see
 <a href="#drivers-ignore-all-aborttransaction-errors">Drivers ignore all abortTransaction errors</a>.</p>
 <h4 id="endsession-changes"><a class="header" href="#endsession-changes">endSession changes</a></h4>
 <p>This method ends a ClientSession. Drivers MUST call abortTransaction if this session is in the “transaction in progress”
@@ -17307,9 +17352,11 @@ a transaction.</p>
 <h3 id="interaction-with-retryable-writes"><a class="header" href="#interaction-with-retryable-writes"><strong>Interaction with Retryable Writes</strong></a></h3>
 <p>In MongoDB 4.0 the only supported retryable write commands within a transaction are commitTransaction and
 abortTransaction. Therefore drivers MUST NOT retry write commands within transactions even when retryWrites has been
-enabled on the MongoClient. In addition, drivers MUST NOT add the RetryableWriteError label to any error that occurs
-during a write command within a transaction (excepting commitTransation and abortTransaction), even when retryWrites has
-been enabled on the MongoClient.</p>
+enabled on the MongoClient, unless the server response is a
+<a href="client-backpressure/client-backpressure.html#retryable-overload-error">retryable overload error</a>.</p>
+<p>In addition, drivers MUST NOT add the RetryableWriteError label to any error that occurs during a write command within a
+transaction (excepting commitTransation and abortTransaction), even when retryWrites has been enabled on the
+MongoClient.</p>
 <p>Drivers MUST retry the commitTransaction and abortTransaction commands even when retryWrites has been disabled on the
 MongoClient. commitTransaction and abortTransaction are retryable write commands and MUST be retried according to the
 <a href="#retryable-writes">Retryable Writes Specification</a>.</p>
@@ -17318,6 +17365,27 @@ MongoClient. commitTransaction and abortTransaction are retryable write commands
 incremented at the start and then stays constant, even for retryable operations within the transaction. When executing
 the commitTransaction and abortTransaction commands within a transaction drivers MUST use the same <code>txnNumber</code> used for
 all preceding commands in the transaction.</p>
+<h3 id="interaction-with-client-backpressure"><a class="header" href="#interaction-with-client-backpressure"><strong>Interaction with Client Backpressure</strong></a></h3>
+<p>All commands in a transaction are subject to the
+<a href="client-backpressure/client-backpressure.html">Client Backpressure Specification</a>, and MUST be retried accordingly.
+This includes the initial command with <code>startTransaction:true</code>, the abortTransaction and commitTransaction commands, as
+well as any read or write commands attempted during the transaction.</p>
+<p>When a commitTransaction attempt fails with a retryable overload error:</p>
+<ul>
+<li>If a commitTransaction attempt has already failed with an error that is not a
+<a href="client-backpressure/client-backpressure.html#retryable-overload-error">retryable overload error</a>, drivers MUST
+follow the instructions for modifying writeConcern as outlined in the
+<a href="#writeconcern-for-committransaction-attempts">writeConcern for commitTransaction attempts</a> section for the next
+retry attempt.</li>
+<li>Otherwise, drivers MUST retry using the same write concern as was used for the most recently failed commitTransaction
+attempt.</li>
+</ul>
+<p>See
+<a href="#majority-write-concern-is-used-when-retrying-committransaction">Majority write concern is used when retrying commitTransaction</a>
+for discussion on why majority write concern is sometimes needed on commitTransaction retries.</p>
+<p>If executing the first command within a transaction fails with a
+<a href="client-backpressure/client-backpressure.html#retryable-overload-error">retryable overload error</a>, and another attempt
+is executed, the command executed in the retry attempt must be treated as the first command within a transaction.</p>
 <h3 id="server-commands-3"><a class="header" href="#server-commands-3"><strong>Server Commands</strong></a></h3>
 <h4 id="committransaction-1"><a class="header" href="#committransaction-1">commitTransaction</a></h4>
 <p>The commitTransaction server command has the following format:</p>
@@ -17687,8 +17755,7 @@ automatically retry.</p>
 <p>The behavior of running such commands in a transaction are undefined. Applications should not run such commands inside a
 transaction.</p>
 <h3 id="majority-write-concern-is-used-when-retrying-committransaction"><a class="header" href="#majority-write-concern-is-used-when-retrying-committransaction">Majority write concern is used when retrying commitTransaction</a></h3>
-<p>Drivers should apply a majority write concern when retrying commitTransaction to guard against a transaction being
-applied twice.</p>
+<p>When retrying commitTransaction, drivers use a majority write concern to ensure the transaction is not applied twice.</p>
 <p>Consider the following scenario:</p>
 <ol>
 <li>The driver is connected to a replica set where node A is primary.</li>
@@ -17727,8 +17794,16 @@ custom write concerns. Excluding the edge case where
 <a href="https://www.mongodb.com/docs/manual/reference/replica-configuration/#rsconf.writeConcernMajorityJournalDefault">writeConcernMajorityJournalDefault</a>
 has been disabled, drivers can readily trust that a majority write concern is durable, which achieves the primary
 objective of avoiding duplicate commits.</p>
+<p>A <a href="client-backpressure/client-backpressure.html#retryable-overload-error">retryable overload error</a> indicates that the
+server performed no work when executing the command. As such, the scenario above is irrelevant for commitTransaction
+attempts which have only failed with retryable overload errors. However, after a commitTransaction fails with an error
+that is not a retryable overload error, we no longer have the guarantee that the server has performed no work, and we
+must apply a majority write concern to prevent the transaction from being applied twice.</p>
 <h2 id="changelog-29"><a class="header" href="#changelog-29"><strong>Changelog</strong></a></h2>
 <ul>
+<li>
+<p>2026-01-09: Specify the handling of client backpressure.</p>
+</li>
 <li>
 <p>2024-11-01: Clarify collection options inside txn.</p>
 </li>
@@ -17916,7 +17991,8 @@ the elapsed time of <code>withTransaction</code> is less than TIMEOUT_MS, calcul
 <code>jitter * min(BACKOFF_INITIAL * 1.5 ** (transactionAttempt - 1), BACKOFF_MAX)</code>. sleep for <code>backoffMS</code>.</p>
 <ol>
 <li>
-<p>jitter is a random float between [0, 1)</p>
+<p>jitter is a random float between [0, 1), optionally including 1, depending on what is most natural for the
+given driver language.</p>
 </li>
 <li>
 <p><code>transactionAttempt</code> is the variable defined in step 1.</p>
@@ -18210,6 +18286,9 @@ provides an implementation of a technique already described in the MongoDB 4.0 d
 (<a href="https://jira.mongodb.org/browse/DRIVERS-488">DRIVERS-488</a>).</p>
 <h2 id="changelog-30"><a class="header" href="#changelog-30">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-03-03: Clarify exponential backoff jitter upper bound.</p>
+</li>
 <li>
 <p>2026-02-20: Fix initial backoff and growth value parameters in “Design Rationale” section.</p>
 </li>
@@ -25531,7 +25610,7 @@ drivers MAY throw an exception containing only the top-level error.</p>
 means that drivers MUST NOT attempt to retrieve more responses from the cursor or execute any further <code>bulkWrite</code>
 batches and MUST immediately throw an exception. If the results cursor has not been exhausted on the server when a
 top-level error occurs, drivers MUST send the <code>killCursors</code> command to attempt to close it. The result returned from the
-<code>killCursors</code> command MAY be ignored.</p>
+<code>killCursors</code> command MUST NOT be ignored.</p>
 <h3 id="write-concern-errors-1"><a class="header" href="#write-concern-errors-1">Write Concern Errors</a></h3>
 <p>Write concern errors are recorded in the <code>writeConcernErrors</code> field on <code>BulkWriteException</code>. When a write concern error
 is encountered, it should not terminate execution of the bulk write for either ordered or unordered bulk writes.
@@ -25548,10 +25627,13 @@ immediately throw the exception. Otherwise, drivers MUST continue to iterate the
 documents to test batch splitting, which is not feasible in the unified test format at the time of writing this
 specification.</p>
 <h2 id="future-work-14"><a class="header" href="#future-work-14">Future Work</a></h2>
-<h3 id="retry-bulkwrite-when-getmore-fails-with-a-retryable-error"><a class="header" href="#retry-bulkwrite-when-getmore-fails-with-a-retryable-error">Retry <code>bulkWrite</code> when <code>getMore</code> fails with a retryable error</a></h3>
+<h3 id="retrying-getmores"><a class="header" href="#retrying-getmores">Retrying <code>getMore</code>s</a></h3>
 <p>When a <code>getMore</code> fails with a retryable error when attempting to iterate the results cursor, drivers could retry the
 entire <code>bulkWrite</code> command to receive a fresh cursor and retry iteration. This work was omitted to minimize the scope of
 the initial implementation and testing of the new bulk write API, but may be revisited in the future.</p>
+<p>Note that there is one exception to this behavior: when a command fails with an error that is eligible for retry under
+the conditions defined in the <a href="client-backpressure/client-backpressure.html">Client Backpressure</a> specification,
+drivers SHOULD retry the <code>getMore</code> following the rules outlined in the client backpressure specification.</p>
 <h3 id="use-document-sequences-for-auto-encrypted-bulk-writes"><a class="header" href="#use-document-sequences-for-auto-encrypted-bulk-writes">Use document sequences for auto-encrypted bulk writes</a></h3>
 <p>Auto-encryption does not currently support document sequences. This specification should be updated when
 <a href="https://jira.mongodb.org/browse/DRIVERS-2859">DRIVERS-2859</a> is completed to require use of document sequences for <code>ops</code>
@@ -25609,6 +25691,9 @@ The requirement has since been removed. Checking size limits complicates some dr
 error in this specific situation does not seem helpful enough to require size checks.</p>
 <h2 id="changelog-39"><a class="header" href="#changelog-39"><strong>Changelog</strong></a></h2>
 <ul>
+<li>
+<p>2026-01-05: Specify that <code>killCursors</code>’s response cannot be ignored.</p>
+</li>
 <li>
 <p>2025-09-09: Clarify that <code>rawData</code> is for internal use only.</p>
 </li>

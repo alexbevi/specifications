@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-6d028b03.js";
+            window.path_to_searchindex_js = "../searchindex-da9d8688.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -275,7 +275,8 @@ the elapsed time of <code>withTransaction</code> is less than TIMEOUT_MS, calcul
 <code>jitter * min(BACKOFF_INITIAL * 1.5 ** (transactionAttempt - 1), BACKOFF_MAX)</code>. sleep for <code>backoffMS</code>.</p>
 <ol>
 <li>
-<p>jitter is a random float between [0, 1)</p>
+<p>jitter is a random float between [0, 1), optionally including 1, depending on what is most natural for the
+given driver language.</p>
 </li>
 <li>
 <p><code>transactionAttempt</code> is the variable defined in step 1.</p>
@@ -569,6 +570,9 @@ provides an implementation of a technique already described in the MongoDB 4.0 d
 (<a href="https://jira.mongodb.org/browse/DRIVERS-488">DRIVERS-488</a>).</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-03-03: Clarify exponential backoff jitter upper bound.</p>
+</li>
 <li>
 <p>2026-02-20: Fix initial backoff and growth value parameters in “Design Rationale” section.</p>
 </li>

@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-6d028b03.js";
+            window.path_to_searchindex_js = "../searchindex-da9d8688.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -437,7 +437,19 @@ state. When the session is in the “starting transaction” state, meaning no o
 transaction, drivers MUST NOT run the commitTransaction command.</p>
 <p>commitTransaction is a retryable write command. Drivers MUST retry once after commitTransaction fails with a retryable
 error, including a handshake network error, according to the Retryable Writes Specification, regardless of whether
-retryWrites is set on the MongoClient or not.</p>
+retryWrites is set on the MongoClient or not. If a commitTransaction fails with a
+<a href="../client-backpressure/client-backpressure.html#retryable-overload-error">retryable overload error</a>, the command MUST be
+retried as specified in <a href="#interaction-with-client-backpressure">Interaction with Client Backpressure</a>.</p>
+<p>When retrying a commitTransaction attempt, if the previous commitTransaction attempt failed with a
+<a href="../client-backpressure/client-backpressure.html#retryable-overload-error">retryable overload error</a>, drivers MUST apply
+the write concern modification rules as outlined in the
+<a href="#interaction-with-client-backpressure">Interaction With Client Backpressure</a> to determine whether or not to modify the
+command’s writeConcern. If the command failed with any other error, drivers MUST follow the rules for write concern
+modification as outlined in <a href="#writeconcern-for-committransaction-attempts">writeConcern for commitTransaction attempts</a>.</p>
+<p>Drivers MUST add error labels to certain errors when commitTransaction fails. See the
+<a href="#error-reporting-changes">Error reporting changes</a> and <a href="#error-labels">Error Labels</a> sections for a precise
+description.</p>
+<h5 id="writeconcern-for-committransaction-attempts"><a class="header" href="#writeconcern-for-committransaction-attempts">writeConcern for commitTransaction attempts</a></h5>
 <p>When commitTransaction is retried, either by the driver’s internal retry logic or explicitly by the user calling
 commitTransaction again, drivers MUST apply <code>w: majority</code> to the write concern of the commitTransaction command. If the
 transaction is using a <a href="#writeconcern">writeConcern</a> that is not the server default (i.e. specified via
@@ -446,9 +458,6 @@ TransactionOptions during the <code>startTransaction</code> call or otherwise in
 <code>wtimeout</code> value, drivers MUST also apply <code>wtimeout: 10000</code> to the write concern in order to avoid waiting forever (or
 until a socket timeout) if the majority write concern cannot be satisfied. See
 <a href="#majority-write-concern-is-used-when-retrying-committransaction">Majority write concern is used when retrying commitTransaction</a>.</p>
-<p>Drivers MUST add error labels to certain errors when commitTransaction fails. See the
-<a href="#error-reporting-changes">Error reporting changes</a> and <a href="#error-labels">Error Labels</a> sections for a precise
-description.</p>
 <h4 id="aborttransaction"><a class="header" href="#aborttransaction">abortTransaction</a></h4>
 <p>This method aborts the currently active transaction on this session. Drivers MUST run an abortTransaction command with
 the transaction’s writeConcern. When this method completes the session moves to the “transaction aborted” state.</p>
@@ -465,11 +474,13 @@ state. When the session is in the “starting transaction” state, meaning, no 
 transaction, drivers MUST NOT run the abortTransaction command.</p>
 <p>abortTransaction is a retryable write command. Drivers MUST retry after abortTransaction fails with a retryable error
 according to the <a href="../retryable-writes/retryable-writes.html">Retryable Writes Specification</a>, including a handshake
-network error, regardless of whether retryWrites is set on the MongoClient or not.</p>
-<p>If the operation times out or fails with a non-retryable error, drivers MUST ignore all errors from the abortTransaction
-command. Errors from abortTransaction are meaningless to the application because they cannot do anything to recover from
-the error. The transaction will ultimately be aborted by the server anyway either upon reaching an age limit or when the
-application starts a new transaction on this session, see
+network error, regardless of whether retryWrites is set on the MongoClient or not. If a abortTransaction fails with a
+<a href="../client-backpressure/client-backpressure.html#retryable-overload-error">retryable overload error</a>, the command MUST be
+retried as specified in <a href="#interaction-with-client-backpressure">Interaction with Client Backpressure</a>.</p>
+<p>If the operation times out or fails with a non-retryable error, drivers MUST NOT propagate errors from the
+abortTransaction command. Errors from abortTransaction are meaningless to the application because they cannot do
+anything to recover from the error. The transaction will ultimately be aborted by the server anyway either upon reaching
+an age limit or when the application starts a new transaction on this session, see
 <a href="#drivers-ignore-all-aborttransaction-errors">Drivers ignore all abortTransaction errors</a>.</p>
 <h4 id="endsession-changes"><a class="header" href="#endsession-changes">endSession changes</a></h4>
 <p>This method ends a ClientSession. Drivers MUST call abortTransaction if this session is in the “transaction in progress”
@@ -588,9 +599,11 @@ a transaction.</p>
 <h3 id="interaction-with-retryable-writes"><a class="header" href="#interaction-with-retryable-writes"><strong>Interaction with Retryable Writes</strong></a></h3>
 <p>In MongoDB 4.0 the only supported retryable write commands within a transaction are commitTransaction and
 abortTransaction. Therefore drivers MUST NOT retry write commands within transactions even when retryWrites has been
-enabled on the MongoClient. In addition, drivers MUST NOT add the RetryableWriteError label to any error that occurs
-during a write command within a transaction (excepting commitTransation and abortTransaction), even when retryWrites has
-been enabled on the MongoClient.</p>
+enabled on the MongoClient, unless the server response is a
+<a href="../client-backpressure/client-backpressure.html#retryable-overload-error">retryable overload error</a>.</p>
+<p>In addition, drivers MUST NOT add the RetryableWriteError label to any error that occurs during a write command within a
+transaction (excepting commitTransation and abortTransaction), even when retryWrites has been enabled on the
+MongoClient.</p>
 <p>Drivers MUST retry the commitTransaction and abortTransaction commands even when retryWrites has been disabled on the
 MongoClient. commitTransaction and abortTransaction are retryable write commands and MUST be retried according to the
 <a href="../retryable-writes/retryable-writes.html">Retryable Writes Specification</a>.</p>
@@ -599,6 +612,27 @@ MongoClient. commitTransaction and abortTransaction are retryable write commands
 incremented at the start and then stays constant, even for retryable operations within the transaction. When executing
 the commitTransaction and abortTransaction commands within a transaction drivers MUST use the same <code>txnNumber</code> used for
 all preceding commands in the transaction.</p>
+<h3 id="interaction-with-client-backpressure"><a class="header" href="#interaction-with-client-backpressure"><strong>Interaction with Client Backpressure</strong></a></h3>
+<p>All commands in a transaction are subject to the
+<a href="../client-backpressure/client-backpressure.html">Client Backpressure Specification</a>, and MUST be retried accordingly.
+This includes the initial command with <code>startTransaction:true</code>, the abortTransaction and commitTransaction commands, as
+well as any read or write commands attempted during the transaction.</p>
+<p>When a commitTransaction attempt fails with a retryable overload error:</p>
+<ul>
+<li>If a commitTransaction attempt has already failed with an error that is not a
+<a href="../client-backpressure/client-backpressure.html#retryable-overload-error">retryable overload error</a>, drivers MUST
+follow the instructions for modifying writeConcern as outlined in the
+<a href="#writeconcern-for-committransaction-attempts">writeConcern for commitTransaction attempts</a> section for the next
+retry attempt.</li>
+<li>Otherwise, drivers MUST retry using the same write concern as was used for the most recently failed commitTransaction
+attempt.</li>
+</ul>
+<p>See
+<a href="#majority-write-concern-is-used-when-retrying-committransaction">Majority write concern is used when retrying commitTransaction</a>
+for discussion on why majority write concern is sometimes needed on commitTransaction retries.</p>
+<p>If executing the first command within a transaction fails with a
+<a href="../client-backpressure/client-backpressure.html#retryable-overload-error">retryable overload error</a>, and another attempt
+is executed, the command executed in the retry attempt must be treated as the first command within a transaction.</p>
 <h3 id="server-commands"><a class="header" href="#server-commands"><strong>Server Commands</strong></a></h3>
 <h4 id="committransaction-1"><a class="header" href="#committransaction-1">commitTransaction</a></h4>
 <p>The commitTransaction server command has the following format:</p>
@@ -968,8 +1002,7 @@ automatically retry.</p>
 <p>The behavior of running such commands in a transaction are undefined. Applications should not run such commands inside a
 transaction.</p>
 <h3 id="majority-write-concern-is-used-when-retrying-committransaction"><a class="header" href="#majority-write-concern-is-used-when-retrying-committransaction">Majority write concern is used when retrying commitTransaction</a></h3>
-<p>Drivers should apply a majority write concern when retrying commitTransaction to guard against a transaction being
-applied twice.</p>
+<p>When retrying commitTransaction, drivers use a majority write concern to ensure the transaction is not applied twice.</p>
 <p>Consider the following scenario:</p>
 <ol>
 <li>The driver is connected to a replica set where node A is primary.</li>
@@ -1008,8 +1041,16 @@ custom write concerns. Excluding the edge case where
 <a href="https://www.mongodb.com/docs/manual/reference/replica-configuration/#rsconf.writeConcernMajorityJournalDefault">writeConcernMajorityJournalDefault</a>
 has been disabled, drivers can readily trust that a majority write concern is durable, which achieves the primary
 objective of avoiding duplicate commits.</p>
+<p>A <a href="../client-backpressure/client-backpressure.html#retryable-overload-error">retryable overload error</a> indicates that the
+server performed no work when executing the command. As such, the scenario above is irrelevant for commitTransaction
+attempts which have only failed with retryable overload errors. However, after a commitTransaction fails with an error
+that is not a retryable overload error, we no longer have the guarantee that the server has performed no work, and we
+must apply a majority write concern to prevent the transaction from being applied twice.</p>
 <h2 id="changelog"><a class="header" href="#changelog"><strong>Changelog</strong></a></h2>
 <ul>
+<li>
+<p>2026-01-09: Specify the handling of client backpressure.</p>
+</li>
 <li>
 <p>2024-11-01: Clarify collection options inside txn.</p>
 </li>

@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-6d028b03.js";
+            window.path_to_searchindex_js = "../searchindex-da9d8688.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -923,7 +923,7 @@ drivers MAY throw an exception containing only the top-level error.</p>
 means that drivers MUST NOT attempt to retrieve more responses from the cursor or execute any further <code>bulkWrite</code>
 batches and MUST immediately throw an exception. If the results cursor has not been exhausted on the server when a
 top-level error occurs, drivers MUST send the <code>killCursors</code> command to attempt to close it. The result returned from the
-<code>killCursors</code> command MAY be ignored.</p>
+<code>killCursors</code> command MUST NOT be ignored.</p>
 <h3 id="write-concern-errors"><a class="header" href="#write-concern-errors">Write Concern Errors</a></h3>
 <p>Write concern errors are recorded in the <code>writeConcernErrors</code> field on <code>BulkWriteException</code>. When a write concern error
 is encountered, it should not terminate execution of the bulk write for either ordered or unordered bulk writes.
@@ -940,10 +940,13 @@ immediately throw the exception. Otherwise, drivers MUST continue to iterate the
 documents to test batch splitting, which is not feasible in the unified test format at the time of writing this
 specification.</p>
 <h2 id="future-work"><a class="header" href="#future-work">Future Work</a></h2>
-<h3 id="retry-bulkwrite-when-getmore-fails-with-a-retryable-error"><a class="header" href="#retry-bulkwrite-when-getmore-fails-with-a-retryable-error">Retry <code>bulkWrite</code> when <code>getMore</code> fails with a retryable error</a></h3>
+<h3 id="retrying-getmores"><a class="header" href="#retrying-getmores">Retrying <code>getMore</code>s</a></h3>
 <p>When a <code>getMore</code> fails with a retryable error when attempting to iterate the results cursor, drivers could retry the
 entire <code>bulkWrite</code> command to receive a fresh cursor and retry iteration. This work was omitted to minimize the scope of
 the initial implementation and testing of the new bulk write API, but may be revisited in the future.</p>
+<p>Note that there is one exception to this behavior: when a command fails with an error that is eligible for retry under
+the conditions defined in the <a href="../client-backpressure/client-backpressure.html">Client Backpressure</a> specification,
+drivers SHOULD retry the <code>getMore</code> following the rules outlined in the client backpressure specification.</p>
 <h3 id="use-document-sequences-for-auto-encrypted-bulk-writes"><a class="header" href="#use-document-sequences-for-auto-encrypted-bulk-writes">Use document sequences for auto-encrypted bulk writes</a></h3>
 <p>Auto-encryption does not currently support document sequences. This specification should be updated when
 <a href="https://jira.mongodb.org/browse/DRIVERS-2859">DRIVERS-2859</a> is completed to require use of document sequences for <code>ops</code>
@@ -1001,6 +1004,9 @@ The requirement has since been removed. Checking size limits complicates some dr
 error in this specific situation does not seem helpful enough to require size checks.</p>
 <h2 id="changelog"><a class="header" href="#changelog"><strong>Changelog</strong></a></h2>
 <ul>
+<li>
+<p>2026-01-05: Specify that <code>killCursors</code>’s response cannot be ignored.</p>
+</li>
 <li>
 <p>2025-09-09: Clarify that <code>rawData</code> is for internal use only.</p>
 </li>

@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-6d028b03.js";
+            window.path_to_searchindex_js = "../searchindex-da9d8688.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -237,6 +237,7 @@ if stable_api_configured or client_options.load_balanced:
 else:
     cmd = {"legacy hello": 1, "helloOk": 1}
     conn.supports_op_msg = False  # Send the initial command via OP_QUERY.
+cmd["backpressure"] = True
 cmd["client"] = client_metadata
 if client_options.compressors:
     cmd["compression"] = client_options.compressors
