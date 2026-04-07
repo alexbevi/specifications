@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ecc6bc6e.js";
+            window.path_to_searchindex_js = "../searchindex-06e96bc7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -309,8 +309,15 @@ following structure:</p>
   to: Optional&lt;Document&gt;;
 
   /**
-   * Only present for ops of type 'rename', 'create', 'modify', 'createIndexes', 'dropIndexes', 'shardCollection', 'reshardCollection', 'refineCollectionShardKey'.
-   * Prior to server version 8.2.0, only present when the `showExpandedEvents` change stream option is enabled.
+   * * Only present when the `showExpandedEvents` change stream option is enabled and for the following events:
+   *  - 'rename'
+   *  - 'create'
+   *  - 'modify'
+   *  - 'createIndexes'
+   *  - 'dropIndexes'
+   *  - 'shardCollection'
+   *  - 'reshardCollection'
+   *  - 'refineCollectionShardKey'
    *
    * A description of the operation.
    * 
@@ -373,7 +380,7 @@ following structure:</p>
   /**
    * The `ui` field from the oplog entry corresponding to the change event.
    * 
-   * Only present for the following events:
+   * Only present when the `showExpandedEvents` change stream option is enabled and for the following events:
    *  - 'insert'
    *  - 'update'
    *  - 'delete'
@@ -385,7 +392,6 @@ following structure:</p>
    *  - 'shardCollection'
    *  - 'reshardCollection'
    *  - 'refineCollectionShardKey'
-   * Prior to server versions 8.2, only present when the `showExpandedEvents` change stream option is enabled.
    *  
    * This field is a value of binary subtype 4 (UUID).
    *  
@@ -469,6 +475,8 @@ class UpdateDescription {
    *   }
    * 
    * In each array, all elements will be returned as strings with the exception of array indices, which will be returned as 32 bit integers.
+   * 
+   * Only present when the `showExpandedEvents` change stream option is enabled.
    * 
    * @since 6.1.0
    */
@@ -1107,6 +1115,9 @@ unnecessary scanning of unmatched oplog entries.</p>
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-03-18: Revert expanded field visibility change.</p>
+</li>
 <li>
 <p>2025-09-08: Clarify resume behavior.</p>
 </li>
