@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-06e96bc7.js";
+            window.path_to_searchindex_js = "../searchindex-073aa860.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -237,7 +237,8 @@ to URI options apply here.</p>
 <tr><th>Name</th><th>Accepted Values</th><th>Default Value</th><th>Optional to implement?</th><th>Description</th></tr>
 </thead>
 <tbody>
-<tr><td>adaptiveRetries</td><td>“true” or “false”</td><td>“false”</td><td>no</td><td>Whether to enable adaptive reries as described by the <a href="../client-backpressure/client-backpressure.html#token-bucket">client backpressure spec</a></td></tr>
+<tr><td>maxAdaptiveRetries</td><td>a non-negative integer</td><td>2</td><td>no</td><td>The maximum number of overload retries as described by the <a href="../client-backpressure/client-backpressure.html#overload-retry-policy">client backpressure spec</a></td></tr>
+<tr><td>enableOverloadRetargeting</td><td>“true” or “false”</td><td>“false”</td><td>no</td><td>Whether or not to enable overload retargeting as described by the <a href="../client-backpressure/client-backpressure.html#overload-retry-policy">client backpressure spec</a></td></tr>
 <tr><td>appname</td><td>any string that meets the criteria listed in the <a href="../mongodb-handshake/handshake.html#client-application-name">handshake spec</a></td><td>no appname specified</td><td>no</td><td>Passed into the server in the client metadata as part of the connection handshake</td></tr>
 <tr><td>authMechanism</td><td>any string; valid values are defined in the <a href="../auth/auth.html#supported-authentication-methods">auth spec</a></td><td>None; default values for authentication exist for constructing authentication credentials per the <a href="../auth/auth.html#supported-authentication-methods">auth spec</a>, but there is no default for the URI option itself.</td><td>no</td><td>The authentication mechanism method to use for connection to the server</td></tr>
 <tr><td>authMechanismProperties</td><td>comma separated key:value pairs, e.g. “opt1:val1,opt2:val2”</td><td>no properties specified</td><td>no</td><td>Additional options provided for authentication (e.g. to enable hostname canonicalization for GSSAPI)</td></tr>

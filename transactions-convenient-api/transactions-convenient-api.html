@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-06e96bc7.js";
+            window.path_to_searchindex_js = "../searchindex-073aa860.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-d281c31f.js"></script>
@@ -270,9 +270,10 @@ attempts.</li>
 <p>If <code>transactionAttempt</code> &gt; 0:</p>
 <ol>
 <li>
-<p>If elapsed time + <code>backoffMS</code> &gt; <code>TIMEOUT_MS</code>, then raise the previously encountered error (see Note 1 below). If
-the elapsed time of <code>withTransaction</code> is less than TIMEOUT_MS, calculate the backoffMS to be
-<code>jitter * min(BACKOFF_INITIAL * 1.5 ** (transactionAttempt - 1), BACKOFF_MAX)</code>. sleep for <code>backoffMS</code>.</p>
+<p>Calculate <code>backoffMS</code> to be <code>jitter * min(BACKOFF_INITIAL * 1.5 ** (transactionAttempt - 1), BACKOFF_MAX)</code>. If
+elapsed time + <code>backoffMS</code> &gt; <code>TIMEOUT_MS</code>, then propagate the previously encountered error to the caller of
+<code>withTransaction</code> as per <a href="#timeout-error-propagation">timeout error propagation</a> and return immediately.
+Otherwise, sleep for <code>backoffMS</code>.</p>
 <ol>
 <li>
 <p>jitter is a random float between [0, 1), optionally including 1, depending on what is most natural for the
@@ -298,7 +299,7 @@ for <code>startTransaction</code>. Note that <code>ClientSession.defaultTransact
 explicit TransactionOptions.</p>
 </li>
 <li>
-<p>If <code>startTransaction</code> reported an error, propagate that error to the caller of <code>withTransaction</code> and return
+<p>If <code>startTransaction</code> reported an error, propagate that error to the caller of <code>withTransaction</code> as is and return
 immediately.</p>
 </li>
 <li>
@@ -323,12 +324,11 @@ reported an error (e.g. thrown exception, error output parameter).</p>
 </li>
 <li>
 <p>If the callback’s error includes a “UnknownTransactionCommitResult” label, the callback must have manually
-committed a transaction, propagate the callback’s error to the caller of <code>withTransaction</code> and return
+committed a transaction, propagate the callback’s error to the caller of <code>withTransaction</code> as is and return
 immediately.</p>
 </li>
 <li>
-<p>Otherwise, propagate the callback’s error (see Note 1 below) to the caller of <code>withTransaction</code> and return
-immediately.</p>
+<p>Otherwise, propagate the callback’s error to the caller of <code>withTransaction</code> as is and return immediately.</p>
 </li>
 </ol>
 </li>
@@ -343,17 +343,23 @@ callback intentionally aborted or committed the transaction and return immediate
 <p>If <code>commitTransaction</code> reported an error:</p>
 <ol>
 <li>
-<p>If the <code>commitTransaction</code> error includes a “UnknownTransactionCommitResult” label and the error is not
-MaxTimeMSExpired and the elapsed time of <code>withTransaction</code> is less than TIMEOUT_MS, jump back to step nine. We
-will trust <code>commitTransaction</code> to apply a majority write concern on retry attempts (see:
-<a href="#majority-write-concern-is-used-when-retrying-committransaction">Majority write concern is used when retrying commitTransaction</a>).</p>
+<p>If the <code>commitTransaction</code> error includes a <code>UnknownTransactionCommitResult</code> label and the error is not
+<code>MaxTimeMSExpired</code></p>
+<ol>
+<li>If the elapsed time of <code>withTransaction</code> exceeded <code>TIMEOUT_MS</code>, propagate the <code>commitTransaction</code> error to the
+caller of <code>withTransaction</code> as per <a href="#timeout-error-propagation">timeout error propagation</a> and return
+immediately.</li>
+<li>Otherwise, jump back to step nine. We will trust <code>commitTransaction</code> to apply a majority write concern on
+retry attempts (see:
+<a href="#majority-write-concern-is-used-when-retrying-committransaction">Majority write concern is used when retrying commitTransaction</a>).</li>
+</ol>
 </li>
 <li>
-<p>If the <code>commitTransaction</code> error includes a “TransientTransactionError” label, jump back to step two.</p>
+<p>If the <code>commitTransaction</code> error includes a <code>TransientTransactionError</code> label, jump back to step two.</p>
 </li>
 <li>
-<p>Otherwise, propagate the <code>commitTransaction</code> error (see Note 1 below) to the caller of <code>withTransaction</code> and
-return immediately.</p>
+<p>Otherwise, propagate the <code>commitTransaction</code> error to the caller of <code>withTransaction</code> as is and return
+immediately.</p>
 </li>
 </ol>
 </li>
@@ -361,14 +367,19 @@ return immediately.</p>
 <p>The transaction was committed successfully. Return immediately.</p>
 </li>
 </ol>
-<hr>
-<p><strong>Note 1:</strong> When the <code>TIMEOUT_MS</code> (calculated in step <a href="#sequence-of-actions">1.3</a>) is reached we MUST report a timeout
-error wrapping the last error that was encountered which triggered the retry behavior. If <code>timeoutMS</code> is set, then
-timeout error is a special type which is defined in CSOT
-<a href="https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.md#errors">specification</a>
-, If <code>timeoutMS</code> is not set, then propagate it as timeout error if the language allows to expose the underlying error as
-a cause of a timeout error (see <code>makeTimeoutError</code> below in <a href="#pseudo-code">pseudo-code</a>). If timeout error is thrown
-then it SHOULD expose error label(s) from the transient error.</p>
+<h6 id="timeout-error-propagation"><a class="header" href="#timeout-error-propagation">Timeout Error propagation</a></h6>
+<p>When the previously encountered error needs to be propagated because there is no more time for another attempt, and it
+is not already a <a href="../client-side-operations-timeout/client-side-operations-timeout.html#errors">timeout error</a>, then:</p>
+<ul>
+<li>A timeout error MUST be propagated instead. It MUST expose the previously encountered error as specified in the
+<a href="../client-side-operations-timeout/client-side-operations-timeout.html#errors">“Errors” section of the CSOT specification</a>.
+<ul>
+<li>If exposing the previously encountered error from a timeout error is impossible in a driver, then the driver is
+exempt from the requirement and MUST propagate the previously encountered error as is.</li>
+</ul>
+</li>
+<li>The timeout error MUST copy all error labels from the previously encountered error.</li>
+</ul>
 <h5 id="pseudo-code"><a class="header" href="#pseudo-code">Pseudo-code</a></h5>
 <p>This method can be expressed by the following pseudo-code:</p>
 <pre><code class="language-typescript">var BACKOFF_INITIAL = 5  // 5ms initial backoff
@@ -435,11 +446,11 @@ withTransaction(callback, options) {
                  * {ok:1, writeConcernError: {code: 50, codeName: "MaxTimeMSExpired"}}
                  */
                 lastError = error;
-                if (Date.now() - startTime &gt;= timeout) {
-                    throw makeTimeoutError(error);
-                }
                 if (!isMaxTimeMSExpiredError(error) &amp;&amp;
                     error.hasErrorLabel("UnknownTransactionCommitResult")) {
+                    if (Date.now() - startTime &gt;= timeout) {
+                        throw makeTimeoutError(error);
+                    }
                     continue retryCommit;
                 }
 
@@ -469,10 +480,10 @@ a client object.</p>
 propagate. Command errors may abort the transaction on the server, and an attempt to commit the transaction will be
 rejected with <code>NoSuchTransaction</code> error.</p>
 <p>For example, <code>DuplicateKeyError</code> is an error that aborts a transaction on the server. If the callback catches
-<code>DuplicateKeyError</code> and does not re-throw it, the driver will attempt to commit the transaction. The server will reject
+<code>DuplicateKeyError</code> and does not report it, the driver will attempt to commit the transaction. The server will reject
 the commit attempt with <code>NoSuchTransaction</code> error. This error has the “TransientTransactionError” label and the driver
 will retry the commit. This will result in an infinite loop.</p>
-<p>Drivers MUST recommend that the callback re-throw command errors if they need to be handled inside the callback. Drivers
+<p>Drivers MUST recommend that the callback report command errors if they need to be handled inside the callback. Drivers
 SHOULD also recommend using Core Transaction API if a user wants to handle errors in a custom way.</p>
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
 <p>See the <a href="tests/README.html">README</a> for tests.</p>
@@ -501,8 +512,8 @@ callback to return a value, they may also choose to propagate that value as the 
 of two ways:</p>
 <ul>
 <li>The callback aborts the transaction directly and returns to <code>withTransaction</code>, which will then return to its caller.</li>
-<li>The callback raises an error without the “TransientTransactionError” label, in which case <code>withTransaction</code> will abort
-the transaction and return to its caller.</li>
+<li>The callback propagates an error without the <code>TransientTransactionError</code> label, in which case <code>withTransaction</code> will
+abort the transaction and return to its caller.</li>
 </ul>
 <h3 id="applications-are-responsible-for-passing-clientsession-for-operations-within-a-transaction"><a class="header" href="#applications-are-responsible-for-passing-clientsession-for-operations-within-a-transaction">Applications are responsible for passing ClientSession for operations within a transaction</a></h3>
 <p>It remains the responsibility of the application to pass a ClientSession to all operations that should be included in a
@@ -570,6 +581,10 @@ provides an implementation of a technique already described in the MongoDB 4.0 d
 (<a href="https://jira.mongodb.org/browse/DRIVERS-488">DRIVERS-488</a>).</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-04-02: <a href="https://github.com/mongodb/specifications/pull/1920">DRIVERS-3436</a> Refine withTransaction timeout error
+wrapping semantics and label propagation in spec and prose tests.</p>
+</li>
 <li>
 <p>2026-03-03: Clarify exponential backoff jitter upper bound.</p>
 </li>
