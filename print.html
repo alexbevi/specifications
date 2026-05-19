@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-95196ac3.js";
+            window.path_to_searchindex_js = "searchindex-aea99cb0.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-d281c31f.js"></script>
@@ -18889,12 +18889,8 @@ drivers MUST NOT set <code>nameOnly</code> if a filter specifies any keys other 
 <p>Drivers MAY allow the <code>authorizedCollections</code> option to be passed when executing the <code>listCollections</code> command for this
 method</p>
 <h4 id="replica-sets-2"><a class="header" href="#replica-sets-2">Replica Sets</a></h4>
-<ul>
-<li><code>listCollections</code> can be run on a secondary node.</li>
-<li>Querying <code>system.indexes</code> on a secondary node requires secondaryOk to be set.</li>
-<li>Drivers MUST run <code>listCollections</code> on the primary node when in a replica set topology, unless directly connected to a
-secondary node in Single topology.</li>
-</ul>
+<p>The server supports running <code>listCollections</code> on a secondary node. Drivers MUST however run <code>listCollections</code> on the
+primary node when in a replica set topology, unless directly connected to a secondary node in Single topology.</p>
 <h2 id="test-plan-24"><a class="header" href="#test-plan-24">Test Plan</a></h2>
 <h3 id="configurations"><a class="header" href="#configurations">Configurations</a></h3>
 <ul>
@@ -18939,6 +18935,10 @@ versions of MongoDB.</p>
 (<a href="https://github.com/mongodb/mongo/blob/f32ba54f971c045fb589fe4c3a37da77dc486cee/src/mongo/shell/db.js#L550">https://github.com/mongodb/mongo/blob/f32ba54f971c045fb589fe4c3a37da77dc486cee/src/mongo/shell/db.js#L550</a>).</p>
 <h2 id="changelog-33"><a class="header" href="#changelog-33">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-05-13: Clarify “Replica Sets” section: reword to distinguish server capability from driver routing rule; remove
+stale <code>system.indexes</code> bullet (2.x behavior).</p>
+</li>
 <li>
 <p>2024-07-26: Migrated from reStructuredText to Markdown. Drop description of behavior for MongoDB 2.x servers.</p>
 </li>
@@ -22878,7 +22878,7 @@ calculating batchSize for opcode writes.</p>
 <h1 id="collation"><a class="header" href="#collation">Collation</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 1.8</li>
+<li>Minimum Server Version: 3.4</li>
 </ul>
 <hr>
 <h2 id="abstract-35"><a class="header" href="#abstract-35">Abstract</a></h2>
@@ -23047,6 +23047,8 @@ collation when deleting a document matching <code>ObjectID()</code> doesn’t ch
 <p>A: A collection with a default collation can be created using the create helper and by providing a collation option.</p>
 <h2 id="changelog-36"><a class="header" href="#changelog-36">Changelog</a></h2>
 <ul>
+<li>2026-05-13: Fix “Minimum Server Version” header from 1.8 to 3.4, matching the maxWireVersion 5 requirement stated in
+the spec body.</li>
 <li>2024-02-15: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter and reformat changelog.</li>
 <li>2017-05-15: Minor markup fixes in API section.</li>
