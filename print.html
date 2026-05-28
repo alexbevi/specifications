@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-aea99cb0.js";
+            window.path_to_searchindex_js = "searchindex-b11c580c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-73b9a657.js"></script>
@@ -29798,9 +29798,21 @@ libmongocrypt returns an error if contentionFactor is set for a non-applicable a
 <ul>
 <li>“equality”</li>
 <li>“range”</li>
-<li>“prefixPreview”</li>
-<li>“suffixPreview”</li>
-<li>“substringPreview”</li>
+<li>“prefixPreview”
+<ul>
+<li>Used for the <code>$encStrStartsWith</code> operator.</li>
+</ul>
+</li>
+<li>“suffixPreview”
+<ul>
+<li>Used for the <code>$encStrEndsWith</code> operator.</li>
+</ul>
+</li>
+<li>“substringPreview”
+<ul>
+<li>Used for the <code>$encStrContains</code> operator.</li>
+</ul>
+</li>
 </ul>
 <p>queryType only applies when algorithm is “Indexed”, “Range”, or “TextPreview”. libmongocrypt returns an error if
 queryType is set for a non-applicable algorithm.</p>
