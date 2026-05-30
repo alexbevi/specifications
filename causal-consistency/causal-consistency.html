@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-b11c580c.js";
+            window.path_to_searchindex_js = "../searchindex-dc4b6b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -240,7 +240,7 @@ instead. For example, you might use <code>StartSession</code> or <code>start_ses
 <pre><code class="language-typescript">options = new SessionOptions(causalConsistency = true);
 session = client.startSession(options);
 </code></pre>
-<p>All read operations performed using this session will now be causally consistent.</p>
+<p>All read and write operations performed using this session will now be causally consistent.</p>
 <p>If no value is provided for <code>causalConsistency</code> and snapshot reads are not requested a value of true is implied. See the
 <code>causalConsistency</code> section.</p>
 <h2 id="mongoclient-changes"><a class="header" href="#mongoclient-changes">MongoClient changes</a></h2>
@@ -256,7 +256,7 @@ consistency by setting the <code>causalConsistency</code> field in the options p
 </code></pre>
 <p>In order to support causal consistency a new property named <code>causalConsistency</code> is added to <code>SessionOptions</code>.
 Applications set <code>causalConsistency</code> when starting a client session to indicate whether they want causal consistency.
-All read operations performed using that client session are then causally consistent.</p>
+All read and write operations performed using that client session are then causally consistent.</p>
 <p>Each new member is documented below.</p>
 <h3 id="causalconsistency"><a class="header" href="#causalconsistency">causalConsistency</a></h3>
 <p>Applications set <code>causalConsistency</code> when starting a session to indicate whether they want causal consistency.</p>
@@ -310,7 +310,7 @@ started with <code>causalConsistency = true</code> then all operations using tha
 The server reports the <code>operationTime</code> whether the operation succeeded or not and drivers MUST save the
 <code>operationTime</code> in the <code>ClientSession</code> whether the operation succeeded or not.</li>
 <li>Passing that <code>operationTime</code> in the <code>afterClusterTime</code> field of the <code>readConcern</code> field for subsequent causally
-consistent read operations (for all commands that support a <code>readConcern</code>)</li>
+consistent read and write operations (for all commands that support a <code>readConcern</code>)</li>
 <li>Gossiping clusterTime (described in the Driver Session Specification)</li>
 </ol>
 <h2 id="server-command-responses"><a class="header" href="#server-command-responses">Server Command Responses</a></h2>
@@ -324,19 +324,19 @@ and write operations).</p>
 }
 </code></pre>
 <p>The <code>operationTime</code> MUST be stored in the <code>ClientSession</code> to later be passed as the <code>afterClusterTime</code> field of the
-<code>readConcern</code> field in subsequent read operations. The <code>operationTime</code> is returned whether the command succeeded or not
-and MUST be stored in either case.</p>
+<code>readConcern</code> field in subsequent causally consistent read and write operations. The <code>operationTime</code> is returned whether
+the command succeeded or not and MUST be stored in either case.</p>
 <p>Drivers MUST examine all responses from the server for the presence of an <code>operationTime</code> field and store the value in
 the <code>ClientSession</code>.</p>
 <p>When connected to a standalone node command replies do not include an <code>operationTime</code> field. All operations against a
 standalone node are causally consistent automatically because there is only one node.</p>
 <p>When connected to a deployment that supports cluster times the command response also includes a field called
 <code>$clusterTime</code> that drivers MUST use to gossip the cluster time. See the Sessions Specification for details.</p>
-<h2 id="causally-consistent-read-commands"><a class="header" href="#causally-consistent-read-commands">Causally consistent read commands</a></h2>
+<h2 id="causally-consistent-read-and-write-commands"><a class="header" href="#causally-consistent-read-and-write-commands">Causally consistent read and write commands</a></h2>
 <p>For causal consistency the driver MUST send the <code>operationTime</code> saved in the <code>ClientSession</code> as the value of the
-<code>afterClusterTime</code> field of the <code>readConcern</code> field:</p>
+<code>afterClusterTime</code> field of the <code>readConcern</code> field for read and write commands:</p>
 <pre><code class="language-typescript">{
-    find : &lt;string&gt;, // or other read command
+    find : &lt;string&gt;, // or other read or write command
     ... // the rest of the command parameters
     readConcern :
     {
@@ -345,8 +345,8 @@ standalone node are causally consistent automatically because there is only one 
     }
 }
 </code></pre>
-<p>For the lists of commands that support causally consistent reads, see
-<a href="../read-write-concern/read-write-concern.html#read-concern">ReadConcern</a> spec.</p>
+<p>For the list of commands that support causally consistent reads and writes, see the
+<a href="../read-write-concern/read-write-concern.html#afterclustertime">Read Concern</a> spec.</p>
 <p>The driver MUST merge the <code>ReadConcern</code> specified for the operation with the <code>operationTime</code> from the <code>ClientSession</code>
 (which goes in the <code>afterClusterTime</code> field) to generate the combined <code>readConcern</code> to send to the server. If the level
 property of the read concern for the operation is null then the driver MUST NOT include a <code>level</code> field alongside the
@@ -355,20 +355,21 @@ supports causally consistent reads or not for a given read concern level. The se
 level does not support causal consistency.</p>
 <p>The Read and Write Concern specification states that when a user has not specified a <code>ReadConcern</code> or has specified the
 server’s default <code>ReadConcern</code>, drivers MUST omit the <code>ReadConcern</code> parameter when sending the command. For causally
-consistent reads this requirement is modified to state that when the <code>ReadConcern</code> parameter would normally be omitted
-drivers MUST send a <code>ReadConcern</code> after all because that is how the <code>afterClusterTime</code> value is sent to the server.</p>
+consistent reads and writes this requirement is modified to state that when the <code>ReadConcern</code> parameter would normally
+be omitted drivers MUST send a <code>ReadConcern</code> after all because that is how the <code>afterClusterTime</code> value is sent to the
+server.</p>
 <p>The Read and Write Concern Specification states that drivers MUST NOT add a <code>readConcern</code> field to commands that are run
 using a generic <code>runCommand</code> method. The same is true for causal consistency, so commands that are run using
 <code>runCommand</code> MUST NOT have an <code>afterClusterTime</code> field added to them.</p>
-<p>When executing a causally consistent read, the <code>afterClusterTime</code> field MUST be sent when connected to a deployment that
-supports cluster times, and MUST NOT be sent when connected to a deployment that does not support cluster times.</p>
+<p>When executing a causally consistent operation, the <code>afterClusterTime</code> field MUST be sent when connected to a deployment
+that supports cluster times, and MUST NOT be sent when connected to a deployment that does not support cluster times.</p>
 <h2 id="unacknowledged-writes"><a class="header" href="#unacknowledged-writes">Unacknowledged writes</a></h2>
 <p>The implementation of causal consistency relies on the <code>operationTime</code> returned by the server in the acknowledgement of
 a write. Since unacknowledged writes don’t receive a response from the server (or don’t wait for a response) the
 <code>ClientSession</code>’s <code>operationTime</code> is not updated after an unacknowledged write. That means that a causally consistent
 read after an unacknowledged write cannot be causally consistent with the unacknowledged write. Rather than prohibiting
 unacknowledged writes in a causally consistent session we have decided to accept this limitation. Drivers MUST document
-that causally consistent reads are not causally consistent with unacknowledged writes.</p>
+that causally consistent operations are not causally consistent with unacknowledged writes.</p>
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
 <p>Below is a list of test cases to write.</p>
 <p>Note: some tests are only relevant to certain deployments. For the purpose of deciding which tests to run assume that
@@ -515,6 +516,10 @@ resolving many discussions of spec details. A final reference implementation mus
 <h2 id="qa"><a class="header" href="#qa">Q&amp;A</a></h2>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-05-04: Require <code>afterClusterTime</code> on all write commands in causally-consistent sessions, not only on read
+commands.</p>
+</li>
 <li>
 <p>2024-02-08: Migrated from reStructuredText to Markdown.</p>
 </li>

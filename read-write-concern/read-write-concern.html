@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-b11c580c.js";
+            window.path_to_searchindex_js = "../searchindex-dc4b6b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -246,6 +246,8 @@ class ReadConcern {
 however, it does not support the “linearizable” level (attempting to do so will result in a server error).</p>
 <p>Server versions before 4.2 do not support a <code>readConcern</code> at all for <code>aggregate</code> commands with a write stage.</p>
 <p>The <code>mapReduce</code> command where the <code>out</code> option is anything other than <code>{ inline: 1 }</code> does not support a <code>readConcern</code>.</p>
+<p>The read concern document is also used to specify <code>afterClusterTime</code> for read and write operations in
+causally-consistent sessions. See <a href="#afterclustertime"><code>afterClusterTime</code></a> for more information.</p>
 <h4 id="unknown-levels-and-additional-options-for-string-based-readconcerns"><a class="header" href="#unknown-levels-and-additional-options-for-string-based-readconcerns">Unknown Levels and Additional Options for String Based ReadConcerns</a></h4>
 <p>For forward compatibility, a driver MUST NOT raise an error when a user provides an unknown <code>level</code> or additional
 options. The driver relies on the server to validate levels and other contents of the read concern.</p>
@@ -259,6 +261,24 @@ for reading. <code>find</code>, <code>aggregate</code> and <code>distinct</code>
 <code>atClusterTime</code> will return <code>atClusterTime</code> timestamp in the server response. The obtained <code>atClusterTime</code> timestamp can
 be used for subsequent read operations. <code>ReadConcern</code> <code>level</code> <code>snapshot</code> with <code>clusterTime</code> is supported in <code>find</code>,
 <code>aggregate</code> and <code>distinct</code> operations.</p>
+<h4 id="afterclustertime"><a class="header" href="#afterclustertime"><code>afterClusterTime</code></a></h4>
+<p>When running operations in a causally-consistent session, the read concern document is used to specify
+<code>afterClusterTime</code>. In addition to the read operations listed above, a read concern document containing only
+<code>afterClusterTime</code> is also supported for the following write operations:</p>
+<ul>
+<li><code>insert</code> command</li>
+<li><code>update</code> command</li>
+<li><code>findAndModify</code> command</li>
+<li><code>delete</code> command</li>
+<li><code>bulkWrite</code> command</li>
+<li><code>create</code> command</li>
+<li><code>createIndexes</code> command</li>
+<li><code>drop</code> command</li>
+<li><code>dropDatabase</code> command</li>
+<li><code>dropIndexes</code> command</li>
+</ul>
+<p>See the <a href="../causal-consistency/causal-consistency.html#server-commands">Causal Consistency specification</a> for details
+about when to send <code>afterClusterTime</code>.</p>
 <h4 id="on-the-wire"><a class="header" href="#on-the-wire">On the Wire</a></h4>
 <h5 id="read-commands"><a class="header" href="#read-commands">Read Commands</a></h5>
 <p>Read commands that support <code>ReadConcern</code> take a named parameter spelled (case-sensitively) <code>readConcern</code>. See command
@@ -605,6 +625,9 @@ don’t send one and if a user does specify a <code>ReadConcern</code>, we do se
 instance, we send it.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-05-04: Describe how <code>readConcern.afterClusterTime</code> is used in causally-consistent sessions on reads and writes.</p>
+</li>
 <li>
 <p>2025-02-25: Rename WriteConcernFailed to WriteConcernTimeout</p>
 </li>
