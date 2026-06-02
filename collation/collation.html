@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-dc4b6b41.js";
+            window.path_to_searchindex_js = "../searchindex-53736807.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -318,9 +318,9 @@ user will provide BulkWrite operation models as in the following example:</p>
   {deleteMany: {..., collation: {...}}}
 ]);
 </code></pre>
-<p>The driver must inspect each operation for a Collation if maxWireVersion is &lt; 5 and fail the entire bulkWrite if a
-collation was explicitly specified. In the example above, that means even the insertOne (without Collation) MUST NOT be
-sent.</p>
+<p>The driver MUST inspect all operations before sending any to the server. If any operation specifies a Collation, the
+driver MUST raise an error and MUST NOT send any operations to the server. In the example above, even the insertOne
+(which has no Collation) MUST NOT be sent.</p>
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
 <p>There is no specific test plan for driver Collation support; however drivers should test each affected CRUD, Index
 Management API, and collection creation/modification component to ensure that Collation is a supported option.</p>
@@ -347,6 +347,8 @@ collation when deleting a document matching <code>ObjectID()</code> doesn’t ch
 <p>A: A collection with a default collation can be created using the create helper and by providing a collation option.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2026-05-20: Clarify BulkWrite pre-flight check: use RFC 2119 MUST and make explicit that all operations are inspected
+before any are sent.</li>
 <li>2026-05-13: Fix “Minimum Server Version” header from 1.8 to 3.4, matching the maxWireVersion 5 requirement stated in
 the spec body.</li>
 <li>2024-02-15: Migrated from reStructuredText to Markdown.</li>
