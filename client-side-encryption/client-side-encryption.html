@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-143b014d.js";
+            window.path_to_searchindex_js = "../searchindex-4307c7ce.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -213,7 +213,9 @@ includes <code>queryType=rangePreview</code>.</p>
 QEv1 and QEv2 are incompatible.</p>
 <p>MongoDB 8.0 dropped <code>queryType=rangePreview</code> and added <code>queryType=range</code>
 (<a href="https://jira.mongodb.org/browse/SPM-3583">SPM-3583</a>).</p>
-<p>MongoDB 8.2 added unstable support for QE text queries (<a href="https://jira.mongodb.org/browse/SPM-2880">SPM-2880</a>)</p>
+<p>MongoDB 8.2 added unstable support for QE string queries (<a href="https://jira.mongodb.org/browse/SPM-2880">SPM-2880</a>)</p>
+<p>MongoDB 9.0 dropped <code>queryType=prefixPreview|suffixPreview</code> and added <code>queryType=prefix|suffix</code>
+(<a href="https://jira.mongodb.org/browse/SPM-4539">SPM-4539</a>)</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
 <p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
 “OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
@@ -1251,7 +1253,7 @@ write operation is unacknowledged as permitted by the <a href="../crud/crud.html
    contentionFactor: Optional&lt;Int64&gt;,
    queryType: Optional&lt;String&gt;
    rangeOpts: Optional&lt;RangeOpts&gt;
-   textOpts: Optional&lt;TextOpts&gt;
+   stringOpts: Optional&lt;StringOpts&gt;
 }
 
 // RangeOpts specifies index options for a Queryable Encryption field supporting "range" queries.
@@ -1270,18 +1272,18 @@ class RangeOpts {
    precision: Optional&lt;Int32&gt;
 }
 
-// TextOpts specifies options for a Queryable Encryption field supporting text queries.
-// NOTE: TextOpts is currently unstable API and subject to backwards breaking changes.
-class TextOpts {
+// StringOpts specifies options for a Queryable Encryption field supporting string queries.
+class StringOpts {
    // substring contains further options to support substring queries.
+   // NOTE: substring is currently unstable API and subject to backwards breaking changes.
    substring: Optional&lt;SubstringOpts&gt;,
    // prefix contains further options to support prefix queries.
    prefix: Optional&lt;PrefixOpts&gt;,
    // suffix contains further options to support suffix queries.
    suffix: Optional&lt;SuffixOpts&gt;,
-   // caseSensitive determines whether text indexes for this field are case sensitive.
+   // caseSensitive determines whether string indexes for this field are case sensitive.
    caseSensitive: bool,
-   // diacriticSensitive determines whether text indexes for this field are diacritic sensitive.
+   // diacriticSensitive determines whether string indexes for this field are diacritic sensitive.
    diacriticSensitive: bool
 }
 
@@ -1295,7 +1297,6 @@ class SubstringOpts {
    strMaxQueryLength: Int32,
 }
 
-// NOTE: PrefixOpts is currently unstable API and subject to backwards breaking changes.
 class PrefixOpts {
    // strMinQueryLength is the minimum allowed query length. Querying with a shorter string will error.
    strMinQueryLength: Int32,
@@ -1303,7 +1304,6 @@ class PrefixOpts {
    strMaxQueryLength: Int32,
 }
 
-// NOTE: SuffixOpts is currently unstable API and subject to backwards breaking changes.
 class SuffixOpts {
    // strMinQueryLength is the minimum allowed query length. Querying with a shorter string will error.
    strMinQueryLength: Int32,
@@ -1326,31 +1326,31 @@ is required.</p>
 <li>“Indexed”</li>
 <li>“Unindexed”</li>
 <li>“Range”</li>
-<li>“TextPreview”</li>
+<li>“String”</li>
 </ul>
-<p>The result of explicit encryption with the “Indexed”, “Range”, or “TextPreview” algorithm must be processed by the
-server to insert or query. Drivers MUST document the following behavior:</p>
+<p>The result of explicit encryption with the “Indexed”, “Range”, or “String” algorithm must be processed by the server to
+insert or query. Drivers MUST document the following behavior:</p>
 <blockquote>
-<p>To insert or query with an “Indexed”, “Range”, or “TextPreview” encrypted payload, use a <code>MongoClient</code> configured with
+<p>To insert or query with an “Indexed”, “Range”, or “String” encrypted payload, use a <code>MongoClient</code> configured with
 <code>AutoEncryptionOpts</code>. <code>AutoEncryptionOpts.bypassQueryAnalysis</code> may be true. <code>AutoEncryptionOpts.bypassAutoEncryption</code>
-must be false. The “TextPreview” algorithm is in preview and should be used for experimental workloads only. These
-features are unstable and their security is not guaranteed until released as Generally Available (GA). The GA version
-of these features may not be backwards compatible with the preview version.</p>
+must be false. The “substringPreview” query type is in preview and should be used for experimental workloads only.
+This feature is unstable and its security is not guaranteed until released as Generally Available (GA). The GA version
+of this feature may not be backwards compatible with the preview version.</p>
 </blockquote>
 <h4 id="contentionfactor"><a class="header" href="#contentionfactor">contentionFactor</a></h4>
-<p>contentionFactor may be used to tune performance. Only applies when algorithm is “Indexed”, “Range”, or “TextPreview”.
+<p>contentionFactor may be used to tune performance. Only applies when algorithm is “Indexed”, “Range”, or “String”.
 libmongocrypt returns an error if contentionFactor is set for a non-applicable algorithm.</p>
 <h4 id="querytype"><a class="header" href="#querytype">queryType</a></h4>
 <p>One of the strings:</p>
 <ul>
 <li>“equality”</li>
 <li>“range”</li>
-<li>“prefixPreview”
+<li>“prefix”
 <ul>
 <li>Used for the <code>$encStrStartsWith</code> operator.</li>
 </ul>
 </li>
-<li>“suffixPreview”
+<li>“suffix”
 <ul>
 <li>Used for the <code>$encStrEndsWith</code> operator.</li>
 </ul>
@@ -1361,13 +1361,13 @@ libmongocrypt returns an error if contentionFactor is set for a non-applicable a
 </ul>
 </li>
 </ul>
-<p>queryType only applies when algorithm is “Indexed”, “Range”, or “TextPreview”. libmongocrypt returns an error if
-queryType is set for a non-applicable algorithm.</p>
+<p>queryType only applies when algorithm is “Indexed”, “Range”, or “String”. libmongocrypt returns an error if queryType is
+set for a non-applicable algorithm.</p>
 <h4 id="rangeopts"><a class="header" href="#rangeopts">rangeOpts</a></h4>
 <p>rangeOpts only applies when algorithm is “Range”. libmongocrypt returns an error if rangeOpts is set for a
 non-applicable algorithm.</p>
-<h4 id="textopts"><a class="header" href="#textopts">textOpts</a></h4>
-<p>textOpts only applies when algorithm is “TextPreview”. libmongocrypt returns an error if textOpts is set for a
+<h4 id="stringopts"><a class="header" href="#stringopts">stringOpts</a></h4>
+<p>stringOpts only applies when algorithm is “String”. libmongocrypt returns an error if stringOpts is set for a
 non-applicable algorithm.</p>
 <h2 id="user-facing-api-when-auto-encryption-fails"><a class="header" href="#user-facing-api-when-auto-encryption-fails">User facing API: When Auto Encryption Fails</a></h2>
 <p>Auto encryption requires parsing the MongoDB query language client side (with the <a href="#mongocryptd">mongocryptd</a> process or
@@ -2317,6 +2317,15 @@ on. To support concurrent access of the key vault collection, the key management
 explicit session parameter as described in the <a href="../sessions/driver-sessions.html">Drivers Sessions Specification</a>.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-05-29: Add stable support for prefix and suffix queries</p>
+<ul>
+<li>Replace <code>prefixPreview</code> with <code>prefix</code>.</li>
+<li>Replace <code>suffixPreview</code> with <code>suffix</code>.</li>
+<li>Replace <code>TextPreview</code> with <code>String</code>.</li>
+<li>Replace <code>TextOpts</code> with <code>StringOpts</code>.</li>
+</ul>
+</li>
 <li>
 <p>2025-09-30: Update <code>$lookup</code> prose test to reflect changes in
 <a href="https://jira.mongodb.org/browse/MONGOCRYPT-793">MONGOCRYPT-793</a>.</p>
