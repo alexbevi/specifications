@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-4307c7ce.js";
+            window.path_to_searchindex_js = "../searchindex-8f733e21.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -188,13 +188,11 @@ opcodes, merging their use into one extendable opcode.</p>
 “OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h3 id="specification"><a class="header" href="#specification">Specification</a></h3>
 <h4 id="usage"><a class="header" href="#usage">Usage</a></h4>
-<p><code>OP_MSG</code> is only available in MongoDB 3.6 (<code>maxWireVersion &gt;= 6</code>) and later. MongoDB drivers MUST perform the MongoDB
-handshake using <code>OP_MSG</code> if an API version was declared on the client.</p>
-<p>If no API version was declared, drivers that have historically supported MongoDB 3.4 and earlier MUST perform the
-handshake using <code>OP_QUERY</code> to determine if the node supports <code>OP_MSG</code>. Drivers that have only ever supported MongoDB 3.6
-and newer MAY default to using <code>OP_MSG</code>.</p>
-<p>If the node supports <code>OP_MSG</code>, any and all messages MUST use <code>OP_MSG</code>, optionally compressed with <code>OP_COMPRESSED</code>.
-Authentication messages MUST also use <code>OP_MSG</code> when it is supported, but MUST NOT use <code>OP_COMPRESSED</code>.</p>
+<p>All messages, including authentication messages, MUST use <code>OP_MSG</code>. Refer to the
+<a href="https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.md">handshake specification</a>
+for the appropriate use of <code>OP_MSG</code>. See also
+<a href="https://github.com/mongodb/specifications/blob/master/source/compression/OP_COMPRESSED.md">OP_COMPRESSED specification</a>
+for more details.</p>
 <h4 id="op_msg-1"><a class="header" href="#op_msg-1">OP_MSG</a></h4>
 <p>Types used in this document</p>
 <div class="table-wrapper">
@@ -558,6 +556,7 @@ helper, rather then adding wire protocol headers as options to the existing <cod
 </ul>
 <h3 id="changelog"><a class="header" href="#changelog">Changelog</a></h3>
 <ul>
+<li>2026-06-05: Use OP_MSG for all messages.</li>
 <li>2024-04-30: Convert from RestructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter.</li>
 <li>2022-01-13: Clarify that <code>OP_MSG</code> must be used when using stable API</li>

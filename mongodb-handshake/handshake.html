@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-4307c7ce.js";
+            window.path_to_searchindex_js = "../searchindex-8f733e21.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -209,16 +209,17 @@ redact, or otherwise treat specially.</p>
 <p>MongoDB uses the <code>hello</code> or <code>isMaster</code> commands for handshakes and topology monitoring. <code>hello</code> is the modern and
 preferred command. <code>hello</code> must always be sent using the <code>OP_MSG</code> protocol. <code>isMaster</code> is referred to as “legacy hello”
 and is maintained for backwards compatibility with servers that do not support the <code>hello</code> command.</p>
-<p>If a <a href="../versioned-api/versioned-api.html">server API version</a> is requested or <code>loadBalanced: True</code>, drivers MUST use the
-<code>hello</code> command for the initial handshake and use the <code>OP_MSG</code> protocol. If server API version is not requested and
-<code>loadBalanced: False</code>, drivers MUST use legacy hello for the first message of the initial handshake with the <code>OP_QUERY</code>
-protocol (before switching to <code>OP_MSG</code> if the <code>maxWireVersion</code> indicates compatibility), and include <code>helloOk:true</code> in
-the handshake request.</p>
+<p>Drivers MUST use the <code>OP_MSG</code> protocol for all handshakes if their minWireVersion is 6 (MongoDB 3.6) or higher. If a
+<a href="../versioned-api/versioned-api.html">server API version</a> is requested or <code>loadBalanced: True</code>, drivers MUST also use the
+<code>hello</code> command for the initial handshake. If server API version is not requested and <code>loadBalanced: False</code>, drivers
+MUST use legacy hello for the first message of the initial handshake, and include <code>helloOk:true</code> in the handshake
+request.</p>
 <p>ASIDE: If the legacy handshake response includes <code>helloOk: true</code>, then subsequent topology monitoring commands MUST use
 the <code>hello</code> command. If the legacy handshake response does not include <code>helloOk: true</code>, then subsequent topology
 monitoring commands MUST use the legacy hello command. See the
 <a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-summary.html">Server Discovery and Monitoring spec</a>
-for further information.</p>
+for further information. Additionally, note that if the server does not understand <code>OP_MSG</code>, the server will close the
+socket.</p>
 <p>The initial handshake MUST be performed on every socket to any and all servers upon establishing the connection to
 MongoDB, including reconnects of dropped connections and newly discovered members of a cluster. It MUST be the first
 command sent over the respective socket. If the command fails the client MUST disconnect. Timeouts MUST be applied to
@@ -233,10 +234,8 @@ argument.</p>
 conn.connect()  # Connect via TCP / TLS
 if stable_api_configured or client_options.load_balanced:
     cmd = {"hello": 1}
-    conn.supports_op_msg = True  # Send the initial command via OP_MSG.
 else:
     cmd = {"legacy hello": 1, "helloOk": 1}
-    conn.supports_op_msg = False  # Send the initial command via OP_QUERY.
 cmd["backpressure"] = True
 cmd["client"] = client_metadata
 if client_options.compressors:
@@ -251,10 +250,6 @@ if creds:
     cmd["speculativeAuthenticate"] = ...
 
 reply = conn.send_command("admin", cmd)
-
-if reply["maxWireVersion"] &gt;= 6:
-    # Use OP_MSG for all future commands, including authentication.
-    conn.supports_op_msg = True
 
 # Store the negotiated compressor, see OP_COMPRESSED spec.
 if reply.get("compression"):
@@ -639,6 +634,7 @@ specification</li>
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2026-06-05: Use OP_MSG for all handshakes.</li>
 <li>2025-09-04: Clarify that drivers do not append the same metadata multiple times.</li>
 <li>2025-06-09: Add requirement to allow appending to client metadata after <code>MongoClient</code> initialization.</li>
 <li>2024-11-05: Move handshake prose tests from spec file to prose test file.</li>
