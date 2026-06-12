@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-8f733e21.js";
+            window.path_to_searchindex_js = "../searchindex-20beaeef.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -214,12 +214,14 @@ and is maintained for backwards compatibility with servers that do not support t
 <code>hello</code> command for the initial handshake. If server API version is not requested and <code>loadBalanced: False</code>, drivers
 MUST use legacy hello for the first message of the initial handshake, and include <code>helloOk:true</code> in the handshake
 request.</p>
-<p>ASIDE: If the legacy handshake response includes <code>helloOk: true</code>, then subsequent topology monitoring commands MUST use
-the <code>hello</code> command. If the legacy handshake response does not include <code>helloOk: true</code>, then subsequent topology
-monitoring commands MUST use the legacy hello command. See the
-<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-summary.html">Server Discovery and Monitoring spec</a>
-for further information. Additionally, note that if the server does not understand <code>OP_MSG</code>, the server will close the
-socket.</p>
+<p>If the legacy handshake response includes <code>helloOk: true</code>, then subsequent topology monitoring commands MUST use the
+<code>hello</code> command. If the legacy handshake response does not include <code>helloOk: true</code>, then subsequent topology monitoring
+commands MUST use the legacy hello command. Additionally, note that if the server does not understand <code>OP_MSG</code>, the
+server will close the socket. See the Server Discovery and Monitoring spec
+<a href="https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-monitoring.md#streaming-hello-or-legacy-hello">here</a>
+and
+<a href="https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-monitoring.md#error-handling">here</a>
+for further information.</p>
 <p>The initial handshake MUST be performed on every socket to any and all servers upon establishing the connection to
 MongoDB, including reconnects of dropped connections and newly discovered members of a cluster. It MUST be the first
 command sent over the respective socket. If the command fails the client MUST disconnect. Timeouts MUST be applied to
@@ -634,6 +636,7 @@ specification</li>
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2026-06-11: Clarify that there is no new behavior as a result of only using OP_MSG for all handshakes.</li>
 <li>2026-06-05: Use OP_MSG for all handshakes.</li>
 <li>2025-09-04: Clarify that drivers do not append the same metadata multiple times.</li>
 <li>2025-06-09: Add requirement to allow appending to client metadata after <code>MongoClient</code> initialization.</li>
