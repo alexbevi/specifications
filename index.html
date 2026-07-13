@@ -15,8 +15,8 @@
         <link rel="icon" href="favicon-de23e50b.svg">
         <link rel="shortcut icon" href="favicon-8114d1fc.png">
         <link rel="stylesheet" href="css/variables-8adf115d.css">
-        <link rel="stylesheet" href="css/general-0392ca55.css">
-        <link rel="stylesheet" href="css/chrome-fc474251.css">
+        <link rel="stylesheet" href="css/general-e96d0476.css">
+        <link rel="stylesheet" href="css/chrome-d279d366.css">
         <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-90921c4d.js";
+            window.path_to_searchindex_js = "searchindex-5ca7a908.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-73b9a657.js"></script>
@@ -179,7 +179,7 @@
 <p>The modern MongoDB driver consists of a number of components, each of which are thoroughly documented in <a href="https://github.com/mongodb/specifications">this repository</a>. Though this information is readily available and extremely helpful, what it lacks is a high level overview to tie the specs together into a cohesive picture of what a MongoDB driver is.</p>
 <p>Architecturally an implicit hierarchy exists within the drivers, so expressing drivers in terms of an <a href="https://en.wikipedia.org/wiki/Onion_model">onion model</a> feels appropriate.</p>
 <h2 id="layers-of-the-onion"><a class="header" href="#layers-of-the-onion">Layers of the Onion</a></h2>
-<p><img src="onion.png" alt=""></p>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="onion.png" alt=""><span class="img-wrapper"><img src="onion.png" alt=""></span></label></p>
 <p>The <em>“drivers onion”</em> is meant to represent how various concepts, components and APIs can be layered atop each other to build a MongoDB driver from the ground up, or to help understand how existing drivers have been structured. Hopefully this representation of MongoDB’s drivers helps provide some clarity, as the complexity of these libraries - like the onion above - could otherwise bring you to tears.</p>
 <h3 id="serialization"><a class="header" href="#serialization">Serialization</a></h3>
 <p>At their lowest level all MongoDB drivers will need to know how to work with <a href="https://bsonspec.org/">BSON</a>. BSON (short for “Binary JSON”) is a bin­ary-en­coded serialization of <a href="https://www.json.org/json-en.html">JSON</a>-like documents, and like JSON, it sup­ports the nesting of arrays and documents. BSON also contains extensions that al­low representation of data types that are not part of the <a href="https://datatracker.ietf.org/doc/html/rfc7159">JSON spec</a>.</p>
@@ -309,7 +309,7 @@ main();
 
         <script src="clipboard-1626706a.min.js"></script>
         <script src="highlight-abc7f01d.js"></script>
-        <script src="book-c22b7243.js"></script>
+        <script src="book-609e4cb8.js"></script>
 
         <!-- Custom JS scripts -->
         <script src="theme/whichlang-30e8f953.js"></script>
