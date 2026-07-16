@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-928dd1aa.js";
+            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -214,6 +214,9 @@ and is maintained for backwards compatibility with servers that do not support t
 <code>hello</code> command for the initial handshake. If server API version is not requested and <code>loadBalanced: False</code>, drivers
 MUST use legacy hello for the first message of the initial handshake, and include <code>helloOk:true</code> in the handshake
 request.</p>
+<p>Drivers MUST include <code>backpressure: "2"</code> in their handshake request in order to explicitly version their supported
+version of the client backpressure specification. The value of <code>backpressure</code> MUST be the string <code>"2"</code> and not a literal
+number <code>2</code>.</p>
 <p>If the legacy handshake response includes <code>helloOk: true</code>, then subsequent topology monitoring commands MUST use the
 <code>hello</code> command. If the legacy handshake response does not include <code>helloOk: true</code>, then subsequent topology monitoring
 commands MUST use the legacy hello command. Additionally, note that if the server does not understand <code>OP_MSG</code>, the
@@ -238,7 +241,7 @@ if stable_api_configured or client_options.load_balanced:
     cmd = {"hello": 1}
 else:
     cmd = {"legacy hello": 1, "helloOk": 1}
-cmd["backpressure"] = True
+cmd["backpressure"] = "2"
 cmd["client"] = client_metadata
 if client_options.compressors:
     cmd["compression"] = client_options.compressors
@@ -636,6 +639,7 @@ specification</li>
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2026-06-25: Clarify the client backpressure component of the handshake.</li>
 <li>2026-06-11: Clarify that there is no new behavior as a result of only using OP_MSG for all handshakes.</li>
 <li>2026-06-05: Use OP_MSG for all handshakes.</li>
 <li>2025-09-04: Clarify that drivers do not append the same metadata multiple times.</li>
