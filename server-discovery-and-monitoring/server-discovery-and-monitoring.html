@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="server-discovery-and-monitoring"><a class="header" href="#server-discovery-and-monitoring">Server Discovery And Monitoring</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 2.4</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -375,7 +374,7 @@ monitors all three types of servers in a replica set.</p>
 <p>(=) <code>setName</code>: string or null. Default null.</p>
 </li>
 <li>
-<p>(=) <code>electionId</code>: an ObjectId, if this is a MongoDB 2.6+ replica set member that believes it is primary. See
+<p>(=) <code>electionId</code>: an ObjectId, if this is a replica set member that believes it is primary. See
 <a href="#using-electionid-and-setversion-to-detect-stale-primaries">using electionId and setVersion to detect stale primaries</a>.
 Default null.</p>
 </li>
@@ -554,8 +553,6 @@ its setName (see <a href="https://jira.mongodb.org/browse/JAVA-1161">JAVA-1161</
 TopologyDescription, in case the client’s only hope for staying connected to the replica set is that this member will
 transition to a more useful state.</p>
 <p>For simplicity, this is the rule: any server is an RSGhost that reports “isreplicaset: true”.</p>
-<p>Non-ghost replica set members have reported their setNames since MongoDB 1.6.2. See
-<a href="#only-support-replica-set-members-running-mongodb-162-or-later">only support replica set members running MongoDB 1.6.2 or later</a>.</p>
 <blockquote class="blockquote-tag blockquote-tag-note">
 <p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
 <p>The Java driver does not have a separate state for RSGhost; it is an RSOther server with no hosts list.</p>
@@ -588,9 +585,9 @@ record the server’s minimum RTT per <a href="server-monitoring.html#measuring-
 null, and if it changes from a known type to Unknown its RTT is set to null. However, if it changes from one known type
 to another (e.g. from RSPrimary to RSSecondary) its RTT is updated normally, not set to null nor restarted from scratch.</p>
 <h4 id="lastwritedate-and-optime"><a class="header" href="#lastwritedate-and-optime">lastWriteDate and opTime</a></h4>
-<p>The hello or legacy hello response of a replica set member running MongoDB 3.4 and later contains a <code>lastWrite</code>
-subdocument with fields <code>lastWriteDate</code> and <code>opTime</code> (<a href="https://jira.mongodb.org/browse/SERVER-8858">SERVER-8858</a>). If
-these fields are available, parse them from the hello or legacy hello response, otherwise set them to null.</p>
+<p>The hello or legacy hello response of a replica set member contains a <code>lastWrite</code> subdocument with fields
+<code>lastWriteDate</code> and <code>opTime</code> (<a href="https://jira.mongodb.org/browse/SERVER-8858">SERVER-8858</a>). If these fields are
+available, parse them from the hello or legacy hello response, otherwise set them to null.</p>
 <p>Clients MUST NOT attempt to compensate for the network latency between when the server generated its hello or legacy
 hello response and when the client records <code>lastUpdateTime</code>.</p>
 <h4 id="lastupdatetime"><a class="header" href="#lastupdatetime">lastUpdateTime</a></h4>
@@ -605,9 +602,9 @@ the replica set.</p>
 <p>Domain Name System (DNS) names are “case insensitive”.</p>
 </blockquote>
 <h4 id="logicalsessiontimeoutminutes"><a class="header" href="#logicalsessiontimeoutminutes">logicalSessionTimeoutMinutes</a></h4>
-<p>MongoDB 3.6 and later include a <code>logicalSessionTimeoutMinutes</code> field if logical sessions are enabled in the deployment.
-Clients MUST check for this field and set the ServerDescription’s logicalSessionTimeoutMinutes field to this value, or
-to null otherwise.</p>
+<p>The hello or legacy hello response includes a <code>logicalSessionTimeoutMinutes</code> field if logical sessions are enabled in
+the deployment. Clients MUST check for this field and set the ServerDescription’s logicalSessionTimeoutMinutes field to
+this value, or to null otherwise.</p>
 <h4 id="topologyversion"><a class="header" href="#topologyversion">topologyVersion</a></h4>
 <p>MongoDB 4.4 and later include a <code>topologyVersion</code> field in all hello or legacy hello and
 <a href="#state-change-error">State Change Error</a> responses. Clients MUST check for this field and set the ServerDescription’s
@@ -678,10 +675,10 @@ fill out the TopologyDescription’s “compatibilityError” field like so:</p>
 <code>clientMinWireVersion</code> (MongoDB <code>mongoVersion</code>).”</p>
 </li>
 </ul>
-<p>Replace <code>mongoVersion</code> with the appropriate MongoDB minor version, for example if <code>clientMinWireVersion</code> is 2 and it
-connects to MongoDB 2.4, format the error like:</p>
+<p>Replace <code>mongoVersion</code> with the appropriate MongoDB minor version, for example if <code>clientMinWireVersion</code> is 8 and it
+connects to MongoDB 4.0, format the error like:</p>
 <blockquote>
-<p>“Server at example.com:27017 reports wire version 0, but this version of My Driver requires at least 2 (MongoDB 2.6).”</p>
+<p>“Server at example.com:27017 reports wire version 7, but this version of My Driver requires at least 8 (MongoDB 4.2).”</p>
 </blockquote>
 <p>In this second case, the exact required MongoDB version is known and can be named in the error message, whereas in the
 first case the implementer does not know which MongoDB versions will be compatible or incompatible in the future.</p>
@@ -944,9 +941,7 @@ should be none or one) and replaces its description with a default ServerDescrip
 the <code>error</code> field of the new <code>ServerDescription</code> object MUST include a descriptive error explaining that it was
 invalidated because the primary was determined to be stale. A multi-threaded client MUST
 <a href="server-monitoring.html#requesting-an-immediate-check">request an immediate check</a> for that server as soon as possible.</p>
-<p>If the old primary server version is 4.0 or earlier, the client MUST clear its connection pool for the old primary, too:
-the connections are all bad because the old primary has closed its sockets. If the old primary server version is 4.2 or
-newer, the client MUST NOT clear its connection pool for the old primary.</p>
+<p>The client MUST NOT clear its connection pool for the old primary.</p>
 <p>See <a href="#replica-set-monitoring-with-and-without-a-primary">replica set monitoring with and without a primary</a>.</p>
 <p>If the server is primary with an obsolete electionId or setVersion, it is likely a stale primary that is going to step
 down. Mark it Unknown and let periodic monitoring detect when it becomes secondary. See
@@ -1025,7 +1020,7 @@ Drivers may use the following pseudocode to guide their implementation:</p>
               # Mark the server Unknown
               unknown = new ServerDescription(type=Unknown, error=error, topologyVersion=topologyVersion)
               onServerDescriptionChanged(unknown, connection pool for server)
-            if isShutdown(code) or (error was from &lt;4.2):
+            if isShutdown(code):
               # the pools must only be cleared while the lock is held.
               if type == LoadBalanced:
                 clear connection pool for serviceId
@@ -1227,7 +1222,7 @@ may not gain useful information.</p>
 </table>
 </div>
 <p>When handling a “not writable primary” or “node is recovering” error, the client MUST clear the server’s connection pool
-if and only if the error is “node is shutting down” or the error originated from server version &lt; 4.2.</p>
+if and only if the error is “node is shutting down”.</p>
 <p>(See
 <a href="#when-does-a-client-see-not-writable-primary-or-node-is-recovering">when does a client see “not writable primary” or “node is recovering”?</a>,
 <a href="#use-error-messages-to-detect-not-master-and-node-is-recovering">use error messages to detect “not master” and “node is recovering”</a>,
@@ -1271,14 +1266,13 @@ generate load for multi-threaded and asynchronous drivers.</p>
 the ServerDescription, but this is an anti-pattern. Multi-threaded and asynchronous clients that do so are prone to
 several classes of race, for example:</p>
 <ul>
-<li>Setup: A MongoDB 3.0 Standalone with authentication enabled, the client must log in with SCRAM-SHA-1.</li>
-<li>The monitor thread discovers the server and stores maxWireVersion on the ServerDescription</li>
-<li>An application thread wants a socket, selects the Standalone, and is about to check the maxWireVersion on its
+<li>Setup: A Standalone server.</li>
+<li>The monitor thread discovers the server and stores maxWireVersion, maxWriteBatchSize, etc. on the ServerDescription.</li>
+<li>An application thread wants a socket, selects the Standalone, and is about to read maxWriteBatchSize from its
 ServerDescription when…</li>
-<li>The monitor thread gets disconnected from server and marks it Unknown, with default maxWireVersion of 0.</li>
-<li>The application thread resumes, creates a socket, and attempts to log in using MONGODB-CR, since maxWireVersion is
-<em>now</em> reported as 0.</li>
-<li>Authentication fails, the server requires SCRAM-SHA-1.</li>
+<li>The monitor thread gets disconnected from the server and marks it Unknown, resetting these fields to their defaults.</li>
+<li>The application thread resumes, creates a socket, and splits a bulk write based on the now-default maxWriteBatchSize,
+sending a batch the server rejects.</li>
 </ul>
 <p>Better to call hello or legacy hello for each new socket, as required by the <a href="../auth/auth.html">Auth Spec</a>, and use the
 hello or legacy hello response associated with that socket for maxWireVersion, maxBsonObjectSize, etc.: all the fields
@@ -1424,8 +1418,6 @@ before timing out in server selection.</p>
 <h3 id="the-client-must-monitor-arbiters"><a class="header" href="#the-client-must-monitor-arbiters">The client MUST monitor arbiters</a></h3>
 <p>Mongos 2.6 does not monitor arbiters, but it costs little to do so, and in the rare case that all data members are moved
 to new hosts in a short time, an arbiter may be the client’s last hope to find the new replica set configuration.</p>
-<h3 id="only-support-replica-set-members-running-mongodb-162-or-later"><a class="header" href="#only-support-replica-set-members-running-mongodb-162-or-later">Only support replica set members running MongoDB 1.6.2 or later</a></h3>
-<p>Replica set members began reporting their setNames in that version. Supporting earlier versions is impractical.</p>
 <h3 id="topologytype-remains-unknown-when-an-rsghost-is-discovered"><a class="header" href="#topologytype-remains-unknown-when-an-rsghost-is-discovered">TopologyType remains Unknown when an RSGhost is discovered</a></h3>
 <p>If the TopologyType is Unknown and the client receives a hello or legacy hello response from
 an<a href="#rsghost-and-rsother">RSGhost</a>, the TopologyType could be set to ReplicaSetNoPrimary. However, an RSGhost does not
@@ -1488,16 +1480,8 @@ ordering the tuple by <code>setVersion</code> before the <code>electionId</code>
 drivers continue to maintain the reversed logic when connected to a topology that reports a maxWireVersion less than
 <code>17</code>. Server versions 6.0 and beyond MUST order the tuple by <code>electionId</code> then <code>setVersion</code>.</p>
 <h4 id="requirements-for-read-your-writes-consistency"><a class="header" href="#requirements-for-read-your-writes-consistency">Requirements for read-your-writes consistency</a></h4>
-<p>Using (electionId, setVersion) only provides read-your-writes consistency if:</p>
-<ul>
-<li>The application uses the same MongoClient instance for write-concern “majority” writes and read-preference “primary”
-reads, and</li>
-<li>All members use MongoDB 2.6.10+, 3.0.0+ or 3.2.0+ with replication protocol 0 and clocks are <em>less</em> than 30 seconds
-skewed, or</li>
-<li>All members run MongoDB 3.2.0 and replication protocol 1 and clocks are <em>less</em> skewed than the election timeout
-(<code>electionTimeoutMillis</code>, which defaults to 10 seconds), or</li>
-<li>All members run MongoDB 3.2.1+ and replication protocol 1 (in which case clocks need not be synchronized).</li>
-</ul>
+<p>Using (electionId, setVersion) only provides read-your-writes consistency if the application uses the same MongoClient
+instance for write-concern “majority” writes and read-preference “primary” reads.</p>
 <h4 id="scenario"><a class="header" href="#scenario">Scenario</a></h4>
 <p>Consider the following situation:</p>
 <ol>
@@ -1740,9 +1724,7 @@ server without the secondaryOk bit set.</li>
 <li>An operation was attempted on a server that is now shutting down.</li>
 </ul>
 <p>In any case the error is a symptom that a ServerDescription’s type no longer reflects reality.</p>
-<p>On MongoDB 4.0 and earlier, a primary closes its connections when it steps down, so in many cases the next operation
-causes a network error rather than “not writable primary”. The driver can see a “not writable primary” error in the
-following scenario:</p>
+<p>The driver can see a “not writable primary” error in the following scenario:</p>
 <ol>
 <li>The client discovers the primary.</li>
 <li>The primary steps down.</li>
@@ -1757,8 +1739,8 @@ scenario called “parsing ‘not writable primary’ and ‘node is recovering�
 <h3 id="why-close-connections-when-a-node-is-shutting-down"><a class="header" href="#why-close-connections-when-a-node-is-shutting-down">Why close connections when a node is shutting down?</a></h3>
 <p>When a server shuts down, it will return one of the “node is shutting down” errors for each attempted operation and
 eventually will close all connections. Keeping a connection to a server which is shutting down open would only produce
-errors on this connection - such a connection will never be usable for any operations. In contrast, when a server 4.2 or
-later returns “not writable primary” error the connection may be usable for other operations (such as secondary reads).</p>
+errors on this connection - such a connection will never be usable for any operations. In contrast, when a server
+returns “not writable primary” error the connection may be usable for other operations (such as secondary reads).</p>
 <h3 id="whats-the-point-of-periodic-monitoring"><a class="header" href="#whats-the-point-of-periodic-monitoring">What’s the point of periodic monitoring?</a></h3>
 <p>Why not just wait until a “not writable primary” error or “node is recovering” error informs the client that its
 TopologyDescription is wrong? Or wait until server selection fails to find a suitable server, and only scan all servers
@@ -1788,6 +1770,9 @@ Mathias Stearn’s beautiful design for replica set monitoring in mongos 2.6 con
 oversaw the specification process.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
 <li>
 <p>2015-12-17: Require clients to compare (setVersion, electionId) tuples.</p>
 </li>

@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -192,9 +192,9 @@
 “OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="required-server-versions"><a class="header" href="#required-server-versions">Required Server Versions</a></h3>
-<p>The server supports attaching a stapled OCSP response with versions ≥ 4.4. Future backports will bring stapling support
-to server versions ≥ 3.6. Drivers need not worry about the version of the server as a driver’s TLS library should
-automatically perform the proper certificate revocation checking behavior once OCSP is enabled.</p>
+<p>The server supports attaching a stapled OCSP response with versions ≥ 4.4. Drivers need not worry about the version of
+the server as a driver’s TLS library should automatically perform the proper certificate revocation checking behavior
+once OCSP is enabled.</p>
 <h3 id="enabling-ocsp-support-by-default"><a class="header" href="#enabling-ocsp-support-by-default">Enabling OCSP Support by Default</a></h3>
 <p>Drivers whose TLS libraries utilize application-wide settings for OCSP MUST respect the application’s settings and MUST
 NOT change any OCSP settings. Otherwise:</p>
@@ -405,8 +405,7 @@ provides signal about the soft/hard fail behavior in a driver’s TLS library so
 <p>A driver with control over its OCSP behavior will react the same in “Malicious Server Test 1” and “Malicious Server Test
 2”, terminating the connection as long as TLS constraints have not been relaxed.</p>
 <h3 id="atlas-connectivity-tests"><a class="header" href="#atlas-connectivity-tests">Atlas Connectivity Tests</a></h3>
-<p>No additional Atlas connectivity tests will be added because the existing tests should provide sufficient coverage
-(provided that one of the non-free tier clusters is upgraded ≥ 3.6).</p>
+<p>No additional Atlas connectivity tests will be added because the existing tests should provide sufficient coverage.</p>
 <h3 id="suggested-ocsp-behavior-1"><a class="header" href="#suggested-ocsp-behavior-1">Suggested OCSP Behavior</a></h3>
 <p>For drivers with finer-grain control over their OCSP behavior, the suggested OCSP behavior was chosen as a balance
 between security and availability, erring on availability while minimizing network round trips. Therefore, in order to
@@ -578,6 +577,9 @@ OCSP cache for a response from an OCSP endpoint specified in the server’s cert
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
 <li>
 <p>2024-08-20: Migrated from reStructuredText to Markdown.</p>
 </li>

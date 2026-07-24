@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,11 +178,10 @@
                         <h1 id="mongodb-handshake"><a class="header" href="#mongodb-handshake">MongoDB Handshake</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 3.4</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
-<p>MongoDB 3.4 has the ability to annotate connections with metadata provided by the connecting client. The intent of this
+<p>MongoDB has the ability to annotate connections with metadata provided by the connecting client. The intent of this
 metadata is to be able to identify client level information about the connection, such as application name, driver name
 and version. The provided information will be logged through the <code>mongo[d|s].log</code> and the profile logs; this should
 enable sysadmins to easily backtrack log entries the offending application. The active connection data will also be
@@ -209,21 +208,17 @@ redact, or otherwise treat specially.</p>
 <p>MongoDB uses the <code>hello</code> or <code>isMaster</code> commands for handshakes and topology monitoring. <code>hello</code> is the modern and
 preferred command. <code>hello</code> must always be sent using the <code>OP_MSG</code> protocol. <code>isMaster</code> is referred to as “legacy hello”
 and is maintained for backwards compatibility with servers that do not support the <code>hello</code> command.</p>
-<p>Drivers MUST use the <code>OP_MSG</code> protocol for all handshakes if their minWireVersion is 6 (MongoDB 3.6) or higher. If a
-<a href="../versioned-api/versioned-api.html">server API version</a> is requested or <code>loadBalanced: True</code>, drivers MUST also use the
-<code>hello</code> command for the initial handshake. If server API version is not requested and <code>loadBalanced: False</code>, drivers
-MUST use legacy hello for the first message of the initial handshake, and include <code>helloOk:true</code> in the handshake
-request.</p>
+<p>Drivers MUST use the <code>OP_MSG</code> protocol for all handshakes. If a <a href="../versioned-api/versioned-api.html">server API version</a>
+is requested or <code>loadBalanced: True</code>, drivers MUST also use the <code>hello</code> command for the initial handshake. If server API
+version is not requested and <code>loadBalanced: False</code>, drivers MUST use legacy hello for the first message of the initial
+handshake, and include <code>helloOk:true</code> in the handshake request.</p>
 <p>Drivers MUST include <code>backpressure: "2"</code> in their handshake request in order to explicitly version their supported
 version of the client backpressure specification. The value of <code>backpressure</code> MUST be the string <code>"2"</code> and not a literal
 number <code>2</code>.</p>
 <p>If the legacy handshake response includes <code>helloOk: true</code>, then subsequent topology monitoring commands MUST use the
 <code>hello</code> command. If the legacy handshake response does not include <code>helloOk: true</code>, then subsequent topology monitoring
-commands MUST use the legacy hello command. Additionally, note that if the server does not understand <code>OP_MSG</code>, the
-server will close the socket. See the Server Discovery and Monitoring spec
-<a href="https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-monitoring.md#streaming-hello-or-legacy-hello">here</a>
-and
-<a href="https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-monitoring.md#error-handling">here</a>
+commands MUST use the legacy hello command. See the
+<a href="../server-discovery-and-monitoring/server-discovery-and-monitoring-summary.html">Server Discovery and Monitoring spec</a>
 for further information.</p>
 <p>The initial handshake MUST be performed on every socket to any and all servers upon establishing the connection to
 MongoDB, including reconnects of dropped connections and newly discovered members of a cluster. It MUST be the first
@@ -266,8 +261,7 @@ speculative_auth = reply.get("speculativeAuthenticate")
 conn.authenticate(creds, negotiated_mechs, speculative_auth)
 </code></pre>
 <h4 id="hello-command"><a class="header" href="#hello-command">Hello Command</a></h4>
-<p>The initial handshake, as of MongoDB 3.4, supports a new argument, <code>client</code>, provided as a BSON object. This object has
-the following structure:</p>
+<p>The initial handshake supports a <code>client</code> argument, provided as a BSON object. This object has the following structure:</p>
 <pre><code class="language-javascript">    {
         hello: 1,
         helloOk: true,
@@ -610,12 +604,6 @@ way and have no effect one way or another.</li>
 </ul>
 </li>
 <li>
-<p>Is establishing the handshake required for connecting to MongoDB 3.4?</p>
-<ul>
-<li>No, it only augments the connection. MongoDB will not reject connections without it</li>
-</ul>
-</li>
-<li>
 <p>Does this affect SDAM implementations?</p>
 <ul>
 <li>Possibly. There are a couple of gotchas. If the application.name is not in the URI…
@@ -640,6 +628,7 @@ specification</li>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
 <li>2026-06-25: Clarify the client backpressure component of the handshake.</li>
+<li>2026-06-17: Remove pre-4.2 version references.</li>
 <li>2026-06-11: Clarify that there is no new behavior as a result of only using OP_MSG for all handshakes.</li>
 <li>2026-06-05: Use OP_MSG for all handshakes.</li>
 <li>2025-09-04: Clarify that drivers do not append the same metadata multiple times.</li>

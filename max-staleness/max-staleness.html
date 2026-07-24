@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="max-staleness"><a class="header" href="#max-staleness">Max Staleness</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 3.4</li>
 </ul>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>Read preference gains a new option, “maxStalenessSeconds”.</p>
@@ -242,15 +241,10 @@ the oplog.</li>
 <li>opTime: an opaque value representing the position in the oplog of the most recently seen write. Needed for sharding,
 not used for the maxStalenessSeconds read preference option.</li>
 </ul>
-<h3 id="wire-version"><a class="header" href="#wire-version">Wire Version</a></h3>
-<p>The maxWireVersion MUST be incremented to 5 to indicate that the server includes maxStalenessSeconds features
-(SERVER-23893).</p>
 <h3 id="client"><a class="header" href="#client">Client</a></h3>
 <p>A client (driver or mongos) MUST estimate the staleness of each secondary, based on lastWriteDate values provided in
 server hello responses, and select for reads only those secondaries whose estimated staleness is less than or equal to
 maxStalenessSeconds.</p>
-<p>If any server’s maxWireVersion is less than 5 and maxStalenessSeconds is a positive number, every attempt at server
-selection throws an error.</p>
 <p>When there is a known primary, a secondary S’s staleness is estimated with this formula:</p>
 <pre><code class="language-javascript">(S.lastUpdateTime - S.lastWriteDate) - (P.lastUpdateTime - P.lastWriteDate) + heartbeatFrequencyMS
 </code></pre>
@@ -282,8 +276,8 @@ to be eligible for reads from now until the next check, even if it stops replica
 <h3 id="routers-and-shards"><a class="header" href="#routers-and-shards">Routers and shards</a></h3>
 <p>Background: Shard servers and mongos servers in a sharded cluster with CSRS use readConcern “afterOptime” for
 consistency guarantees when querying the shard config.</p>
-<p>Besides tracking lastWriteDate, routers and shards additionally track the opTime of CSRS members if they have
-maxWireVersion 5 or greater. (See Server Discovery and Monitoring Spec for details.)</p>
+<p>Besides tracking lastWriteDate, routers and shards additionally track the opTime of CSRS members. (See Server Discovery
+and Monitoring Spec for details.)</p>
 <p>When a router or shard selects a CSRS member to read from with readConcern like:</p>
 <pre><code class="language-yaml">readConcern: { afterOpTime: OPTIME }
 </code></pre>
@@ -456,13 +450,6 @@ different drivers</li>
 <li>To emphasize that maxStalenessSeconds is a low-precision heuristic</li>
 <li>To avoid the arbitrary-seeming minimum of 70 seconds imposed by single-threaded drivers</li>
 </ul>
-<h3 id="all-servers-must-have-wire-version-5-to-support-maxstalenessseconds"><a class="header" href="#all-servers-must-have-wire-version-5-to-support-maxstalenessseconds">All servers must have wire version 5 to support maxStalenessSeconds</a></h3>
-<p>Clients with minWireVersion &lt; 5 MUST throw an error if maxStalenessSeconds is set, and any available server in the
-topology has maxWireVersion less than 5.</p>
-<p>An available server is defined in the <a href="../server-selection/server-selection.html#terms">Server Selection</a> specification.</p>
-<p>Servers began reporting lastWriteDate in wire protocol version 5, and clients require some or all servers’ lastWriteDate
-in order to estimate any servers’ staleness. The exact requirements of the formula vary according to TopologyType, so
-this spec makes a simple ruling: if any server is running an outdated version, maxStalenessSeconds cannot be supported.</p>
 <h3 id="rejected-ideas"><a class="header" href="#rejected-ideas">Rejected ideas</a></h3>
 <h4 id="add-all-secondaries-optimes-to-primarys-hello-response"><a class="header" href="#add-all-secondaries-optimes-to-primarys-hello-response">Add all secondaries’ opTimes to primary’s hello response</a></h4>
 <p>Not needed; each secondary’s self-report of its opTime is just as good as the primary’s.</p>
@@ -518,6 +505,9 @@ server communicates is staleness configuration in its hello response like:</p>
 client-side setting.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
 <li>
 <p>2024-08-09: Updated wire versions in tests to 4.0+.</p>
 </li>

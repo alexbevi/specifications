@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="enumerating-collections"><a class="header" href="#enumerating-collections">Enumerating Collections</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 1.8</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -271,8 +270,8 @@ backwards compatibility when adding new methods.</p>
 <h4 id="getting-collection-names"><a class="header" href="#getting-collection-names">Getting Collection Names</a></h4>
 <p>Drivers MAY implement a MongoClient method that returns an Iterable of strings, where each string corresponds to a
 collection name. This method SHOULD be named <code>listCollectionNames</code>.</p>
-<p>MongoDB 4.0 introduced a <code>nameOnly</code> boolean option to the <code>listCollections</code> database command, which limits the command
-result to only include collection names. NOTE: <code>nameOnly</code> is applied before any filter is applied.</p>
+<p>The <code>listCollections</code> database command supports a <code>nameOnly</code> boolean option, which limits the command result to only
+include collection names. NOTE: <code>nameOnly</code> is applied before any filter is applied.</p>
 <p>Example return:</p>
 <pre><code class="language-javascript">[
     "me",
@@ -283,12 +282,8 @@ result to only include collection names. NOTE: <code>nameOnly</code> is applied 
     "system.replset"
 ]
 </code></pre>
-<p>Server version between 2.7.6 (inclusive) and 4.0 (exclusive) do not support the <code>nameOnly</code> option for the
-<code>listCollections</code> command and will ignore it without raising an error. Therefore, drivers MUST always specify the
-<code>nameOnly</code> option when they only intend to access collection names from the <code>listCollections</code> command result, except
-drivers MUST NOT set <code>nameOnly</code> if a filter specifies any keys other than <code>name</code>.</p>
-<p>MongoDB 4.0 also added an <code>authorizedCollections</code> boolean option to the <code>listCollections</code> command, which can be used to
-limit the command result to only include collections the user is authorized to use. Drivers MAY allow users to set the
+<p>The <code>listCollections</code> command also supports an <code>authorizedCollections</code> boolean option, which can be used to limit the
+command result to only include collections the user is authorized to use. Drivers MAY allow users to set the
 <code>authorizedCollections</code> option on the <code>listCollectionNames</code> method.</p>
 <h4 id="getting-full-collection-information"><a class="header" href="#getting-full-collection-information">Getting Full Collection Information</a></h4>
 <p>Drivers MAY implement a method to return the full <code>name/options</code> pairs that are returned from both <code>listCollections</code> (in
@@ -395,6 +390,9 @@ versions of MongoDB.</p>
 (<a href="https://github.com/mongodb/mongo/blob/f32ba54f971c045fb589fe4c3a37da77dc486cee/src/mongo/shell/db.js#L550">https://github.com/mongodb/mongo/blob/f32ba54f971c045fb589fe4c3a37da77dc486cee/src/mongo/shell/db.js#L550</a>).</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
 <li>
 <p>2026-05-13: Clarify “Replica Sets” section: reword to distinguish server capability from driver routing rule; remove
 stale <code>system.indexes</code> bullet (2.x behavior).</p>

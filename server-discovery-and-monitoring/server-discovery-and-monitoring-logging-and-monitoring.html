@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="sdam-logging-and-monitoring-specification"><a class="header" href="#sdam-logging-and-monitoring-specification">SDAM Logging and Monitoring Specification</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 2.4</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -543,7 +542,7 @@ messages”:</p>
 <tr><td>serverHost</td><td>Log messages specific to a particular server, including heartbeat-related messages</td><td>String</td><td>The hostname, IP address, or Unix domain socket path for the endpoint the pool is for.</td></tr>
 <tr><td>serverPort</td><td>Log messages specific to a particular server, including heartbeat-related messages</td><td>Int</td><td>(Only present for server-specific log messages) The port for the endpoint the pool is for. Optional; not present for Unix domain sockets. When the user does not specify a port and the default (27017) is used, the driver SHOULD include it here.</td></tr>
 <tr><td>driverConnectionId</td><td>Heartbeat-related log messages</td><td>Int</td><td>The driver-generated ID for the monitoring connection as defined in the <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">connection monitoring and pooling specification</a>. Unlike <code>connectionId</code> in the above events, this field MUST NOT contain the host/port; that information MUST be in the above fields, <code>serverHost</code> and <code>serverPort</code>. This field is optional for drivers that do not implement CMAP if they do have an equivalent concept of a connection ID.</td></tr>
-<tr><td>serverConnectionId</td><td>Heartbeat-related log messages</td><td>Int</td><td>The server’s ID for the monitoring connection, if known. This value will be unknown and can be omitted in certain cases, e.g. the first “heartbeat started” message for a monitoring connection. Only present on server versions 4.2+.</td></tr>
+<tr><td>serverConnectionId</td><td>Heartbeat-related log messages</td><td>Int</td><td>The server’s ID for the monitoring connection, if known. This value will be unknown and can be omitted in certain cases, e.g. the first “heartbeat started” message for a monitoring connection.</td></tr>
 </tbody>
 </table>
 </div>
@@ -718,6 +717,9 @@ placeholders as appropriate:</p>
 <p>See the <a href="tests/monitoring/README.html">README</a>.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
 <li>
 <p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
 </li>

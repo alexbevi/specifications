@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -1700,11 +1700,6 @@ determine no encryption is necessary, or bypass many checks if the command is de
 encrypted data (e.g. ping). See the appendix section:
 <a href="#libmongocrypt-auto-encryption-allow-list">libmongocrypt: Auto Encryption Allow-List</a>.</p>
 <p>An encrypted MongoClient MUST attempt to auto decrypt the results of all commands.</p>
-<p>Drivers MUST raise an error when attempting to auto encrypt a command if the maxWireVersion is less than 8. The error
-message MUST contain “Auto-encryption requires a minimum MongoDB version of 4.2”.</p>
-<p>Note, all client side features (including all of <code>ClientEncryption</code>) are only supported against 4.2 or higher servers.
-However, errors are only raised for automatic encryption/decryption against older servers. See
-<a href="#why-is-a-42-server-required">Why is a 4.2 server required?</a></p>
 <h2 id="interaction-with-command-monitoring"><a class="header" href="#interaction-with-command-monitoring">Interaction with Command Monitoring</a></h2>
 <p>Unencrypted data MUST NOT appear in the data of any command monitoring events. Encryption MUST occur before generating a
 CommandStartedEvent, and decryption MUST occur after generating a CommandSucceededEvent.</p>
@@ -2319,6 +2314,9 @@ explicit session parameter as described in the <a href="../sessions/driver-sessi
 <ul>
 <li>
 <p>2026-06-22: Add stable support for substring queries</p>
+</li>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
 </li>
 <li>
 <p>2026-06-17: Restore <code>prefixPreview</code> and <code>suffixPreview</code> as experimental.</p>

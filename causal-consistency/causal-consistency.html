@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="causal-consistency-specification"><a class="header" href="#causal-consistency-specification">Causal Consistency Specification</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 3.6</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -306,9 +305,9 @@ started with <code>causalConsistency = true</code> then all operations using tha
 <h2 id="server-commands"><a class="header" href="#server-commands">Server Commands</a></h2>
 <p>There are no new server commands related to causal consistency. Instead, causal consistency is implemented by:</p>
 <ol>
-<li>Saving the <code>operationTime</code> returned by 3.6+ servers for all operations in a property of the <code>ClientSession</code> object.
-The server reports the <code>operationTime</code> whether the operation succeeded or not and drivers MUST save the
-<code>operationTime</code> in the <code>ClientSession</code> whether the operation succeeded or not.</li>
+<li>Saving the <code>operationTime</code> returned by servers for all operations in a property of the <code>ClientSession</code> object. The
+server reports the <code>operationTime</code> whether the operation succeeded or not and drivers MUST save the <code>operationTime</code>
+in the <code>ClientSession</code> whether the operation succeeded or not.</li>
 <li>Passing that <code>operationTime</code> in the <code>afterClusterTime</code> field of the <code>readConcern</code> field for subsequent causally
 consistent read and write operations (for all commands that support a <code>readConcern</code>)</li>
 <li>Gossiping clusterTime (described in the Driver Session Specification)</li>
@@ -373,7 +372,7 @@ that causally consistent operations are not causally consistent with unacknowled
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
 <p>Below is a list of test cases to write.</p>
 <p>Note: some tests are only relevant to certain deployments. For the purpose of deciding which tests to run assume that
-any deployment that is version 3.6 or higher and is either a replica set or a sharded cluster supports cluster times.</p>
+any deployment that is either a replica set or a sharded cluster supports cluster times.</p>
 <ol>
 <li>When a <code>ClientSession</code> is first created the <code>operationTime</code> has no value.
 <ul>
@@ -495,7 +494,7 @@ the <code>ReadConcern</code> value and the <code>afterClusterTime</code> field.
 </li>
 </ol>
 <h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
-<p>To support causal consistency. Only supported with server version 3.6 or newer.</p>
+<p>To support causal consistency.</p>
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
 <p>The goal is to modify the driver API as little as possible so that existing programs that don’t need causal consistency
 don’t have to be changed. This goal is met by defining a <code>SessionOptions</code> field that applications use to start a

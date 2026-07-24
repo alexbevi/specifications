@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -211,8 +211,7 @@ configurable in all drivers, not just single-threaded drivers.</p>
 <h2 id="driver-tests"><a class="header" href="#driver-tests">Driver Tests</a></h2>
 <h3 id="parse-lastwritedate"><a class="header" href="#parse-lastwritedate">Parse lastWriteDate</a></h3>
 <p>Configure a client with heartbeatFrequencyMS of 500 milliseconds.</p>
-<p>Connect to a MongoDB replica set member with maxWireVersion at least 5. (Only replica set members with maxWireVersion 5
-have a lastWriteDate in the legacy hello reply.)</p>
+<p>Connect to a MongoDB replica set member.</p>
 <p>Insert a document and wait one second.</p>
 <p>Get the client’s ServerDescription for the server. It must have a non-zero lastWriteDate. Wait another second.<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup></p>
 <p>Insert a document and wait one second.</p>
@@ -220,15 +219,12 @@ have a lastWriteDate in the legacy hello reply.)</p>
 but less than 10 seconds greater.</p>
 <p>(This test is as lenient as possible, while still testing that the driver parses lastWriteDate and converts it to an
 appropriate unit.)</p>
-<h3 id="absent-lastwritedate"><a class="header" href="#absent-lastwritedate">Absent lastWriteDate</a></h3>
-<p>Connect to a MongoDB server with maxWireVersion less than 5. Check that the driver’s ServerDescription for this server
-has no lastWriteDate, represented with null, zero, or however the driver represents a non-value.</p>
 <h3 id="direct-connection-to-mongos"><a class="header" href="#direct-connection-to-mongos">Direct connection to mongos</a></h3>
 <p>Initialize a MongoClient with this connection string:</p>
 <pre><code class="language-text">mongodb://mongos/?readPreference=secondary&amp;maxStalenessSeconds=120
 </code></pre>
-<p>Where “mongos” is the hostname and port of a mongos server running wire protocol version 5+. Execute a “findOne”
-operation. The MongoClient must include following read preference element with its “find” command:</p>
+<p>Where “mongos” is the hostname and port of a mongos server. Execute a “findOne” operation. The MongoClient must include
+following read preference element with its “find” command:</p>
 <pre><code class="language-javascript">$readPreference: {
     mode: "secondary",
     maxStalenessSeconds: 120

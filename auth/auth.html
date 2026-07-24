@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="authentication"><a class="header" href="#authentication">Authentication</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 2.6</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -275,8 +274,8 @@ definitions for details.</p>
 Userinfo or authentication parameters in connection options MUST NOT be interpreted as a request for authentication.</p>
 <h4 id="errors"><a class="header" href="#errors">Errors</a></h4>
 <p>Drivers SHOULD raise an error as early as possible when detecting invalid values in a credential. For instance, if a
-<code>mechanism_property</code> is specified for <a href="#mongodb-cr">MONGODB-CR</a>, the driver should raise an error indicating that the
-property does not apply.</p>
+<code>mechanism_property</code> is specified for a mechanism that does not support it, the driver should raise an error indicating
+that the property does not apply.</p>
 <p>Drivers MUST raise an error if any required information for a mechanism is missing. For instance, if a <code>username</code> is not
 specified for SCRAM-SHA-256, the driver must raise an error indicating the the property is missing.</p>
 <h4 id="naming"><a class="header" href="#naming">Naming</a></h4>
@@ -307,8 +306,7 @@ authentication conversations.</p>
 type. If the <code>hello</code> or legacy hello of the MongoDB Handshake fails with an error, drivers MUST treat this as an
 authentication error.</li>
 <li>If the server is of type RSArbiter, no authentication is possible and the handshake is complete.</li>
-<li>Inspect the value of <code>maxWireVersion</code>. If the value is greater than or equal to <code>6</code>, then the driver MUST use
-<code>OP_MSG</code> for authentication. Otherwise, it MUST use <code>OP_QUERY</code>.</li>
+<li>Drivers MUST use <code>OP_MSG</code> for authentication.</li>
 <li>If credentials exist: 3.1. A driver MUST authenticate with all credentials provided to the MongoClient. 3.2. A single
 invalid credential is the same as all credentials being invalid.</li>
 </ol>
@@ -319,9 +317,6 @@ for rationale.)</p>
 <p>All blocking operations executed as part of the authentication handshake MUST apply timeouts per the
 <a href="../client-side-operations-timeout/client-side-operations-timeout.html">Client Side Operations Timeout</a> specification.</p>
 <h4 id="mechanism-negotiation-via-handshake"><a class="header" href="#mechanism-negotiation-via-handshake">Mechanism Negotiation via Handshake</a></h4>
-<ul>
-<li>Since: 4.0</li>
-</ul>
 <p>If an application provides a username but does not provide an authentication mechanism, drivers MUST negotiate a
 mechanism via a <code>hello</code> or legacy hello command requesting a user’s supported SASL mechanisms:</p>
 <pre><code class="language-javascript">{hello: 1, saslSupportedMechs: "&lt;dbname&gt;.&lt;username&gt;"}
@@ -331,8 +326,7 @@ are the same; either from the connection string or else defaulting to ‘admin�
 in the auth credential. The username MUST NOT be modified from the form provided by the user (i.e. do not normalize with
 SASLprep), as the server uses the raw form to look for conflicts with legacy credentials.</p>
 <p>If the handshake response includes a <code>saslSupportedMechs</code> field, then drivers MUST use the contents of that field to
-select a default mechanism as described later. If the command succeeds and the response does not include a
-<code>saslSupportedMechs</code> field, then drivers MUST use the legacy default mechanism rules for servers older than 4.0.</p>
+select a default mechanism as described later.</p>
 <p>Drivers MUST NOT validate the contents of the <code>saslSupportedMechs</code> attribute of the initial handshake reply. Drivers
 MUST NOT raise an error if the <code>saslSupportedMechs</code> attribute of the reply includes an unknown mechanism.</p>
 <h3 id="single-credential-drivers"><a class="header" href="#single-credential-drivers">Single-credential drivers</a></h3>
@@ -345,14 +339,8 @@ may not have user credentials when connections are opened and thus will not be a
 <p>Drivers with a list of credentials at the time a connection is opened MAY do mechanism negotiation on the initial
 handshake, but only for the first credential in the list of credentials.</p>
 <p>When authenticating each credential, if the authentication mechanism is not specified and has not been negotiated for
-that credential:</p>
-<ul>
-<li>If the connection handshake results indicate the server version is 4.0 or later, drivers MUST send a new <code>hello</code> or
-legacy hello negotiation command for the credential to determine the default authentication mechanism.</li>
-<li>Otherwise, when the server version is earlier than 4.0, the driver MUST select a default authentication mechanism for
-the credential following the instructions for when the <code>saslSupportedMechs</code> field is not present in a legacy hello
-response.</li>
-</ul>
+that credential, drivers MUST send a new <code>hello</code> or legacy hello negotiation command for the credential to determine the
+default authentication mechanism.</p>
 <h3 id="caching-credentials-in-scram"><a class="header" href="#caching-credentials-in-scram">Caching credentials in SCRAM</a></h3>
 <p>In the implementation of SCRAM authentication mechanisms (e.g. SCRAM-SHA-1 and SCRAM-SHA-256), drivers MUST maintain a
 cache of computed SCRAM credentials. The cache entries SHOULD be identified by the password, salt, iteration count, and
@@ -372,10 +360,6 @@ operation MUST be raised to the user.</p>
 spec tests for reauthentication, it may be necessary to add reauthentication support for whichever auth mechanism is
 used when running the authentication spec tests.</p>
 <h3 id="default-authentication-methods"><a class="header" href="#default-authentication-methods">Default Authentication Methods</a></h3>
-<ul>
-<li>Since: 3.0</li>
-<li>Revised: 4.0</li>
-</ul>
 <p>If the user did not provide a mechanism via the connection string or via code, the following logic describes how to
 select a default.</p>
 <p>If a <code>saslSupportedMechs</code> field was present in the handshake response for mechanism negotiation, then it MUST be
@@ -391,92 +375,20 @@ inspected to select a default mechanism:</p>
 be used as the default, regardless of whether SCRAM-SHA-1 is in the list. Drivers MUST NOT attempt to use any other
 mechanism (e.g. PLAIN) as the default.</p>
 <p>If <code>saslSupportedMechs</code> is not present in the handshake response for mechanism negotiation, then SCRAM-SHA-1 MUST be
-used when talking to servers &gt;= 3.0. Prior to server 3.0, MONGODB-CR MUST be used.</p>
+used as the default.</p>
 <p>When a user has specified a mechanism, regardless of the server version, the driver MUST honor this.</p>
-<h4 id="determining-server-version"><a class="header" href="#determining-server-version">Determining Server Version</a></h4>
-<p>Drivers SHOULD use the server’s wire version ranges to determine the server’s version.</p>
-<h3 id="mongodb-cr"><a class="header" href="#mongodb-cr">MONGODB-CR</a></h3>
-<ul>
-<li>Since: 1.4</li>
-<li>Deprecated: 3.0</li>
-<li>Removed: 4.0</li>
-</ul>
-<p>MongoDB Challenge Response is a nonce and MD5 based system. The driver sends a <code>getnonce</code> command, encodes and hashes
-the password using the returned nonce, and then sends an <code>authenticate</code> command.</p>
-<h4 id="conversation"><a class="header" href="#conversation">Conversation</a></h4>
-<ol>
-<li>
-<p>Send <code>getnonce</code> command</p>
-<pre><code class="language-javascript">CMD = { getnonce: 1 }
-RESP = { nonce: &lt;nonce&gt; }
-</code></pre>
-</li>
-<li>
-<p>Compute key</p>
-<pre><code class="language-javascript">passwordDigest = HEX( MD5( UTF8( username + ':mongo:' + password )))
-key = HEX( MD5( UTF8( nonce + username + passwordDigest )))
-</code></pre>
-</li>
-<li>
-<p>Send <code>authenticate</code> command</p>
-<pre><code class="language-javascript">CMD = { authenticate: 1, nonce: nonce, user: username, key: key }
-</code></pre>
-</li>
-</ol>
-<p>As an example, given a username of “user” and a password of “pencil”, the conversation would appear as follows:</p>
-<pre><code class="language-javascript">CMD = {getnonce : 1}
-RESP = {nonce: "2375531c32080ae8", ok: 1}
-CMD = {authenticate: 1, user: "user", nonce: "2375531c32080ae8", key: "21742f26431831d5cfca035a08c5bdf6"}
-RESP = {ok: 1}
-</code></pre>
-<h4 id="mongocredential-properties"><a class="header" href="#mongocredential-properties"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
-<ul>
-<li>
-<p>username</p>
-<p>MUST be specified and non-zero length.</p>
-</li>
-<li>
-<p>source</p>
-<p>MUST be specified. Defaults to the database name if supplied on the connection string or <code>admin</code>.</p>
-</li>
-<li>
-<p>password</p>
-<p>MUST be specified.</p>
-</li>
-<li>
-<p>mechanism</p>
-<p>MUST be “MONGODB-CR”</p>
-</li>
-<li>
-<p>mechanism_properties</p>
-<p>MUST NOT be specified.</p>
-</li>
-</ul>
 <h3 id="mongodb-x509"><a class="header" href="#mongodb-x509">MONGODB-X509</a></h3>
-<ul>
-<li>Since: 2.6</li>
-<li>Changed: 3.4</li>
-</ul>
 <p>MONGODB-X509 is the usage of X.509 certificates to validate a client where the distinguished subject name of the client
 certificate acts as the username.</p>
-<p>When connected to MongoDB 3.4:</p>
 <ul>
 <li>You MUST NOT raise an error when the application only provides an X.509 certificate and no username.</li>
 <li>If the application does not provide a username you MUST NOT send a username to the server.</li>
 <li>If the application provides a username you MUST send that username to the server.</li>
 </ul>
-<p>When connected to MongoDB 3.2 or earlier:</p>
-<ul>
-<li>You MUST send a username to the server.</li>
-<li>If no username is provided by the application, you MAY extract the username from the X.509 certificate instead of
-requiring the application to provide it.</li>
-<li>If you choose not to automatically extract the username from the certificate you MUST error when no username is
-provided by the application.</li>
-</ul>
-<h4 id="conversation-1"><a class="header" href="#conversation-1">Conversation</a></h4>
+<h4 id="conversation"><a class="header" href="#conversation">Conversation</a></h4>
 <ol>
 <li>
-<p>Send <code>authenticate</code> command (MongoDB 3.4+)</p>
+<p>Send <code>authenticate</code> command</p>
 <pre><code class="language-javascript">CMD = {"authenticate": 1, "mechanism": "MONGODB-X509"}
 RESP = {"dbname" : "$external", "user" : "C=IS,ST=Reykjavik,L=Reykjavik,O=MongoDB,OU=Drivers,CN=client", "ok" : 1}
 </code></pre>
@@ -490,11 +402,11 @@ RESP = {"dbname" : "$external", "user" : "C=IS,ST=Reykjavik,L=Reykjavik,O=MongoD
 </code></pre>
 </li>
 </ol>
-<h4 id="mongocredential-properties-1"><a class="header" href="#mongocredential-properties-1"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
+<h4 id="mongocredential-properties"><a class="header" href="#mongocredential-properties"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
 <ul>
 <li>
 <p>username</p>
-<p>SHOULD NOT be provided for MongoDB 3.4+ MUST be specified and non-zero length for MongoDB prior to 3.4</p>
+<p>SHOULD NOT be provided</p>
 </li>
 <li>
 <p>source</p>
@@ -515,9 +427,6 @@ RESP = {"dbname" : "$external", "user" : "C=IS,ST=Reykjavik,L=Reykjavik,O=MongoD
 </ul>
 <p>TODO: Errors</p>
 <h3 id="sasl-mechanisms"><a class="header" href="#sasl-mechanisms">SASL Mechanisms</a></h3>
-<ul>
-<li>Since: 2.4 Enterprise</li>
-</ul>
 <p>SASL mechanisms are all implemented using the same sasl commands and interpreted as defined by the
 <a href="http://tools.ietf.org/html/rfc4422">SASL specification RFC 4422</a>.</p>
 <ol>
@@ -549,13 +458,6 @@ SCRAM-SHA-1 from scratch.</p>
 </li>
 </ol>
 <h3 id="gssapi"><a class="header" href="#gssapi">GSSAPI</a></h3>
-<ul>
-<li>
-<p>Since:</p>
-<p>2.4 Enterprise</p>
-<p>2.6 Enterprise on Windows</p>
-</li>
-</ul>
 <p>GSSAPI is kerberos authentication as defined in <a href="http://tools.ietf.org/html/rfc4752">RFC 4752</a>. Microsoft has a
 proprietary implementation called SSPI which is compatible with both Windows and Linux clients.</p>
 <p><a href="#mongocredential">MongoCredential</a> properties:</p>
@@ -670,13 +572,10 @@ print('canonicalized: [%s]' % (canonicalized,))
 AF_INET6, and beware of a bug in older MIT Kerberos that causes it to always do reverse DNS lookup even if the <code>rdns</code>
 configuration option is set to <code>false</code>.</p>
 <h3 id="plain"><a class="header" href="#plain">PLAIN</a></h3>
-<ul>
-<li>Since: 2.6 Enterprise</li>
-</ul>
 <p>The PLAIN mechanism, as defined in <a href="http://tools.ietf.org/html/rfc4616">RFC 4616</a>, is used in MongoDB to perform LDAP
 authentication. It cannot be used to perform any other type of authentication. Since the credentials are stored outside
 of MongoDB, the <code>$external</code> database must be used for authentication.</p>
-<h4 id="conversation-2"><a class="header" href="#conversation-2">Conversation</a></h4>
+<h4 id="conversation-1"><a class="header" href="#conversation-1">Conversation</a></h4>
 <p>As an example, given a username of “user” and a password of “pencil”, the conversation would appear as follows:</p>
 <pre><code class="language-javascript">CMD = {saslStart: 1, mechanism: "PLAIN", payload: BinData(0, "AHVzZXIAcGVuY2ls")}
 RESP = {conversationId: 1, payload: BinData(0,""), done: true, ok: 1}
@@ -686,7 +585,7 @@ RESP = {conversationId: 1, payload: BinData(0,""), done: true, ok: 1}
 RESP = {conversationId: 1, payload: BinData(0,""), done: true, ok: 1}
 </code></pre>
 <p>MongoDB supports either of these forms.</p>
-<h4 id="mongocredential-properties-2"><a class="header" href="#mongocredential-properties-2"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
+<h4 id="mongocredential-properties-1"><a class="header" href="#mongocredential-properties-1"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
 <ul>
 <li>
 <p>username</p>
@@ -710,9 +609,6 @@ RESP = {conversationId: 1, payload: BinData(0,""), done: true, ok: 1}
 </li>
 </ul>
 <h3 id="scram-sha-1"><a class="header" href="#scram-sha-1">SCRAM-SHA-1</a></h3>
-<ul>
-<li>Since: 3.0</li>
-</ul>
 <p>SCRAM-SHA-1 is defined in <a href="http://tools.ietf.org/html/rfc5802">RFC 5802</a>.</p>
 <p><a href="http://tools.ietf.org/html/rfc5802#page-11">Page 11 of the RFC</a> specifies that user names be prepared with SASLprep,
 but drivers MUST NOT do so.</p>
@@ -742,7 +638,7 @@ named <code>skipEmptyExchange</code> whose value is true. Older servers will ign
 longer conversation as shown in the “Backwards Compatibility” section. Newer servers will set the <code>done</code> field to <code>true</code>
 when it responds to the client at the end of the second round trip, showing proof that it knows the password. This will
 shorten the conversation by one round trip.</p>
-<h4 id="conversation-3"><a class="header" href="#conversation-3">Conversation</a></h4>
+<h4 id="conversation-2"><a class="header" href="#conversation-2">Conversation</a></h4>
 <p>As an example, given a username of “user” and a password of “pencil” and an r value of “fyko+d2lbbFgONRv9qkxdawL”, a
 SCRAM-SHA-1 conversation would appear as follows:</p>
 <pre><code class="language-javascript">CMD = "n,,n=user,r=fyko+d2lbbFgONRv9qkxdawL"
@@ -756,7 +652,7 @@ RESP = {conversationId : 1, payload: BinData(0,"cj1meWtvK2QybGJiRmdPTlJ2OXFreGRh
 CMD = {saslContinue: 1, conversationId: 1, payload: BinData(0, "Yz1iaXdzLHI9ZnlrbytkMmxiYkZnT05Sdjlxa3hkYXdMSG8rVmdrN3F2VU9LVXd1V0xJV2c0bC85U3JhR01IRUUscD1NQzJUOEJ2Ym1XUmNrRHc4b1dsNUlWZ2h3Q1k9")}
 RESP = {conversationId: 1, payload: BinData(0,"dj1VTVdlSTI1SkQxeU5ZWlJNcFo0Vkh2aFo5ZTA9"), done: true, ok: 1}
 </code></pre>
-<h4 id="mongocredential-properties-3"><a class="header" href="#mongocredential-properties-3"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
+<h4 id="mongocredential-properties-2"><a class="header" href="#mongocredential-properties-2"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
 <ul>
 <li>
 <p>username</p>
@@ -780,9 +676,6 @@ RESP = {conversationId: 1, payload: BinData(0,"dj1VTVdlSTI1SkQxeU5ZWlJNcFo0Vkh2a
 </li>
 </ul>
 <h3 id="scram-sha-256"><a class="header" href="#scram-sha-256">SCRAM-SHA-256</a></h3>
-<ul>
-<li>Since: 4.0</li>
-</ul>
 <p>SCRAM-SHA-256 extends <a href="http://tools.ietf.org/html/rfc5802">RFC 5802</a> and is formally defined in
 <a href="https://tools.ietf.org/html/rfc7677">RFC 7677</a>.</p>
 <p>The MongoDB SCRAM-SHA-256 mechanism works similarly to the SCRAM-SHA-1 mechanism, with the following changes:</p>
@@ -799,7 +692,7 @@ named <code>skipEmptyExchange</code> whose value is true. Older servers will ign
 longer conversation as shown in the “Backwards Compatibility” section. Newer servers will set the <code>done</code> field to <code>true</code>
 when it responds to the client at the end of the second round trip, showing proof that it knows the password. This will
 shorten the conversation by one round trip.</p>
-<h4 id="conversation-4"><a class="header" href="#conversation-4">Conversation</a></h4>
+<h4 id="conversation-3"><a class="header" href="#conversation-3">Conversation</a></h4>
 <p>As an example, given a username of “user” and a password of “pencil” and an r value of “rOprNGfwEbeRWgbNEkqO”, a
 SCRAM-SHA-256 conversation would appear as follows:</p>
 <pre><code class="language-javascript">CMD = "n,,n=user,r=rOprNGfwEbeRWgbNEkqO"
@@ -813,7 +706,7 @@ RESP = {conversationId: 1, payload: BinData(0, "cj1yT3ByTkdmd0ViZVJXZ2JORWtxTyVo
 CMD = {saslContinue: 1, conversationId: 1, payload: BinData(0, "Yz1iaXdzLHI9ck9wck5HZndFYmVSV2diTkVrcU8laHZZRHBXVWEyUmFUQ0FmdXhGSWxqKWhObEYkazAscD1kSHpiWmFwV0lrNGpVaE4rVXRlOXl0YWc5empmTUhnc3FtbWl6N0FuZFZRPQ==")}
 RESP = {conversationId: 1, payload: BinData(0, "dj02cnJpVFJCaTIzV3BSUi93dHVwK21NaFVaVW4vZEI1bkxUSlJzamw5NUc0PQ=="), done: true, ok: 1}
 </code></pre>
-<h4 id="mongocredential-properties-4"><a class="header" href="#mongocredential-properties-4"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
+<h4 id="mongocredential-properties-3"><a class="header" href="#mongocredential-properties-3"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
 <ul>
 <li>
 <p>username</p>
@@ -874,7 +767,7 @@ human-readable “friendly name” which is used in this specification. They are
 <p>Drivers MUST NOT advertise support for channel binding, as the server does not support it and legacy servers may fail
 authentication if drivers advertise support. The client-first-message MUST set the gs2-cb-flag to the integer
 representation of the ASCII character <code>n</code>, i.e., <code>110</code>.</p>
-<h4 id="conversation-5"><a class="header" href="#conversation-5">Conversation</a></h4>
+<h4 id="conversation-4"><a class="header" href="#conversation-4">Conversation</a></h4>
 <p>The first message sent by drivers MUST contain a <code>client nonce</code> and <code>gs2-cb-flag</code>. In response, the server will send a
 <code>server nonce</code> and <code>sts host</code>. Drivers MUST validate that the server nonce is exactly 64 bytes and the first 32 bytes
 are the same as the client nonce. Drivers MUST also validate that the length of the host is greater than 0 and less than
@@ -996,7 +889,7 @@ else // the valid host string contains no periods and is not "aws.amazonaws.com"
 </tbody>
 </table>
 </div>
-<h4 id="mongocredential-properties-5"><a class="header" href="#mongocredential-properties-5"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
+<h4 id="mongocredential-properties-4"><a class="header" href="#mongocredential-properties-4"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
 <ul>
 <li>
 <p>username</p>
@@ -1248,7 +1141,7 @@ database tools or CLIs. Some OIDC documentation refers to the human authenticati
 <p>Drivers that support the <a href="#human-authentication-flow">Human Authentication Flow</a> MUST implement all behaviors described
 in the MONGODB-OIDC specification, including sections or blocks that specifically say that it only applies the
 <a href="#human-authentication-flow">Human Authentication Flow</a>.</p>
-<h4 id="mongocredential-properties-6"><a class="header" href="#mongocredential-properties-6"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
+<h4 id="mongocredential-properties-5"><a class="header" href="#mongocredential-properties-5"><a href="#mongocredential">MongoCredential</a> Properties</a></h4>
 <ul>
 <li>
 <p>username</p>
@@ -1536,7 +1429,7 @@ callback. See the Conversation and <a href="#credential-caching">Credential Cach
 <li>The timeout duration MUST be 5 minutes. This is to account for the human interaction required to complete the
 callback. In this case, the callback is not subject to CSOT.</li>
 </ul>
-<h4 id="conversation-6"><a class="header" href="#conversation-6">Conversation</a></h4>
+<h4 id="conversation-5"><a class="header" href="#conversation-5">Conversation</a></h4>
 <p>OIDC supports two conversation styles: one-step and two-step. The server detects whether the driver is using a one-step
 or two-step conversation based on the structure of the <code>saslStart</code> payload.</p>
 <h5 id="one-step"><a class="header" href="#one-step">One-Step</a></h5>
@@ -1808,9 +1701,9 @@ the <em>Client Cache</em>, fetch a new access token, and re-run the SASL convers
 <ul>
 <li>
 <p>authMechanism</p>
-<p>MONGODB-CR, MONGODB-X509, GSSAPI, PLAIN, SCRAM-SHA-1, SCRAM-SHA-256, MONGODB-AWS</p>
-<p>Sets the Mechanism property on the MongoCredential. When not set, the default will be one of SCRAM-SHA-256,
-SCRAM-SHA-1 or MONGODB-CR, following the auth spec default mechanism rules.</p>
+<p>MONGODB-X509, GSSAPI, PLAIN, SCRAM-SHA-1, SCRAM-SHA-256, MONGODB-AWS</p>
+<p>Sets the Mechanism property on the MongoCredential. When not set, the default will be SCRAM-SHA-256 or SCRAM-SHA-1,
+following the auth spec default mechanism rules.</p>
 </li>
 <li>
 <p>authSource</p>
@@ -1818,9 +1711,8 @@ SCRAM-SHA-1 or MONGODB-CR, following the auth spec default mechanism rules.</p>
 </li>
 </ul>
 <p>For GSSAPI, MONGODB-X509 and MONGODB-AWS authMechanisms the authSource defaults to <code>$external</code>. For PLAIN the authSource
-defaults to the database name if supplied on the connection string or <code>$external</code>. For MONGODB-CR, SCRAM-SHA-1 and
-SCRAM-SHA-256 authMechanisms, the authSource defaults to the database name if supplied on the connection string or
-<code>admin</code>.</p>
+defaults to the database name if supplied on the connection string or <code>$external</code>. For SCRAM-SHA-1 and SCRAM-SHA-256
+authMechanisms, the authSource defaults to the database name if supplied on the connection string or <code>admin</code>.</p>
 <ul>
 <li>
 <p>authMechanismProperties=PROPERTY_NAME:PROPERTY_VALUE,PROPERTY_NAME2:PROPERTY_VALUE2</p>
@@ -1870,7 +1762,6 @@ colon follow the username before the ‘@’ hostname separator.</p>
 <li><a href="./tests/legacy/connection-string.json">Connection String</a>.</li>
 </ul>
 <h3 id="scram-sha-256-and-mechanism-negotiation"><a class="header" href="#scram-sha-256-and-mechanism-negotiation">SCRAM-SHA-256 and mechanism negotiation</a></h3>
-<p>Testing SCRAM-SHA-256 requires server version 3.7.3 or later with <code>featureCompatibilityVersion</code> of “4.0” or later.</p>
 <p>Drivers that allow specifying auth parameters in code as well as via connection string should test both for the test
 cases described below.</p>
 <h4 id="step-1"><a class="header" href="#step-1">Step 1</a></h4>
@@ -2003,6 +1894,9 @@ practice to avoid this. (See
 <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html">IAM Roles for Tasks</a>)</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-06-17: Remove additional pre-4.2 version references.</p>
+</li>
 <li>
 <p>2025-11-25: Remove redundant <code>*.mongodbgov.net</code> on <code>ALLOWED_HOSTS</code></p>
 </li>

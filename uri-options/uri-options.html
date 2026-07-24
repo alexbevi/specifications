@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -263,8 +263,8 @@ to URI options apply here.</p>
 <tr><td>readPreference</td><td>any string; currently supported values are defined in the <a href="../server-selection/server-selection.html#mode">server selection spec</a>, but must be lowercase camelCase, e.g. “primaryPreferred”</td><td>defined in <a href="../server-selection/server-selection.html#mode">server selection spec</a></td><td>no</td><td>Default read preference for the client (excluding tags)</td></tr>
 <tr><td>readPreferenceTags</td><td>comma-separated key:value pairs (e.g. “dc:ny,rack:1” and “dc:ny)<br><br>can be specified multiple times; each instance of this key is a separate tag set</td><td>no tags specified</td><td>no</td><td>Default read preference tags for the client; only valid if the read preference mode is not primary<br><br>The order of the tag sets in the read preference is the same as the order they are specified in the URI</td></tr>
 <tr><td>replicaSet</td><td>any string</td><td>no replica set name provided</td><td>no</td><td>The name of the replica set to connect to</td></tr>
-<tr><td>retryReads</td><td>“true” or “false”</td><td>defined in <a href="../retryable-reads/retryable-reads.html#retryreads">retryable reads spec</a></td><td>no</td><td>Enables retryable reads on server 3.6+</td></tr>
-<tr><td>retryWrites</td><td>“true” or “false”</td><td>defined in <a href="../retryable-writes/retryable-writes.html#retrywrites">retryable writes spec</a></td><td>no</td><td>Enables retryable writes on server 3.6+</td></tr>
+<tr><td>retryReads</td><td>“true” or “false”</td><td>defined in <a href="../retryable-reads/retryable-reads.html#retryreads">retryable reads spec</a></td><td>no</td><td>Enables retryable reads</td></tr>
+<tr><td>retryWrites</td><td>“true” or “false”</td><td>defined in <a href="../retryable-writes/retryable-writes.html#retrywrites">retryable writes spec</a></td><td>no</td><td>Enables retryable writes</td></tr>
 <tr><td>serverMonitoringMode</td><td>“stream”, “poll”, or “auto”</td><td>defined in <a href="../server-discovery-and-monitoring/server-monitoring.html#servermonitoringmode">SDAM spec</a></td><td>required for multi-threaded or asynchronous drivers</td><td>Configures which server monitoring protocol to use.</td></tr>
 <tr><td>serverSelectionTimeoutMS</td><td>positive integer; a driver may also accept 0 to be used for a special case, provided that it documents the meaning</td><td>defined in <a href="../server-selection/server-selection.html#serverselectiontimeoutms">server selection spec</a></td><td>no</td><td>A timeout in milliseconds to block for server selection before raising an error</td></tr>
 <tr><td>serverSelectionTryOnce</td><td>“true” or “false”</td><td>defined in <a href="../server-selection/server-selection.html#serverselectiontryonce">server selection spec</a></td><td>required for single-threaded drivers</td><td>Scan the topology only once after a server selection failure instead of repeatedly until the server selection times out</td></tr>
@@ -332,6 +332,9 @@ the name or the semantics of a URI option or adds a new URI option, this specifi
 changes.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
 <li>
 <p>2024-05-08: Migrated from reStructuredText to Markdown.</p>
 </li>

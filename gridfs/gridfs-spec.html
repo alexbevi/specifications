@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="gridfs-spec"><a class="header" href="#gridfs-spec">GridFS Spec</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 2.2</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -717,8 +716,7 @@ found ids that were just deleted.</p>
    * can write temporary data to disk while executing the find operation on the files collection.
    *
    * This option is sent only if the caller explicitly provides a value. The default
-   * is to not send a value. For servers &lt; 3.2, this option is ignored and not sent
-   * as allowDiskUse does not exist in the OP_QUERY wire protocol.
+   * is to not send a value.
    *
    * @see https://www.mongodb.com/docs/manual/reference/command/find/
    */
@@ -1026,6 +1024,7 @@ system. While this functionality is not in-scope for this spec (see “Why can�
 system?”) it is a potential area of growth for the future.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2026-06-17: Remove pre-4.2 version references.</li>
 <li>2024-10-30: Add <code>delete_by_name</code> and <code>rename_by_name</code></li>
 <li>2024-10-28: Removed deprecated fields from tests: <code>md5</code>, <code>contentType</code>, <code>aliases</code></li>
 <li>2024-02-27: Migrated from reStructuredText to Markdown.</li>

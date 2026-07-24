@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="change-streams"><a class="header" href="#change-streams">Change Streams</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 3.6</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -493,9 +492,6 @@ class UpdateDescription {
        ns: String,
        id: Int64,
        firstBatch: Array&lt;ChangeStreamDocument&gt;,
-       /**
-        * postBatchResumeToken is returned in MongoDB 4.0.7 and later.
-        */
        postBatchResumeToken: Document
     },
     operationTime: Timestamp,
@@ -511,9 +507,6 @@ class UpdateDescription {
        ns: String,
        id: Int64,
        nextBatch: Array&lt;ChangeStreamDocument&gt;
-       /**
-        * postBatchResumeToken is returned in MongoDB 4.0.7 and later.
-        */
        postBatchResumeToken: Document
     },
     operationTime: Timestamp,
@@ -843,7 +836,6 @@ return an error. Drivers MUST NOT throw a custom error, and MUST defer to the se
 met:</p>
 <ul>
 <li>None of <code>startAtOperationTime</code>, <code>resumeAfter</code>, <code>startAfter</code> were specified in the <code>ChangeStreamOptions</code>.</li>
-<li>The max wire version is &gt;= <code>7</code>.</li>
 <li>The initial <code>aggregate</code> response had no results.</li>
 <li>The initial <code>aggregate</code> response did not include a <code>postBatchResumeToken</code>.</li>
 </ul>
@@ -879,7 +871,7 @@ the driver MUST remove it.</li>
 </ul>
 </li>
 <li>Else if there is no cached <code>resumeToken</code> and the <code>ChangeStream</code> has a saved operation time (either from an originally
-specified <code>startAtOperationTime</code> or saved from the original aggregation) and the max wire version is &gt;= <code>7</code>:
+specified <code>startAtOperationTime</code> or saved from the original aggregation):
 <ul>
 <li>The driver MUST NOT set <code>resumeAfter</code>.</li>
 <li>The driver MUST NOT set <code>startAfter</code>.</li>
@@ -914,12 +906,9 @@ MUST NOT attempt to kill the cursor on any other server. Any exceptions or error
 killing the cursor should be suppressed, including both errors returned by the <code>killCursor</code> command and exceptions
 thrown by opening, writing to, or reading from the socket.</p>
 <h5 id="exposing-all-resume-tokens"><a class="header" href="#exposing-all-resume-tokens">Exposing All Resume Tokens</a></h5>
-<ul>
-<li>Since: 4.0.7</li>
-</ul>
-<p>Users can inspect the _id on each <code>ChangeDocument</code> to use as a resume token. But since MongoDB 4.0.7, aggregate and
-getMore responses also include a <code>postBatchResumeToken</code>. Drivers use one or the other when automatically resuming, as
-described in <a href="#resume-process">Resume Process</a>.</p>
+<p>Users can inspect the _id on each <code>ChangeDocument</code> to use as a resume token. Aggregate and getMore responses also
+include a <code>postBatchResumeToken</code>. Drivers use one or the other when automatically resuming, as described in
+<a href="#resume-process">Resume Process</a>.</p>
 <p>Drivers MUST expose a mechanism to retrieve the same resume token that would be used to automatically resume. It MUST be
 possible to use this mechanism after iterating every document. It MUST be possible for users to use this mechanism
 periodically even when no documents are getting returned (i.e. <code>getMore</code> has returned empty batches). Drivers have two
@@ -1115,6 +1104,9 @@ unnecessary scanning of unmatched oplog entries.</p>
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
 <li>
 <p>2026-04-28: Remove test for nsType when creating timeseries</p>
 </li>

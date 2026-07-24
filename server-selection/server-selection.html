@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="server-selection"><a class="header" href="#server-selection">Server Selection</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 2.4</li>
 </ul>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>MongoDB deployments may offer more than one server that can service an operation. This specification describes how
@@ -444,8 +443,6 @@ maxStalenessSeconds &gt;= smallestMaxStalenessSeconds
 <p>mongos MUST reject a read with <code>maxStalenessSeconds</code> that is not a positive integer.</p>
 <p>mongos MUST reject a read if <code>maxStalenessSeconds</code> is less than smallestMaxStalenessSeconds, with error code 160
 (SERVER-24421).</p>
-<p>During server selection, drivers (but not mongos) with <code>minWireVersion</code> &lt; 5 MUST raise an error if <code>maxStalenessSeconds</code>
-is a positive number, and any available server’s <code>maxWireVersion</code> is less than 5.<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup></p>
 <p>After filtering servers according to <code>mode</code>, and before filtering with <code>tag_sets</code>, eligibility MUST be determined from
 <code>maxStalenessSeconds</code> as follows:</p>
 <ul>
@@ -1099,10 +1096,6 @@ suits their design.</p>
             throw invalid wire protocol range error with details
 
         if maxStalenessSeconds is set:
-            if client minWireVersion &lt; 5 and "&lt;any available server's maxWireVersion &lt; 5"&gt;:
-                client.lock.release()
-                throw error
-
             if topologyDescription.type in (ReplicaSetWithPrimary, ReplicaSetNoPrimary):
                 if (maxStalenessSeconds * 1000 &lt; heartbeatFrequencyMS + idleWritePeriodMS or
                     maxStalenessSeconds &lt; smallestMaxStalenessSeconds):
@@ -1182,9 +1175,6 @@ suits their design.</p>
             # throw invalid wire version range error with details
 
         if maxStalenessSeconds is set:
-            if client minWireVersion &lt; 5 and "&lt;any available server's maxWireVersion &lt; 5&gt;":
-                # throw error
-
             if topologyDescription.type in (ReplicaSetWithPrimary, ReplicaSetNoPrimary):
                 if (maxStalenessSeconds * 1000 &lt; heartbeatFrequencyMS + idleWritePeriodMS or
                     maxStalenessSeconds &lt; smallestMaxStalenessSeconds):
@@ -1514,6 +1504,9 @@ specification</li>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
 <li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
+<li>
 <p>2025-12-08: Require server deprioritization for all topology types and clarify the order of server candidate
 filtering.</p>
 </li>
@@ -1621,13 +1614,6 @@ preference is not primary.</p>
 <p>2025-02-25: Note the deprecation of hedged reads.</p>
 </li>
 </ul>
-<hr>
-<ol class="footnote-definition">
-<li id="footnote-1">
-<p>mongos 3.4 refuses to connect to mongods with maxWireVersion &lt; 5, so it does no additional wire version checks
-related to maxStalenessSeconds. <a href="#fr-1-1">↩</a></p>
-</li>
-</ol>
 
                     </main>
 

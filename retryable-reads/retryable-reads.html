@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="retryable-reads"><a class="header" href="#retryable-reads">Retryable Reads</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 3.6</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -252,17 +251,6 @@ MongoClient constructor), drivers SHOULD use the defined name but MAY deviate to
 For example, a driver may use <code>retry_reads</code> instead of <code>retryReads</code>. For any other names in the spec, drivers SHOULD use
 the defined name but MAY deviate to comply with their existing conventions.</p>
 <h3 id="requirements-for-retryable-reads"><a class="header" href="#requirements-for-retryable-reads">Requirements for Retryable Reads</a></h3>
-<h4 id="supported-server-versions"><a class="header" href="#supported-server-versions">Supported Server Versions</a></h4>
-<p>Drivers MUST verify server eligibility by ensuring that <code>maxWireVersion</code> is at least 6 because retryable reads require a
-MongoDB 3.6 standalone, replica set or shard cluster, MongoDB 3.6 server wire version is 6 as defined in the
-<a href="../wireversion-featurelist/wireversion-featurelist.html">Server Wire version and Feature List specification</a>.</p>
-<p>The minimum server version is 3.6 because</p>
-<ol>
-<li>It gives us version parity with retryable writes.</li>
-<li>It forces the retry attempt(s) to use the same implicit session, which would make it it easier to track operations
-and kill any errant longer running operation.</li>
-<li>It limits the scope of the implementation (<code>OP_QUERY</code> will not need to be supported).</li>
-</ol>
 <h4 id="supported-read-operations"><a class="header" href="#supported-read-operations">Supported Read Operations</a></h4>
 <p>Drivers MUST support retryability for the following operations:</p>
 <ul>
@@ -373,7 +361,6 @@ infer that no attempt was made.</p>
 following conditions:</p>
 <ul>
 <li>if retryable reads is not enabled <strong>or</strong></li>
-<li>if the selected server does not support retryable reads <strong>or</strong></li>
 <li>if the session in a transaction</li>
 </ul>
 <p>By allowing the error to propagate, the caller is able to infer that one attempt was made.</p>
@@ -381,7 +368,6 @@ following conditions:</p>
 <p>Drivers MUST only attempt to retry a read command if</p>
 <ul>
 <li>retryable reads are enabled <strong>and</strong></li>
-<li>the selected server supports retryable reads <strong>and</strong></li>
 <li>the previous attempt yields a retryable error</li>
 </ul>
 <h5 id="3-deciding-to-allow-retry-encountering-the-initial-retryable-error-and-selecting-a-server"><a class="header" href="#3-deciding-to-allow-retry-encountering-the-initial-retryable-error-and-selecting-a-server">3. Deciding to allow retry, encountering the initial retryable error, and selecting a server</a></h5>
@@ -397,9 +383,8 @@ mechanism as a member of the deprioritized server address list only if the error
 <code>SystemOverloadedError</code>. All other retryable errors MUST NOT cause the server address to be added to the deprioritized
 server address list. This requirement preserves the existing behavior of retryable reads for non-overload errors and
 avoids unintended consequences for operations utilizing primaryPreferred and secondaryPreferred read preferences.</p>
-<p>If the driver cannot select a server for a retry attempt or the newly selected server does not support retryable reads,
-retrying is not possible and drivers MUST raise the previous retryable error. In both cases, the caller is able to infer
-that an attempt was made.</p>
+<p>If the driver cannot select a server for a retry attempt, retrying is not possible and drivers MUST raise the previous
+retryable error. In this case, the caller is able to infer that an attempt was made.</p>
 <h6 id="3b-sending-an-equivalent-command-for-a-retry-attempt"><a class="header" href="#3b-sending-an-equivalent-command-for-a-retry-attempt">3b. Sending an equivalent command for a retry attempt</a></h6>
 <p>After server selection, a driver MUST send a valid command to the newly selected server that is equivalent<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup> to the
 initial command sent to the first server. If the driver determines that the newly selected server may not be able to
@@ -453,13 +438,6 @@ specification and backoff retryabilitity as defined in the client backpressure s
 the <a href="../client-backpressure/client-backpressure.html">Backpressure Specification</a>.</p>
 </blockquote>
 <pre><code class="language-typescript">/**
- * Checks if a connection supports retryable reads.
- */
-function isRetryableReadsSupported(connection) {
-  return connection.MaxWireVersion &gt;= RETRYABLE_READS_MIN_WIRE_VERSION);
-}
-
-/**
  * Executes a read command in the context of a MongoClient where a retryable
  * read have been enabled. The session parameter may be an implicit or
  * explicit client session (depending on how the CRUD method was invoked).
@@ -516,20 +494,10 @@ function executeRetryableRead(command, session) {
       continue;
     }
 
-    if ( !isRetryableReadsSupported(connection) || session.inTransaction()) {
-      /* If this is the first loop iteration and we determine that retryable
-       * reads are not supported, execute the command once and allow any
-       * errors to propagate */
-
-      if (previousError == null) {
-        return executeCommand(connection, command);
-      }
-
-      /* If the server selected for retrying is too old, throw the previous error.
-       * The caller can then infer that an attempt was made and failed. This case
-       * is very rare, and likely means that the cluster is in the midst of a
-       * downgrade. */
-      throw previousError;
+    if (session.inTransaction()) {
+      /* Retryable reads are disabled within a transaction; execute the command
+       * once and allow any errors to propagate */
+      return executeCommand(connection, command);
     }
 
     /* NetworkException and NotWritablePrimaryException are both retryable errors. If
@@ -650,8 +618,6 @@ timeout period.</li>
 <a href="../retryable-writes/retryable-writes.html">retryable writes specification</a> may also need to be reflected in the
 retryable reads specification, and vice versa.</li>
 <li>We may revisit the decision not retry <code>Cursor.getMore()</code> (see <a href="#qa">Q&amp;A</a>).</li>
-<li>Once <a href="https://jira.mongodb.org/browse/DRIVERS-560">DRIVERS-560</a> is resolved, tests will be added to allow testing
-Retryable Reads on MongoDB 3.6. See the <a href="./tests/README.html">test plan</a> for additional information.</li>
 </ol>
 <h2 id="qa"><a class="header" href="#qa">Q&amp;A</a></h2>
 <h3 id="why-is-retrying-cursorgetmore-not-supported"><a class="header" href="#why-is-retrying-cursorgetmore-not-supported">Why is retrying <code>Cursor.getMore()</code> not supported?</a></h3>
@@ -709,6 +675,9 @@ reads because the resilience benefit of retryable reads outweighs the minor risk
 any customers experiencing degraded performance can simply disable <code>retryableReads</code>.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
 <li>
 <p>2026-02-19: Clarified that server deprioritization on replica sets only occurs for <code>SystemOverloadedError</code> errors.</p>
 </li>

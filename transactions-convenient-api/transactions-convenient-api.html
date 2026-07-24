@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,14 +178,14 @@
                         <h1 id="convenient-api-for-transactions"><a class="header" href="#convenient-api-for-transactions">Convenient API for Transactions</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 4.0</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
-<p>Reliably committing a transaction in the face of errors can be a complicated endeavor using the MongoDB 4.0 drivers API.
-This specification introduces a <code>withTransaction</code> method on the ClientSession object that allows application logic to be
-executed within a transaction. This method is capable of retrying either the commit operation or entire transaction as
-needed (and when the error permits) to better ensure that the transaction can complete successfully.</p>
+<p>Reliably committing a transaction in the face of errors can be a complicated endeavor using the drivers API introduced
+along with MongoDB 4.0. This specification introduces a <code>withTransaction</code> method on the ClientSession object that allows
+application logic to be executed within a transaction. This method is capable of retrying either the commit operation or
+entire transaction as needed (and when the error permits) to better ensure that the transaction can complete
+successfully.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
 <p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
 “OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
@@ -557,7 +557,7 @@ regularly in a healthy application, as opposed to UnknownTransactionCommitResult
 election.</p>
 <p>In order to avoid blocking the application with infinite retry loops, <code>withTransaction</code> will cease retrying invocations
 of the callback or commitTransaction if it has exceeded a fixed timeout period of 120 seconds. This limit is a
-non-configurable default and is intentionally twice the value of MongoDB 4.0’s default for the
+non-configurable default and is intentionally twice the value of the server’s default for the
 <a href="https://www.mongodb.com/docs/manual/reference/parameters/#param.transactionLifetimeLimitSeconds">transactionLifetimeLimitSeconds</a>
 parameter (60 seconds). Applications that desire longer retry periods may call <code>withTransaction</code> additional times as
 needed. Applications that desire shorter retry periods should not use this method.</p>
@@ -577,13 +577,16 @@ implementations may be found via <a href="https://jira.mongodb.org/browse/DRIVER
 <h2 id="security-implication"><a class="header" href="#security-implication">Security Implication</a></h2>
 <p>Applications that use transaction guarantees to enforce security rules will benefit from a less error-prone API. Adding
 a helper method to execute a user-defined function within a transaction has few security implications, as it only
-provides an implementation of a technique already described in the MongoDB 4.0 documentation
+provides an implementation of a technique already described in the MongoDB documentation
 (<a href="https://jira.mongodb.org/browse/DRIVERS-488">DRIVERS-488</a>).</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
 <li>
 <p>2026-07-08: Update exponential backoff formula to use the attempt number as the exponent instead of one less than the
 attempt number.</p>
+</li>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
 </li>
 <li>
 <p>2026-04-02: <a href="https://github.com/mongodb/specifications/pull/1920">DRIVERS-3436</a> Refine withTransaction timeout error

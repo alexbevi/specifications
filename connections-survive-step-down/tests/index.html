@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-73b9a657.js"></script>
@@ -206,7 +206,6 @@ test.</p>
 </ul>
 <p>The driver should implement the following tests:</p>
 <h3 id="getmore-iteration"><a class="header" href="#getmore-iteration">getMore Iteration</a></h3>
-<p>This test requires a replica set with server version 4.2 or higher.</p>
 <p>Perform the following operations:</p>
 <ul>
 <li>Insert 5 documents into a collection with a majority write concern.</li>
@@ -224,7 +223,6 @@ published. Otherwise verify that
 in <a href="https://www.mongodb.com/docs/manual/reference/command/serverStatus">serverStatus</a> has not changed.</li>
 </ul>
 <h3 id="not-primary---keep-connection-pool"><a class="header" href="#not-primary---keep-connection-pool">Not Primary - Keep Connection Pool</a></h3>
-<p>This test requires a replica set with server version 4.2 or higher.</p>
 <ul>
 <li>Set the following fail point:
 <code>{configureFailPoint: "failCommand", mode: {times: 1}, data: {failCommands: ["insert"], errorCode: 10107}}</code></li>
@@ -238,26 +236,7 @@ published. Otherwise verify that
 <a href="https://www.mongodb.com/docs/manual/reference/command/serverStatus/#serverstatus.connections.totalCreated">connections.totalCreated</a>
 in <a href="https://www.mongodb.com/docs/manual/reference/command/serverStatus">serverStatus</a> has not changed.</li>
 </ul>
-<h3 id="not-primary---reset-connection-pool"><a class="header" href="#not-primary---reset-connection-pool">Not Primary - Reset Connection Pool</a></h3>
-<p>This test requires a replica set with server version 4.0.</p>
-<ul>
-<li>Set the following fail point:
-<code>{configureFailPoint: "failCommand", mode: {times: 1}, data: {failCommands: ["insert"], errorCode: 10107}}</code></li>
-<li>Execute an insert into the test collection of a <code>{test: 1}</code> document.</li>
-<li>Verify that the insert failed with an operation failure with 10107 code.</li>
-<li>If the driver implements the <a href="../../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">CMAP</a>
-specification, verify that a
-<a href="../../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html#events">PoolClearedEvent</a> has been
-published</li>
-<li>Execute an insert into the test collection of a <code>{test: 1}</code> document and verify that it succeeds.</li>
-<li>If the driver does NOT implement the
-<a href="../../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">CMAP</a> specification, use the
-<a href="https://www.mongodb.com/docs/manual/reference/command/serverStatus">serverStatus</a> command to verify
-<a href="https://www.mongodb.com/docs/manual/reference/command/serverStatus/#serverstatus.connections.totalCreated">connections.totalCreated</a>
-has increased by 1.</li>
-</ul>
 <h3 id="shutdown-in-progress---reset-connection-pool"><a class="header" href="#shutdown-in-progress---reset-connection-pool">Shutdown in progress - Reset Connection Pool</a></h3>
-<p>This test should be run on all server versions &gt;= 4.0.</p>
 <p>Perform the following operations on a client configured to NOT retry writes:</p>
 <ul>
 <li>Set the following fail point:
@@ -276,7 +255,6 @@ published</li>
 has increased by 1.</li>
 </ul>
 <h3 id="interrupted-at-shutdown---reset-connection-pool"><a class="header" href="#interrupted-at-shutdown---reset-connection-pool">Interrupted at shutdown - Reset Connection Pool</a></h3>
-<p>This test should be run on all server versions &gt;= 4.0.</p>
 <p>Perform the following operations on a client configured to NOT retry writes:</p>
 <ul>
 <li>Set the following fail point:

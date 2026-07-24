@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="command-logging-and-monitoring"><a class="header" href="#command-logging-and-monitoring">Command Logging and Monitoring</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 2.4</li>
 </ul>
 <hr>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
@@ -349,7 +348,7 @@ MongoDB Handshake spec for details.</p>
   /**
    * Returns the server connection id for the command. The server connection id is distinct from
    * the connection id and is returned by the hello or legacy hello response as "connectionId"
-   * from the server on 4.2+. Drivers MUST use an Int64 to represent the server connection ID value.
+   * from the server. Drivers MUST use an Int64 to represent the server connection ID value.
    */
   serverConnectionId: Optional&lt;Int64&gt;;
 
@@ -407,7 +406,7 @@ interface CommandSucceededEvent {
   /**
    * Returns the server connection id for the command. The server connection id is distinct from
    * the connection id and is returned by the hello or legacy hello response as "connectionId"
-   * from the server on 4.2+. Drivers MUST use an Int64 to represent the server connection ID value.
+   * from the server. Drivers MUST use an Int64 to represent the server connection ID value.
    */
   serverConnectionId: Optional&lt;Int64&gt;;
 
@@ -466,7 +465,7 @@ interface CommandFailedEvent {
   /**
    * Returns the server connection id for the command. The server connection id is distinct from
    * the connection id and is returned by the hello or legacy hello response as "connectionId"
-   * from the server on 4.2+. Drivers MUST use an Int64 to represent the server connection ID value.
+   * from the server. Drivers MUST use an Int64 to represent the server connection ID value.
    */
   serverConnectionId: Optional&lt;Int64&gt;;
 
@@ -505,7 +504,7 @@ commands issued by server monitors.</p>
 <tr><td>driverConnectionId</td><td>Int64</td><td>The driver’s ID for the connection used for the command. Note this is NOT the same as <code>CommandStartedEvent.connectionId</code> defined above, but refers to the <code>connectionId</code> defined in the <a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">connection monitoring and pooling specification</a>. Unlike <code>CommandStartedEvent.connectionId</code> this field MUST NOT contain the host/port; that information MUST be in the following fields, <code>serverHost</code> and <code>serverPort</code>. This field is optional for drivers that do not implement CMAP if they do have an equivalent concept of a connection ID.</td></tr>
 <tr><td>serverHost</td><td>String</td><td>The hostname or IP address for the server the command is being run on.</td></tr>
 <tr><td>serverPort</td><td>Int</td><td>The port for the server the command is being run on. Optional; not present for Unix domain sockets. When the user does not specify a port and the default (27017) is used, the driver SHOULD include it here.</td></tr>
-<tr><td>serverConnectionId</td><td>Int64</td><td>The server’s ID for the connection used for the command. Optional; only present for server versions 4.2+. NOTE: Existing drivers may represent this as an Int32 already. For strongly-typed languages, you may have to introduce a new Int64 field and deprecate the old Int32 field. The next major version should remove the old Int32 field.</td></tr>
+<tr><td>serverConnectionId</td><td>Int64</td><td>The server’s ID for the connection used for the command. Optional. NOTE: Existing drivers may represent this as an Int32 already. For strongly-typed languages, you may have to introduce a new Int64 field and deprecate the old Int32 field. The next major version should remove the old Int32 field.</td></tr>
 <tr><td>serviceId</td><td>String</td><td>The hex string representation of the service ID for the command. Optional; only present when the driver is in load balancer mode.</td></tr>
 </tbody>
 </table>
@@ -584,6 +583,9 @@ released. Requiring the retention of this buffer until command completion could 
 penalties, particularly when event listeners are introduced.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
 <li>
 <p>2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.</p>
 </li>

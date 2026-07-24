@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="client-side-operations-timeout"><a class="header" href="#client-side-operations-timeout">Client Side Operations Timeout</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 2.6</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -602,10 +601,10 @@ rather than adding complexity to the behavior of <code>timeoutMS</code>.</p>
 <h3 id="runcommand-behavior"><a class="header" href="#runcommand-behavior">runCommand behavior</a></h3>
 <p>The behavior of runCommand varies across drivers. If the provided command document includes a <code>maxTimeMS</code> field and the
 <code>timeoutMS</code> option is set, some drivers would overwrite the <code>maxTimeMS</code> field with the value derived from <code>timeoutMS</code>,
-while others would append a second <code>maxTimeMS</code> field, which would cause a server error on versions 3.4+. To be
-prescriptive, we could mandate that drivers raise a client-side error in this case, but this would require a potentially
-expensive lookup in the command document. To avoid this additional cost, drivers are only required to document the
-behavior and suggest that <code>timeoutMS</code> be used instead of including a manual <code>maxTimeMS</code> field.</p>
+while others would append a second <code>maxTimeMS</code> field, which would cause a server error. To be prescriptive, we could
+mandate that drivers raise a client-side error in this case, but this would require a potentially expensive lookup in
+the command document. To avoid this additional cost, drivers are only required to document the behavior and suggest that
+<code>timeoutMS</code> be used instead of including a manual <code>maxTimeMS</code> field.</p>
 <h3 id="why-dont-drivers-use-backoffjitter-between-retry-attempts"><a class="header" href="#why-dont-drivers-use-backoffjitter-between-retry-attempts">Why don’t drivers use backoff/jitter between retry attempts?</a></h3>
 <p>Earlier versions of this specification proposed adding backoff and/or jitter between retry attempts to avoid connection
 storming or overloading the server, but we later deemed this unnecessary. If multiple concurrent operations select the
@@ -687,9 +686,8 @@ expected.</p>
 <h3 id="timeoutms-cannot-be-overridden-for-startsession-calls"><a class="header" href="#timeoutms-cannot-be-overridden-for-startsession-calls">timeoutMS cannot be overridden for startSession calls</a></h3>
 <p>In general, users can override <code>timeoutMS</code> at the level of a single operation. The <code>startSession</code> operation, however,
 only inherits <code>timeoutMS</code> from the MongoClient and does not allow the option to be overridden. This was a conscious API
-design decision because drivers are moving towards only supporting MongoDB versions 3.6 and higher, so sessions will
-always be supported. Adding an override for <code>startSession</code> would introduce a new knob and increase the API surface of
-drivers without providing a significant benefit.</p>
+design decision because all supported MongoDB versions support sessions. Adding an override for <code>startSession</code> would
+introduce a new knob and increase the API surface of drivers without providing a significant benefit.</p>
 <h3 id="drivers-use-minimum-rtt-to-short-circuit-operations"><a class="header" href="#drivers-use-minimum-rtt-to-short-circuit-operations">Drivers use minimum RTT to short circuit operations</a></h3>
 <p>A previous version of this spec used the 90th percentile RTT to short circuit operations that might otherwise fail with
 a socket timeout. We decided to change this logic to avoid canceling operations that may have a high chance of
@@ -705,12 +703,27 @@ changes, the default would continue to cap the stream lifetime but there could b
 timeout for each database operation. This would mimic using <code>timeoutMode=ITERATION</code> for cursors.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
-<li>2024-01-29: Adjust getMore maxTimeMS calculation for tailable awaitData cursors.</li>
-<li>2024-09-12: Specify that explain helpers support support timeoutMS.</li>
-<li>2023-12-07: Migrated from reStructuredText to Markdown.</li>
-<li>2022-11-17: Use minimum RTT for maxTimeMS calculation instead of 90th percentile RTT.</li>
-<li>2022-10-05: Remove spec front matter.</li>
-<li>2022-01-19: Initial version.</li>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
+<li>
+<p>2024-01-29: Adjust getMore maxTimeMS calculation for tailable awaitData cursors.</p>
+</li>
+<li>
+<p>2024-09-12: Specify that explain helpers support support timeoutMS.</p>
+</li>
+<li>
+<p>2023-12-07: Migrated from reStructuredText to Markdown.</p>
+</li>
+<li>
+<p>2022-11-17: Use minimum RTT for maxTimeMS calculation instead of 90th percentile RTT.</p>
+</li>
+<li>
+<p>2022-10-05: Remove spec front matter.</p>
+</li>
+<li>
+<p>2022-01-19: Initial version.</p>
+</li>
 </ul>
 
                     </main>

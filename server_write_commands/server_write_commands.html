@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="write-commands-specification"><a class="header" href="#write-commands-specification">Write Commands Specification</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 2.6</li>
 </ul>
 <hr>
 <h2 id="goals"><a class="header" href="#goals">Goals</a></h2>
@@ -546,13 +545,11 @@ until 6.0 continued to support the legacy opcodes.</p>
 <p>Yes. The drivers are still required to serve a {w:0} write concern by returning the control to the application as soon
 as possible. But a driver should send the request to the server via a write command and should, therefore, take the
 corresponding response off the wire – even if the caller is not interested in that result.</p>
-<h3 id="what-happens-if-a-driver-receives-a-write-request-against-an-old-server"><a class="header" href="#what-happens-if-a-driver-receives-a-write-request-against-an-old-server">What happens if a driver receives a write request against an old server?</a></h3>
-<p>It must convert that request into write operations + gle’s and use the old op codes.</p>
-<h3 id="are-we-discontinuing-the-use-of-getlasterror"><a class="header" href="#are-we-discontinuing-the-use-of-getlasterror">Are we discontinuing the use of getLastError?</a></h3>
-<p>Yes but as of 2.6 the existing getLastError behavior is supported for backward compatibility. Note also that
-<code>getLastError</code> was removed in server version 5.1.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
 <li>
 <p>2024-11-11: Add note that getLastError has been removed from the server.</p>
 </li>

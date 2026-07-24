@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="read-and-write-concern"><a class="header" href="#read-and-write-concern">Read and Write Concern</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 2.4</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -188,7 +187,6 @@ the API drivers must implement as well as how that API is translated into messag
 <p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
 “OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="terminology"><a class="header" href="#terminology">Terminology</a></h2>
-<p>MaxWireVersion The <code>maxWireVersion</code> value reported by the <code>hello</code> command.</p>
 <p>Server Selection The process of selecting a server to read or write from. See
 <a href="../server-selection/server-selection.html">the server selection specification</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
@@ -242,9 +240,8 @@ class ReadConcern {
 <li><code>geoNear</code> command</li>
 <li><code>geoSearch</code> command</li>
 </ul>
-<p>Starting in MongoDB 4.2, an <code>aggregate</code> command with a write stage (e.g. <code>$out</code>, <code>$merge</code>) supports a <code>readConcern</code>;
-however, it does not support the “linearizable” level (attempting to do so will result in a server error).</p>
-<p>Server versions before 4.2 do not support a <code>readConcern</code> at all for <code>aggregate</code> commands with a write stage.</p>
+<p>An <code>aggregate</code> command with a write stage (e.g. <code>$out</code>, <code>$merge</code>) supports a <code>readConcern</code>; however, it does not support
+the “linearizable” level (attempting to do so will result in a server error).</p>
 <p>The <code>mapReduce</code> command where the <code>out</code> option is anything other than <code>{ inline: 1 }</code> does not support a <code>readConcern</code>.</p>
 <p>The read concern document is also used to specify <code>afterClusterTime</code> for read and write operations in
 causally-consistent sessions. See <a href="#afterclustertime"><code>afterClusterTime</code></a> for more information.</p>
@@ -334,17 +331,6 @@ var col3 = db2.getCollection("col_name", { readConcern: { } });
 <p>For example:</p>
 <pre><code class="language-text">mongodb://server:27017/db?readConcernLevel=majority
 </code></pre>
-<h4 id="errors-1"><a class="header" href="#errors-1">Errors</a></h4>
-<ul>
-<li>MaxWireVersion &lt; 4 Only the server’s default <code>ReadConcern</code> is support by MaxWireVersion &lt; 4. When using other
-<code>readConcernLevels</code> with clients reporting <code>MaxWireVersion</code> &lt; 4, the driver MUST raise an error. This check MUST
-happen after server selection has occurred in the case of mixed version clusters. It is up to users to appropriately
-define a <code>ReadPreference</code> such that intermittent errors do not occur.</li>
-</ul>
-<blockquote class="blockquote-tag blockquote-tag-note">
-<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
-<p><code>ReadConcern</code> is only supported for commands.</p>
-</blockquote>
 <h3 id="write-concern"><a class="header" href="#write-concern">Write Concern</a></h3>
 <p>When a driver sends a write concern document to the server, the structure of the write concern document MUST be as
 follows:</p>
@@ -448,23 +434,11 @@ is new enough to support a write concern for the command. The method simply send
 as-is.</p>
 <h5 id="find-and-modify"><a class="header" href="#find-and-modify">Find And Modify</a></h5>
 <p>The <code>findAndModify</code> command takes a named parameter, <code>writeConcern</code>. See command documentation for further examples.</p>
-<p>If writeConcern is specified for the Collection, <code>writeConcern</code> MUST be omitted when sending <code>findAndModify</code> with
-MaxWireVersion &lt; 4.</p>
-<p>If the findAndModify helper accepts writeConcern as a parameter, the driver MUST raise an error with MaxWireVersion &lt;
-4.</p>
-<blockquote class="blockquote-tag blockquote-tag-note">
-<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
-<p>Driver documentation SHOULD include a warning in their server 3.2 compatible releases that an elevated <code>WriteConcern</code>
-may cause performance degradation when using <code>findAndModify</code>. This is because <code>findAndModify</code> will now be honoring a
-potentially high latency setting where it did not before.</p>
-</blockquote>
 <h5 id="other-commands-that-write"><a class="header" href="#other-commands-that-write">Other commands that write</a></h5>
 <p>Command helper methods for commands that write, other than those discussed above, MAY accept a write concern or write
-concern options in their parameter list. If the helper accepts a write concern, the driver MUST error if the selected
-server’s MaxWireVersion &lt; 5 and a write concern has explicitly been specified.</p>
-<p>Helper methods that apply the write concern inherited from the Collection or Database, SHOULD check whether the selected
-server’s MaxWireVersion &gt;= 5 and if so, include the inherited write concern in the command on the wire. If the selected
-server’s MaxWireVersion &lt; 5, these methods SHOULD silently omit the write concern from the command on the wire.</p>
+concern options in their parameter list.</p>
+<p>Helper methods that apply the write concern inherited from the Collection or Database SHOULD include the inherited write
+concern in the command on the wire.</p>
 <p>These commands that write are:</p>
 <blockquote>
 <ul>
@@ -487,7 +461,7 @@ server’s MaxWireVersion &lt; 5, these methods SHOULD silently omit the write c
 <li><code>dropUser</code></li>
 </ul>
 </blockquote>
-<h5 id="errors-2"><a class="header" href="#errors-2">Errors</a></h5>
+<h5 id="errors-1"><a class="header" href="#errors-1">Errors</a></h5>
 <p>In general, server errors associated with <code>WriteConcern</code> return successful (<code>"ok": 1</code>) responses with a
 <code>writeConcernError</code> field indicating the issue. For example,</p>
 <pre><code class="language-typescript">rs0:PRIMARY&gt; db.runCommand({insert: "foo", documents: [{x:1}], writeConcern: { w: "blah"}})
@@ -599,8 +573,6 @@ concerns.</p>
 <p>Below are English descriptions of other items that should be tested:</p>
 <h3 id="readconcern"><a class="header" href="#readconcern">ReadConcern</a></h3>
 <ol>
-<li>Commands supporting a read concern MUST raise an error when MaxWireVersion is less than 4 and a non-default,
-non-local read concern is specified.</li>
 <li>Commands supporting a read concern MUST NOT send the default read concern to the server.</li>
 <li>Commands supporting a read concern MUST send any non-default read concern to the server.</li>
 </ol>
@@ -612,10 +584,6 @@ non-local read concern is specified.</li>
 <h2 id="reference-implementation"><a class="header" href="#reference-implementation">Reference Implementation</a></h2>
 <p>These are currently under construction.</p>
 <h2 id="q--a"><a class="header" href="#q--a">Q &amp; A</a></h2>
-<p>Q: Why is specifying a non-default <code>ReadConcern</code> for servers &lt; 3.2 an error while a non-default write concern gets
-ignored in <code>findAndModify</code>? <code>findAndModify</code> is an existing command and since <code>WriteConcern</code> may be defined globally,
-anyone using <code>findAndModify</code> in their applications with a non-default <code>WriteConcern</code> defined globally would have all
-their <code>findAndModify</code> operations fail.</p>
 <p>Q: Why does a driver send <code>{ readConcern: { level: "local" } }</code> to the server when that is the server’s default? First,
 to mirror how <code>WriteConcern</code> already works, <code>ReadConcern() does not equal ReadConcern(level=local)</code> in the same way that
 <code>WriteConcern() does not equal WriteConcern(w=1)</code>. This is true for <code>WriteConcern</code> because the server’s default could be
@@ -625,6 +593,9 @@ don’t send one and if a user does specify a <code>ReadConcern</code>, we do se
 instance, we send it.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
 <li>
 <p>2026-05-04: Describe how <code>readConcern.afterClusterTime</code> is used in causally-consistent sessions on reads and writes.</p>
 </li>

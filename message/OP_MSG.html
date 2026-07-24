@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="op_msg"><a class="header" href="#op_msg">OP_MSG</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 3.6</li>
 </ul>
 <h3 id="abstract"><a class="header" href="#abstract">Abstract</a></h3>
 <p><code>OP_MSG</code> is a bi-directional wire protocol opcode introduced in MongoDB 3.6 with the goal of replacing most existing
@@ -367,7 +366,7 @@ where each identifier MUST be unique per message.</p>
 the <code>identifier</code> is the command argument’s name. Specifying a command argument as a separate payload removes the need to
 use a BSON Array. For example, <code>Payload Type 1</code> allows an array of documents to be specified as a sequence of BSON
 documents on the wire without the overhead of array keys.</p>
-<p>MongoDB 3.6 only allows certain command arguments to be provided this way. These are:</p>
+<p>MongoDB only allows certain command arguments to be provided this way. These are:</p>
 <div class="table-wrapper">
 <table>
 <thead>
@@ -556,6 +555,7 @@ helper, rather then adding wire protocol headers as options to the existing <cod
 </ul>
 <h3 id="changelog"><a class="header" href="#changelog">Changelog</a></h3>
 <ul>
+<li>2026-06-17: Remove pre-4.2 version references.</li>
 <li>2026-06-05: Use OP_MSG for all messages.</li>
 <li>2024-04-30: Convert from RestructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter.</li>

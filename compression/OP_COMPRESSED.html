@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -177,12 +177,7 @@
                     <main>
                         <h1 id="wire-compression-in-drivers"><a class="header" href="#wire-compression-in-drivers">Wire Compression in Drivers</a></h1>
 <ul>
-<li>
-<p>Status: Accepted</p>
-</li>
-<li>
-<p>Minimum Server Version: 3.4</p>
-</li>
+<li>Status: Accepted</li>
 </ul>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>This specification describes how to implement Wire Protocol Compression between MongoDB drivers and mongo[d|s].</p>
@@ -315,8 +310,6 @@ without regards to what opcode it wraps, be it <code>OP_QUERY</code>, <code>OP_R
 therefore effectively replaces the standard <code>MsgHeader</code> of the compressed opcode.</p>
 <p>There is no guarantee that a response will be compressed even though compression was negotiated for in the handshake.
 Clients MUST be able to parse both compressed and uncompressed responses to both compressed and uncompressed requests.</p>
-<p>MongoDB 3.4 will always reply with a compressed response when compression has been negotiated, but future versions may
-not.</p>
 <p>A client MAY choose to implement compression for only <code>OP_QUERY</code>, <code>OP_REPLY</code>, and <code>OP_MSG</code>, and perhaps for future
 opcodes, but not to implement it for <code>OP_INSERT</code>, <code>OP_UPDATE</code>, <code>OP_DELETE</code>, <code>OP_GETMORE</code>, and <code>OP_KILLCURSORS</code>.</p>
 <p>Note that certain messages, such as authentication commands, MUST NOT be compressed. All other messages MUST be
@@ -344,7 +337,7 @@ clients should implement.</p>
 <p>In general, after implementing this functionality and the test cases, running the traditional client test suite against
 a server with compression enabled, and ensuring the test suite is configured to provide a valid compressor as part of
 the connection string, is a good idea. MongoDB-supported drivers MUST add such variant to their CI environment.</p>
-<p>The following cases assume a standalone MongoDB 3.4 (or later) node configured with:</p>
+<p>The following cases assume a standalone MongoDB node configured with:</p>
 <pre><code class="language-shell">mongod --networkMessageCompressors "snappy" -vvv
 </code></pre>
 <p>Create an example application which connects to a provided connection string, runs <code>ping: 1</code>, and then quits the program
@@ -430,15 +423,6 @@ normally.</p>
 <pre><code class="language-javascript">{ "ok" : 1 }
 </code></pre>
 </li>
-<li>
-<p>Create example program that authenticates to the server using SCRAM-SHA-1, then creates another user (MONGODB-CR),
-then runs <code>hello</code> followed with <code>serverStatus</code>.</p>
-</li>
-<li>
-<p>Reconnect to the same server using the created MONGODB-CR credentials. Observe that the only command that was
-decompressed on the server was <code>serverStatus</code>, while the server replied with <code>OP_COMPRESSED</code> for at least the
-<code>serverStatus</code> command.</p>
-</li>
 </ul>
 <h2 id="motivation-for-change"><a class="header" href="#motivation-for-change">Motivation For Change</a></h2>
 <p>Drivers provide the canonical interface to MongoDB. Most tools for MongoDB are written with the aid of MongoDB drivers.
@@ -484,7 +468,7 @@ needing to (not) compress very few operations.</p>
 <li>
 <p>The server MAY reply with compressed data even if the request was not compressed?</p>
 <ul>
-<li>Yes, and this is in fact the behaviour of MongoDB 3.4</li>
+<li>Yes.</li>
 </ul>
 </li>
 <li>
@@ -502,27 +486,16 @@ actual MongoDB Handshake/<code>hello</code> where the support was announced.</li
 </ul>
 </li>
 <li>
-<p>This is billed a MongoDB 3.6 feature – but I hear it works with MongoDB 3.4?</p>
-<ul>
-<li>Yes, it does. All MongoDB versions support the <code>compression</code> argument to the initial handshake and all MongoDB
-versions will reply with an intersection of compressors it supports. This works even with MongoDB 3.0, as it will
-not reply with any compressors. It also works with MongoDB 3.4 which will reply with <code>snappy</code> if it was part of
-the driver’s list. MongoDB 3.6 will likely include zlib support.</li>
-</ul>
-</li>
-<li>
 <p>Which compressors are currently supported?</p>
 <ul>
-<li>MongoDB 3.4 supports <code>snappy</code></li>
-<li>MongoDB 3.6 supports <code>snappy</code> and <code>zlib</code></li>
-<li>MongoDB 4.2 supports <code>snappy</code>, <code>zlib</code>, and <code>zstd</code></li>
+<li>All supported MongoDB versions support <code>snappy</code>, <code>zlib</code>, and <code>zstd</code>.</li>
 </ul>
 </li>
 <li>
 <p>My language supports xyz compressor, should I announce them all in the handshake?</p>
 <ul>
-<li>No. But you are allowed to if you really want to make sure you can use that compressor with MongoDB 4.2 and your
-current driver versions.</li>
+<li>No. But you are allowed to if you really want to make sure you can use that compressor with your current driver
+versions.</li>
 </ul>
 </li>
 <li>
@@ -539,15 +512,7 @@ and since you never declared support for any compressor, you won’t be served w
 </ul>
 </li>
 <li>
-<p>Why did the server not support zlib in MongoDB 3.4?</p>
-<ul>
-<li>Snappy was selected for its very low performance hit, while giving reasonable compression, resulting in quite
-significant bandwidth reduction. Zlib characteristics are slightly different out-of-the-box and did not make sense
-for the initial goal of reducing bandwidth between replica set nodes.</li>
-</ul>
-</li>
-<li>
-<p>If snappy is preferable to zlib, why add support for zlib in MongoDB 3.6?</p>
+<p>If snappy is preferable to zlib, why add support for zlib?</p>
 <ul>
 <li>Zlib is available on every platform known to man. Snappy is not. Having zlib support makes sense for client traffic,
 which could originate on any type of platform, which may or may not support snappy.</li>
@@ -556,6 +521,7 @@ which could originate on any type of platform, which may or may not support snap
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2026-06-17: Remove pre-4.2 version references.</li>
 <li>2024-02-16: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter and reformat changelog.</li>
 <li>2021-04-06: Use ‘hello’ command</li>

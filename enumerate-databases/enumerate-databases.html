@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="enumerating-databases"><a class="header" href="#enumerating-databases">Enumerating Databases</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 3.6</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -220,10 +219,9 @@ condition on any of the database fields returned in the command output:</p>
 <pre><code class="language-javascript">db.adminCommand({listDatabases: 1, filter: {name: /^foo/}});
 </code></pre>
 <h3 id="authorizeddatabases"><a class="header" href="#authorizeddatabases">AuthorizedDatabases</a></h3>
-<p>MongoDB 4.0.5 added an <code>authorizedDatabases</code> boolean option to the
-<a href="https://www.mongodb.com/docs/manual/reference/command/listDatabases/">listDatabases</a> database command, which can be
-used to limit the command result to only include databases the user is authorized to use. Drivers SHOULD support the new
-<code>authorizedDatabases</code> option when implementing the
+<p>The <a href="https://www.mongodb.com/docs/manual/reference/command/listDatabases/">listDatabases</a> database command supports an
+<code>authorizedDatabases</code> boolean option, which can be used to limit the command result to only include databases the user
+is authorized to use. Drivers SHOULD support the <code>authorizedDatabases</code> option when implementing the
 <a href="https://www.mongodb.com/docs/manual/reference/command/listDatabases/">listDatabases</a> database command.</p>
 <p>The possible values for <code>authorizedDatabases</code> are:</p>
 <ul>
@@ -275,8 +273,8 @@ This method SHOULD be named <code>listDatabases</code>.</p>
 not necessary.</p>
 <p>Drivers SHOULD support the <code>filter</code>, <code>authorizedDatabases</code> and <code>comment</code> options when implementing this method.</p>
 <h4 id="enumerating-database-names"><a class="header" href="#enumerating-database-names">Enumerating Database Names</a></h4>
-<p>MongoDB 3.6 introduced a <code>nameOnly</code> boolean option to the <code>listDatabases</code> database command, which limits the command
-result to only include database names. Consider the following example:</p>
+<p>The <code>listDatabases</code> database command supports a <code>nameOnly</code> boolean option, which limits the command result to only
+include database names. Consider the following example:</p>
 <pre><code class="language-javascript">&gt; db.getSiblingDB("admin").runCommand({listDatabases:1,nameOnly:true})
 {
     "databases" : [
@@ -335,8 +333,8 @@ primary node in replica set topology, unless directly connected to a secondary n
 </ul>
 <h2 id="motivation-for-change"><a class="header" href="#motivation-for-change">Motivation for Change</a></h2>
 <p>Although most drivers provide a <code>listDatabases</code> command helper in their API, there was previously no spec for a database
-enumeration. MongoDB 3.6 introduced a <code>nameOnly</code> option to the <code>listDatabases</code> database command. The driver API should
-to be expanded to support this option.</p>
+enumeration. The <code>listDatabases</code> database command supports a <code>nameOnly</code> option, and the driver API should support this
+option.</p>
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
 <p>The design of this specification is inspired by the
 <a href="../enumerate-collections/enumerate-collections.html">Collection Enumeration</a> and

@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,13 +178,12 @@
                         <h1 id="bson-decimal128"><a class="header" href="#bson-decimal128">BSON Decimal128</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 3.4</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
-<p>MongoDB 3.4 introduces a new BSON type representing high precision decimal (<code>"\x13"</code>), known as Decimal128. 3.4
-compatible drivers must support this type by creating a Value Object for it, possibly with accessor functions for
-retrieving its value in data types supported by the respective languages.</p>
+<p>Decimal128 is a BSON type representing high precision decimal (<code>"\x13"</code>). Drivers must support this type by creating a
+Value Object for it, possibly with accessor functions for retrieving its value in data types supported by the respective
+languages.</p>
 <p>Round-tripping Decimal128 types between driver and server MUST not change its value or representation in any way.
 Conversion to and from native language types is complicated and there are many pitfalls to represent Decimal128
 precisely in all languages</p>
@@ -474,12 +473,6 @@ example, ‘2.00’ always remains stored as 200E-2 in Decimal128, and it differ
 </ul>
 </li>
 <li>
-<p>Should a driver avoid sending Decimal128 values to pre-3.4 servers?</p>
-<ul>
-<li>No</li>
-</ul>
-</li>
-<li>
 <p>Is there a wire version bump or something for Decimal128?</p>
 <ul>
 <li>No</li>
@@ -488,6 +481,7 @@ example, ‘2.00’ always remains stored as 200E-2 in Decimal128, and it differ
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2026-06-17: Remove pre-4.2 version references.</li>
 <li>2024-02-08: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter.</li>
 </ul>

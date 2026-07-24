@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,15 +178,12 @@
                         <h1 id="collation"><a class="header" href="#collation">Collation</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 3.4</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
-<p>As of MongoDB server version 3.4 (maxWireVersion 5), a collation option is supported by the query system for matching
-and sorting on language strings in a locale-aware fashion.</p>
-<p>A driver MUST support a Collation option for each of the relevant operations in server versions &gt;= 3.4 (maxWireVersion
-5) and MUST throw an error if a user supplies a Collation option for the operation and the selected server has
-maxWireVersion &lt; 5 or if the user is using opcode-based unacknowledged writes.</p>
+<p>A collation option is supported by the query system for matching and sorting on language strings in a locale-aware
+fashion.</p>
+<p>A driver MUST support a Collation option for each of the relevant operations.</p>
 <p>The CRUD and Index Management specs include the collation option in descriptions of API elements where it is supported.
 This document provides more details on the specific driver behavior required to handle the collation option.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
@@ -204,11 +201,6 @@ existing collection. Such users will have to supply the Collation option to each
 eventually the majority of users wishing to use Collations on all operations on a collection will create a collection
 with a server-side default. We chose to favor user verbosity right now over abstracting the feature for short-term
 gains.</p>
-<h3 id="drivers-throw-an-error-if-a-user-supplies-collation-and-the-selected-server-does-not-support-the-feature"><a class="header" href="#drivers-throw-an-error-if-a-user-supplies-collation-and-the-selected-server-does-not-support-the-feature">Drivers throw an error if a user supplies Collation and the selected server does not support the feature</a></h3>
-<p>Server versions earlier than 3.4 don’t always throw an error if an unknown option is supplied to certain operations.
-Because a Collation defines how documents are matched and sorted for both read and write operations, behavior
-differences between server versions are significant. Drivers therefore MUST throw an error if a user specifies a
-Collation and the selected server has a maxWireVersion &lt; 5 or if using opcode-based unacknowledged writes.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="collation-document-model"><a class="header" href="#collation-document-model">Collation Document Model</a></h3>
 <p>For naming and deviation guidance, see the <a href="../crud/crud.html#naming">CRUD specification</a>. Defined below are the
@@ -289,9 +281,6 @@ commands that take a collation option are:</p>
 <a href="../crud/crud.html#naming">CRUD specification</a> for details on supporting the option in the CRUD API.</p>
 <p>Driver helpers manipulating or using indexes MUST support a collation option. These include creating, deleting, and
 hinting an index. See the <a href="../index-management/index-management.html">Index Management specification</a> for details.</p>
-<h3 id="require-maxwireversion-5"><a class="header" href="#require-maxwireversion-5">Require maxWireVersion 5</a></h3>
-<p>Drivers MUST require the server’s maxWireVersion &gt;= 5 to support Collations. When a collation is explicitly specified
-for a server with maxWireVersion &lt; 5, the driver MUST raise an error.</p>
 <h3 id="opcode-based-unacknowledged-writes"><a class="header" href="#opcode-based-unacknowledged-writes">Opcode-based Unacknowledged Writes</a></h3>
 <p>The driver MUST NOT allow collation with opcodes, because the server doesn’t support it. If a driver uses opcode-based
 writes when the write concern is unacknowledged, the driver MUST raise an error if a collation is explicitly set.</p>
@@ -302,33 +291,12 @@ writes when the write concern is unacknowledged, the driver MUST raise an error 
     collation: {locale: "en_US"}
 });
 </code></pre>
-<h3 id="bulkwrite-api"><a class="header" href="#bulkwrite-api">BulkWrite API</a></h3>
-<p>If maxWireVersion &lt; 5, the driver MUST inspect each BulkWrite operation model for a collation and MUST raise an error
-and MUST NOT send any operations to the server if a collation is explicitly specified on an operation. For example, the
-user will provide BulkWrite operation models as in the following example:</p>
-<pre><code class="language-typescript">db.collection.bulkWrite([
-  {insertOne: { ... }},
-
-  {updateOne: { filter: { name: "PING" },
-                        update: { $set: { name: "pong" }},
-                        collation: { locale: "en_US", strength: 2 }}},
-  {updateMany: {..., collation: {...}}},
-  {replaceOne: {..., collation: {...}}},
-  {deleteOne: {..., collation: {...}}},
-  {deleteMany: {..., collation: {...}}}
-]);
-</code></pre>
-<p>The driver MUST inspect all operations before sending any to the server. If any operation specifies a Collation, the
-driver MUST raise an error and MUST NOT send any operations to the server. In the example above, even the insertOne
-(which has no Collation) MUST NOT be sent.</p>
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
 <p>There is no specific test plan for driver Collation support; however drivers should test each affected CRUD, Index
 Management API, and collection creation/modification component to ensure that Collation is a supported option.</p>
 <p>In addition, drivers should test that two indexes can be created with identical key patterns and different collations. A
 custom name must be provided for one of them. Then, the test should ensure that the correct index is dropped when
 delete_one is called with an index name.</p>
-<p>Drivers should also test that errors are raised in each place Collation can be provided to a API method and the selected
-server has maxWireVersion &lt; 5.</p>
 <h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns.</p>
 <h2 id="reference-implementation"><a class="header" href="#reference-implementation">Reference Implementation</a></h2>

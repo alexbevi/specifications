@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5b5ec546.js";
+            window.path_to_searchindex_js = "../searchindex-f7101b41.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-73b9a657.js"></script>
@@ -178,7 +178,6 @@
                         <h1 id="find-getmore-and-killcursors-commands"><a class="header" href="#find-getmore-and-killcursors-commands">Find, getMore and killCursors commands</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: 3.2</li>
 </ul>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
 <p>The Find, GetMore and KillCursors commands in MongoDB 3.2 or later replace the use of the legacy OP_QUERY, OP_GET_MORE
@@ -194,25 +193,21 @@ commands when compared to the legacy wire protocol level messages.</p>
 <h4 id="command"><a class="header" href="#command">Command</a></h4>
 <p>A BSON document containing the fields making up a MongoDB server command.</p>
 <h4 id="wire-protocol"><a class="header" href="#wire-protocol">Wire Protocol</a></h4>
-<p>The binary protocol used to talk with MongoDB over a socket. It’s made up by the OP_QUERY, OP_GET_MORE, OP_KILL_CURSORS,
-OP_INSERT, OP_UPDATE and OP_DELETE.</p>
+<p>The binary protocol used to talk with MongoDB over a socket.</p>
 <h2 id="guidance"><a class="header" href="#guidance">Guidance</a></h2>
 <h3 id="documentation"><a class="header" href="#documentation">Documentation</a></h3>
 <p>The documentation provided in code below is merely for driver authors and SHOULD NOT be taken as required documentation
 for the driver.</p>
 <h3 id="implementation"><a class="header" href="#implementation">Implementation</a></h3>
-<p>If the <strong>hello</strong> command returns <strong>maxWireVersion &gt;= 4</strong>, drivers:</p>
+<p>Drivers:</p>
 <ul>
-<li>MUST implement queries with the <code>find</code> command instead of <code>OP_QUERY</code>.</li>
-<li>MUST implement cursor operations with the <code>getMore</code> and <code>killCursors</code> commands instead of <code>OP_GET_MORE</code> and
-<code>OP_KILL_CURSORS</code>, respectively.</li>
-<li>MUST NOT use OP_QUERY except to execute commands.</li>
+<li>MUST implement queries with the <code>find</code> command.</li>
+<li>MUST implement cursor operations with the <code>getMore</code> and <code>killCursors</code> commands.</li>
 </ul>
 <h2 id="commands"><a class="header" href="#commands">Commands</a></h2>
 <h3 id="find"><a class="header" href="#find">find</a></h3>
 <p>The <a href="https://www.mongodb.com/docs/manual/reference/command/find/">find</a> command replaces the query functionality of the
-OP_QUERY wire protocol message but cannot execute queries against special collections. Unlike the legacy OP_QUERY wire
-protocol message, the <strong>find</strong> command cannot be used to execute other commands.</p>
+OP_QUERY wire protocol message but cannot execute queries against special collections.</p>
 <p>For a successful command, the document returned from the server has the following format:</p>
 <pre><code class="language-javascript">{
   "cursor": {
@@ -225,25 +220,6 @@ protocol message, the <strong>find</strong> command cannot be used to execute ot
   "ok": 1
 }
 </code></pre>
-<h4 id="special-collection-names"><a class="header" href="#special-collection-names">Special Collection names</a></h4>
-<p>The find command <strong>does not support querying on system collections</strong>, so if drivers are using any system collections
-instead of the inprog, killop, unlock, etc. commands they SHOULD default to using the old-style OP_QUERY.</p>
-<p>Any driver that provides helpers for any of the special collections below SHOULD use the replacement commands if
-<strong>hello.maxWireVersion &gt;=4</strong> or higher.</p>
-<div class="table-wrapper">
-<table>
-<thead>
-<tr><th>Special collection name</th><th>Replacement Command</th></tr>
-</thead>
-<tbody>
-<tr><td><code>$cmd.sys.inprog</code></td><td>currentOp</td></tr>
-<tr><td><code>$cmd.sys.unlock</code></td><td>fsyncUnlock</td></tr>
-<tr><td><code>&lt;database&gt;.system.indexes</code></td><td>listIndexes</td></tr>
-<tr><td><code>&lt;database&gt;.system.namespaces</code></td><td>listCollections</td></tr>
-</tbody>
-</table>
-</div>
-<p>Special Collection Names</p>
 <h4 id="exhaust"><a class="header" href="#exhaust">Exhaust</a></h4>
 <p>This section only applies to drivers that support exhaust cursors.</p>
 <p>The exhaust protocol differs based on the server version:</p>
@@ -253,7 +229,6 @@ instead of the inprog, killop, unlock, etc. commands they SHOULD default to usin
 <tr><th>Server version</th><th>Server behavior</th></tr>
 </thead>
 <tbody>
-<tr><td>4.0 and earlier</td><td>Only supports exhaust over legacy <strong>OP_QUERY</strong>. The <strong>find</strong> command does not support the exhaust flag from <strong>OP_QUERY</strong>.</td></tr>
 <tr><td>4.2 to 5.0</td><td>Supports exhaust both over legacy <strong>OP_QUERY</strong> and <strong>OP_MSG</strong>.</td></tr>
 <tr><td>5.1 and later</td><td>Supports exhaust over <strong>OP_MSG</strong>.</td></tr>
 </tbody>
@@ -266,7 +241,6 @@ instead of the inprog, killop, unlock, etc. commands they SHOULD default to usin
 <tr><th>Server version</th><th>Driver behavior</th></tr>
 </thead>
 <tbody>
-<tr><td>4.0 and earlier</td><td>Drivers MUST use legacy <strong>OP_QUERY</strong>.</td></tr>
 <tr><td>4.2 to 5.0</td><td>Drivers SHOULD use <strong>OP_MSG</strong> but MAY use legacy <strong>OP_QUERY</strong>.</td></tr>
 <tr><td>5.1 and later</td><td>Drivers MUST only use <strong>OP_MSG</strong>. Alternatively, drivers MAY fallback to a non-exhaust cursor when an exhaust cursor is requested.</td></tr>
 </tbody>
@@ -338,16 +312,15 @@ else:
 <li>If <strong>singleBatch</strong> is false, it MUST be omitted from <strong>find</strong> options</li>
 </ul>
 <h4 id="batchsize-of-1"><a class="header" href="#batchsize-of-1">BatchSize of 1</a></h4>
-<p>In 3.2 a batchSize of 1 means return a single document for the find command and it will not destroy the cursor after the
-first batch of documents are returned. Given a query returning 4 documents the number of commands issues will be.</p>
+<p>A batchSize of 1 means return a single document for the find command and it will not destroy the cursor after the first
+batch of documents are returned. Given a query returning 4 documents the number of commands issues will be.</p>
 <ol>
 <li><strong>find</strong> command with batchSize=1</li>
 <li><strong>getMore</strong> command with batchSize=1</li>
 <li><strong>getMore</strong> command with batchSize=1</li>
 <li><strong>getMore</strong> command with batchSize=1</li>
 </ol>
-<p>The driver <strong>SHOULD NOT attempt to emulate the behavior seen in 3.0 or earlier</strong> as the new find command enables the
-user expected behavior of allowing the first result to contain a single document when specifying batchSize=1.</p>
+<p>The <code>find</code> command allows the first result to contain a single document when specifying batchSize=1.</p>
 <h4 id="tailable-cursors"><a class="header" href="#tailable-cursors">Tailable cursors</a></h4>
 <p>By default, most cursors are non-tailable. For example, a typical <code>find</code> cursor is exhausted when all results for the
 filter have been returned. MongoDB also supports creating cursors that “tail” or follow the target namespace for new
@@ -388,8 +361,7 @@ to the value of the option <strong>maxAwaitTimeMS</strong>. If no <strong>maxAwa
 <strong>maxTimeMS</strong> on the <strong>getMore</strong> command.</p>
 <h3 id="getmore"><a class="header" href="#getmore">getMore</a></h3>
 <p>The <a href="https://www.mongodb.com/docs/manual/reference/command/getMore/">getMore</a> command replaces the <strong>OP_GET_MORE</strong> wire
-protocol message. The query flags passed to OP_QUERY for a getMore command MUST be secondaryOk=true when sent to a
-secondary. The OP_QUERY namespace MUST be the same as for the <strong>find</strong> and <strong>killCursors</strong> commands.</p>
+protocol message. The OP_MSG namespace MUST be the same as for the <strong>find</strong> and <strong>killCursors</strong> commands.</p>
 <pre><code class="language-typescript">interface GetMoreCommand {
   /** Set to the nonzero cursor id */
   getMore: int64;
@@ -434,8 +406,8 @@ secondary. The OP_QUERY namespace MUST be the same as for the <strong>find</stro
 <p>The driver’s local cursor MUST update its <code>id</code> and <code>ns</code>, as well as store the <code>nextBatch</code> from every <code>getMore</code> response.</p>
 <h3 id="killcursors"><a class="header" href="#killcursors">killCursors</a></h3>
 <p>The <a href="https://www.mongodb.com/docs/manual/reference/command/killCursors/">killCursors</a> command replaces the
-<strong>OP_KILL_CURSORS</strong> wire protocol message. The OP_QUERY namespace MUST be the same as for the <strong>find</strong> and <strong>getMore</strong>
-commands. The <strong>killCursors</strong> command is optional to implement in <strong>MongoDB 3.2</strong>.</p>
+<strong>OP_KILL_CURSORS</strong> wire protocol message. The OP_MSG namespace MUST be the same as for the <strong>find</strong> and <strong>getMore</strong>
+commands.</p>
 <p>The command response will be as follows:</p>
 <pre><code class="language-typescript">{
   "cursorsKilled": [
@@ -519,9 +491,6 @@ queryresults.</p>
 <p>Like other commands, the find and getMore commands will not use the OP_REPLY response flags.
 <a href="https://www.mongodb.com/docs/meta-driver/latest/legacy/mongodb-wire-protocol/#op-reply">OP_REPLY Documentation</a></p>
 <h2 id="faq"><a class="header" href="#faq">FAQ</a></h2>
-<h3 id="changes-in-error-handling-for-32-tailable-cursor"><a class="header" href="#changes-in-error-handling-for-32-tailable-cursor">Changes in error handling for 3.2 tailable cursor</a></h3>
-<p>Tailable cursors pointing to documents in a capped collection that get overwritten will return a zero document result in
-MongoDB 3.0 or earlier but will return an error in MongoDB 3.2</p>
 <h3 id="explain-command"><a class="header" href="#explain-command">Explain command</a></h3>
 <p>There is no equivalent of the <code>$explain</code> modifier in the find command. The driver SHOULD use the <strong>explain</strong> command.
 Information about the command can be found in the
@@ -536,6 +505,9 @@ Information about the command can be found in the
 <a href="../server-selection/server-selection.html#passing-read-preference-to-mongos">Server Selection Specification</a>.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
 <li>
 <p>2024-07-30: Migrated from reStructuredText to Markdown.</p>
 </li>
