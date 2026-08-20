@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>SOCKS5 - MongoDB Driver Specifications</title>
+        <title>SDAM Summary - MongoDB Driver Specifications</title>
 
 
         <!-- Custom HTML head -->
@@ -175,117 +175,124 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="socks5-support"><a class="header" href="#socks5-support">SOCKS5 Support</a></h1>
+                        <h1 id="server-discovery-and-monitoring--summary"><a class="header" href="#server-discovery-and-monitoring--summary">Server Discovery And Monitoring – Summary</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: N/A</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
-<p>SOCKS5 is a standardized protocol for connecting to network services through a separate proxy server. It can be used for
-connecting to hosts that would otherwise be unreachable from the local network by connecting to a proxy server, which
-receives the intended target host’s address from the client and then connects to that address.</p>
-<p>This specification defines driver behaviour when connecting to MongoDB services through a SOCKS5 proxy.</p>
-<h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
-“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
-<h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
-<h4 id="socks5"><a class="header" href="#socks5">SOCKS5</a></h4>
-<p>The SOCKS protocol, version 5, as defined in <a href="https://datatracker.ietf.org/doc/html/rfc1928">RFC1928</a>, restricted to
-either no authentication or username/password authentication as defined in
-<a href="https://datatracker.ietf.org/doc/html/rfc1929">RFC1929</a>.</p>
-<h3 id="mongoclient-configuration"><a class="header" href="#mongoclient-configuration">MongoClient Configuration</a></h3>
-<h4 id="proxyhost"><a class="header" href="#proxyhost">proxyHost</a></h4>
-<p>To specify to the driver to connect using a SOCKS5 proxy, a connection string option of <code>proxyHost=host</code> MUST be added
-to the connection string or passed through an equivalent <code>MongoClient</code> option. This option specifies a domain name or
-IPv4 or IPv6 address on which a SOCKS5 proxy is listening. This option MUST only be configurable at the level of a
-<code>MongoClient</code>.</p>
-<h4 id="proxyport"><a class="header" href="#proxyport">proxyPort</a></h4>
-<p>To specify to the driver to connect using a SOCKS5 proxy listening on a non-default port, a connection string option of
-<code>proxyPort=port</code> MUST be added to the connection string or passed through an equivalent <code>MongoClient</code> option. This
-option specifies a TCP port number. The default for this option MUST be <code>1080</code>. This option MUST only be configurable at
-the level of a <code>MongoClient</code>. Drivers MUST error if this option was specified and <code>proxyHost</code> was not specified.</p>
-<h4 id="proxyusername"><a class="header" href="#proxyusername">proxyUsername</a></h4>
-<p>To specify to the driver to connect using a SOCKS5 proxy requiring username/password authentication, a connection string
-option of - Code:<code>proxyUsername=username</code> MUST be added to the connection string or passed through an equivalent
-<code>MongoClient</code> option. This option specifies a string of non-zero length. Drivers MUST ignore this option if it specifies
-a zero-length string. Drivers MUST error if this option was specified and <code>proxyHost</code> was not specified or
-<code>proxyPassword</code> was not specified.</p>
-<h4 id="proxypassword"><a class="header" href="#proxypassword">proxyPassword</a></h4>
-<p>To specify to the driver to connect using a SOCKS5 proxy requiring username/password authentication, a connection string
-option of - Code:<code>proxyPassword=password</code> MUST be added to the connection string or passed through an equivalent
-<code>MongoClient</code> option. This option specifies a string of non-zero length. Drivers MUST ignore this option if it specifies
-a zero-length string. Drivers MUST error if this option was specified and <code>proxyHost</code> was not specified or
-<code>proxyUsername</code> was not specified.</p>
-<h3 id="connection-pooling"><a class="header" href="#connection-pooling">Connection Pooling</a></h3>
-<h4 id="connection-establishment"><a class="header" href="#connection-establishment">Connection Establishment</a></h4>
-<p>When establishing a new outgoing TCP connection, drivers MUST perform the following steps if <code>proxyHost</code> was specified:</p>
-<ol>
-<li>
-<p>Connect to the SOCKS5 proxy host, using <code>proxyHost</code> and <code>proxyPort</code> as specified.</p>
-</li>
-<li>
-<p>Perform a SOCKS5 handshake as specified in RFC1928.</p>
-<blockquote>
-<p>If <code>proxyUsername</code> and <code>proxyPassword</code> were passed, drivers MUST indicate in the handshake that both “no
-authentication” and “username/password authentication” are supported. Otherwise, drivers MUST indicate support for
-“no authentication” only.</p>
-<p>Drivers MUST NOT attempt to perform DNS A or AAAA record resolution of the destination hostname and instead pass
-the hostname to the proxy as-is.</p>
-</blockquote>
-</li>
-<li>
-<p>Continue with connection establishment as if the connection was one to the destination host.</p>
-</li>
-</ol>
-<p>Drivers MUST use the SOCKS5 proxy for connections to MongoDB services and
-<a href="../client-side-encryption/client-side-encryption.html#kms-provider">client-side field-level encryption KMS servers</a>.</p>
-<p>Drivers MUST NOT use the SOCKS5 proxy for connections to - Code:<code>mongocryptd</code> processes spawned for automatic
-client-side field-level encryption.</p>
-<p>Drivers MUST treat a connection failure when connecting to the SOCKS5 proxy or a SOCKS5 handshake or authentication
-failure the same as a network error (e.g. <code>ECONNREFUSED</code>) which does not indicate server overload for backpressure
-purposes.</p>
-<h3 id="events"><a class="header" href="#events">Events</a></h3>
-<p>SOCKS5 proxies are fully transparent to connection monitoring events. In particular, in <code>CommandStartedEvent</code>,
-<code>CommandSucceededEvent</code>, and - Code:<code>CommandFailedEvent</code>, the driver SHOULD NOT reference the SOCKS5 proxy as part of
-the <code>connectionId</code> field or other fields.</p>
-<h3 id="qa"><a class="header" href="#qa">Q&amp;A</a></h3>
-<h4 id="why-not-include-dns-requests-in-the-set-of-proxied-network-communication"><a class="header" href="#why-not-include-dns-requests-in-the-set-of-proxied-network-communication">Why not include DNS requests in the set of proxied network communication?</a></h4>
-<p>While SOCKS5 as a protocol does support UDP forwarding, using this feature has a number of downsides. Notably, only a
-subset of SOCKS5 client libraries and SOCKS5 server implementations support UDP forwarding (e.g. the OpenSSH client’s
-dynamic forwarding feature does not). This would also considerably increase implementation complexity in drivers that do
-not use DNS libraries in which the driver is in control of how the UDP packets are sent and received.</p>
-<h4 id="why-not-support-other-proxy-protocols-such-as-socks4socks4a-http-connect-proxies-etc"><a class="header" href="#why-not-support-other-proxy-protocols-such-as-socks4socks4a-http-connect-proxies-etc">Why not support other proxy protocols, such as Socks4/Socks4a, HTTP Connect proxies, etc.?</a></h4>
-<p>SOCKS5 is a powerful, standardized and widely used proxy protocol. It is likely that almost all users which require
-tunneling/proxying of some sort will be able to use it, and those who require another protocol or a more advanced setup
-like proxy chaining, can work around that by using a local SOCKS5 intermediate proxy.</p>
-<h4 id="why-are-the-connection-string-parameters-generic-with-no-explicit-mention-of-socks5"><a class="header" href="#why-are-the-connection-string-parameters-generic-with-no-explicit-mention-of-socks5">Why are the connection string parameters generic, with no explicit mention of SOCKS5?</a></h4>
-<p>In the case that future changes will enable drivers using other proxy protocols, keeping the option names generic allows
-their re-use. In that case, another option would specify the protocol and SOCKS5 would be the implied default. However,
-since there is no reason to believe that such additions will be made in the foreseeable future, no option for specifying
-the proxy protocol is introduced here.</p>
-<h4 id="why-is-support-for-authentication-methods-limited-to-no-authentication-and-usernamepassword-authentication"><a class="header" href="#why-is-support-for-authentication-methods-limited-to-no-authentication-and-usernamepassword-authentication">Why is support for authentication methods limited to no authentication and username/password authentication?</a></h4>
-<p>This matches the set of authentication methods most commonly implemented by SOCKS5 client libraries and thus reduces
-implementation complexity for drivers. This advantage is sufficient to ignore the possible advantages that would come
-with enabling other authentication methods.</p>
-<h3 id="design-rationales"><a class="header" href="#design-rationales">Design Rationales</a></h3>
-<h3 id="alternative-designs"><a class="header" href="#alternative-designs">Alternative Designs</a></h3>
+<p>This spec defines how a MongoDB client discovers and monitors one or more servers. It covers monitoring a single server,
+a set of mongoses, or a replica set. How does the client determine what type of servers they are? How does it keep this
+information up to date? How does the client find an entire replica set from a seed list, and how does it respond to a
+stepdown, election, reconfiguration, or network error?</p>
+<p>All drivers must answer these questions the same. Or, where platforms’ limitations require differences among drivers,
+there must be as few answers as possible and each must be clearly explained in this spec. Even in cases where several
+answers seem equally good, drivers must agree on one way to do it.</p>
+<p>The server discovery and monitoring method is specified in five sections. First, a client is constructed. Second, it
+begins monitoring the topology by calling <code>hello</code> or legacy hello on all servers. (Multi-threaded and asynchronous
+monitoring is described first, then single-threaded monitoring.) Third, as <code>hello</code> or legacy hello responses are
+received the client parses them, and fourth, it updates its view of the topology. Finally, this spec describes how
+drivers update their topology view in response to errors.</p>
+<p>This spec does not describe how a client selects a server for an operation; that is the domain of the specs for Mongos
+High Availability and for Read Preferences. There is no discussion of driver architecture and data structures, nor is
+there any specification of a user-facing API. This spec is only concerned with the algorithm for monitoring the
+topology.</p>
+<p>The Java driver 2.12.1 is the reference implementation for multi-threaded drivers. Mongos 2.6’s replica set monitor is
+the reference implementation for single-threaded drivers, with a few differences.</p>
+<h2 id="general-requirements"><a class="header" href="#general-requirements">General Requirements</a></h2>
+<p>A client MUST be able to connect to a single server of any type. This includes querying hidden replica set members, and
+connecting to uninitialized members in order to run “replSetInitiate”.</p>
+<p>A client MUST be able to discover an entire replica set from a seed list containing one or more replica set members. It
+MUST be able to continue monitoring the replica set even when some members go down, or when reconfigs add and remove
+members. A client MUST be able to connect to a replica set while there is no primary, or while the primary is down.</p>
+<p>A client MUST be able to connect to a set of mongoses and monitor their availability and round trip time. This spec
+defines how mongoses are discovered and monitored, but does not define which mongos is selected for a given operation.</p>
+<p>Multi-threaded or asynchronous clients MUST unblock waiting operations as soon as a suitable server is found, rather
+than waiting for all servers to be checked. For example, if the client is discovering a replica set and the application
+attempts a write operation, the write operation MUST proceed as soon as the primary is found, rather than blocking until
+the client has checked all members.</p>
+<h2 id="client-construction"><a class="header" href="#client-construction">Client Construction</a></h2>
+<p>This spec does not intend to require any drivers to make breaking changes regarding what configuration options are
+available, how options are named, or what combinations of options are allowed.</p>
+<p>A multi-threaded or asynchronous client’s constructor MUST NOT do any I/O. The constructor MAY start the monitors as
+background tasks, or they MAY be started by some “initialize” method (by any name), or on the first use of the client
+for an operation. This means that the constructor does not throw an exception if the deployment is unavailable: Instead,
+all subsequent operations on the client fail as long as the error persists.</p>
+<p>The justification is that if clients can be constructed when the deployment is in some states but not in other states,
+it leads to an unfortunate scenario: When the deployment is passing through a strange state, long-running applications
+may keep working, but any applications restarted during this period fail.</p>
+<p>Additionally, since asynchronous clients cannot do I/O in a constructor, it is consistent to prohibit I/O in other
+clients’ constructors as well.</p>
+<p>Single-threaded clients also MUST NOT do I/O in the constructor. They scan the servers on demand, when the first
+operation is attempted. Thus they behave consistently with multi-threaded and asynchronous clients.</p>
+<h2 id="monitoring"><a class="header" href="#monitoring">Monitoring</a></h2>
+<p>The client monitors servers by checking them periodically, or after an error indicates that the client’s view of the
+topology is wrong, or when no suitable server is found for a write or a read.</p>
+<p>Drivers differ from Mongos 2.6 in two respects. First, if a client frequently rechecks a server, it MUST wait at least
+10 ms since the previous check to avoid excessive effort.</p>
+<p>Second, Mongos 2.6 does not monitor arbiters, but drivers MUST do so. It costs little, and in rare cases an arbiter may
+be the client’s last hope to find the new replica set configuration.</p>
+<h3 id="multi-threaded-or-asynchronous-monitoring"><a class="header" href="#multi-threaded-or-asynchronous-monitoring">Multi-threaded or asynchronous monitoring</a></h3>
+<p>All servers’ monitors run independently, in parallel: If some monitors block calling <code>hello</code> or legacy hello over slow
+connections, other monitors MUST proceed unimpeded. The natural implementation is a thread per server, but the decision
+is left to the implementer.</p>
+<p>Multi-threaded and asynchronous drivers MUST call <code>hello</code> or legacy hello on servers every 10 seconds by default. (10
+seconds is Mongos’s frequency.) This frequency MAY be configurable.</p>
+<h3 id="single-threaded-monitoring"><a class="header" href="#single-threaded-monitoring">Single-threaded monitoring</a></h3>
+<p>Single-threaded clients MUST scan all servers synchronously, inline with regular application operations. For
+single-threaded drivers the default frequency MUST be 60 seconds and MUST be configurable.</p>
+<p>If the topology is a replica set, a single-threaded client attempts to contact the primary as soon as possible to get an
+authoritative list of members. Otherwise, the client attempts to check all members it knows of, in order from the
+least-recently to the most-recently checked. The scanning order is described completely in the spec.</p>
+<h2 id="parsing-hello-or-legacy-hello"><a class="header" href="#parsing-hello-or-legacy-hello">Parsing <code>hello</code> or legacy hello</a></h2>
+<p>The full algorithm for determining server type from a <code>hello</code> or legacy hello response is specified and test cases are
+provided.</p>
+<p>Drivers MUST record the server’s round trip time after each successful call to <code>hello</code> or legacy hello. How round trip
+times are averaged is not in this spec’s scope.</p>
+<h2 id="updating-the-topology-view"><a class="header" href="#updating-the-topology-view">Updating the Topology View</a></h2>
+<p>After each attempt to call <code>hello</code> or legacy hello on a server, the client updates its topology view. Initial topology
+discovery and long-running monitoring are both specified by the same detailed algorithm.</p>
+<p>When monitoring a replica set, the client strives to use only the servers that the primary says are members. While there
+is no known primary, the client MUST add servers from non-primaries’ host lists, but it MUST NOT remove servers.
+Eventually, when a primary is discovered, any hosts not in the primary’s host list are removed from the client’s view of
+the topology.</p>
+<p>The client MUST NOT use replica set members’ “setVersion” to detect reconfigs, since race conditions with setVersion
+make it inferior to simply trusting the primary.</p>
+<h2 id="error-handling"><a class="header" href="#error-handling">Error handling</a></h2>
+<p>When an application operation fails because of any network error besides a socket timeout, the client MUST mark the
+server “down”. The server will eventually be re-checked by periodic monitoring. The specific operation that discovered
+the error MUST abort and raise an exception if it was a write. It MAY be retried if it was a read. (The Read Preferences
+spec includes retry rules for reads.)</p>
+<p>If a monitor’s <code>hello</code> or legacy hello call fails on a server, the behavior is different from a failed application
+operation. The <code>hello</code> or legacy hello call is retried once, immediately, before the server is marked “down”.</p>
+<p>In either case the client MUST clear its connection pool for the server: if one socket is bad, it is likely that all
+are.</p>
+<p>An algorithm is specified for inspecting error codes. When the client sees such an error it knows its topology view is
+out of date. It MUST mark the server type “unknown.” Multi-threaded and asynchronous clients MUST re-check the server
+soon, and single-threaded clients MUST request a scan before the next operation. The client MUST NOT clear its
+connection pool for the server.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
-<li>2024-09-04: Migrated from reStructuredText to Markdown.</li>
-<li>2022-10-05: Remove spec front matter</li>
+<li>
+<p>2026-06-17: Remove pre-4.2 version references.</p>
+</li>
+<li>
+<p>2024-05-02: Migrated from reStructuredText to Markdown.</p>
+</li>
+<li>
+<p>2022-10-05: Revise spec front matter and add changelog.</p>
+</li>
 </ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../compression/OP_COMPRESSED.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -295,11 +302,11 @@ with enabling other authentication methods.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../compression/OP_COMPRESSED.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server-discovery-and-monitoring/server-discovery-and-monitoring.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

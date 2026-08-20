@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>SOCKS5 - MongoDB Driver Specifications</title>
+        <title>Atlas SFP Testing - MongoDB Driver Specifications</title>
 
 
         <!-- Custom HTML head -->
@@ -175,117 +175,125 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="socks5-support"><a class="header" href="#socks5-support">SOCKS5 Support</a></h1>
+                        <h1 id="atlas-secure-frontend-processor-sfp-testing"><a class="header" href="#atlas-secure-frontend-processor-sfp-testing">Atlas Secure Frontend Processor (SFP) Testing</a></h1>
 <ul>
 <li>Status: Accepted</li>
-<li>Minimum Server Version: N/A</li>
+<li>Minimum Server Version: 7.0</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
-<p>SOCKS5 is a standardized protocol for connecting to network services through a separate proxy server. It can be used for
-connecting to hosts that would otherwise be unreachable from the local network by connecting to a proxy server, which
-receives the intended target host’s address from the client and then connects to that address.</p>
-<p>This specification defines driver behaviour when connecting to MongoDB services through a SOCKS5 proxy.</p>
+<p>This specification defines the tests that drivers MUST run to verify connectivity and authentication through an Atlas
+Secure Frontend Processor (SFP). The SFP is a proxy that sits in front of Atlas clusters to provide additional security
+capabilities.</p>
 <h2 id="meta"><a class="header" href="#meta">META</a></h2>
 <p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
 “OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
 <h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
 <h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
-<h4 id="socks5"><a class="header" href="#socks5">SOCKS5</a></h4>
-<p>The SOCKS protocol, version 5, as defined in <a href="https://datatracker.ietf.org/doc/html/rfc1928">RFC1928</a>, restricted to
-either no authentication or username/password authentication as defined in
-<a href="https://datatracker.ietf.org/doc/html/rfc1929">RFC1929</a>.</p>
-<h3 id="mongoclient-configuration"><a class="header" href="#mongoclient-configuration">MongoClient Configuration</a></h3>
-<h4 id="proxyhost"><a class="header" href="#proxyhost">proxyHost</a></h4>
-<p>To specify to the driver to connect using a SOCKS5 proxy, a connection string option of <code>proxyHost=host</code> MUST be added
-to the connection string or passed through an equivalent <code>MongoClient</code> option. This option specifies a domain name or
-IPv4 or IPv6 address on which a SOCKS5 proxy is listening. This option MUST only be configurable at the level of a
-<code>MongoClient</code>.</p>
-<h4 id="proxyport"><a class="header" href="#proxyport">proxyPort</a></h4>
-<p>To specify to the driver to connect using a SOCKS5 proxy listening on a non-default port, a connection string option of
-<code>proxyPort=port</code> MUST be added to the connection string or passed through an equivalent <code>MongoClient</code> option. This
-option specifies a TCP port number. The default for this option MUST be <code>1080</code>. This option MUST only be configurable at
-the level of a <code>MongoClient</code>. Drivers MUST error if this option was specified and <code>proxyHost</code> was not specified.</p>
-<h4 id="proxyusername"><a class="header" href="#proxyusername">proxyUsername</a></h4>
-<p>To specify to the driver to connect using a SOCKS5 proxy requiring username/password authentication, a connection string
-option of - Code:<code>proxyUsername=username</code> MUST be added to the connection string or passed through an equivalent
-<code>MongoClient</code> option. This option specifies a string of non-zero length. Drivers MUST ignore this option if it specifies
-a zero-length string. Drivers MUST error if this option was specified and <code>proxyHost</code> was not specified or
-<code>proxyPassword</code> was not specified.</p>
-<h4 id="proxypassword"><a class="header" href="#proxypassword">proxyPassword</a></h4>
-<p>To specify to the driver to connect using a SOCKS5 proxy requiring username/password authentication, a connection string
-option of - Code:<code>proxyPassword=password</code> MUST be added to the connection string or passed through an equivalent
-<code>MongoClient</code> option. This option specifies a string of non-zero length. Drivers MUST ignore this option if it specifies
-a zero-length string. Drivers MUST error if this option was specified and <code>proxyHost</code> was not specified or
-<code>proxyUsername</code> was not specified.</p>
-<h3 id="connection-pooling"><a class="header" href="#connection-pooling">Connection Pooling</a></h3>
-<h4 id="connection-establishment"><a class="header" href="#connection-establishment">Connection Establishment</a></h4>
-<p>When establishing a new outgoing TCP connection, drivers MUST perform the following steps if <code>proxyHost</code> was specified:</p>
+<h4 id="sfp"><a class="header" href="#sfp">SFP</a></h4>
+<p>Secure Frontend Processor - a proxy service that sits in front of Atlas clusters, providing TLS termination,
+authentication forwarding, and additional security features.</p>
+<h3 id="test-environment"><a class="header" href="#test-environment">Test Environment</a></h3>
+<p>SFP clusters are <strong>preconfigured</strong> and do not require provisioning or teardown as part of the test run. Drivers will be
+provided with connection URIs and credentials via environment variables.</p>
+<p>The SFP proxy is fully transparent to drivers - all standard MongoDB operations should work exactly as they would
+against a normal Atlas cluster.</p>
+<h3 id="required-environment-variables"><a class="header" href="#required-environment-variables">Required Environment Variables</a></h3>
+<p>The following environment variables will be available to run the tests:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Variable</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>SFP_ATLAS_URI</code></td><td>MongoDB connection URI for the SFP-proxied cluster</td></tr>
+<tr><td><code>SFP_ATLAS_USER</code></td><td>Username for SCRAM authentication</td></tr>
+<tr><td><code>SFP_ATLAS_PASSWORD</code></td><td>Password for SCRAM authentication</td></tr>
+</tbody>
+</table>
+</div>
+<p>For X.509 authentication tests, the following additional variables are required:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Variable</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>SFP_ATLAS_X509_URI</code></td><td>MongoDB connection URI for X.509 authentication</td></tr>
+<tr><td><code>SFP_ATLAS_X509_CERT</code></td><td>Path to client certificate (PEM format)</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="test-isolation-and-cleanup"><a class="header" href="#test-isolation-and-cleanup">Test Isolation and Cleanup</a></h3>
+<p>To prevent conflicts between concurrent test runs and avoid unbounded collection growth:</p>
 <ol>
-<li>
-<p>Connect to the SOCKS5 proxy host, using <code>proxyHost</code> and <code>proxyPort</code> as specified.</p>
-</li>
-<li>
-<p>Perform a SOCKS5 handshake as specified in RFC1928.</p>
-<blockquote>
-<p>If <code>proxyUsername</code> and <code>proxyPassword</code> were passed, drivers MUST indicate in the handshake that both “no
-authentication” and “username/password authentication” are supported. Otherwise, drivers MUST indicate support for
-“no authentication” only.</p>
-<p>Drivers MUST NOT attempt to perform DNS A or AAAA record resolution of the destination hostname and instead pass
-the hostname to the proxy as-is.</p>
-</blockquote>
-</li>
-<li>
-<p>Continue with connection establishment as if the connection was one to the destination host.</p>
-</li>
+<li>Drivers MUST use a unique collection name for each test run, e.g., <code>sfp_test_&lt;random&gt;</code> where <code>&lt;random&gt;</code> is an
+ObjectID string representation</li>
+<li>Drivers MUST drop the test collection after all tests complete, regardless of test success or failure</li>
 </ol>
-<p>Drivers MUST use the SOCKS5 proxy for connections to MongoDB services and
-<a href="../client-side-encryption/client-side-encryption.html#kms-provider">client-side field-level encryption KMS servers</a>.</p>
-<p>Drivers MUST NOT use the SOCKS5 proxy for connections to - Code:<code>mongocryptd</code> processes spawned for automatic
-client-side field-level encryption.</p>
-<p>Drivers MUST treat a connection failure when connecting to the SOCKS5 proxy or a SOCKS5 handshake or authentication
-failure the same as a network error (e.g. <code>ECONNREFUSED</code>) which does not indicate server overload for backpressure
-purposes.</p>
-<h3 id="events"><a class="header" href="#events">Events</a></h3>
-<p>SOCKS5 proxies are fully transparent to connection monitoring events. In particular, in <code>CommandStartedEvent</code>,
-<code>CommandSucceededEvent</code>, and - Code:<code>CommandFailedEvent</code>, the driver SHOULD NOT reference the SOCKS5 proxy as part of
-the <code>connectionId</code> field or other fields.</p>
-<h3 id="qa"><a class="header" href="#qa">Q&amp;A</a></h3>
-<h4 id="why-not-include-dns-requests-in-the-set-of-proxied-network-communication"><a class="header" href="#why-not-include-dns-requests-in-the-set-of-proxied-network-communication">Why not include DNS requests in the set of proxied network communication?</a></h4>
-<p>While SOCKS5 as a protocol does support UDP forwarding, using this feature has a number of downsides. Notably, only a
-subset of SOCKS5 client libraries and SOCKS5 server implementations support UDP forwarding (e.g. the OpenSSH client’s
-dynamic forwarding feature does not). This would also considerably increase implementation complexity in drivers that do
-not use DNS libraries in which the driver is in control of how the UDP packets are sent and received.</p>
-<h4 id="why-not-support-other-proxy-protocols-such-as-socks4socks4a-http-connect-proxies-etc"><a class="header" href="#why-not-support-other-proxy-protocols-such-as-socks4socks4a-http-connect-proxies-etc">Why not support other proxy protocols, such as Socks4/Socks4a, HTTP Connect proxies, etc.?</a></h4>
-<p>SOCKS5 is a powerful, standardized and widely used proxy protocol. It is likely that almost all users which require
-tunneling/proxying of some sort will be able to use it, and those who require another protocol or a more advanced setup
-like proxy chaining, can work around that by using a local SOCKS5 intermediate proxy.</p>
-<h4 id="why-are-the-connection-string-parameters-generic-with-no-explicit-mention-of-socks5"><a class="header" href="#why-are-the-connection-string-parameters-generic-with-no-explicit-mention-of-socks5">Why are the connection string parameters generic, with no explicit mention of SOCKS5?</a></h4>
-<p>In the case that future changes will enable drivers using other proxy protocols, keeping the option names generic allows
-their re-use. In that case, another option would specify the protocol and SOCKS5 would be the implied default. However,
-since there is no reason to believe that such additions will be made in the foreseeable future, no option for specifying
-the proxy protocol is introduced here.</p>
-<h4 id="why-is-support-for-authentication-methods-limited-to-no-authentication-and-usernamepassword-authentication"><a class="header" href="#why-is-support-for-authentication-methods-limited-to-no-authentication-and-usernamepassword-authentication">Why is support for authentication methods limited to no authentication and username/password authentication?</a></h4>
-<p>This matches the set of authentication methods most commonly implemented by SOCKS5 client libraries and thus reduces
-implementation complexity for drivers. This advantage is sufficient to ignore the possible advantages that would come
-with enabling other authentication methods.</p>
-<h3 id="design-rationales"><a class="header" href="#design-rationales">Design Rationales</a></h3>
-<h3 id="alternative-designs"><a class="header" href="#alternative-designs">Alternative Designs</a></h3>
+<h2 id="required-tests"><a class="header" href="#required-tests">Required Tests</a></h2>
+<p>Drivers MUST implement and run the following tests against SFP-proxied clusters.</p>
+<h3 id="common-assertions"><a class="header" href="#common-assertions">Common Assertions</a></h3>
+<p>The following assertions are used across multiple tests:</p>
+<h4 id="assertion-ping"><a class="header" href="#assertion-ping">Assertion: Ping</a></h4>
+<ol>
+<li>Execute a <code>ping</code> command against the <code>admin</code> database</li>
+<li>Assert that the command succeeds with <code>ok: 1</code></li>
+</ol>
+<h4 id="assertion-connection-status"><a class="header" href="#assertion-connection-status">Assertion: Connection Status</a></h4>
+<ol>
+<li>Execute a <code>connectionStatus</code> command against the <code>admin</code> database</li>
+<li>Assert that the command succeeds with <code>ok: 1</code></li>
+<li>If authenticated, assert that <code>authInfo.authenticatedUsers</code> contains at least one user</li>
+</ol>
+<h4 id="assertion-crud-operations"><a class="header" href="#assertion-crud-operations">Assertion: CRUD Operations</a></h4>
+<ol>
+<li>Insert a document into a test collection and assert the insert succeeds</li>
+<li>Query the collection using <code>find</code> and assert the inserted document is returned</li>
+</ol>
+<h3 id="unauthenticated-tests"><a class="header" href="#unauthenticated-tests">Unauthenticated Tests</a></h3>
+<p>Create a <code>MongoClient</code> configured with <code>SFP_ATLAS_URI</code> but without credentials. Run the following assertions:</p>
+<ul>
+<li>Ping</li>
+<li>Connection Status (assert <code>authenticatedUsers</code> is empty)</li>
+</ul>
+<h3 id="authenticated-tests"><a class="header" href="#authenticated-tests">Authenticated Tests</a></h3>
+<p>Each authenticated test MUST be run under each of the following variations:</p>
+<ol>
+<li>No additional configuration (baseline)</li>
+<li>With at least one compressor enabled (e.g., zlib, snappy, or zstd)</li>
+<li>With <a href="../versioned-api/versioned-api.html#mongoclient-changes">Server API</a> version 1</li>
+</ol>
+<h4 id="scram-sha-256"><a class="header" href="#scram-sha-256">SCRAM-SHA-256</a></h4>
+<p>Create a <code>MongoClient</code> with the connection string and SCRAM-SHA-256 credentials from environment variables. Run the
+following assertions:</p>
+<ul>
+<li>Ping</li>
+<li>Connection Status</li>
+<li>CRUD Operations</li>
+</ul>
+<h4 id="x509"><a class="header" href="#x509">X.509</a></h4>
+<p>Create a <code>MongoClient</code> with the connection string and X.509 authentication using the client certificate. Run the
+following assertions:</p>
+<ul>
+<li>Ping</li>
+<li>Connection Status</li>
+<li>CRUD Operations</li>
+</ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
-<li>2024-09-04: Migrated from reStructuredText to Markdown.</li>
-<li>2022-10-05: Remove spec front matter</li>
+<li>2025-02-27: Initial version</li>
 </ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../compression/OP_COMPRESSED.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../unified-test-format/unified-test-format.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../benchmarking/benchmarking.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -295,11 +303,11 @@ with enabling other authentication methods.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../compression/OP_COMPRESSED.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../unified-test-format/unified-test-format.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../benchmarking/benchmarking.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

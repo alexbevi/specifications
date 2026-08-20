@@ -1,0 +1,609 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>ODM Performance Benchmarking - MongoDB Driver Specifications</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-e96d0476.css">
+        <link rel="stylesheet" href="../css/chrome-d279d366.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/whichlang-dcadca89.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-7df195a1.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-13602469.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">MongoDB Driver Specifications</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="odm-performance-benchmarking"><a class="header" href="#odm-performance-benchmarking">ODM Performance Benchmarking</a></h1>
+<ul>
+<li>Version: 1.0</li>
+<li>Status: In progress</li>
+<li>Minimum Server Version: N/A</li>
+</ul>
+<h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
+<p>This document describes a standard benchmarking suite for MongoDB ODMs (Object Document Mappers). Much of this
+document’s structure and content is taken from the existing MongoDB driver benchmarking suite for consistency.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<h3 id="name-and-purpose"><a class="header" href="#name-and-purpose">Name and purpose</a></h3>
+<p>ODM performance will be measured by the MongoDB ODM Performance Benchmark. It will provide both “horizontal” insights
+into how individual ODM performance evolves over time and two types of “vertical” insights: the relative performance of
+different ODMs, and the relative performance of ODMs and their associated language drivers.</p>
+<p>We expect substantial performance differences between ODMs based on both their language families (e.g. static vs.
+dynamic or compiled vs. virtual-machine-based) as well as their inherent design (e.g. web frameworks such as Django vs.
+application-agnostic such as Mongoose). Within families of ODMs that use similar design and language families, these
+comparisons could be used to identify potential areas of performance improvement.</p>
+<h3 id="task-hierarchy"><a class="header" href="#task-hierarchy">Task Hierarchy</a></h3>
+<p>The benchmark suite consists of two groups of small, independent benchmarks. This allows us to better isolate areas
+within ODMs that are faster or slower.</p>
+<ul>
+<li>Flat models – reading and writing flat models of various sizes, to explore basic operation efficiency</li>
+<li>Nested models – reading and writing nested models of various sizes, to explore basic operation efficiency for complex
+data</li>
+</ul>
+<p>The suite is intentionally kept small for several reasons:</p>
+<ul>
+<li>ODM feature sets vary significantly across libraries, limiting the number of benchmarks that can be run across the
+entire collection of extant ODMs.</li>
+<li>Several popular MongoDB ODMs are actively maintained by third-parties, such as Mongoose. By limiting the benchmarking
+suite to a minimal set of representative tests that are easy to implement, we encourage adoption of the suite by
+these third-party maintainers.</li>
+</ul>
+<h3 id="measurement"><a class="header" href="#measurement">Measurement</a></h3>
+<p>In addition to latency data, all benchmark tasks will be measured in terms of “megabytes/second” (MB/s) of documents
+processed, with higher scores being better. (In this document, “megabyte” refers to the SI decimal unit, i.e. 1,000,000
+bytes.) This makes cross-benchmark comparisons easier.</p>
+<p>To avoid various types of measurement skew, tasks will be measured over several iterations. Each iteration will have a
+number of operations performed per iteration that depends on the task being benchmarked. The final score for a task will
+be the median score of the iterations. A range of percentiles will also be recorded for diagnostic analysis.</p>
+<h3 id="data-sets"><a class="header" href="#data-sets">Data sets</a></h3>
+<p>Data sets will vary by task. In most cases, data sets will be synthetic line-delimited JSON files to be constructed by
+the ODM being benchmarked into the appropriate model. Some tasks will require additional modifications to these
+constructed models, such as adding generated ObjectIds. See the
+<a href="#benchmark-task-definitions">Benchmark task definitions</a> section for details.</p>
+<h3 id="versioning"><a class="header" href="#versioning">Versioning</a></h3>
+<p>The MongoDB ODM Performance Benchmark will have vX.Y versioning. Minor updates and clarifications will increment “Y” and
+MUST have little impact on score comparison. Major changes, such as task modifications, MongoDB version tested against,
+or hardware used, MUST increment “X” to indicate that older version scores are unlikely to be comparable.</p>
+<h2 id="benchmark-execution-phases-and-measurement"><a class="header" href="#benchmark-execution-phases-and-measurement">Benchmark execution phases and measurement</a></h2>
+<p>All benchmark tasks will be conducted via a number of iterations. Each iteration will be timed and will generally
+include a large number of individual ODM operations.</p>
+<p>The measurement is broken up this way to better isolate the benchmark from external volatility. If we consider the
+problem of benchmarking an operation over many iterations, such as 100,000 model insertions, we want to avoid two
+extreme forms of measurement:</p>
+<ul>
+<li>measuring a single insertion 100,000 times – in this case, the timing code is likely to be a greater proportion of
+executed code, which could routinely evict the insertion code from CPU caches or mislead a JIT optimizer and throw
+off results</li>
+<li>measuring 100,000 insertions one time – in this case, the longer the timer runs, the higher the likelihood that an
+external event occurs that affects the time of the run</li>
+</ul>
+<p>Therefore, we choose a middle ground:</p>
+<ul>
+<li>measuring the same 10,000 insertions over 10 iterations – each timing run includes enough operations that insertion
+code dominates timing code; unusual system events are likely to affect only a fraction of the 10 timing measurements</li>
+</ul>
+<p>With 10 timings of inserting the same 10,000 models, we build up a statistical distribution of the operation timing,
+allowing a more robust estimate of performance than a single measurement. (In practice, the number of iterations could
+exceed 10, but 10 is a reasonable minimum goal.)</p>
+<p>Because a timing distribution is bounded by zero on one side, taking the mean would allow large positive outlier
+measurements to skew the result substantially. Therefore, for the benchmark score, we use the median timing measurement,
+which is robust in the face of outliers.</p>
+<p>Each benchmark is structured into discrete setup/execute/teardown phases. Phases are as follows, with specific details
+given in a subsequent section:</p>
+<ul>
+<li>setup – (ONCE PER TASK) something to do once before any benchmarking, e.g. construct a model object, load test data,
+insert data into a collection, etc.</li>
+<li>before operation – (ONCE PER ITERATION) something to do before every task iteration, e.g. drop a collection, or
+reload test data (if the test run modifies it), etc.</li>
+<li>do operation – (ONCE PER ITERATION) smallest amount of code necessary to execute the task; e.g. insert 10,000 models
+one by one into the database, or retrieve 10,000 models of test data from the database, etc.</li>
+<li>after operation – (ONCE PER ITERATION) something to do after every task iteration (if necessary)</li>
+<li>teardown – (ONCE PER TASK) something done once after all benchmarking is complete (if necessary); e.g. drop the test
+database</li>
+</ul>
+<p>The wall-clock execution time of each “do operation” phase will be recorded. We use wall clock time to model user
+experience and as a lowest-common denominator across ODMs. Iteration timing SHOULD be done with a high-resolution
+monotonic timer (or best language approximation).</p>
+<p>Unless otherwise specified, the number of iterations to measure per task is variable:</p>
+<ul>
+<li>iterations MUST loop for at least 30 seconds cumulative execution time</li>
+<li>once this 30 second minimum execution time is reached, iterations SHOULD stop after at least 10 iterations or 1 minute
+cumulative execution time, whichever is shorter</li>
+</ul>
+<p>This balances measurement stability with a timing cap to ensure all tasks can complete in a reasonable time.</p>
+<p>For each task, the 10th, 25th, 50th, 75th, 90th, 95th, 98th and 99th percentiles will be recorded using the following
+algorithm:</p>
+<ul>
+<li>Given a 0-indexed array <code>A</code> of <code>N</code> iteration wall clock times</li>
+<li>Sort the array into ascending order (i.e. shortest time first)</li>
+<li>Let the index <code>i</code> for percentile <code>p</code> in the range [1,100] be defined as: <code>i = int(N * p / 100) - 1</code></li>
+</ul>
+<p><em>N.B. This is the <a href="https://en.wikipedia.org/wiki/Percentile#The_nearest-rank_method">Nearest Rank</a> algorithm, chosen for
+its utter simplicity given that it needs to be implemented identically across a wide variety of ODMs and languages.</em></p>
+<p>The 50th percentile (i.e. the median) will be used for score composition. Other percentiles will be stored for
+visualizations and analysis.</p>
+<p>Each task will have defined for it an associated size in megabytes (MB). This size will be calculated using the task’s
+dataset size and the number of documents processed per iteration. The benchmarking score for each task will be the task
+size in MB divided by the median wall clock time.</p>
+<h2 id="benchmark-task-definitions"><a class="header" href="#benchmark-task-definitions">Benchmark task definitions</a></h2>
+<p>Datasets are available in the <code>odm-data</code> directory adjacent to this spec.</p>
+<p>Note: The term “LDJSON” means “line-delimited JSON”, which should be understood to mean a collection of UTF-8 encoded
+JSON documents (without embedded CR or LF characters), separated by a single LF character. (Some Internet definition of
+line-delimited JSON use CRLF delimiters, but this benchmark uses only LF.)</p>
+<h3 id="flat-models"><a class="header" href="#flat-models">Flat models</a></h3>
+<p>Datasets are in the <code>flat_models.tgz</code> tarball.</p>
+<p>Flat model tests focus on flatly-structured model reads and writes across data sizes. They are designed to give insights
+into the efficiency of the ODM’s implementation of basic data operations.</p>
+<p>The data will be stored as strict JSON with no extended types. These JSON representations MUST be converted into
+equivalent models as part of each benchmark task.</p>
+<p>Flat model benchmark tasks include:</p>
+<ul>
+<li>Small model creation</li>
+<li>Small model update</li>
+<li>Small model find by filter</li>
+<li>Small model find foreign key by filter (if joins are supported)</li>
+<li>Large model creation</li>
+<li>Large model update</li>
+</ul>
+<h4 id="small-model-creation"><a class="header" href="#small-model-creation">Small model creation</a></h4>
+<p>Summary: This benchmark tests ODM performance creating a single small model.</p>
+<p>Dataset: The dataset (SMALL_DOC) is contained within <code>small_doc.json</code> and consists of a sample document stored as strict
+JSON with an encoded length of approximately 250 bytes.</p>
+<p>Dataset size: For scoring purposes, the dataset size is the size of the <code>small_doc</code> source file (250 bytes) times 10,000
+operations, which equals 2,250,000 bytes or 2.5 MB.</p>
+<p>This benchmark uses a comparable dataset to the driver <code>small doc insertOne</code> benchmark, allowing for direct comparisons.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Load the SMALL_DOC dataset into memory.</td></tr>
+<tr><td>Before task</td><td>n/a.</td></tr>
+<tr><td>Do task</td><td>Create an ODM-appropriate model instance for the SMALL_DOC document and save it to the database. Repeat this 10,000 times.</td></tr>
+<tr><td>After task</td><td>Drop the collection associated with the SMALL_DOC model.</td></tr>
+<tr><td>Teardown</td><td>n/a.</td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="small-model-update"><a class="header" href="#small-model-update">Small model update</a></h4>
+<p>Summary: This benchmark tests ODM performance updating fields on a single small model.</p>
+<p>Dataset: The dataset (SMALL_DOC) is contained within <code>small_doc.json</code> and consists of a sample document stored as strict
+JSON with an encoded length of approximately 250 bytes.</p>
+<p>Dataset size: For scoring purposes, the dataset size is the size of the <code>updated_value</code> string file (13 bytes) times
+10,000 operations, which equals 130,000 bytes or 130 KB.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Load the SMALL_DOC dataset into memory as an ODM-appropriate model object. Save 10,000 instances into the database.</td></tr>
+<tr><td>Before task</td><td>n/a.</td></tr>
+<tr><td>Do task</td><td>Update the <code>field1</code> field for each instance of the model to equal <code>updated_value</code> in an ODM-appropriate manner.</td></tr>
+<tr><td>After task</td><td>n/a.</td></tr>
+<tr><td>Teardown</td><td>Drop the collection associated with the SMALL_DOC model.</td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="small-model-find-by-filter"><a class="header" href="#small-model-find-by-filter">Small model find by filter</a></h4>
+<p>Summary: This benchmark tests ODM performance finding documents using a basic filter.</p>
+<p>Dataset: The dataset (SMALL_DOC) is contained within <code>small_doc.json</code> and consists of a sample document stored as strict
+JSON with an encoded length of approximately 250 bytes.</p>
+<p>Dataset size: For scoring purposes, the dataset size is the size of the <code>small_doc</code> source file (250 bytes) times 10,000
+operations, which equals 2,250,000 bytes or 2.5 MB.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Load the SMALL_DOC dataset into memory as an ODM-appropriate model object. Insert 10,000 instances into the database, saving the <code>_id</code> field for each into a list.</td></tr>
+<tr><td>Before task</td><td>n/a.</td></tr>
+<tr><td>Do task</td><td>For each of the 10,000 <code>_id</code> values, perform a filter operation to find the corresponding SMALL_DOC model.</td></tr>
+<tr><td>After task</td><td>n/a.</td></tr>
+<tr><td>Teardown</td><td>Drop the collection associated with the SMALL_DOC model.</td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="small-model-find-foreign-key-by-filter"><a class="header" href="#small-model-find-foreign-key-by-filter">Small model find foreign key by filter</a></h4>
+<p>Summary: This benchmark tests ODM performance finding documents by foreign keys. This benchmark MUST only be run by ODMs
+that support join ($lookup) operations.</p>
+<p>Dataset: The dataset (SMALL_DOC) is contained within <code>small_doc.json</code> and consists of a sample document stored as strict
+JSON with an encoded length of approximately 250 bytes. An additional model (FOREIGN_KEY) representing the foreign key,
+consisting of only a string field called <code>name</code>, MUST also be created.</p>
+<p>Dataset size: For scoring purposes, the dataset size is the size of the <code>small_doc</code> source file (250 bytes) times 10,000
+operations, which equals 2,250,000 bytes or 2.5 MB.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Load the SMALL_DOC dataset into memory as an ODM-appropriate model object. For each SMALL_DOC model, create and assign a FOREIGN_KEY instance to the <code>field_fk</code> field. Insert 10,000 instances of both models into the database, saving the inserted <code>_id</code> field for each FOREIGN_KEY into a list.</td></tr>
+<tr><td>Before task</td><td>n/a.</td></tr>
+<tr><td>Do task</td><td>For each of the 10,000 FOREIGN_KEY <code>_id</code> values, perform a filter operation in an ODM-appropriate manner to find the corresponding SMALL_DOC model.</td></tr>
+<tr><td>After task</td><td>n/a.</td></tr>
+<tr><td>Teardown</td><td>Drop the collections associated with the SMALL_DOC and FOREIGN_KEY models.</td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="large-model-creation"><a class="header" href="#large-model-creation">Large model creation</a></h4>
+<p>Summary: This benchmark tests ODM performance creating a single large model.</p>
+<p>Dataset: The dataset (LARGE_DOC) is contained within <code>large_doc.json</code> and consists of a sample document stored as strict
+JSON with an encoded length of approximately 3.2 MB.</p>
+<p>Dataset size: For scoring purposes, the dataset size is the size of the <code>large_doc</code> source file (3,226,020 bytes) times
+10,000 operations, which equals 32,260,200,000 bytes or 32.2 GB.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Load the LARGE_DOC dataset into memory.</td></tr>
+<tr><td>Before task</td><td>n/a.</td></tr>
+<tr><td>Do task</td><td>Create an ODM-appropriate model instance for the LARGE_DOC document and save it to the database. Repeat this 10,000 times.</td></tr>
+<tr><td>After task</td><td>Drop the collection associated with the LARGE_DOC model.</td></tr>
+<tr><td>Teardown</td><td>n/a.</td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="large-model-update"><a class="header" href="#large-model-update">Large model update</a></h4>
+<p>Summary: This benchmark tests ODM performance updating fields on a single large model.</p>
+<p>Dataset: The dataset (LARGE_DOC) is contained within <code>large_doc.json</code> and consists of a sample document stored as strict
+JSON with an encoded length of approximately 3.2 MB.</p>
+<p>Dataset size: For scoring purposes, the dataset size is the size of the <code>updated_value</code> string file (13 bytes) times
+10,000 operations, which equals 130,000 bytes or 130 KB.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Load the LARGE_DOC dataset into memory as an ODM-appropriate model object. Save 10,000 instances into the database.</td></tr>
+<tr><td>Before task</td><td>n/a.</td></tr>
+<tr><td>Do task</td><td>Update the <code>field1</code> field for each instance of the model to <code>updated_value</code> in an ODM-appropriate manner.</td></tr>
+<tr><td>After task</td><td>Drop the collection associated with the LARGE_DOC model.</td></tr>
+<tr><td>Teardown</td><td>n/a.</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="nested-models"><a class="header" href="#nested-models">Nested models</a></h3>
+<p>Datasets are in the <code>nested_models.tgz</code> tarball.</p>
+<p>Nested model tests focus performing reads and writes on models containing nested (embedded) documents. They are designed
+to give insights into the efficiency of operations on the more complex data structures enabled by the document model.</p>
+<p>The data will be stored as strict JSON with no extended types. These JSON representations MUST be converted into
+equivalent ODM models as part of each benchmark task.</p>
+<p>Nested model benchmark tasks include:</p>
+<ul>
+<li>Large model creation</li>
+<li>Large model update nested field</li>
+<li>Large model find nested field by filter</li>
+<li>Large model find nested array field by filter</li>
+</ul>
+<h4 id="large-model-creation-1"><a class="header" href="#large-model-creation-1">Large model creation</a></h4>
+<p>Summary: This benchmark tests ODM performance creating a single large nested model.</p>
+<p>Dataset: The dataset (LARGE_DOC_NESTED) is contained within <code>large_doc_nested.json</code> and consists of a sample document
+stored as strict JSON with an encoded length of approximately 8,000 bytes.</p>
+<p>Dataset size: For scoring purposes, the dataset size is the size of the <code>large_doc_nested</code> source file (8,000 bytes)
+times 10,000 operations, which equals 80,000,000 bytes or 80 MB.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Load the LARGE_DOC_NESTED dataset into memory.</td></tr>
+<tr><td>Before task</td><td>n/a.</td></tr>
+<tr><td>Do task</td><td>Create an ODM-appropriate model instance for the LARGE_DOC_NESTED document and save it to the database. Repeat this 10,000 times.</td></tr>
+<tr><td>After task</td><td>Drop the collection associated with the LARGE_DOC_NESTED model.</td></tr>
+<tr><td>Teardown</td><td>n/a.</td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="large-model-update-nested"><a class="header" href="#large-model-update-nested">Large model update nested</a></h4>
+<p>Summary: This benchmark tests ODM performance updating nested fields on a single large model.</p>
+<p>Dataset: The dataset (LARGE_DOC_NESTED) is contained within <code>large_doc_nested.json</code> and consists of a sample document
+stored as strict JSON with an encoded length of approximately 8,000 bytes.</p>
+<p>Dataset size: For scoring purposes, the dataset size is the size of the <code>updated_value</code> string file (13 bytes) times
+10,000 operations, which equals 130,000 bytes or 130 KB.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Load the LARGE_DOC_NESTED dataset into memory as an ODM-appropriate model object. Save 10,000 instances into the database.</td></tr>
+<tr><td>Before task</td><td>n/a.</td></tr>
+<tr><td>Do task</td><td>Update the value of the <code>embedded_str_doc_1.field1</code> field to <code>updated_value</code> in an ODM-appropriate manner for each instance of the model.</td></tr>
+<tr><td>After task</td><td>Drop the collection associated with the LARGE_DOC_NESTED model.</td></tr>
+<tr><td>Teardown</td><td>n/a.</td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="large-nested-model-find-nested-by-filter"><a class="header" href="#large-nested-model-find-nested-by-filter">Large nested model find nested by filter</a></h4>
+<p>Summary: This benchmark tests ODM performance finding nested documents using a basic filter.</p>
+<p>Dataset: The dataset (LARGE_DOC_NESTED) is contained within <code>large_doc_nested.json</code> and consists of a sample document
+stored as strict JSON with an encoded length of approximately 8,000 bytes.</p>
+<p>Dataset size: For scoring purposes, the dataset size is the size of the <code>large_doc_nested</code> source file (8,000 bytes)
+times 10,000 operations, which equals 80,000,000 bytes or 80 MB.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Load the LARGE_DOC_NESTED dataset into memory as an ODM-appropriate model object. Insert 10,000 instances into the database, saving the value of the <code>unique_id</code> field for each model’s <code>embedded_str_doc_1</code> nested model into a list.</td></tr>
+<tr><td>Before task</td><td>n/a.</td></tr>
+<tr><td>Do task</td><td>For each of the 10,000 <code>embedded_str_doc_1.unique_id</code> values, perform a filter operation to search for the parent LARGE_DOC_NESTED model.</td></tr>
+<tr><td>After task</td><td>n/a.</td></tr>
+<tr><td>Teardown</td><td>Drop the collection associated with the LARGE_DOC_NESTED model.</td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="large-nested-model-find-nested-array-by-filter"><a class="header" href="#large-nested-model-find-nested-array-by-filter">Large nested model find nested array by filter</a></h4>
+<p>Summary: This benchmark tests ODM performance finding nested document arrays using a basic filter.</p>
+<p>Dataset: The dataset (LARGE_DOC_NESTED) is contained within <code>large_doc_nested.json</code> and consists of a sample document
+stored as strict JSON with an encoded length of approximately 8,000 bytes.</p>
+<p>Dataset size: For scoring purposes, the dataset size is the size of the <code>large_doc_nested</code> source file (8,000 bytes)
+times 10,000 operations, which equals 80,000,000 bytes or 80 MB.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Phase</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>Setup</td><td>Load the LARGE_DOC_NESTED dataset into memory as an ODM-appropriate model object. Insert 10,000 instances into the database, saving the value of the <code>unique_id</code> field for the first item in each model’s <code>embedded_str_doc_array</code> nested model into a list.</td></tr>
+<tr><td>Before task</td><td>n/a.</td></tr>
+<tr><td>Do task</td><td>For each of the 10,000 <code>unique_id</code> values, perform a filter operation to search for the parent LARGE_DOC_NESTED model.</td></tr>
+<tr><td>After task</td><td>n/a.</td></tr>
+<tr><td>Teardown</td><td>Drop the collection associated with the LARGE_DOC_NESTED model.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="benchmark-platform-configuration-and-environments"><a class="header" href="#benchmark-platform-configuration-and-environments">Benchmark platform, configuration and environments</a></h2>
+<h3 id="benchmark-client"><a class="header" href="#benchmark-client">Benchmark Client</a></h3>
+<p>The benchmarks SHOULD be run with the most recent stable version of the ODM and the newest version of the driver it
+supports.</p>
+<h3 id="benchmark-server"><a class="header" href="#benchmark-server">Benchmark Server</a></h3>
+<p>The MongoDB ODM Performance Benchmark MUST be run against a MongoDB replica set of size 1 patch-pinned to the latest
+stable database version without authentication or SSL enabled. This database version SHOULD be updated as needed to
+better differentiate between ODM performance changes and server performance changes. The Benchmark MUST be run on the
+established internal performance distro for the sake of consistency.</p>
+<h3 id="benchmark-placement-and-scheduling"><a class="header" href="#benchmark-placement-and-scheduling">Benchmark placement and scheduling</a></h3>
+<p>The MongoDB ODM Performance Benchmark SHOULD be placed in one of two places. For first-party ODMs, the Benchmark SHOULD
+be placed within the ODM’s test directory as an independent test suite. For third-party ODMs, if the external
+maintainers do not wish to have the Benchmark included as part of the in-repo test suite, it SHOULD be included in the
+ODM performance testing repository created explicitly for this purpose.</p>
+<p>Due to the relatively long runtime of the benchmarks, including them as part of an automated suite that runs against
+every PR is not recommended. Instead, scheduling benchmark runs on a regular cadence is the recommended method of
+automating this suite of tests.</p>
+<h2 id="odm-specific-benchmarking"><a class="header" href="#odm-specific-benchmarking">ODM-specific benchmarking</a></h2>
+<p>As discussed earlier in this document, ODM feature sets vary significantly across libraries. Many ODMs have features
+unique to them or their niche in the wider ecosystem, which makes specifying concrete benchmark test cases for every
+possible API unfeasible. Instead, ODM authors SHOULD determine what mainline use cases of their library are not covered
+by the benchmarks specified above and expand this testing suite with additional benchmarks to cover those areas.</p>
+<h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
+<ul>
+<li>2025-11-14: Release initial 1.0 version</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../benchmarking/benchmarking.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../bson-corpus/bson-corpus.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../benchmarking/benchmarking.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../bson-corpus/bson-corpus.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-609e4cb8.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../theme/whichlang-30e8f953.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

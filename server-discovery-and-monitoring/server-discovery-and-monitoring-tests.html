@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>SOCKS5 - MongoDB Driver Specifications</title>
+        <title>SDAM Test Plan - MongoDB Driver Specifications</title>
 
 
         <!-- Custom HTML head -->
@@ -175,119 +175,209 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="socks5-support"><a class="header" href="#socks5-support">SOCKS5 Support</a></h1>
+                        <h1 id="server-discovery-and-monitoring--test-plan"><a class="header" href="#server-discovery-and-monitoring--test-plan">Server Discovery And Monitoring – Test Plan</a></h1>
 <ul>
-<li>Status: Accepted</li>
-<li>Minimum Server Version: N/A</li>
+<li>
+<p>Status: Accepted</p>
+</li>
+<li>
+<p>See also the YAML test files and their accompanying README in the “tests” directory.</p>
+</li>
 </ul>
 <hr>
-<h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
-<p>SOCKS5 is a standardized protocol for connecting to network services through a separate proxy server. It can be used for
-connecting to hosts that would otherwise be unreachable from the local network by connecting to a proxy server, which
-receives the intended target host’s address from the client and then connects to that address.</p>
-<p>This specification defines driver behaviour when connecting to MongoDB services through a SOCKS5 proxy.</p>
-<h2 id="meta"><a class="header" href="#meta">META</a></h2>
-<p>The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
-“OPTIONAL” in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>.</p>
-<h2 id="specification"><a class="header" href="#specification">Specification</a></h2>
-<h3 id="terms"><a class="header" href="#terms">Terms</a></h3>
-<h4 id="socks5"><a class="header" href="#socks5">SOCKS5</a></h4>
-<p>The SOCKS protocol, version 5, as defined in <a href="https://datatracker.ietf.org/doc/html/rfc1928">RFC1928</a>, restricted to
-either no authentication or username/password authentication as defined in
-<a href="https://datatracker.ietf.org/doc/html/rfc1929">RFC1929</a>.</p>
-<h3 id="mongoclient-configuration"><a class="header" href="#mongoclient-configuration">MongoClient Configuration</a></h3>
-<h4 id="proxyhost"><a class="header" href="#proxyhost">proxyHost</a></h4>
-<p>To specify to the driver to connect using a SOCKS5 proxy, a connection string option of <code>proxyHost=host</code> MUST be added
-to the connection string or passed through an equivalent <code>MongoClient</code> option. This option specifies a domain name or
-IPv4 or IPv6 address on which a SOCKS5 proxy is listening. This option MUST only be configurable at the level of a
-<code>MongoClient</code>.</p>
-<h4 id="proxyport"><a class="header" href="#proxyport">proxyPort</a></h4>
-<p>To specify to the driver to connect using a SOCKS5 proxy listening on a non-default port, a connection string option of
-<code>proxyPort=port</code> MUST be added to the connection string or passed through an equivalent <code>MongoClient</code> option. This
-option specifies a TCP port number. The default for this option MUST be <code>1080</code>. This option MUST only be configurable at
-the level of a <code>MongoClient</code>. Drivers MUST error if this option was specified and <code>proxyHost</code> was not specified.</p>
-<h4 id="proxyusername"><a class="header" href="#proxyusername">proxyUsername</a></h4>
-<p>To specify to the driver to connect using a SOCKS5 proxy requiring username/password authentication, a connection string
-option of - Code:<code>proxyUsername=username</code> MUST be added to the connection string or passed through an equivalent
-<code>MongoClient</code> option. This option specifies a string of non-zero length. Drivers MUST ignore this option if it specifies
-a zero-length string. Drivers MUST error if this option was specified and <code>proxyHost</code> was not specified or
-<code>proxyPassword</code> was not specified.</p>
-<h4 id="proxypassword"><a class="header" href="#proxypassword">proxyPassword</a></h4>
-<p>To specify to the driver to connect using a SOCKS5 proxy requiring username/password authentication, a connection string
-option of - Code:<code>proxyPassword=password</code> MUST be added to the connection string or passed through an equivalent
-<code>MongoClient</code> option. This option specifies a string of non-zero length. Drivers MUST ignore this option if it specifies
-a zero-length string. Drivers MUST error if this option was specified and <code>proxyHost</code> was not specified or
-<code>proxyUsername</code> was not specified.</p>
-<h3 id="connection-pooling"><a class="header" href="#connection-pooling">Connection Pooling</a></h3>
-<h4 id="connection-establishment"><a class="header" href="#connection-establishment">Connection Establishment</a></h4>
-<p>When establishing a new outgoing TCP connection, drivers MUST perform the following steps if <code>proxyHost</code> was specified:</p>
+<h2 id="all-servers-unavailable"><a class="header" href="#all-servers-unavailable">All servers unavailable</a></h2>
+<p>A MongoClient can be constructed without an exception, even with all seeds unavailable.</p>
+<h2 id="network-error-writing-to-primary"><a class="header" href="#network-error-writing-to-primary">Network error writing to primary</a></h2>
+<p>Scenario: With TopologyType ReplicaSetWithPrimary, a write to the primary fails with a network error other than timeout.</p>
+<p>Outcome: The former primary’s ServerType MUST become Unknown. The TopologyType MUST change to ReplicaSetNoPrimary. The
+client MUST NOT immediately re-check the former primary.</p>
+<h2 id="not-writable-primary-error-when-reading-without-secondaryok-bit"><a class="header" href="#not-writable-primary-error-when-reading-without-secondaryok-bit">“Not writable primary” error when reading without SecondaryOk bit</a></h2>
+<p>Scenario: With TopologyType ReplicaSetWithPrimary, we read from a server we thought was RSPrimary. Thus the SecondaryOk
+bit is not set.</p>
+<p>The server response should indicate an error due to the server not being a primary.</p>
+<p>Outcome: The former primary’s ServerType MUST become Unknown. The TopologyType MUST change to ReplicaSetNoPrimary. The
+client MUST NOT immediately re-check the former primary.</p>
+<h2 id="node-is-recovering-error-reading-with-secondaryok-bit"><a class="header" href="#node-is-recovering-error-reading-with-secondaryok-bit">“Node is recovering” error reading with SecondaryOk bit</a></h2>
+<p>Scenario: With TopologyType ReplicaSetWithPrimary, we read from a server we thought was RSSecondary. Thus the
+SecondaryOk bit <em>is</em> set.</p>
+<p>The server response should indicate an error due to the server being in recovering state.</p>
+<p>Outcome: The former secondary’s ServerType MUST become Unknown. The TopologyType MUST remain ReplicaSetWithPrimary. A
+multi-threaded client MUST immediately re-check the former secondary, a single-threaded client MUST NOT.</p>
+<h2 id="node-is-recovering-error-from-a-write-concern-error"><a class="header" href="#node-is-recovering-error-from-a-write-concern-error">“Node is recovering” error from a write concern error</a></h2>
+<p>Scenario: With TopologyType ReplicaSetWithPrimary, a write to the primary responds with the following document:</p>
+<blockquote>
+<p>{ ok: 1, writeConcernError: {code: 91, errmsg: “Replication is being shut down”} }</p>
+</blockquote>
+<p>Outcome: The former primary’s ServerType MUST become Unknown. The TopologyType MUST change to ReplicaSetNoPrimary. A
+multi-threaded client MUST immediately re-check the former secondary, a single-threaded client MUST NOT.</p>
+<h2 id="parsing-not-writable-primary-and-node-is-recovering-errors"><a class="header" href="#parsing-not-writable-primary-and-node-is-recovering-errors">Parsing “not writable primary” and “node is recovering” errors</a></h2>
+<p>For all these example responses, the client MUST mark the server “Unknown” and store the error message in the
+ServerDescription’s error field.</p>
+<p>Clients MUST NOT depend on any particular field order in these responses.</p>
+<h3 id="write-command"><a class="header" href="#write-command">Write command</a></h3>
+<p>Response to an “insert” command on an arbiter, secondary, recovering member, or ghost:</p>
+<blockquote>
+<p>{ok: 0, errmsg: “not writable primary”}</p>
+</blockquote>
+<h3 id="query-with-secondaryok-bit"><a class="header" href="#query-with-secondaryok-bit">Query with SecondaryOk bit</a></h3>
+<p>Response from an arbiter, recovering member, or ghost when SecondaryOk is true:</p>
+<blockquote>
+<p>{$err: “not primary or secondary; cannot currently read from this replSet member”}</p>
+</blockquote>
+<p>The QueryFailure bit is set in responseFlags.</p>
+<h3 id="query-without-secondaryok-bit"><a class="header" href="#query-without-secondaryok-bit">Query without SecondaryOk bit</a></h3>
+<p>Response from an arbiter, recovering member, ghost, or secondary when SecondaryOk is false:</p>
+<blockquote>
+<p>{$err: “not writable primary and SecondaryOk=false”}</p>
+</blockquote>
+<p>The QueryFailure bit is set in responseFlags.</p>
+<h3 id="count-with-secondaryok-bit"><a class="header" href="#count-with-secondaryok-bit">Count with SecondaryOk bit</a></h3>
+<p>Command response on an arbiter, recovering member, or ghost when SecondaryOk is true:</p>
+<blockquote>
+<p>{ok: 0, errmsg: “node is recovering”}</p>
+</blockquote>
+<h3 id="count-without-secondaryok-bit"><a class="header" href="#count-without-secondaryok-bit">Count without SecondaryOk bit</a></h3>
+<p>Command response on an arbiter, recovering member, ghost, or secondary when SecondaryOk is false:</p>
+<blockquote>
+<p>{ok: 0, errmsg: “not writable primary”}</p>
+</blockquote>
+<h2 id="topology-discovery-and-direct-connection"><a class="header" href="#topology-discovery-and-direct-connection">Topology discovery and direct connection</a></h2>
+<h3 id="topology-discovery"><a class="header" href="#topology-discovery">Topology discovery</a></h3>
+<p>Scenario: given a replica set deployment with a secondary, where HOST is the address of the secondary, create a
+MongoClient using <code>mongodb://HOST/?directConnection=false</code> as the URI. Attempt a write to a collection.</p>
+<p>Outcome: Verify that the write succeeded.</p>
+<h3 id="direct-connection"><a class="header" href="#direct-connection">Direct connection</a></h3>
+<p>Scenario: given a replica set deployment with a secondary, where HOST is the address of the secondary, create a
+MongoClient using <code>mongodb://HOST/?directConnection=true</code> as the URI. Attempt a write to a collection.</p>
+<p>Outcome: Verify that the write failed with a NotWritablePrimary error.</p>
+<h3 id="existing-behavior"><a class="header" href="#existing-behavior">Existing behavior</a></h3>
+<p>Scenario: given a replica set deployment with a secondary, where HOST is the address of the secondary, create a
+MongoClient using <code>mongodb://HOST/</code> as the URI. Attempt a write to a collection.</p>
+<p>Outcome: Verify that the write succeeded or failed depending on existing driver behavior with respect to the starting
+topology.</p>
+<h2 id="monitors-sleep-at-least-minheartbeatfrequencyms-between-checks"><a class="header" href="#monitors-sleep-at-least-minheartbeatfrequencyms-between-checks">Monitors sleep at least minHeartbeatFrequencyMS between checks</a></h2>
+<p>This test will be used to ensure monitors sleep for an appropriate amount of time between failed server checks so as to
+not flood the server with new connection creations.</p>
+<p>This test requires MongoDB 4.9.0+.</p>
 <ol>
 <li>
-<p>Connect to the SOCKS5 proxy host, using <code>proxyHost</code> and <code>proxyPort</code> as specified.</p>
+<p>Enable the following failpoint:</p>
+<pre><code class="language-javascript">{
+    configureFailPoint: "failCommand",
+    mode: { times: 5 },
+    data: {
+        failCommands: ["hello"], // or legacy hello command
+        errorCode: 1234,
+        appName: "SDAMMinHeartbeatFrequencyTest"
+    }
+}
+</code></pre>
 </li>
 <li>
-<p>Perform a SOCKS5 handshake as specified in RFC1928.</p>
-<blockquote>
-<p>If <code>proxyUsername</code> and <code>proxyPassword</code> were passed, drivers MUST indicate in the handshake that both “no
-authentication” and “username/password authentication” are supported. Otherwise, drivers MUST indicate support for
-“no authentication” only.</p>
-<p>Drivers MUST NOT attempt to perform DNS A or AAAA record resolution of the destination hostname and instead pass
-the hostname to the proxy as-is.</p>
-</blockquote>
+<p>Create a client with directConnection=true, appName=“SDAMMinHeartbeatFrequencyTest”, and
+serverSelectionTimeoutMS=5000.</p>
 </li>
 <li>
-<p>Continue with connection establishment as if the connection was one to the destination host.</p>
+<p>Start a timer.</p>
+</li>
+<li>
+<p>Execute a <code>ping</code> command.</p>
+</li>
+<li>
+<p>Stop the timer. Assert that the <code>ping</code> took between 2 seconds and 3.5 seconds to complete.</p>
 </li>
 </ol>
-<p>Drivers MUST use the SOCKS5 proxy for connections to MongoDB services and
-<a href="../client-side-encryption/client-side-encryption.html#kms-provider">client-side field-level encryption KMS servers</a>.</p>
-<p>Drivers MUST NOT use the SOCKS5 proxy for connections to - Code:<code>mongocryptd</code> processes spawned for automatic
-client-side field-level encryption.</p>
-<p>Drivers MUST treat a connection failure when connecting to the SOCKS5 proxy or a SOCKS5 handshake or authentication
-failure the same as a network error (e.g. <code>ECONNREFUSED</code>) which does not indicate server overload for backpressure
-purposes.</p>
-<h3 id="events"><a class="header" href="#events">Events</a></h3>
-<p>SOCKS5 proxies are fully transparent to connection monitoring events. In particular, in <code>CommandStartedEvent</code>,
-<code>CommandSucceededEvent</code>, and - Code:<code>CommandFailedEvent</code>, the driver SHOULD NOT reference the SOCKS5 proxy as part of
-the <code>connectionId</code> field or other fields.</p>
-<h3 id="qa"><a class="header" href="#qa">Q&amp;A</a></h3>
-<h4 id="why-not-include-dns-requests-in-the-set-of-proxied-network-communication"><a class="header" href="#why-not-include-dns-requests-in-the-set-of-proxied-network-communication">Why not include DNS requests in the set of proxied network communication?</a></h4>
-<p>While SOCKS5 as a protocol does support UDP forwarding, using this feature has a number of downsides. Notably, only a
-subset of SOCKS5 client libraries and SOCKS5 server implementations support UDP forwarding (e.g. the OpenSSH client’s
-dynamic forwarding feature does not). This would also considerably increase implementation complexity in drivers that do
-not use DNS libraries in which the driver is in control of how the UDP packets are sent and received.</p>
-<h4 id="why-not-support-other-proxy-protocols-such-as-socks4socks4a-http-connect-proxies-etc"><a class="header" href="#why-not-support-other-proxy-protocols-such-as-socks4socks4a-http-connect-proxies-etc">Why not support other proxy protocols, such as Socks4/Socks4a, HTTP Connect proxies, etc.?</a></h4>
-<p>SOCKS5 is a powerful, standardized and widely used proxy protocol. It is likely that almost all users which require
-tunneling/proxying of some sort will be able to use it, and those who require another protocol or a more advanced setup
-like proxy chaining, can work around that by using a local SOCKS5 intermediate proxy.</p>
-<h4 id="why-are-the-connection-string-parameters-generic-with-no-explicit-mention-of-socks5"><a class="header" href="#why-are-the-connection-string-parameters-generic-with-no-explicit-mention-of-socks5">Why are the connection string parameters generic, with no explicit mention of SOCKS5?</a></h4>
-<p>In the case that future changes will enable drivers using other proxy protocols, keeping the option names generic allows
-their re-use. In that case, another option would specify the protocol and SOCKS5 would be the implied default. However,
-since there is no reason to believe that such additions will be made in the foreseeable future, no option for specifying
-the proxy protocol is introduced here.</p>
-<h4 id="why-is-support-for-authentication-methods-limited-to-no-authentication-and-usernamepassword-authentication"><a class="header" href="#why-is-support-for-authentication-methods-limited-to-no-authentication-and-usernamepassword-authentication">Why is support for authentication methods limited to no authentication and username/password authentication?</a></h4>
-<p>This matches the set of authentication methods most commonly implemented by SOCKS5 client libraries and thus reduces
-implementation complexity for drivers. This advantage is sufficient to ignore the possible advantages that would come
-with enabling other authentication methods.</p>
-<h3 id="design-rationales"><a class="header" href="#design-rationales">Design Rationales</a></h3>
-<h3 id="alternative-designs"><a class="header" href="#alternative-designs">Alternative Designs</a></h3>
-<h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
-<ul>
-<li>2024-09-04: Migrated from reStructuredText to Markdown.</li>
-<li>2022-10-05: Remove spec front matter</li>
-</ul>
+<h2 id="connection-pool-management"><a class="header" href="#connection-pool-management">Connection Pool Management</a></h2>
+<p>This test will be used to ensure monitors properly create and unpause connection pools when they discover servers.</p>
+<p>This test requires failCommand appName support which is only available in MongoDB 4.2.9+.</p>
+<ol>
+<li>
+<p>Create a client with directConnection=true, appName=“SDAMPoolManagementTest”, and heartbeatFrequencyMS=500 (or lower
+if possible).</p>
+</li>
+<li>
+<p>Verify via SDAM and CMAP event monitoring that a ConnectionPoolReadyEvent occurs after the first
+ServerHeartbeatSucceededEvent event does.</p>
+</li>
+<li>
+<p>Enable the following failpoint:</p>
+<pre><code class="language-javascript">{
+    configureFailPoint: "failCommand",
+    mode: { times: 2 },
+    data: {
+        failCommands: ["hello"], // or legacy hello command
+        errorCode: 1234,
+        appName: "SDAMPoolManagementTest"
+    }
+}
+</code></pre>
+</li>
+<li>
+<p>Verify that a ServerHeartbeatFailedEvent and a ConnectionPoolClearedEvent (CMAP) are emitted.</p>
+</li>
+<li>
+<p>Then verify that a ServerHeartbeatSucceededEvent and a ConnectionPoolReadyEvent (CMAP) are emitted.</p>
+</li>
+<li>
+<p>Disable the failpoint.</p>
+</li>
+</ol>
+<h2 id="connection-pool-backpressure"><a class="header" href="#connection-pool-backpressure">Connection Pool Backpressure</a></h2>
+<p>This test will be used to ensure that connection establishment failures during the TLS handshake do not result in a pool
+clear event. We create a setup client to enable the ingress connection establishment rate limiter, and then induce a
+connection storm. After the storm, we verify that some of the connections failed to checkout, but that the pool was not
+cleared.</p>
+<p>This test requires MongoDB 7.0+. See the
+<a href="https://www.mongodb.com/docs/manual/reference/parameters/#mongodb-parameter-param.ingressConnectionEstablishmentRateLimiterEnabled">MongoDB Server Parameters</a>
+for more details.</p>
+<p>This test MUST be run both with and without TLS enabled. Without TLS enabled, the connection establishment will fail
+during the <code>hello</code> message, and with TLS enabled it will fail during the TLS handshake.</p>
+<p>If running against a sharded cluster, this test MUST be run against only a single host, similar to how
+<code>useMultipleMongoses:false</code> would be handled in a unified test.</p>
+<ol>
+<li>
+<p>Create a test client that listens to CMAP events, with maxConnecting=100. The higher maxConnecting will help ensure
+contention for creating connections.</p>
+</li>
+<li>
+<p>Run the following commands to set up the rate limiter.</p>
+<pre><code class="language-python">client.admin.command("setParameter", 1, ingressConnectionEstablishmentRateLimiterEnabled=True)
+client.admin.command("setParameter", 1, ingressConnectionEstablishmentRatePerSec=20)
+client.admin.command("setParameter", 1, ingressConnectionEstablishmentBurstCapacitySecs=1)
+client.admin.command("setParameter", 1, ingressConnectionEstablishmentMaxQueueDepth=1)
+</code></pre>
+</li>
+<li>
+<p>Add a document to the test collection so that the sleep operations will actually block:
+<code>client.test.test.insert_one({})</code>.</p>
+</li>
+<li>
+<p>Run the following find command on the collection in 100 parallel threads/coroutines. Run these commands concurrently
+but block on their completion, and ignore errors raised by the command.
+<code>client.test.test.find_one({"$where": "function() { sleep(2000); return true; }})</code></p>
+</li>
+<li>
+<p>Assert that at least 10 <code>ConnectionCheckOutFailedEvent</code> occurred.</p>
+</li>
+<li>
+<p>Assert that 0 <code>PoolClearedEvent</code> occurred.</p>
+</li>
+<li>
+<p>Ensure that the following steps run at test teardown even if the test fails:</p>
+<p>7.1. Sleep for 1 second to clear the rate limiter.</p>
+<p>7.2. Execute the following command:
+<code>client.admin("setParameter", 1, ingressConnectionEstablishmentRateLimiterEnabled=False)</code>.</p>
+</li>
+</ol>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../compression/OP_COMPRESSED.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server-selection/server-selection-tests.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
-                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -295,13 +385,10 @@ with enabling other authentication methods.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../compression/OP_COMPRESSED.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server-selection/server-selection-tests.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
-                    </a>
             </nav>
 
         </div>
