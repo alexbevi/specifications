@@ -106,18 +106,22 @@ if [ "${#EXCLUDE_PATTERNS[@]}" -gt 0 ]; then
   EXCLUDE_REGEX="$(IFS='|'; echo "${EXCLUDE_PATTERNS[*]}")"
 fi
 
-# Find actual .md files (filter once)
+# Find all actual .md files for validating links.
 tmp_actual_files=()
-if [ -n "$EXCLUDE_REGEX" ]; then
-  while IFS= read -r f; do tmp_actual_files+=("$f"); done < <(
-    find "$BASE_DIR" -type f -name "*.md" | sed "s|^$BASE_DIR/||" | grep -Ev "$EXCLUDE_REGEX" | sort -u
-  )
-else
-  while IFS= read -r f; do tmp_actual_files+=("$f"); done < <(
-    find "$BASE_DIR" -type f -name "*.md" | sed "s|^$BASE_DIR/||" | sort -u
-  )
-fi
+while IFS= read -r f; do tmp_actual_files+=("$f"); done < <(
+  find "$BASE_DIR" -type f -name "*.md" | sed "s|^$BASE_DIR/||" | sort -u
+)
 actual_files=("${tmp_actual_files[@]}")
+
+# Apply exclusions only when looking for orphaned files. Excluded files may
+# still be linked from the source file and must be validated normally.
+orphan_candidates=()
+for af in "${actual_files[@]}"; do
+  if [ -n "$EXCLUDE_REGEX" ] && echo "$af" | grep -Eq "$EXCLUDE_REGEX"; then
+    continue
+  fi
+  orphan_candidates+=("$af")
+done
 
 # Build string sets for fast lookup
 linked_set="|"
@@ -163,7 +167,7 @@ done
 echo ""
 echo "� Checking for orphaned markdown files..."
 orphaned=false
-for af in "${actual_files[@]}"; do
+for af in "${orphan_candidates[@]}"; do
   if [[ "$linked_set" != *"|$af|"* ]]; then
     echo "⚠️  Orphaned file: ./$af"
     orphaned=true
@@ -173,5 +177,7 @@ done
 # Summary
 if ! $missing && ! $orphaned; then
   echo "✅ All linked files exist and no orphaned .md files found."
+  exit 0
 fi
 
+exit 1

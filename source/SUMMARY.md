@@ -33,6 +33,7 @@
 
 - [Connectivity]()
   - [Server Discovery and Monitoring](server-discovery-and-monitoring/server-discovery-and-monitoring.md)
+  - [SDAM Summary](server-discovery-and-monitoring/server-discovery-and-monitoring-summary.md)
   - [Connection Monitoring and Pooling](connection-monitoring-and-pooling/connection-monitoring-and-pooling.md)
   - [Load Balancer Support](load-balancers/load-balancers.md)
 
@@ -54,6 +55,7 @@
   - [Retryability]()
     - [Reads](retryable-reads/retryable-reads.md)
     - [Writes](retryable-writes/retryable-writes.md)
+  - [Client Backpressure](client-backpressure/client-backpressure.md)
   - [CSOT](client-side-operations-timeout/client-side-operations-timeout.md)
   - [Consistency]()
     - [Sessions](sessions/driver-sessions.md)
@@ -101,9 +103,12 @@
 
 - [Testability]()
   - [Unified Test Format](unified-test-format/unified-test-format.md)
+  - [Atlas SFP Testing](atlas-sfp-testing/atlas-sfp-testing.md)
   - [Performance Benchmarking](benchmarking/benchmarking.md)
+  - [ODM Performance Benchmarking](benchmarking/odm-benchmarking.md)
   - [BSON Corpus](bson-corpus/bson-corpus.md)
   - [Replication Event Resilience](connections-survive-step-down/tests/README.md)
   - [FAAS Automated Testing](faas-automated-testing/faas-automated-testing.md)
   - [Max Staleness Tests](max-staleness/max-staleness-tests.md)
   - [Server Selection Tests](server-selection/server-selection-tests.md)
+  - [SDAM Test Plan](server-discovery-and-monitoring/server-discovery-and-monitoring-tests.md)
