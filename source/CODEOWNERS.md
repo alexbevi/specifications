@@ -4,6 +4,7 @@ This is very loosely based on GitHub's [CODEOWNERS](https://docs.github.com/en/r
 
 |Specification|DRI/Owner(s)|Last Updated|
 |-------------|---------|------------|
+|[Atlas Secure Frontend Processor (SFP) Testing](atlas-sfp-testing/atlas-sfp-testing.md)||2025-02-27|
 |[Authentication](auth/auth.md)|[Steven Silvester](https://github.com/blink1073)<br/>[Dmitry Rybakov](https://github.com/comandeo-mongo)|2025-09-30|
 |[BSON Binary Subtype 6: Encrypted](bson-binary-encrypted/binary-encrypted.md)||2024-03-04|
 |[BSON Binary Subtype 9: Vector](bson-binary-vector/bson-binary-vector.md)||2025-06-23|
@@ -12,6 +13,7 @@ This is very loosely based on GitHub's [CODEOWNERS](https://docs.github.com/en/r
 |[Bulk Write](crud/bulk-write.md)||2025-09-09|
 |[Causal Consistency](causal-consistency/causal-consistency.md)||2024-02-08|
 |[Change Streams](change-streams/change-streams.md)|[Abraham Egnor](https://github.com/abr-egn)|2025-09-08|
+|[Client Backpressure](client-backpressure/client-backpressure.md)||2026-07-08|
 |[Client Side Encryption](client-side-encryption/client-side-encryption.md)|[Kevin Albertson](https://github.com/kevinAlbs)<br/>[Maxim Katcharov](https://github.com/katcharov)|2025-09-30|
 |[Client Side Operations Timeout (CSOT)](client-side-operations-timeout/client-side-operations-timeout.md)|[Shane Harvey](https://github.com/ShaneHarvey)<br/>[Preston Vasquez](https://github.com/prestonvasquez)|2024-01-29|
 |[Collation](collation/collation.md)||2024-02-15|
@@ -36,6 +38,7 @@ This is very loosely based on GitHub's [CODEOWNERS](https://docs.github.com/en/r
 |[Max Staleness](max-staleness/max-staleness.md)||2024-08-09|
 |[ObjectId](bson-objectid/objectid.md)||2024-07-30|
 |[OCSP](ocsp-support/ocsp-support.md)||2024-08-20|
+|[ODM Performance Benchmarking](benchmarking/odm-benchmarking.md)||2025-11-14|
 |[Open Telemetry](open-telemetry/open-telemetry.md)|||
 |[`OP_MSG`](message/OP_MSG.md)||2024-04-30|
 |[Performance Benchmarking](benchmarking/benchmarking.md)||2024-12-23|
