@@ -28,6 +28,7 @@
   - [Wire Compression](compression/OP_COMPRESSED.md)
   - [SOCKS5](socks5-support/socks5.md)
   - [Initial DNS Seedlist Discovery](initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.md)
+  - [Public Suffix List](public-suffix-list/public-suffix-list.md)
 
 ---
 
@@ -104,6 +105,7 @@
 - [Testability]()
   - [Unified Test Format](unified-test-format/unified-test-format.md)
   - [Atlas SFP Testing](atlas-sfp-testing/atlas-sfp-testing.md)
+  - [Atlas Serverless Tests](serverless-testing/README.md)
   - [Performance Benchmarking](benchmarking/benchmarking.md)
   - [ODM Performance Benchmarking](benchmarking/odm-benchmarking.md)
   - [BSON Corpus](bson-corpus/bson-corpus.md)
