@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-c2274416.js";
+            window.path_to_searchindex_js = "../searchindex-b27a8209.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -179,7 +179,7 @@
 <ul>
 <li>Status: Accepted</li>
 <li>Minimum Server Version: N/A</li>
-<li>Current Schema Version: 1.28.0</li>
+<li>Current Schema Version: 1.29.0</li>
 </ul>
 <hr>
 <h2 id="abstract"><a class="header" href="#abstract">Abstract</a></h2>
@@ -961,6 +961,9 @@ for a test. The structure of this object is as follows:</p>
 <li>If <code>true</code>, additional unexpected spans are allowed.</li>
 <li>If <code>false</code> or omitted, the test runner MUST fail if any unexpected spans are detected.</li>
 </ul>
+<p>This applies at every level of the span tree, not only to the top-level <code>spans</code> array. A span nested under an
+expected span, but absent from that span’s <code>nested</code> array, is an unexpected span. A test can therefore assert that
+a command span is <em>not</em> nested under a given operation span by omitting it from that operation’s <code>nested</code> array.</p>
 </li>
 <li>
 <p><code>spans</code>: Required array of span objects. Each span describes an expected tracing event.</p>
@@ -2738,6 +2741,14 @@ for a session entity’s <code>id</code> field (e.g. <code>session: *session0</c
 test runner MUST assert that the actual value is less than or equal to the specified value. Test runners MUST also apply
 the rules specified in <a href="#flexible-numeric-comparisons">Flexible Numeric Comparisons</a> for this operator. For example, an
 expected value of <code>1</code> would match an actual value of <code>1.0</code> and <code>0.0</code> but would not match <code>1.1</code>.</p>
+<h5 id="gte"><a class="header" href="#gte">$$gte</a></h5>
+<p>Syntax:</p>
+<pre><code class="language-yaml">{ $$gte: 1 }
+</code></pre>
+<p>This operator can be used anywhere a matched value is expected (including <a href="#operation_expectResult">expectResult</a>). The
+test runner MUST assert that the actual value is greater than or equal to the specified value. Test runners MUST also
+apply the rules specified in <a href="#flexible-numeric-comparisons">Flexible Numeric Comparisons</a> for this operator. For
+example, an expected value of <code>1</code> would match an actual value of <code>1.0</code> and <code>1.1</code> but would not match <code>0.0</code>.</p>
 <h5 id="matchasdocument"><a class="header" href="#matchasdocument">$$matchAsDocument</a></h5>
 <p>Syntax:</p>
 <pre><code class="language-yaml">{ $$matchAsDocument: &lt;anything&gt; }
@@ -3136,6 +3147,12 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-08-26: <strong>Schema version 1.29.</strong></p>
+<p>Introduced the <code>$$gte</code> operator, the lower-bound counterpart to <code>$$lte</code>. Also clarified that <code>ignoreExtraSpans</code>
+applies at every level of the span tree, so that a test can assert a span is not nested under a given parent by
+omitting it from that parent’s <code>nested</code> array. Both changes require runner support, so they share this version.</p>
+</li>
 <li>
 <p>2026-06-17: Remove pre-4.2 version references.</p>
 </li>

@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-c2274416.js";
+            window.path_to_searchindex_js = "../searchindex-b27a8209.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -281,6 +281,29 @@ within the transaction SHOULD be nested to the <code>transaction</code> span.</p
 <h5 id="withtransaction"><a class="header" href="#withtransaction"><code>withTransaction</code></a></h5>
 <p>In case of <code>withTransaction</code> operation spans for operations that are executed inside the callbacks SHOULD be nested into
 the <code>withTransaction</code> span.</p>
+<h5 id="cursor-iteration-getmore"><a class="header" href="#cursor-iteration-getmore">Cursor Iteration (<code>getMore</code>)</a></h5>
+<p>If the driver does not expose the cursor to the caller, but iterates it internally to produce the return value of one
+public API call (e.g., a <code>find</code> helper returning an array of all matching documents), the driver MUST NOT create
+additional operation spans. Every <code>getMore</code> command span for that call MUST be nested under the call’s single operation
+span.</p>
+<p>If the driver returns the cursor to the caller and the caller drives iteration, the driver MUST create a new operation
+span for each <code>getMore</code> it sends. The span MUST be created within the current span of the host application and MUST be
+named according to <a href="#operation-span-name">Operation Span Name</a>: <code>getMore db.collection_name</code> for a cursor over a
+collection, or <code>getMore db</code> when the cursor targets no specific collection (e.g., a cursor from <code>listCollections</code>), per
+<a href="#dbcollectionname">db.collection.name</a>. The <code>getMore</code> command span MUST be nested under it, per
+<a href="#instrumenting-server-commands">Instrumenting Server Commands</a>.</p>
+<p>This operation span MUST NOT be nested under the operation span of the command that created the cursor. A host
+application may do unrelated work between batches, and nesting each <code>getMore</code> under the cursor-creating operation would
+attribute that work to the original operation. Ordinary nesting still applies otherwise. A cursor iterated inside a
+<code>withTransaction</code> callback nests into the <code>withTransaction</code> span, and a cursor iterated inside a transaction started
+with the core transaction API nests into the pseudo operation <code>transaction</code> span.</p>
+<p>Each <code>getMore</code> operation span MUST be finished once its command completes. No span is scoped to a cursor’s lifetime, so
+a cursor that is never exhausted (e.g., a tailable cursor) leaves nothing unfinished.</p>
+<p>A <code>getMore</code> is not retryable, but a change stream may resume after one fails. A resume MUST NOT extend the failed
+<code>getMore</code> operation span: drivers MUST finish that span with its error, and the <code>aggregate</code> and <code>getMore</code> commands that
+re-establish the cursor MUST each be nested under new operation spans. Drivers MUST NOT create an operation span for the
+<code>killCursors</code> a resume sends; it is internal cleanup rather than a public API call, so its command span is created
+within whatever span is current.</p>
 <h5 id="operation-span-name"><a class="header" href="#operation-span-name">Operation Span Name</a></h5>
 <p>The span name SHOULD be:</p>
 <ul>
@@ -308,6 +331,7 @@ span is <code>findAndModify</code>. This ensures consistency between drivers whe
 <tr><td style="text-align: left"><code>db.collection.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The collection being accessed within the database stated in <code>db.namespace</code></td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.operation.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the driver operation being executed</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.operation.summary</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Equivalent to span name</td><td style="text-align: left">Required</td></tr>
+<tr><td style="text-align: left"><code>db.mongodb.cursor_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">If a cursor is created or used in the operation (see below)</td><td style="text-align: left">Conditional</td></tr>
 </tbody>
 </table>
 </div>
@@ -339,6 +363,13 @@ omitted for commands running against <code>admin</code> database or commands tha
 <li><code>abortTransaction</code> → <em>omitted</em></li>
 <li>client <code>bulkWrite</code> → <em>omitted</em></li>
 </ul>
+<p><span id="operation-cursor-id"></span></p>
+<h6 id="dbmongodbcursor_id"><a class="header" href="#dbmongodbcursor_id">db.mongodb.cursor_id</a></h6>
+<p>If the operation creates a cursor, or operates on a single existing cursor, the <code>cursor_id</code> attribute MUST be added to
+the operation span, following the same rules as the command span attribute of the same name, including its omissions:
+never a literal <code>0</code>, and never for a command that may operate on several cursors at once, such as <code>killCursors</code> (see
+<a href="#command-cursor-id">db.mongodb.cursor_id</a>). When the driver iterates a cursor internally, the value is the id of the
+cursor the operation created; for a caller-driven <code>getMore</code>, it is the id the driver sent.</p>
 <h5 id="exceptions"><a class="header" href="#exceptions">Exceptions</a></h5>
 <p>If the driver operation fails with an exception, drivers MUST record an exception to the current operation span. This
 does not relate to exceptions that happen on the server command level (see below). Those exceptions MUST be recorded to
@@ -380,7 +411,7 @@ span.</p>
 <tr><td style="text-align: left"><code>db.mongodb.server_connection_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Server connection id</td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.mongodb.driver_connection_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Local connection id</td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.query.text</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Database command that was sent to the server. Content should be equivalent to the <code>document</code> field of the CommandStartedEvent of the command monitoring.</td><td style="text-align: left">Conditional</td></tr>
-<tr><td style="text-align: left"><code>db.mongodb.cursor_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">If a cursor is created or used in the operation</td><td style="text-align: left">Required if available</td></tr>
+<tr><td style="text-align: left"><code>db.mongodb.cursor_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">If a cursor is created or used in the command (see below)</td><td style="text-align: left">Conditional</td></tr>
 <tr><td style="text-align: left"><code>db.mongodb.lsid</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Logical session id</td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.mongodb.txn_number</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Transaction number</td><td style="text-align: left">Required if available</td></tr>
 </tbody>
@@ -433,8 +464,17 @@ configuration can be implemented with an environment variable
 added and truncated to the provided value (similar to the Logging specification).</p>
 <p>On the <code>MongoClient</code> level this configuration can be implemented with a <code>MongoClient</code> option, for example,
 <code>tracing.query_text_max_length</code>.</p>
-<h6 id="dbmongodbcursor_id"><a class="header" href="#dbmongodbcursor_id">db.mongodb.cursor_id</a></h6>
-<p>If the command returns a cursor, or uses a cursor, the <code>cursor_id</code> attribute SHOULD be added.</p>
+<p><span id="command-cursor-id"></span></p>
+<h6 id="dbmongodbcursor_id-1"><a class="header" href="#dbmongodbcursor_id-1">db.mongodb.cursor_id</a></h6>
+<p>If the command creates a cursor (e.g., <code>find</code>, <code>aggregate</code>, <code>listIndexes</code>) and the server returns a non-zero cursor id,
+the <code>cursor_id</code> attribute MUST be added.</p>
+<p>If the command operates on a single existing cursor (e.g., <code>getMore</code>), the attribute MUST be added, holding the cursor
+id the driver sent. It MUST still be added when the reply returns a cursor id of <code>0</code> to signal the cursor is now
+exhausted; the id the command operated on is the one worth recording.</p>
+<p>If a command may operate on several cursors at once (e.g., <code>killCursors</code>, whose <code>cursors</code> field is an array), the
+attribute MUST be omitted: it is a single <code>int64</code> and has no defined value for such a command.</p>
+<p>A cursor id of <code>0</code> means no server-side cursor remains. Drivers MUST NOT add the attribute with a value of <code>0</code>, and MUST
+omit it when a cursor-creating command’s reply returns <code>0</code>.</p>
 <h5 id="exceptions-1"><a class="header" href="#exceptions-1">Exceptions</a></h5>
 <p>If the server command fails with an exception, drivers MUST record an exception to the current command span. When
 recording an exception, drivers SHOULD add the following attributes to the span, when the content for the attribute if
@@ -476,6 +516,7 @@ take.</p>
 <tr><td style="text-align: left"><code>dropCollection</code></td><td style="text-align: left"><a href="tests/operation/drop_collection.yml">tests/operation/drop_collection.yml</a></td></tr>
 <tr><td style="text-align: left"><code>dropIndexes</code></td><td style="text-align: left"><a href="tests/operation/drop_indexes.yml">tests/operation/drop_indexes.yml</a></td></tr>
 <tr><td style="text-align: left"><code>find</code></td><td style="text-align: left"><a href="tests/operation/find.yml">tests/operation/find.yml</a></td></tr>
+<tr><td style="text-align: left"><code>getMore</code></td><td style="text-align: left"><a href="tests/operation/get_more.yml">tests/operation/get_more.yml</a></td></tr>
 <tr><td style="text-align: left"><code>listCollections</code></td><td style="text-align: left"><a href="tests/operation/list_collections.yml">tests/operation/list_collections.yml</a></td></tr>
 <tr><td style="text-align: left"><code>listDatabases</code></td><td style="text-align: left"><a href="tests/operation/list_databases.yml">tests/operation/list_databases.yml</a></td></tr>
 <tr><td style="text-align: left"><code>listIndexes</code></td><td style="text-align: left"><a href="tests/operation/list_indexes.yml">tests/operation/list_indexes.yml</a></td></tr>
@@ -525,6 +566,11 @@ tracing may have unexpected negative outcome.</p>
 <p>A URI options can be added later if we realise our users need it, while the opposite is not easily accomplished.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2026-08-11: Specified that each <code>getMore</code> command is nested under its own new operation span, sibling to the operation
+span of the command that created the cursor, when the caller drives cursor iteration. Specified that
+<code>db.mongodb.cursor_id</code> MUST be added to operation spans and to command spans that create a cursor with a non-zero id
+or that operate on a single existing cursor, and MUST be omitted rather than set to <code>0</code> when no server-side cursor
+remains.</li>
 <li>2026-07-31: Allowed the <code>update</code> test to accept <code>multi</code> and <code>upsert</code> at their default values, and added <code>initialData</code>
 to the operation tests that create or modify collections.</li>
 <li>2026-06-16: Clarified that the <code>db.query.text</code> attribute should be serialized to Relaxed Extended JSON.</li>
