@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-b27a8209.js";
+            window.path_to_searchindex_js = "../searchindex-3ac6d19b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -242,6 +242,9 @@ that library.</p>
 vendored file MUST therefore convert one side before comparing, so that a Punycode-encoded hostname (one containing
 <code>xn--</code> labels) and the Unicode rules it is compared against are in the same form. Comparing the two forms directly will
 fail to match rules that should match.</p>
+<p>Note: The leading <code>*</code> and <code>!</code> markers in the PSL are not part of a label and MUST NOT be included in that conversion. A
+driver MUST strip them before converting a rule and reapply them after, so that a rule such as <code>!公司.cn</code> converts to
+<code>!xn--55qx5d.cn</code> rather than being mangled.</p>
 <h3 id="determining-the-public-suffix"><a class="header" href="#determining-the-public-suffix">Determining the public suffix</a></h3>
 <p>To determine the public suffix of a domain, a driver using the vendored file MUST follow the
 <a href="https://github.com/publicsuffix/list/wiki/Format#algorithm">algorithm published by the publicsuffix folks</a>, pasted
@@ -316,7 +319,13 @@ reproduced verbatim and in their original order; only the surrounding comments a
 notice does not apply to the rest of this repository.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
-<li>2026-08-11: Vendor the Public Suffix List and add a script to sync it.</li>
+<li>
+<p>2026-09-03: Clarify that markers shouldn’t be converted to Punycode and add a prose test covering internationalized
+(Punycode vs. Unicode) rules.</p>
+</li>
+<li>
+<p>2026-08-11: Vendor the Public Suffix List and add a script to sync it.</p>
+</li>
 </ul>
 
                     </main>

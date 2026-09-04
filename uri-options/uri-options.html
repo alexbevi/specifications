@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-b27a8209.js";
+            window.path_to_searchindex_js = "../searchindex-3ac6d19b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -213,8 +213,8 @@ have the same value, an error MUST NOT be raised.</li>
 <p>The driver MUST report an error if the <code>directConnection=true</code> URI option is specified with multiple seeds.</p>
 <p>The driver MUST report an error if the <code>directConnection=true</code> URI option is specified with an SRV URI, because the URI
 may resolve to multiple hosts. The driver MUST allow specifying <code>directConnection=false</code> URI option with an SRV URI.</p>
-<h3 id="srvservicename-and-srvmaxhosts-uri-options"><a class="header" href="#srvservicename-and-srvmaxhosts-uri-options">srvServiceName and srvMaxHosts URI options</a></h3>
-<p>For URI option validation pertaining to <code>srvServiceName</code> and <code>srvMaxHosts</code>, please see the
+<h3 id="srvservicename-srvmaxhosts-and-srvallowedhostssuffix-uri-options"><a class="header" href="#srvservicename-srvmaxhosts-and-srvallowedhostssuffix-uri-options">srvServiceName, srvMaxHosts, and srvAllowedHostsSuffix URI options</a></h3>
+<p>For URI option validation pertaining to <code>srvServiceName</code>, <code>srvMaxHosts</code>, and <code>srvAllowedHostsSuffix</code>, please see the
 <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#uri-validation">Initial DNS Seedlist Discovery spec</a>
 for details.</p>
 <h3 id="load-balancer-mode"><a class="header" href="#load-balancer-mode">Load Balancer Mode</a></h3>
@@ -269,6 +269,7 @@ to URI options apply here.</p>
 <tr><td>serverSelectionTimeoutMS</td><td>positive integer; a driver may also accept 0 to be used for a special case, provided that it documents the meaning</td><td>defined in <a href="../server-selection/server-selection.html#serverselectiontimeoutms">server selection spec</a></td><td>no</td><td>A timeout in milliseconds to block for server selection before raising an error</td></tr>
 <tr><td>serverSelectionTryOnce</td><td>“true” or “false”</td><td>defined in <a href="../server-selection/server-selection.html#serverselectiontryonce">server selection spec</a></td><td>required for single-threaded drivers</td><td>Scan the topology only once after a server selection failure instead of repeatedly until the server selection times out</td></tr>
 <tr><td>socketTimeoutMS</td><td>non-negative integer; 0 means no timeout</td><td>no timeout</td><td>no</td><td>NOTE: This option is deprecated in favor of <a href="../client-side-operations-timeout/client-side-operations-timeout.html#timeoutms">timeoutMS</a><br><br>Amount of time spent attempting to send or receive on a socket before timing out; note that this only applies to application operations, not SDAM.</td></tr>
+<tr><td>srvAllowedHostsSuffix</td><td>a valid DNS hostname suffix (e.g. “.mydomain.net”)</td><td>none; domain is inferred from the SRV hostname</td><td>no</td><td>A hostname suffix used to validate hosts returned via SRV lookup, replacing the domain inferred from the SRV hostname. Defined in the <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvallowedhostssuffix">Initial DNS Seedlist Discovery spec</a>.</td></tr>
 <tr><td>srvMaxHosts</td><td>non-negative integer; 0 means no maximum</td><td>defined in the <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvmaxhosts">Initial DNS Seedlist Discovery spec</a></td><td>no</td><td>The maximum number of SRV results to randomly select when initially populating the seedlist or, during SRV polling, adding new hosts to the topology.</td></tr>
 <tr><td>srvServiceName</td><td>a valid SRV service name according to <a href="https://datatracker.ietf.org/doc/html/rfc6335#section-5.1">RFC 6335</a></td><td>“mongodb”</td><td>no</td><td>the service name to use for SRV lookup in <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvservicename">initial DNS seedlist discovery</a> and <a href="../polling-srv-records-for-mongos-discovery/polling-srv-records-for-mongos-discovery.html">SRV polling</a></td></tr>
 <tr><td>ssl</td><td>“true” or “false”</td><td>same as “tls”</td><td>no</td><td>alias of “tls”; required to ensure that Atlas connection strings continue to work</td></tr>
@@ -332,6 +333,9 @@ the name or the semantics of a URI option or adds a new URI option, this specifi
 changes.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-09-03: Add <code>srvAllowedHostsSuffix</code> option.</p>
+</li>
 <li>
 <p>2026-06-17: Remove pre-4.2 version references.</p>
 </li>

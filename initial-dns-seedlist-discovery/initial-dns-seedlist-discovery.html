@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-b27a8209.js";
+            window.path_to_searchindex_js = "../searchindex-3ac6d19b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -202,7 +202,8 @@ host names is replaced with a single host name. The format is:</p>
 </code></pre>
 <p><code>{options}</code> refers to the optional elements from the <a href="../connection-string/connection-string-spec.html">Connection String</a>
 specification following the <code>Host Information</code>. This includes the <code>Auth database</code> and <code>Connection Options</code>.</p>
-<p>For the purposes of this document, <code>{hostname}</code> will be divided using the following terminology. If an SRV <code>{hostname}</code>
+<p>For the purposes of this document, <code>{hostname}</code> will be divided using the following terminology. If
+<code>srvAllowedHostsSuffix</code> has been configured, then that will act as the <code>{domainname}</code>. Otherwise, if an SRV <code>{hostname}</code>
 has:</p>
 <ol>
 <li>
@@ -244,6 +245,27 @@ subdomain.</p>
 </ol>
 <p>Only <code>{domainname}</code> is used during SRV record verification and <code>{subdomain}</code> is ignored.</p>
 <h3 id="mongoclient-configuration"><a class="header" href="#mongoclient-configuration">MongoClient Configuration</a></h3>
+<h4 id="srvallowedhostssuffix"><a class="header" href="#srvallowedhostssuffix">srvAllowedHostsSuffix</a></h4>
+<p>This option is used to validate hosts. If present, its value MUST be treated as the <code>{domainname}</code> for
+<a href="#querying-dns">DNS validation</a> and
+<a href="../polling-srv-records-for-mongos-discovery/polling-srv-records-for-mongos-discovery.html">SRV polling</a>. For example,
+<code>srvAllowedHostsSuffix=.mydomain.net</code>. Drivers MUST apply the following normalization and validation to the value, in
+this order:</p>
+<ol>
+<li>Any leading or trailing <code>.</code> MUST be stripped. For example, <code>srvAllowedHostsSuffix=.mydomain.net.</code> is treated as
+<code>mydomain.net</code>. If the resulting stripped value is empty, an error MUST be raised.</li>
+<li>The value MUST be converted to its A-label (Punycode) form, so that it is comparable against the A-label hostnames
+returned by DNS.</li>
+<li>The value MUST be normalized to lowercase using ASCII case folding.</li>
+<li>The resulting value MUST contain at least two <code>.</code> separated labels. For example, <code>srvAllowedHostsSuffix=net</code> MUST
+raise an error.</li>
+<li>Drivers SHOULD raise an error if the resulting value is a public suffix, per the algorithm in
+<a href="../public-suffix-list/public-suffix-list.html">Public Suffix List</a>.</li>
+<li>A <code>.</code> MUST be prepended. For example, <code>srvAllowedHostsSuffix=mydomain.net</code> is treated as <code>.mydomain.net</code>.</li>
+</ol>
+<p>If this option is not present, the <code>{domainname}</code> MUST be inferred from the <code>{hostname}</code> (as described in
+<a href="#connection-string-format">Connection String Format</a>). This option MUST only be configurable at the level of a
+<code>MongoClient</code>.</p>
 <h4 id="srvmaxhosts"><a class="header" href="#srvmaxhosts">srvMaxHosts</a></h4>
 <p>This option is used to limit the number of mongos connections that may be created for sharded topologies. This option
 limits the number of SRV records used to populate the seedlist during initial discovery, as well as the number of
@@ -258,9 +280,9 @@ characters as long as the 63rd (62nd with prepended underscore) character DNS qu
 requires a string value and defaults to “mongodb”. This option MUST only be configurable at the level of a
 <code>MongoClient</code>.</p>
 <h4 id="uri-validation"><a class="header" href="#uri-validation">URI Validation</a></h4>
-<p>The driver MUST report an error if either the <code>srvServiceName</code> or <code>srvMaxHosts</code> URI options are specified with a non-SRV
-URI (i.e. scheme other than <code>mongodb+srv</code>). The driver MUST allow specifying the <code>srvServiceName</code> and <code>srvMaxHosts</code> URI
-options with an SRV URI (i.e. <code>mongodb+srv</code> scheme).</p>
+<p>The driver MUST report an error if any of <code>srvServiceName</code>, <code>srvMaxHosts</code>, or <code>srvAllowedHostsSuffix</code> URI options are
+specified with a non-SRV URI (i.e. scheme other than <code>mongodb+srv</code>). The driver MUST allow specifying the
+<code>srvServiceName</code>, <code>srvMaxHosts</code>, and <code>srvAllowedHostsSuffix</code> URI options with an SRV URI (i.e. <code>mongodb+srv</code> scheme).</p>
 <p>If <code>srvMaxHosts</code> is a positive integer, the driver MUST throw an error in the following cases:</p>
 <ul>
 <li>The connection string contains a <code>replicaSet</code> option.</li>
@@ -287,10 +309,21 @@ This DNS query is expected to respond with one or more SRV records.</p>
 <p>If the DNS result returns no SRV records, or no records at all, or a DNS error happens, an error MUST be raised
 indicating that the URI could not be used to find hostnames. The error SHALL include the reason why they could not be
 found.</p>
+<p>Before validating returned hostnames, drivers MUST normalize them as follows, in this order:</p>
+<ol>
+<li>Any trailing <code>.</code> MUST be stripped. For example, <code>host.mydomain.net.</code> becomes <code>host.mydomain.net</code>.</li>
+<li>The hostname MUST be converted to its A-label (Punycode) form.</li>
+<li>The hostname MUST be normalized to lowercase using ASCII case folding.</li>
+</ol>
+<p>The <code>{domainname}</code> that returned hostnames are validated against MUST have the same three normalizations applied, so
+that neither trailing dots, case, nor Unicode/Punycode encoding can affect the comparison. When <code>{domainname}</code> comes
+from <code>srvAllowedHostsSuffix</code>, steps 1-3 of <a href="#srvallowedhostssuffix">srvAllowedHostsSuffix</a> already apply them. The
+leading <code>.</code> that step 6 prepends makes the value a label-aligned suffix and is not part of this normalization.</p>
 <p>A driver MUST verify that the host names returned through SRV records share the original SRV’s <code>{domainname}</code>. In
-addition, SRV records with fewer than three <code>.</code> separated parts, the returned hostname MUST have at least one more
-domain level than the SRV record hostname. Drivers MUST raise an error and MUST NOT initiate a connection to any
-returned hostname which does not fulfill these requirements.</p>
+addition, when <code>srvAllowedHostsSuffix</code> is not configured and the SRV record hostname has fewer than three <code>.</code> separated
+parts, the returned hostname MUST have at least one more domain level than the SRV record hostname. Drivers MUST raise
+an error and MUST NOT initiate a connection to any returned hostname which does not fulfill these requirements. This
+additional requirement does not apply when <code>srvAllowedHostsSuffix</code> is configured.</p>
 <p>The driver MUST NOT attempt to connect to any hosts until the DNS query has returned its results.</p>
 <p>If <code>srvMaxHosts</code> is zero or greater than or equal to the number of hosts in the DNS result, the driver MUST populate the
 seedlist with all hosts.</p>
@@ -367,6 +400,31 @@ Client MUST treat the host information as if the following URI was used instead:
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
 <p>The design specifically calls for a pre-processing stage of the processing of connection URLs to minimize the impact on
 existing functionality.</p>
+<h3 id="rationale-for-srvallowedhostssuffix"><a class="header" href="#rationale-for-srvallowedhostssuffix">Rationale for <code>srvAllowedHostsSuffix</code></a></h3>
+<p>By default, the parent domain that returned host names are checked against is inferred from the seed by treating its
+leftmost label as the <code>{subdomain}</code>. A seed of <code>mongodb.mydomain.net</code> results in <code>mongodb1.us-east-1.mydomain.net</code> being
+rejected, even when both are owned by the same user. <code>srvAllowedHostsSuffix</code> allows users to work around this limitation
+by letting the user state the parent domain directly instead, admitting such nested names and hosts in a different
+domain altogether.</p>
+<p>Note that nothing requires the <code>{hostname}</code> itself to end with the configured suffix. For example,
+<code>mongodb+srv://cluster.example.org/?srvAllowedHostsSuffix=.hosts.example.net</code> is valid, even though
+<code>cluster.example.org</code> does not end with <code>.hosts.example.net</code>. This is intentional: the option exists so the user can
+state the allowed parent domain explicitly, rather than having it inferred from the connection string. Requiring the two
+to match would restore that coupling, and would rule out arrangements such as a vanity alias in one organization’s
+domain resolving to hosts in a provider’s domain.</p>
+<p>Because it replaces that default requirement, this option relaxes a DNS spoofing safeguard. An attacker able to forge
+SRV responses is otherwise confined to host names under the seed’s <code>{domainname}</code>; with the option set, they are
+confined to host names under the configured suffix instead. The broader that suffix, the more hosts a forged response
+can direct a driver to.</p>
+<p>Requiring that the value not be a public suffix bounds how broad it can get. It rules out values such as <code>.com</code> or
+<code>.co.uk</code>, which would place no meaningful limit on a forged response. It does not, however, make a given configuration
+safe: <code>.example.com</code> is not a public suffix, but it still admits every host in a large organization’s domain.</p>
+<p>Users should be encouraged to configure the narrowest suffix that covers their deployment, and drivers should say so
+wherever the option is documented. For a seed hostname of <code>cluster.test.internal.example.com</code>, prefer the second of
+these:</p>
+<pre><code class="language-text">mongodb+srv://cluster.test.internal.example.com/?srvAllowedHostsSuffix=.example.com
+mongodb+srv://cluster.test.internal.example.com/?srvAllowedHostsSuffix=.internal.example.com
+</code></pre>
 <h2 id="justifications"><a class="header" href="#justifications">Justifications</a></h2>
 <h3 id="why-are-multiple-key-value-pairs-allowed-in-one-txt-record"><a class="header" href="#why-are-multiple-key-value-pairs-allowed-in-one-txt-record">Why Are Multiple Key-Value Pairs Allowed in One TXT Record?</a></h3>
 <p>One could imagine an alternative design in which each TXT record would allow only one URI option. No <code>&amp;</code> character would
@@ -390,6 +448,13 @@ left the behaviour of supporting UTF-8 characters as unspecified.</p>
 <p>In the future we could consider using the priority and weight fields of the SRV records.</p>
 <h2 id="changelog"><a class="header" href="#changelog">ChangeLog</a></h2>
 <ul>
+<li>
+<p>2026-09-03: Specify that host names returned through SRV records, and the <code>{domainname}</code> they are validated against,
+are both normalized – trailing dot stripped, converted to A-label form, ASCII lowercased – before validation.</p>
+</li>
+<li>
+<p>2026-08-24: Add <code>srvAllowedHostsSuffix</code> MongoClient option.</p>
+</li>
 <li>
 <p>2024-09-24: Removed requirement for URI to have three ‘.’ separated parts; these SRVs have stricter parent domain
 matching requirements for security. Create terminology section. Remove usage of term <code>{TLD}</code>. The <code>{hostname}</code> now

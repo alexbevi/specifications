@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-b27a8209.js";
+            window.path_to_searchindex_js = "../searchindex-3ac6d19b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -214,9 +214,14 @@ initial seedlist discovery. Periodic scan MUST follow these rules:</p>
 and protocol. The SRV service name is provided in the
 <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvservicename">srvServiceName</a> URI option and
 defaults to <code>mongodb</code>. The protocol is always <code>tcp</code>. After prefixing, the URI should look like:
-<code>_{srvServiceName}._tcp.{hostname}.{domainname}</code>.</li>
-<li>A driver MUST verify that the host names returned through SRV records have the same parent <code>{domainname}</code>. When this
-verification fails, a driver:
+<code>_{srvServiceName}._tcp.{hostname}.{domainname}</code>. Here <code>{hostname}.{domainname}</code> is the host from the connection
+string, and is not affected by
+<a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvallowedhostssuffix">srvAllowedHostsSuffix</a>:
+that option changes which parent domain returned host names are verified against, not which records are queried.</li>
+<li>A driver MUST verify that the host names returned through SRV records have the same parent <code>{domainname}</code>. When
+<a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvallowedhostssuffix">srvAllowedHostsSuffix</a>
+is configured, its value is the parent domain used for this verification instead of the <code>{domainname}</code> derived from
+the connection string. When this verification fails, a driver:
 <ul>
 <li>MUST NOT add such a non-compliant host name to the topology</li>
 <li>MUST NOT raise an error</li>
@@ -309,6 +314,9 @@ were familiar with the old behaviour. We do not expect this to negatively impact
 <p>No future work is expected.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-09-03: Account for the <code>srvAllowedHostsSuffix</code> MongoClient option when verifying returned host names.</p>
+</li>
 <li>
 <p>2024-08-22: Migrated from reStructuredText to Markdown.</p>
 </li>
