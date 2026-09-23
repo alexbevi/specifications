@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-3ac6d19b.js";
+            window.path_to_searchindex_js = "searchindex-ab4ffb9f.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-c2b477e5.js"></script>
@@ -471,63 +471,49 @@ without carefully reading the changelog and/or adequately testing the change.</p
 <tr><td>5.3</td><td>16</td><td></td></tr>
 <tr><td>6.0</td><td>17</td><td>
 <p>Support for Partial Indexes</p>
- 
 <p>Sharded Time Series Collections</p>
- 
 <p>FCV set to 5.0</p>
 </td></tr>
 <tr><td>6.1</td><td>18</td><td>
 <p>Update Perl Compatible Regular Expressions version to PCRE2</p>
- 
 <p>Add <code>*UCP</code> option for regex queries</p>
 </td></tr>
 <tr><td>6.2</td><td>19</td><td>
 <p>Collection validation ensures BSON documents conform to BSON spec</p>
- 
 <p>Collection validation checks time series collections for internal consistency</p>
 </td></tr>
 <tr><td>7.0</td><td>21</td><td>
 <p>Atlas Search Index Management</p>
- 
 <p><code>$currentOp</code> aggregation Metrics</p>
- 
 <p>Compound Wildcard Indexes</p>
- 
 <p>Support large change stream events via <code>$changeStreamSplitLargeEvent</code> stage</p>
- 
 <p><code>serverStatus</code> output gets new fields</p>
  
 <p>Slot Based Query Execution</p>
 </td></tr>
 <tr><td>7.1</td><td>22</td><td>
 <p>Improved Index Builds</p>
- 
 <p>Exhaust Cursors Enabled for Sharded Clusters</p>
- 
 <p>New Sharding Statistics for Chunk Migrations</p>
- 
 <p>Self-Managed Backups of Sharded Clusters</p>
 </td></tr>
 <tr><td>7.2</td><td>23</td><td>
 <p>Database Validation on <code>mongos</code> Aggregation Queries</p>
- 
 <p><code>serverStatus</code> Metrics</p>
- 
 <p>Default Chunks Per Shard</p>
 </td></tr>
 <tr><td>7.3</td><td>24</td><td>
 <p>Compaction Improvements</p>
- 
 <p>New <code>serverStatus</code> metrics</p>
 </td></tr>
 <tr><td>8.0</td><td>25</td><td>
 <p>Range Encryption GA</p>
- 
 <p>OIDC authentication mechanism</p>
- 
 <p>New <code>bulkWrite</code> command</p>
- 
 <p><code>snapshot</code> read concern on capped collections</p>
+</td></tr>
+<tr><td>9.0</td><td>29</td><td>
+<p><code>OP_MSG</code> telemetry section (<code>Payload Type 3</code>, OpenTelemetry trace context propagation)</p>
 </td></tr>
 </tbody>
 </table>
@@ -2617,6 +2603,7 @@ for more details.</p>
             cstring    identifier;
             document*  documents;
         };
+        document telemetry; // payloadType == 3
     };
 };
 
@@ -2635,6 +2622,14 @@ struct OP_MSG {
 <p>Each <code>OP_MSG</code> MUST NOT exceed the <code>maxMessageSizeBytes</code> as configured by the MongoDB Handshake.</p>
 <p>Each <code>OP_MSG</code> MUST have one section with <code>Payload Type 0</code>, and zero or more <code>Payload Type 1</code>. Bulk writes SHOULD use
 <code>Payload Type 1</code>, and MUST do so when the batch contains more than one entry.</p>
+<p>Each <code>OP_MSG</code> request MAY additionally contain <strong>at most one</strong> section with <code>Payload Type 3</code>, carrying telemetry
+context. <code>Payload Type 3</code> is request-only: drivers MAY send it, and it MUST NOT appear in server replies. Its payload is
+a single BSON document whose contents are defined by the
+<a href="#opentelemetry">OpenTelemetry specification</a>. Servers and intermediaries that do not recognize a
+section kind fail the message (see below), so senders MUST gate emission of this section on server support as defined by
+the OpenTelemetry specification.</p>
+<p>Note: <code>Payload Type 2</code> is reserved for server-internal use (a security-token section populated by the server and
+infrastructure components, never by drivers), so the next payload type available for driver-emitted content is 3.</p>
 <p>Sections may exist in any order. Each <code>OP_MSG</code> MAY contain a checksum, and MUST set the relevant <code>flagBits</code> when that
 field is included.</p>
 <div class="table-wrapper">
@@ -2713,7 +2708,7 @@ request has the <code>exhaustAllowed</code> bit set.</p>
 </div>
 <h5 id="sections"><a class="header" href="#sections">sections</a></h5>
 <p>Each message contains one or more sections. A section is composed of an uint8 which determines the payload’s type, and a
-separate payload field. The payload size for payload type 0 and 1 is determined by the first 4 bytes of the payload
+separate payload field. The payload size for payload type 0, 1, and 3 is determined by the first 4 bytes of the payload
 field (includes the 4 bytes holding the size but not the payload type).</p>
 <div class="table-wrapper">
 <table>
@@ -2722,7 +2717,7 @@ field (includes the 4 bytes holding the size but not the payload type).</p>
 </thead>
 <tbody>
 <tr><td>type</td><td>A byte indicating the layout and semantics of payload</td></tr>
-<tr><td>payload</td><td>The payload of a section can either be a single document, or a document sequence.</td></tr>
+<tr><td>payload</td><td>The payload of a section can either be a single document (Payload Type 0 and 3), or a document sequence (Payload Type 1).</td></tr>
 </tbody>
 </table>
 </div>
@@ -2750,10 +2745,21 @@ field (includes the 4 bytes holding the size but not the payload type).</p>
 </tbody>
 </table>
 </div>
+<p>When the Payload Type is 3, the content of the payload is:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>document</td><td>A single BSON document containing telemetry context, as defined by the <a href="#opentelemetry">OpenTelemetry specification</a>. The payload size is inferred from the document’s leading int32. Servers enforce a maximum size for this section (4096 bytes as of MongoDB 9.0, see <a href="https://github.com/mongodb/mongo/blob/master/src/mongo/rpc/op_msg.cpp#L65-L69"><code>kMaxTelemetrySectionSize</code></a>) and reject messages whose telemetry section exceeds it.</td></tr>
+</tbody>
+</table>
+</div>
 <p>Any unknown Payload Types MUST result in an error and the socket MUST be closed. There is no ordering implied by payload
 types. A section with payload type 1 can be serialized before payload type 0.</p>
-<p>A fully constructed <code>OP_MSG</code> MUST contain exactly one <code>Payload Type 0</code>, and optionally any number of <code>Payload Type 1</code>
-where each identifier MUST be unique per message.</p>
+<p>A fully constructed <code>OP_MSG</code> MUST contain exactly one <code>Payload Type 0</code>, optionally any number of <code>Payload Type 1</code> where
+each identifier MUST be unique per message, and optionally at most one <code>Payload Type 3</code>.</p>
 <h4 id="command-arguments-as-payload"><a class="header" href="#command-arguments-as-payload">Command Arguments As Payload</a></h4>
 <p>Certain commands support “pulling out” certain arguments to the command, and providing them as <code>Payload Type 1</code>, where
 the <code>identifier</code> is the command argument’s name. Specifying a command argument as a separate payload removes the need to
@@ -2948,6 +2954,7 @@ helper, rather then adding wire protocol headers as options to the existing <cod
 </ul>
 <h3 id="changelog-6"><a class="header" href="#changelog-6">Changelog</a></h3>
 <ul>
+<li>2026-07-21: Add <code>Payload Type 3</code> (telemetry context BSON document; DRIVERS-3454).</li>
 <li>2026-06-17: Remove pre-4.2 version references.</li>
 <li>2026-06-05: Use OP_MSG for all messages.</li>
 <li>2024-04-30: Convert from RestructuredText to Markdown.</li>
@@ -5345,15 +5352,50 @@ this order:</p>
 <li>The value MUST be converted to its A-label (Punycode) form, so that it is comparable against the A-label hostnames
 returned by DNS.</li>
 <li>The value MUST be normalized to lowercase using ASCII case folding.</li>
-<li>The resulting value MUST contain at least two <code>.</code> separated labels. For example, <code>srvAllowedHostsSuffix=net</code> MUST
-raise an error.</li>
+<li>Drivers MUST raise an error if the resulting value does not contain at least two <code>.</code> separated labels and is not a
+single label that appears in the list of valid names below:
+<pre><code># RFC 6761 special use names (https://www.rfc-editor.org/info/rfc6761/)
+test
+localhost
+invalid
+example
+# RFC 6762 multicast dns (https://www.rfc-editor.org/info/rfc6762/)
+local
+# Reserved by ICANN for private use (https://www.icann.org/en/board-activities-and-meetings/materials/approved-resolutions-special-meeting-of-the-icann-board-29-07-2024-en#section2.a)
+internal
+# Not officially reserved by ICANN but commonly used privately (https://www.icann.org/resources/board-material/resolutions-2018-02-04-en#2.c)
+corp
+home
+mail
+</code></pre>
+For example, <code>srvAllowedHostsSuffix=net</code> MUST raise an error, but <code>srvAllowedHostsSuffix=test</code> MUST NOT raise an
+error.</li>
 <li>Drivers SHOULD raise an error if the resulting value is a public suffix, per the algorithm in
-<a href="#public-suffix-list">Public Suffix List</a>.</li>
+<a href="#public-suffix-list">Public Suffix List</a>, unless the value is in the aforementioned list
+of valid names.</li>
 <li>A <code>.</code> MUST be prepended. For example, <code>srvAllowedHostsSuffix=mydomain.net</code> is treated as <code>.mydomain.net</code>.</li>
 </ol>
 <p>If this option is not present, the <code>{domainname}</code> MUST be inferred from the <code>{hostname}</code> (as described in
 <a href="#connection-string-format">Connection String Format</a>). This option MUST only be configurable at the level of a
 <code>MongoClient</code>.</p>
+<p>Notably, <code>srvAllowedHostsSuffix</code> relaxes existing security measures and must be used with caution. Thus, drivers MUST
+document that this parameter is a dangerous option. For example, something like “WARNING: Modifying the default SRV
+domain name validation can create vulnerabilities.” should be clearly visible in the documentation.</p>
+<h4 id="srvhostvalidator"><a class="header" href="#srvhostvalidator">srvHostValidator</a></h4>
+<p>This option is an alternative to <code>srvAllowedHostsSuffix</code> that allows users to provide an optional synchronous callback
+for SRV host validation. If both <code>srvAllowedHostsSuffix</code> and <code>srvHostValidator</code> are present, an error MUST be raised.
+Drivers MAY raise this error at any point between MongoClient construction and DNS resolution. The signature of
+<code>srvHostValidator</code> MUST take in a string representing the SRV resolved hostname after applying the normalization
+described in <a href="#querying-dns">Querying DNS</a>, and return a bool representing whether the given SRV hostname is valid or
+not. If <code>srvHostValidator</code> raises an error during initial seedlist resolution, the driver MUST catch that error and wrap
+it prior to re-raising the error to the user. During
+<a href="#polling-srv-records-for-mongos-discovery">SRV polling</a>, a driver MUST
+NOT raise an error; an error raised by the validator is instead treated as though the validator had returned <code>false</code>.
+Since this is a synchronous callback, drivers should advise users to not write a validator that blocks. This option MUST
+only be configurable at the level of a <code>MongoClient</code>.</p>
+<p>Notably, <code>srvHostValidator</code> relaxes existing security measures and must be used with caution. Thus, drivers MUST
+document that this parameter is a dangerous option. For example, something like “WARNING: Modifying the default SRV
+domain name validation can create vulnerabilities.” should be clearly visible in the documentation.</p>
 <h4 id="srvmaxhosts"><a class="header" href="#srvmaxhosts">srvMaxHosts</a></h4>
 <p>This option is used to limit the number of mongos connections that may be created for sharded topologies. This option
 limits the number of SRV records used to populate the seedlist during initial discovery, as well as the number of
@@ -5370,7 +5412,10 @@ requires a string value and defaults to “mongodb”. This option MUST only be 
 <h4 id="uri-validation"><a class="header" href="#uri-validation">URI Validation</a></h4>
 <p>The driver MUST report an error if any of <code>srvServiceName</code>, <code>srvMaxHosts</code>, or <code>srvAllowedHostsSuffix</code> URI options are
 specified with a non-SRV URI (i.e. scheme other than <code>mongodb+srv</code>). The driver MUST allow specifying the
-<code>srvServiceName</code>, <code>srvMaxHosts</code>, and <code>srvAllowedHostsSuffix</code> URI options with an SRV URI (i.e. <code>mongodb+srv</code> scheme).</p>
+<code>srvServiceName</code>, <code>srvMaxHosts</code>, and <code>srvAllowedHostsSuffix</code> URI options with an SRV URI (i.e. <code>mongodb+srv</code> scheme).
+While not a URI option, <code>srvHostValidator</code> also MUST only be allowed with the use of an SRV URI. As with the error
+raised when both <code>srvAllowedHostsSuffix</code> and <code>srvHostValidator</code> are present, drivers MAY raise this error at any point
+between MongoClient construction and DNS resolution.</p>
 <p>If <code>srvMaxHosts</code> is a positive integer, the driver MUST throw an error in the following cases:</p>
 <ul>
 <li>The connection string contains a <code>replicaSet</code> option.</li>
@@ -5403,15 +5448,30 @@ found.</p>
 <li>The hostname MUST be converted to its A-label (Punycode) form.</li>
 <li>The hostname MUST be normalized to lowercase using ASCII case folding.</li>
 </ol>
+<p>Drivers MUST use the normalized hostnames, rather than the hostnames exactly as returned by DNS, to populate the
+seedlist.</p>
 <p>The <code>{domainname}</code> that returned hostnames are validated against MUST have the same three normalizations applied, so
 that neither trailing dots, case, nor Unicode/Punycode encoding can affect the comparison. When <code>{domainname}</code> comes
 from <code>srvAllowedHostsSuffix</code>, steps 1-3 of <a href="#srvallowedhostssuffix">srvAllowedHostsSuffix</a> already apply them. The
 leading <code>.</code> that step 6 prepends makes the value a label-aligned suffix and is not part of this normalization.</p>
-<p>A driver MUST verify that the host names returned through SRV records share the original SRV’s <code>{domainname}</code>. In
-addition, when <code>srvAllowedHostsSuffix</code> is not configured and the SRV record hostname has fewer than three <code>.</code> separated
-parts, the returned hostname MUST have at least one more domain level than the SRV record hostname. Drivers MUST raise
-an error and MUST NOT initiate a connection to any returned hostname which does not fulfill these requirements. This
-additional requirement does not apply when <code>srvAllowedHostsSuffix</code> is configured.</p>
+<p>Drivers MAY differ in which IDNA processing standard they use for the A-label conversion as long as the same conversion
+is applied to both sides of the comparison: the returned hostnames and the <code>{domainname}</code> they are validated against.</p>
+<p>A driver MUST verify every host name returned through SRV records. How that verification is performed depends on which
+options are configured:</p>
+<ul>
+<li>When neither <a href="#srvallowedhostssuffix"><code>srvAllowedHostsSuffix</code></a> nor <a href="#srvhostvalidator"><code>srvHostValidator</code></a> is
+configured, the returned host name MUST share the original SRV’s <code>{domainname}</code>. In addition, when the SRV record
+hostname has fewer than three <code>.</code> separated parts, the returned hostname MUST have at least one more domain level
+than the SRV record hostname.</li>
+<li>When <a href="#srvallowedhostssuffix"><code>srvAllowedHostsSuffix</code></a> is configured, the returned host name MUST end in <code>.</code> followed
+by the <code>srvAllowedHostsSuffix</code> value after normalization.</li>
+<li>When <a href="#srvhostvalidator"><code>srvHostValidator</code></a> is configured, the driver MUST pass each returned host name to the
+validator and MUST treat the value it returns as the complete verdict: a returned host name is valid if and only if
+the validator returns <code>true</code>. Drivers MUST NOT additionally apply the <code>{domainname}</code> check or the domain level
+requirement described above, whether before or after calling the validator.</li>
+</ul>
+<p>Drivers MUST raise an error and MUST NOT initiate a connection to any returned hostname which does not fulfill these
+requirements.</p>
 <p>The driver MUST NOT attempt to connect to any hosts until the DNS query has returned its results.</p>
 <p>If <code>srvMaxHosts</code> is zero or greater than or equal to the number of hosts in the DNS result, the driver MUST populate the
 seedlist with all hosts.</p>
@@ -5513,6 +5573,15 @@ these:</p>
 <pre><code class="language-text">mongodb+srv://cluster.test.internal.example.com/?srvAllowedHostsSuffix=.example.com
 mongodb+srv://cluster.test.internal.example.com/?srvAllowedHostsSuffix=.internal.example.com
 </code></pre>
+<h3 id="rationale-for-srvhostvalidator"><a class="header" href="#rationale-for-srvhostvalidator">Rationale for <code>srvHostValidator</code></a></h3>
+<p><code>srvAllowedHostsSuffix</code> only validates SRV host against a single suffix. This can be limiting as users may want to allow
+multiple unrelated suffixes or apply custom logic beyond simple suffix matching. Users may have more specific validation
+needs that currently can not be expressed. By allowing users to provide a callback, via <code>srvHostValidator</code>, the driver
+gives users more control over SRV host validation logic.</p>
+<h3 id="rationale-for-allowlist-relating-to-srvallowedhostssuffix"><a class="header" href="#rationale-for-allowlist-relating-to-srvallowedhostssuffix">Rationale for allowlist relating to <code>srvAllowedHostsSuffix</code></a></h3>
+<p>In <a href="#srvallowedhostssuffix">srvAllowedHostsSuffix</a>, the 4th step of validation for the parameter includes an allowlist.
+Without the allowlist, these suffixes would be rejected by the PSL algorithm – specifically the <code>*</code> rule. The suffixes
+on this list are all either specially reserved or commonly recognized for private usage.</p>
 <h2 id="justifications"><a class="header" href="#justifications">Justifications</a></h2>
 <h3 id="why-are-multiple-key-value-pairs-allowed-in-one-txt-record"><a class="header" href="#why-are-multiple-key-value-pairs-allowed-in-one-txt-record">Why Are Multiple Key-Value Pairs Allowed in One TXT Record?</a></h3>
 <p>One could imagine an alternative design in which each TXT record would allow only one URI option. No <code>&amp;</code> character would
@@ -5536,6 +5605,10 @@ left the behaviour of supporting UTF-8 characters as unspecified.</p>
 <p>In the future we could consider using the priority and weight fields of the SRV records.</p>
 <h2 id="changelog-14"><a class="header" href="#changelog-14">ChangeLog</a></h2>
 <ul>
+<li>
+<p>2026-09-16: Add <code>srvHostValidator</code> as a MongoClient option, and allow <code>srvAllowedHostsSuffix</code> to be a single label
+when that label is one of a fixed list of names reserved for private or special use.</p>
+</li>
 <li>
 <p>2026-09-03: Specify that host names returned through SRV records, and the <code>{domainname}</code> they are validated against,
 are both normalized – trailing dot stripped, converted to A-label form, ASCII lowercased – before validation.</p>
@@ -11983,27 +12056,46 @@ ReplicaSetWithPrimary).</p>
 the original specification. The behaviour of the periodic rescan is similar, but not identical to the behaviour of
 initial seedlist discovery. Periodic scan MUST follow these rules:</p>
 <ul>
-<li>The driver will query the DNS server for SRV records on <code>{hostname}.{domainname}</code>, prefixed with the SRV service name
+<li>
+<p>The driver will query the DNS server for SRV records on <code>{hostname}.{domainname}</code>, prefixed with the SRV service name
 and protocol. The SRV service name is provided in the
 <a href="#srvservicename">srvServiceName</a> URI option and
 defaults to <code>mongodb</code>. The protocol is always <code>tcp</code>. After prefixing, the URI should look like:
 <code>_{srvServiceName}._tcp.{hostname}.{domainname}</code>. Here <code>{hostname}.{domainname}</code> is the host from the connection
 string, and is not affected by
 <a href="#srvallowedhostssuffix">srvAllowedHostsSuffix</a>:
-that option changes which parent domain returned host names are verified against, not which records are queried.</li>
-<li>A driver MUST verify that the host names returned through SRV records have the same parent <code>{domainname}</code>. When
-<a href="#srvallowedhostssuffix">srvAllowedHostsSuffix</a>
-is configured, its value is the parent domain used for this verification instead of the <code>{domainname}</code> derived from
-the connection string. When this verification fails, a driver:
+that option changes which parent domain returned host names are verified against, not which records are queried.</p>
+</li>
+<li>
+<p>A driver MUST verify every host name returned through SRV records. Drivers MUST normalize the returned host names as
+described in <a href="#querying-dns">Querying DNS</a> before
+verifying them. Drivers MUST use the normalized host names, rather than the host names exactly as returned by DNS,
+to populate the topology. How that verification is performed depends on which options are configured:</p>
+<ul>
+<li>When neither
+<a href="#srvallowedhostssuffix"><code>srvAllowedHostsSuffix</code></a>
+nor <a href="#srvhostvalidator"><code>srvHostValidator</code></a>
+is configured, the returned host name MUST have the same parent <code>{domainname}</code> as the one derived from the
+connection string.</li>
+<li>When
+<a href="#srvallowedhostssuffix"><code>srvAllowedHostsSuffix</code></a>
+is configured, its value is the parent domain used for this verification instead of the <code>{domainname}</code> derived
+from the connection string.</li>
+<li>When <a href="#srvhostvalidator"><code>srvHostValidator</code></a> is
+configured, the given validator MUST be used to verify the returned host names, and any error raised by the
+validator MUST be treated as a <code>false</code> response.</li>
+</ul>
+<p>Regardless of how verification is accomplished, when this verification fails, a driver:</p>
 <ul>
 <li>MUST NOT add such a non-compliant host name to the topology</li>
 <li>MUST NOT raise an error</li>
-<li>SHOULD log the non-compliance, including the host name</li>
+<li>SHOULD log the non-compliance, including the host name and any errors raised during validation</li>
 <li>MUST NOT initiate a connection to any such host</li>
 </ul>
 </li>
-<li>If the DNS request returns no verified hosts in SRV records, no SRV records at all, or a DNS error happens, the
-driver:
+<li>
+<p>If the DNS request returns no verified hosts in SRV records, no SRV records at all, or a DNS error happens, the
+driver:</p>
 <ul>
 <li>MUST NOT change the topology</li>
 <li>MUST NOT raise an error</li>
@@ -12012,7 +12104,8 @@ driver:
 obtained.</li>
 </ul>
 </li>
-<li>For all verified host names, as returned through the DNS SRV query, the driver:
+<li>
+<p>For all verified host names, as returned through the DNS SRV query, the driver:</p>
 <ul>
 <li>MUST remove all hosts that are part of the topology, but are no longer in the returned set of valid hosts</li>
 <li>MUST NOT remove all hosts, and then re-add the ones that were returned. Hosts that have not changed, MUST be left
@@ -12025,8 +12118,10 @@ as Unknown until the topology has <code>srvMaxHosts</code> hosts. Drivers MUST u
 do for <a href="#querying-dns">initial selection</a>.</li>
 </ul>
 </li>
-<li>Priorities and weights in SRV records MUST continue to be ignored, and MUST NOT dictate which mongos server is used
-for new connections.</li>
+<li>
+<p>Priorities and weights in SRV records MUST continue to be ignored, and MUST NOT dictate which mongos server is used
+for new connections.</p>
+</li>
 </ul>
 <p>The rescan needs to happen periodically. As SRV records contain a TTL value, this value can be used to indicate when a
 rescan needs to happen. Different SRV records can have different TTL values. The <em>rescanSRVIntervalMS</em> value MUST be set
@@ -12087,6 +12182,9 @@ were familiar with the old behaviour. We do not expect this to negatively impact
 <p>No future work is expected.</p>
 <h2 id="changelog-22"><a class="header" href="#changelog-22">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-09-16: Add <code>srvHostValidator</code> as a MongoClient option.</p>
+</li>
 <li>
 <p>2026-09-03: Account for the <code>srvAllowedHostsSuffix</code> MongoClient option when verifying returned host names.</p>
 </li>
@@ -28354,6 +28452,17 @@ will have double as the type for numeric values).</p>
 <p>If a driver determines that it should create the indexes, it MUST raise an error if the attempt to create the indexes
 fails.</p>
 <p>Drivers MUST create the indexes in foreground mode.</p>
+<h3 id="tfileid-queries"><a class="header" href="#tfileid-queries"><code>TFileId</code> Queries</a></h3>
+<p>Any database command constructed by a driver that embeds a user-provided <code>TFileId</code> in its query MUST use the <code>$eq</code>
+operator to perform an equality comparison. This applies to queries matching against both the <code>_id</code> field of a files
+collection document and the <code>files_id</code> field of a chunk document. For example, when deleting a file with the ID “file1”,
+the query provided to the delete command used to delete its files collection document MUST be the following:</p>
+<pre><code class="language-javascript">{
+  "_id": { "$eq": "file1" }
+}
+</code></pre>
+<p>This requirement prevents a <code>TFileId</code> input from matching multiple files (e.g. a regular expression or a document with a
+query operator).</p>
 <h3 id="file-upload"><a class="header" href="#file-upload">File Upload</a></h3>
 <pre><code class="language-javascript">class GridFSUploadOptions {
 
@@ -28512,9 +28621,10 @@ failure to the application.</p>
 <p><strong>Aborting an upload</strong></p>
 <p>Drivers SHOULD provide a mechanism to abort an upload. When using open_upload_stream, the returned Stream SHOULD have an
 Abort method. When using upload_from_stream, the upload will be aborted if the source stream raises an error.</p>
-<p>When an upload is aborted any chunks already uploaded MUST be deleted. Note that this differs from the case where an
-attempt to insert a chunk fails, in which case drivers immediately report the failure without attempting to delete any
-chunks already uploaded.</p>
+<p>When an upload is aborted, any chunks already uploaded MUST be deleted. Drivers MUST follow the rules described in
+<a href="#tfileid-queries"><code>TFileId</code> Queries</a> to construct the delete command used to delete the chunks. Note that this differs
+from the case where an attempt to insert a chunk fails, in which case drivers immediately report the failure without
+attempting to delete any chunks already uploaded.</p>
 <p>Abort MUST raise an error if it is unable to successfully abort the upload (for example, if an error occurs while
 deleting any chunks already uploaded). However, if the upload is being aborted because the source stream provided to
 upload_from_stream raised an error then the original error should be re-raised.</p>
@@ -28548,10 +28658,12 @@ is done reading the contents.</p>
 does NOT call close (or its equivalent) on the Stream.</p>
 <p>Note: By default a file id is of type ObjectId. If an application uses custom file ids it may be of any type.</p>
 <p><strong>Implementation details:</strong></p>
-<p>Drivers must first retrieve the files collection document for this file. If there is no files collection document, the
-file either never existed, is in the process of being deleted, or has been corrupted, and the driver MUST raise an
-error.</p>
-<p>Then, implementers retrieve all chunks with files_id equal to id, sorted in ascending order on “n”.</p>
+<p>Drivers must first retrieve the files collection document for this file. Drivers MUST follow the rules described in
+<a href="#tfileid-queries"><code>TFileId</code> Queries</a> to perform the find command on the files collection. If there is no files
+collection document, the file either never existed, is in the process of being deleted, or has been corrupted, and the
+driver MUST raise an error.</p>
+<p>Then, implementers retrieve all chunks with files_id equal to id, sorted in ascending order on “n”. Drivers MUST follow
+the rules described in <a href="#tfileid-queries"><code>TFileId</code> Queries</a> to perform the find command on the chunks collection.</p>
 <p>However, when downloading a zero length stored file the driver MUST NOT issue a query against the chunks collection,
 since that query is not necessary. For a zero length file, drivers return either an empty stream or send nothing to the
 provided stream (depending on the download method).</p>
@@ -28575,6 +28687,8 @@ the point at which the application stopped reading won’t be detected by the dr
 <p>As noted for download(), drivers that previously used id’s of a different type MAY implement a delete() method that
 accepts that type, but MUST mark that method as deprecated.</p>
 <p><strong>Implementation details:</strong></p>
+<p>Drivers MUST follow the rules described in <a href="#tfileid-queries"><code>TFileId</code> Queries</a> to construct the delete commands used
+to delete the file’s files collection document and chunks.</p>
 <p>There is an inherent race condition between the chunks and files collections. Without some transaction-like behavior
 between these two collections, it is always possible for one client to delete a stored file while another client is
 attempting a read of the stored file. For example, imagine client A retrieves a stored file’s files collection document,
@@ -28582,8 +28696,11 @@ client B deletes the stored file, then client A attempts to read the stored file
 chunks for the given stored file. To minimize the window of vulnerability of reading a stored file that is the process
 of being deleted, drivers MUST first delete the files collection document for a stored file, then delete its associated
 chunks.</p>
-<p>If there is no such file listed in the files collection, drivers MUST raise an error. Drivers MAY attempt to delete any
-orphaned chunks with files_id equal to id before raising the error.</p>
+<p>If there is no such file listed in the files collection, drivers MUST raise an error. Drivers MUST NOT perform a <code>find</code>
+to determine whether the file exists and MUST instead inspect the <code>deletedCount</code> returned when deleting the files
+collection document. Drivers MAY attempt to delete any orphaned chunks with files_id equal to id before raising the
+error. If a driver attempts to delete orphaned chunks, it MUST follow the rules described in
+<a href="#tfileid-queries"><code>TFileId</code> Queries</a> to construct the delete command used to delete the chunks.</p>
 <p>If a networking or server error occurs, drivers MUST raise an error.</p>
 <h3 id="file-deletion-by-filename"><a class="header" href="#file-deletion-by-filename">File deletion by filename</a></h3>
 <p>To rename all revisions of a stored file with the specified filename, drivers SHOULD provide the method
@@ -28744,8 +28861,8 @@ section and avoid reading unneeded documents from the “chunks” collection.</
 </code></pre>
 <p>Sets the filename field in the stored file’s files collection document to the new filename.</p>
 <p><strong>Implementation details:</strong></p>
-<p>Drivers construct and execute an update_one command on the files collection using <code>{ _id: @id }</code> as the filter and
-<code>{ $set : { filename : "new_filename" } }</code> as the update parameter.</p>
+<p>Drivers construct and execute an update_one command on the files collection using <code>{ _id: { $eq: @id } }</code> as the filter
+and <code>{ $set : { filename : "new_filename" } }</code> as the update parameter.</p>
 <p>If <code>renameByName</code> is not implemented to rename multiple revisions of the same filename, users must retrieve the full
 list of files collection documents for a given filename and execute “rename” on each corresponding <code>_id</code>.</p>
 <p>If there is no file with the given id, drivers MUST raise an error.</p>
@@ -28919,6 +29036,7 @@ system. While this functionality is not in-scope for this spec (see “Why can�
 system?”) it is a potential area of growth for the future.</p>
 <h2 id="changelog-46"><a class="header" href="#changelog-46">Changelog</a></h2>
 <ul>
+<li>2026-09-10: Require <code>$eq</code> when a query includes a user-provided file ID.</li>
 <li>2026-06-17: Remove pre-4.2 version references.</li>
 <li>2024-10-30: Add <code>delete_by_name</code> and <code>rename_by_name</code></li>
 <li>2024-10-28: Removed deprecated fields from tests: <code>md5</code>, <code>contentType</code>, <code>aliases</code></li>
@@ -31573,6 +31691,7 @@ span is <code>findAndModify</code>. This ensures consistency between drivers whe
 <tr><td style="text-align: left"><code>db.operation.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the driver operation being executed</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.operation.summary</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Equivalent to span name</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.mongodb.cursor_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">If a cursor is created or used in the operation (see below)</td><td style="text-align: left">Conditional</td></tr>
+<tr><td style="text-align: left"><code>error.type</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">(see <a href="#errortype-operation-spans">error.type</a> below)</td><td style="text-align: left">Required if the operation fails</td></tr>
 </tbody>
 </table>
 </div>
@@ -31622,6 +31741,11 @@ if available:</p>
 <li><code>exception.type</code></li>
 <li><code>exception.stacktrace</code></li>
 </ul>
+<h6 id="errortype-operation-spans"><a class="header" href="#errortype-operation-spans">error.type (operation spans)</a></h6>
+<p>Operation spans MUST NOT have an <code>error.type</code> attribute when the operation succeeds, even if one of its commands failed:
+an operation can succeed through a retry, so a failed command’s <code>error.type</code> does not carry over. Drivers MUST add this
+attribute to the span when the operation itself fails. Its value SHOULD be the name of the exception class raised to the
+application, the same value as the operation span’s <code>exception.type</code> attribute above.</p>
 <h4 id="instrumenting-server-commands"><a class="header" href="#instrumenting-server-commands">Instrumenting Server Commands</a></h4>
 <p>Drivers MUST create a span for every server command sent to the server as a result of a public API call, except for
 sensitive commands as listed in the command logging and monitoring specification.</p>
@@ -31645,6 +31769,7 @@ span.</p>
 <tr><td style="text-align: left"><code>db.collection.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The collection being accessed within the database stated in <code>db.namespace</code></td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.command.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the server command being executed</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.response.status_code</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MongoDB error code represented as a string. This attribute should be added only if an error happens.</td><td style="text-align: left">Required if an error happens</td></tr>
+<tr><td style="text-align: left"><code>error.type</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">(see <a href="#errortype-command-spans">error.type</a> below)</td><td style="text-align: left">Required if the command fails</td></tr>
 <tr><td style="text-align: left"><code>server.port</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Server port number</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>server.address</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Name of the database host, or IP address if name is not known</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>network.transport</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be ‘tcp’ or ‘unix’ depending on the protocol</td><td style="text-align: left">Required</td></tr>
@@ -31725,6 +31850,45 @@ available:</p>
 <li><code>exception.type</code></li>
 <li><code>exception.stacktrace</code></li>
 </ul>
+<h6 id="errortype-command-spans"><a class="header" href="#errortype-command-spans">error.type (command spans)</a></h6>
+<p>Drivers MUST add this attribute to the command span when the command fails. This attribute SHOULD match
+<code>db.response.status_code</code> when the command failed with a server error, meaning the server returned an error code in its
+response. Otherwise, this attribute SHOULD be the name of the exception class associated with that command’s failure,
+whether or not the operation ultimately raises it to the application: a retry of the same operation may still succeed.</p>
+<p>Drivers MUST NOT set this attribute when the command succeeds. Per the
+<a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/error/#error-type">OpenTelemetry semantic conventions for <code>error.type</code></a>,
+this attribute SHOULD have a low cardinality, because tracing backends use it as a dimension for grouping and alerting
+on failures.</p>
+<p><code>error.type</code> is the OpenTelemetry semantic-convention attribute for this purpose, and the name tracing backends
+recognize for it. <code>exception.type</code> (see the exception attributes above) is not part of that convention, even though
+drivers also add it to the span. For a non-server error, <code>error.type</code> carries the same value as <code>exception.type</code>.</p>
+<h4 id="propagating-trace-context-to-the-server"><a class="header" href="#propagating-trace-context-to-the-server">Propagating Trace Context to the Server</a></h4>
+<p>Drivers MUST propagate the trace context of the <strong>command span</strong> to servers that support it, so that server-generated
+spans join the same distributed trace as the driver’s spans.</p>
+<p>The trace context is carried in an <code>OP_MSG</code> section with <a href="#op_msg"><code>Payload Type 3</code></a>, whose payload is a
+single BSON document with the following schema:</p>
+<pre><code class="language-json">{ "otel": { "traceparent": "&lt;string&gt;" } }
+</code></pre>
+<p><code>traceparent</code> is the <a href="https://www.w3.org/TR/trace-context/#traceparent-header">W3C traceparent</a> value of the <strong>command
+span</strong>: the propagated context MUST be that of the command span for the command being sent, so server spans join the
+trace as children of the exact command (and retry attempt) that produced them.</p>
+<p>Drivers MUST attach the section to a command if and only if all of the following hold:</p>
+<ol>
+<li>Tracing is enabled for the <code>MongoClient</code> (see
+<a href="#enabling-disabling-and-configuring-opentelemetry">Enabling, Disabling, and Configuring OpenTelemetry</a>).</li>
+<li>The connection’s <code>maxWireVersion</code> is greater than or equal to 29 (MongoDB 9.0).</li>
+<li>A valid <code>traceparent</code> value is available from the command span for the command being sent.</li>
+</ol>
+<p>A <code>traceparent</code> value is valid if and only if it is exactly 55 characters of the form
+<code>00-&lt;trace-id: 32 lowercase hex&gt;-&lt;parent-id: 16 lowercase hex&gt;-&lt;trace-flags: 2 lowercase hex&gt;</code> (the field names are
+those of the <a href="https://www.w3.org/TR/trace-context/#traceparent-header">W3C traceparent header</a>; <code>00</code> is the version, and
+<code>parent-id</code> carries the command span’s own span id — the parent of the spans the server creates) and neither the
+trace-id nor the parent-id is all zeroes. This mirrors the server-side validation. If no valid value is available,
+drivers MUST omit the section entirely rather than send an invalid or truncated value. Drivers MUST propagate unsampled
+trace contexts (trace-flags <code>00</code>); the sampling decision MUST NOT affect whether the section is attached.</p>
+<p>A message MUST NOT contain more than one telemetry section. Commands that carry no command span (for example server
+monitoring, authentication, and security-sensitive commands) naturally send no section.</p>
+<p>No tracing data is returned in server responses as part of this feature.</p>
 <h2 id="motivation-for-change-18"><a class="header" href="#motivation-for-change-18">Motivation for Change</a></h2>
 <p>A common complaint from our support team is that they don’t know how to easily get debugging information from drivers.
 Some drivers provide debug logging, but others do not. For drivers that do provide it, the log messages produced and the
@@ -31805,18 +31969,44 @@ replace those binary values with placeholders (assuming the encrypted blobs are 
 tracing may have unexpected negative outcome.</p>
 <p>Further, we already have two attributes that configure tracing, and we expect there might be more.</p>
 <p>A URI options can be added later if we realise our users need it, while the opposite is not easily accomplished.</p>
+<h3 id="wire-protocol-version-gate-instead-of-a-hello-capability"><a class="header" href="#wire-protocol-version-gate-instead-of-a-hello-capability">Wire protocol version gate instead of a hello capability</a></h3>
+<p>An alternative was for servers to advertise support via a <code>hello</code> response field. Gating on <code>maxWireVersion</code> was chosen
+instead: the wire protocol version acts as the schema contract for the telemetry payload, so drivers know exactly which
+fields a server accepts, and any future payload additions require a wire version bump rather than a second, parallel
+negotiation mechanism.</p>
+<h3 id="bson-document-instead-of-a-bare-traceparent-string"><a class="header" href="#bson-document-instead-of-a-bare-traceparent-string">BSON document instead of a bare traceparent string</a></h3>
+<p>Carrying the traceparent inside a BSON document allows future propagation fields to be added to the same section without
+redesigning the payload format.</p>
 <h2 id="changelog-49"><a class="header" href="#changelog-49">Changelog</a></h2>
 <ul>
-<li>2026-08-11: Specified that each <code>getMore</code> command is nested under its own new operation span, sibling to the operation
+<li>
+<p>2026-08-19: Specified the <code>error.type</code> attribute on command spans, which drivers MUST add when a command fails and
+which matches <code>db.response.status_code</code> when the command failed with a server error and is otherwise the name of the
+exception class associated with that command’s failure. Specified that drivers MUST NOT set it when the command
+succeeds, that it SHOULD have a low cardinality, and that operation spans MUST NOT carry it unless the operation
+itself fails, in which case it matches the operation span’s <code>exception.type</code>.</p>
+</li>
+<li>
+<p>2026-08-11: Specified that each <code>getMore</code> command is nested under its own new operation span, sibling to the operation
 span of the command that created the cursor, when the caller drives cursor iteration. Specified that
 <code>db.mongodb.cursor_id</code> MUST be added to operation spans and to command spans that create a cursor with a non-zero id
 or that operate on a single existing cursor, and MUST be omitted rather than set to <code>0</code> when no server-side cursor
-remains.</li>
-<li>2026-07-31: Allowed the <code>update</code> test to accept <code>multi</code> and <code>upsert</code> at their default values, and added <code>initialData</code>
-to the operation tests that create or modify collections.</li>
-<li>2026-06-16: Clarified that the <code>db.query.text</code> attribute should be serialized to Relaxed Extended JSON.</li>
-<li>2026-02-09: Renamed <code>db.system</code> to <code>db.system.name</code> according to the corresponding update of OpenTelemetry semantic
-conventions.</li>
+remains.</p>
+</li>
+<li>
+<p>2026-07-31: Allowed the <code>update</code> test to accept <code>multi</code> and <code>upsert</code> at their default values, and added <code>initialData</code>
+to the operation tests that create or modify collections.</p>
+</li>
+<li>
+<p>2026-07-21: Add trace context propagation to the server via the <code>OP_MSG</code> telemetry section (DRIVERS-3454).</p>
+</li>
+<li>
+<p>2026-06-16: Clarified that the <code>db.query.text</code> attribute should be serialized to Relaxed Extended JSON.</p>
+</li>
+<li>
+<p>2026-02-09: Renamed <code>db.system</code> to <code>db.system.name</code> according to the corresponding update of OpenTelemetry semantic
+conventions.</p>
+</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="command-logging-and-monitoring"><a class="header" href="#command-logging-and-monitoring">Command Logging and Monitoring</a></h1>

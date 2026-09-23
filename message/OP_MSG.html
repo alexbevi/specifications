@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-3ac6d19b.js";
+            window.path_to_searchindex_js = "../searchindex-ab4ffb9f.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -224,6 +224,7 @@ for more details.</p>
             cstring    identifier;
             document*  documents;
         };
+        document telemetry; // payloadType == 3
     };
 };
 
@@ -242,6 +243,14 @@ struct OP_MSG {
 <p>Each <code>OP_MSG</code> MUST NOT exceed the <code>maxMessageSizeBytes</code> as configured by the MongoDB Handshake.</p>
 <p>Each <code>OP_MSG</code> MUST have one section with <code>Payload Type 0</code>, and zero or more <code>Payload Type 1</code>. Bulk writes SHOULD use
 <code>Payload Type 1</code>, and MUST do so when the batch contains more than one entry.</p>
+<p>Each <code>OP_MSG</code> request MAY additionally contain <strong>at most one</strong> section with <code>Payload Type 3</code>, carrying telemetry
+context. <code>Payload Type 3</code> is request-only: drivers MAY send it, and it MUST NOT appear in server replies. Its payload is
+a single BSON document whose contents are defined by the
+<a href="../open-telemetry/open-telemetry.html">OpenTelemetry specification</a>. Servers and intermediaries that do not recognize a
+section kind fail the message (see below), so senders MUST gate emission of this section on server support as defined by
+the OpenTelemetry specification.</p>
+<p>Note: <code>Payload Type 2</code> is reserved for server-internal use (a security-token section populated by the server and
+infrastructure components, never by drivers), so the next payload type available for driver-emitted content is 3.</p>
 <p>Sections may exist in any order. Each <code>OP_MSG</code> MAY contain a checksum, and MUST set the relevant <code>flagBits</code> when that
 field is included.</p>
 <div class="table-wrapper">
@@ -320,7 +329,7 @@ request has the <code>exhaustAllowed</code> bit set.</p>
 </div>
 <h5 id="sections"><a class="header" href="#sections">sections</a></h5>
 <p>Each message contains one or more sections. A section is composed of an uint8 which determines the payload’s type, and a
-separate payload field. The payload size for payload type 0 and 1 is determined by the first 4 bytes of the payload
+separate payload field. The payload size for payload type 0, 1, and 3 is determined by the first 4 bytes of the payload
 field (includes the 4 bytes holding the size but not the payload type).</p>
 <div class="table-wrapper">
 <table>
@@ -329,7 +338,7 @@ field (includes the 4 bytes holding the size but not the payload type).</p>
 </thead>
 <tbody>
 <tr><td>type</td><td>A byte indicating the layout and semantics of payload</td></tr>
-<tr><td>payload</td><td>The payload of a section can either be a single document, or a document sequence.</td></tr>
+<tr><td>payload</td><td>The payload of a section can either be a single document (Payload Type 0 and 3), or a document sequence (Payload Type 1).</td></tr>
 </tbody>
 </table>
 </div>
@@ -357,10 +366,21 @@ field (includes the 4 bytes holding the size but not the payload type).</p>
 </tbody>
 </table>
 </div>
+<p>When the Payload Type is 3, the content of the payload is:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>document</td><td>A single BSON document containing telemetry context, as defined by the <a href="../open-telemetry/open-telemetry.html">OpenTelemetry specification</a>. The payload size is inferred from the document’s leading int32. Servers enforce a maximum size for this section (4096 bytes as of MongoDB 9.0, see <a href="https://github.com/mongodb/mongo/blob/master/src/mongo/rpc/op_msg.cpp#L65-L69"><code>kMaxTelemetrySectionSize</code></a>) and reject messages whose telemetry section exceeds it.</td></tr>
+</tbody>
+</table>
+</div>
 <p>Any unknown Payload Types MUST result in an error and the socket MUST be closed. There is no ordering implied by payload
 types. A section with payload type 1 can be serialized before payload type 0.</p>
-<p>A fully constructed <code>OP_MSG</code> MUST contain exactly one <code>Payload Type 0</code>, and optionally any number of <code>Payload Type 1</code>
-where each identifier MUST be unique per message.</p>
+<p>A fully constructed <code>OP_MSG</code> MUST contain exactly one <code>Payload Type 0</code>, optionally any number of <code>Payload Type 1</code> where
+each identifier MUST be unique per message, and optionally at most one <code>Payload Type 3</code>.</p>
 <h4 id="command-arguments-as-payload"><a class="header" href="#command-arguments-as-payload">Command Arguments As Payload</a></h4>
 <p>Certain commands support “pulling out” certain arguments to the command, and providing them as <code>Payload Type 1</code>, where
 the <code>identifier</code> is the command argument’s name. Specifying a command argument as a separate payload removes the need to
@@ -555,6 +575,7 @@ helper, rather then adding wire protocol headers as options to the existing <cod
 </ul>
 <h3 id="changelog"><a class="header" href="#changelog">Changelog</a></h3>
 <ul>
+<li>2026-07-21: Add <code>Payload Type 3</code> (telemetry context BSON document; DRIVERS-3454).</li>
 <li>2026-06-17: Remove pre-4.2 version references.</li>
 <li>2026-06-05: Use OP_MSG for all messages.</li>
 <li>2024-04-30: Convert from RestructuredText to Markdown.</li>

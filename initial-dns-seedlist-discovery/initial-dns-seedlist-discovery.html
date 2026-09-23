@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-3ac6d19b.js";
+            window.path_to_searchindex_js = "../searchindex-ab4ffb9f.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -257,15 +257,50 @@ this order:</p>
 <li>The value MUST be converted to its A-label (Punycode) form, so that it is comparable against the A-label hostnames
 returned by DNS.</li>
 <li>The value MUST be normalized to lowercase using ASCII case folding.</li>
-<li>The resulting value MUST contain at least two <code>.</code> separated labels. For example, <code>srvAllowedHostsSuffix=net</code> MUST
-raise an error.</li>
+<li>Drivers MUST raise an error if the resulting value does not contain at least two <code>.</code> separated labels and is not a
+single label that appears in the list of valid names below:
+<pre><code># RFC 6761 special use names (https://www.rfc-editor.org/info/rfc6761/)
+test
+localhost
+invalid
+example
+# RFC 6762 multicast dns (https://www.rfc-editor.org/info/rfc6762/)
+local
+# Reserved by ICANN for private use (https://www.icann.org/en/board-activities-and-meetings/materials/approved-resolutions-special-meeting-of-the-icann-board-29-07-2024-en#section2.a)
+internal
+# Not officially reserved by ICANN but commonly used privately (https://www.icann.org/resources/board-material/resolutions-2018-02-04-en#2.c)
+corp
+home
+mail
+</code></pre>
+For example, <code>srvAllowedHostsSuffix=net</code> MUST raise an error, but <code>srvAllowedHostsSuffix=test</code> MUST NOT raise an
+error.</li>
 <li>Drivers SHOULD raise an error if the resulting value is a public suffix, per the algorithm in
-<a href="../public-suffix-list/public-suffix-list.html">Public Suffix List</a>.</li>
+<a href="../public-suffix-list/public-suffix-list.html">Public Suffix List</a>, unless the value is in the aforementioned list
+of valid names.</li>
 <li>A <code>.</code> MUST be prepended. For example, <code>srvAllowedHostsSuffix=mydomain.net</code> is treated as <code>.mydomain.net</code>.</li>
 </ol>
 <p>If this option is not present, the <code>{domainname}</code> MUST be inferred from the <code>{hostname}</code> (as described in
 <a href="#connection-string-format">Connection String Format</a>). This option MUST only be configurable at the level of a
 <code>MongoClient</code>.</p>
+<p>Notably, <code>srvAllowedHostsSuffix</code> relaxes existing security measures and must be used with caution. Thus, drivers MUST
+document that this parameter is a dangerous option. For example, something like “WARNING: Modifying the default SRV
+domain name validation can create vulnerabilities.” should be clearly visible in the documentation.</p>
+<h4 id="srvhostvalidator"><a class="header" href="#srvhostvalidator">srvHostValidator</a></h4>
+<p>This option is an alternative to <code>srvAllowedHostsSuffix</code> that allows users to provide an optional synchronous callback
+for SRV host validation. If both <code>srvAllowedHostsSuffix</code> and <code>srvHostValidator</code> are present, an error MUST be raised.
+Drivers MAY raise this error at any point between MongoClient construction and DNS resolution. The signature of
+<code>srvHostValidator</code> MUST take in a string representing the SRV resolved hostname after applying the normalization
+described in <a href="#querying-dns">Querying DNS</a>, and return a bool representing whether the given SRV hostname is valid or
+not. If <code>srvHostValidator</code> raises an error during initial seedlist resolution, the driver MUST catch that error and wrap
+it prior to re-raising the error to the user. During
+<a href="../polling-srv-records-for-mongos-discovery/polling-srv-records-for-mongos-discovery.html">SRV polling</a>, a driver MUST
+NOT raise an error; an error raised by the validator is instead treated as though the validator had returned <code>false</code>.
+Since this is a synchronous callback, drivers should advise users to not write a validator that blocks. This option MUST
+only be configurable at the level of a <code>MongoClient</code>.</p>
+<p>Notably, <code>srvHostValidator</code> relaxes existing security measures and must be used with caution. Thus, drivers MUST
+document that this parameter is a dangerous option. For example, something like “WARNING: Modifying the default SRV
+domain name validation can create vulnerabilities.” should be clearly visible in the documentation.</p>
 <h4 id="srvmaxhosts"><a class="header" href="#srvmaxhosts">srvMaxHosts</a></h4>
 <p>This option is used to limit the number of mongos connections that may be created for sharded topologies. This option
 limits the number of SRV records used to populate the seedlist during initial discovery, as well as the number of
@@ -282,7 +317,10 @@ requires a string value and defaults to “mongodb”. This option MUST only be 
 <h4 id="uri-validation"><a class="header" href="#uri-validation">URI Validation</a></h4>
 <p>The driver MUST report an error if any of <code>srvServiceName</code>, <code>srvMaxHosts</code>, or <code>srvAllowedHostsSuffix</code> URI options are
 specified with a non-SRV URI (i.e. scheme other than <code>mongodb+srv</code>). The driver MUST allow specifying the
-<code>srvServiceName</code>, <code>srvMaxHosts</code>, and <code>srvAllowedHostsSuffix</code> URI options with an SRV URI (i.e. <code>mongodb+srv</code> scheme).</p>
+<code>srvServiceName</code>, <code>srvMaxHosts</code>, and <code>srvAllowedHostsSuffix</code> URI options with an SRV URI (i.e. <code>mongodb+srv</code> scheme).
+While not a URI option, <code>srvHostValidator</code> also MUST only be allowed with the use of an SRV URI. As with the error
+raised when both <code>srvAllowedHostsSuffix</code> and <code>srvHostValidator</code> are present, drivers MAY raise this error at any point
+between MongoClient construction and DNS resolution.</p>
 <p>If <code>srvMaxHosts</code> is a positive integer, the driver MUST throw an error in the following cases:</p>
 <ul>
 <li>The connection string contains a <code>replicaSet</code> option.</li>
@@ -315,15 +353,30 @@ found.</p>
 <li>The hostname MUST be converted to its A-label (Punycode) form.</li>
 <li>The hostname MUST be normalized to lowercase using ASCII case folding.</li>
 </ol>
+<p>Drivers MUST use the normalized hostnames, rather than the hostnames exactly as returned by DNS, to populate the
+seedlist.</p>
 <p>The <code>{domainname}</code> that returned hostnames are validated against MUST have the same three normalizations applied, so
 that neither trailing dots, case, nor Unicode/Punycode encoding can affect the comparison. When <code>{domainname}</code> comes
 from <code>srvAllowedHostsSuffix</code>, steps 1-3 of <a href="#srvallowedhostssuffix">srvAllowedHostsSuffix</a> already apply them. The
 leading <code>.</code> that step 6 prepends makes the value a label-aligned suffix and is not part of this normalization.</p>
-<p>A driver MUST verify that the host names returned through SRV records share the original SRV’s <code>{domainname}</code>. In
-addition, when <code>srvAllowedHostsSuffix</code> is not configured and the SRV record hostname has fewer than three <code>.</code> separated
-parts, the returned hostname MUST have at least one more domain level than the SRV record hostname. Drivers MUST raise
-an error and MUST NOT initiate a connection to any returned hostname which does not fulfill these requirements. This
-additional requirement does not apply when <code>srvAllowedHostsSuffix</code> is configured.</p>
+<p>Drivers MAY differ in which IDNA processing standard they use for the A-label conversion as long as the same conversion
+is applied to both sides of the comparison: the returned hostnames and the <code>{domainname}</code> they are validated against.</p>
+<p>A driver MUST verify every host name returned through SRV records. How that verification is performed depends on which
+options are configured:</p>
+<ul>
+<li>When neither <a href="#srvallowedhostssuffix"><code>srvAllowedHostsSuffix</code></a> nor <a href="#srvhostvalidator"><code>srvHostValidator</code></a> is
+configured, the returned host name MUST share the original SRV’s <code>{domainname}</code>. In addition, when the SRV record
+hostname has fewer than three <code>.</code> separated parts, the returned hostname MUST have at least one more domain level
+than the SRV record hostname.</li>
+<li>When <a href="#srvallowedhostssuffix"><code>srvAllowedHostsSuffix</code></a> is configured, the returned host name MUST end in <code>.</code> followed
+by the <code>srvAllowedHostsSuffix</code> value after normalization.</li>
+<li>When <a href="#srvhostvalidator"><code>srvHostValidator</code></a> is configured, the driver MUST pass each returned host name to the
+validator and MUST treat the value it returns as the complete verdict: a returned host name is valid if and only if
+the validator returns <code>true</code>. Drivers MUST NOT additionally apply the <code>{domainname}</code> check or the domain level
+requirement described above, whether before or after calling the validator.</li>
+</ul>
+<p>Drivers MUST raise an error and MUST NOT initiate a connection to any returned hostname which does not fulfill these
+requirements.</p>
 <p>The driver MUST NOT attempt to connect to any hosts until the DNS query has returned its results.</p>
 <p>If <code>srvMaxHosts</code> is zero or greater than or equal to the number of hosts in the DNS result, the driver MUST populate the
 seedlist with all hosts.</p>
@@ -425,6 +478,15 @@ these:</p>
 <pre><code class="language-text">mongodb+srv://cluster.test.internal.example.com/?srvAllowedHostsSuffix=.example.com
 mongodb+srv://cluster.test.internal.example.com/?srvAllowedHostsSuffix=.internal.example.com
 </code></pre>
+<h3 id="rationale-for-srvhostvalidator"><a class="header" href="#rationale-for-srvhostvalidator">Rationale for <code>srvHostValidator</code></a></h3>
+<p><code>srvAllowedHostsSuffix</code> only validates SRV host against a single suffix. This can be limiting as users may want to allow
+multiple unrelated suffixes or apply custom logic beyond simple suffix matching. Users may have more specific validation
+needs that currently can not be expressed. By allowing users to provide a callback, via <code>srvHostValidator</code>, the driver
+gives users more control over SRV host validation logic.</p>
+<h3 id="rationale-for-allowlist-relating-to-srvallowedhostssuffix"><a class="header" href="#rationale-for-allowlist-relating-to-srvallowedhostssuffix">Rationale for allowlist relating to <code>srvAllowedHostsSuffix</code></a></h3>
+<p>In <a href="#srvallowedhostssuffix">srvAllowedHostsSuffix</a>, the 4th step of validation for the parameter includes an allowlist.
+Without the allowlist, these suffixes would be rejected by the PSL algorithm – specifically the <code>*</code> rule. The suffixes
+on this list are all either specially reserved or commonly recognized for private usage.</p>
 <h2 id="justifications"><a class="header" href="#justifications">Justifications</a></h2>
 <h3 id="why-are-multiple-key-value-pairs-allowed-in-one-txt-record"><a class="header" href="#why-are-multiple-key-value-pairs-allowed-in-one-txt-record">Why Are Multiple Key-Value Pairs Allowed in One TXT Record?</a></h3>
 <p>One could imagine an alternative design in which each TXT record would allow only one URI option. No <code>&amp;</code> character would
@@ -448,6 +510,10 @@ left the behaviour of supporting UTF-8 characters as unspecified.</p>
 <p>In the future we could consider using the priority and weight fields of the SRV records.</p>
 <h2 id="changelog"><a class="header" href="#changelog">ChangeLog</a></h2>
 <ul>
+<li>
+<p>2026-09-16: Add <code>srvHostValidator</code> as a MongoClient option, and allow <code>srvAllowedHostsSuffix</code> to be a single label
+when that label is one of a fixed list of names reserved for private or special use.</p>
+</li>
 <li>
 <p>2026-09-03: Specify that host names returned through SRV records, and the <code>{domainname}</code> they are validated against,
 are both normalized – trailing dot stripped, converted to A-label form, ASCII lowercased – before validation.</p>

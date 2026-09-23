@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-3ac6d19b.js";
+            window.path_to_searchindex_js = "../searchindex-ab4ffb9f.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -210,27 +210,46 @@ ReplicaSetWithPrimary).</p>
 the original specification. The behaviour of the periodic rescan is similar, but not identical to the behaviour of
 initial seedlist discovery. Periodic scan MUST follow these rules:</p>
 <ul>
-<li>The driver will query the DNS server for SRV records on <code>{hostname}.{domainname}</code>, prefixed with the SRV service name
+<li>
+<p>The driver will query the DNS server for SRV records on <code>{hostname}.{domainname}</code>, prefixed with the SRV service name
 and protocol. The SRV service name is provided in the
 <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvservicename">srvServiceName</a> URI option and
 defaults to <code>mongodb</code>. The protocol is always <code>tcp</code>. After prefixing, the URI should look like:
 <code>_{srvServiceName}._tcp.{hostname}.{domainname}</code>. Here <code>{hostname}.{domainname}</code> is the host from the connection
 string, and is not affected by
 <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvallowedhostssuffix">srvAllowedHostsSuffix</a>:
-that option changes which parent domain returned host names are verified against, not which records are queried.</li>
-<li>A driver MUST verify that the host names returned through SRV records have the same parent <code>{domainname}</code>. When
-<a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvallowedhostssuffix">srvAllowedHostsSuffix</a>
-is configured, its value is the parent domain used for this verification instead of the <code>{domainname}</code> derived from
-the connection string. When this verification fails, a driver:
+that option changes which parent domain returned host names are verified against, not which records are queried.</p>
+</li>
+<li>
+<p>A driver MUST verify every host name returned through SRV records. Drivers MUST normalize the returned host names as
+described in <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#querying-dns">Querying DNS</a> before
+verifying them. Drivers MUST use the normalized host names, rather than the host names exactly as returned by DNS,
+to populate the topology. How that verification is performed depends on which options are configured:</p>
+<ul>
+<li>When neither
+<a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvallowedhostssuffix"><code>srvAllowedHostsSuffix</code></a>
+nor <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvhostvalidator"><code>srvHostValidator</code></a>
+is configured, the returned host name MUST have the same parent <code>{domainname}</code> as the one derived from the
+connection string.</li>
+<li>When
+<a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvallowedhostssuffix"><code>srvAllowedHostsSuffix</code></a>
+is configured, its value is the parent domain used for this verification instead of the <code>{domainname}</code> derived
+from the connection string.</li>
+<li>When <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#srvhostvalidator"><code>srvHostValidator</code></a> is
+configured, the given validator MUST be used to verify the returned host names, and any error raised by the
+validator MUST be treated as a <code>false</code> response.</li>
+</ul>
+<p>Regardless of how verification is accomplished, when this verification fails, a driver:</p>
 <ul>
 <li>MUST NOT add such a non-compliant host name to the topology</li>
 <li>MUST NOT raise an error</li>
-<li>SHOULD log the non-compliance, including the host name</li>
+<li>SHOULD log the non-compliance, including the host name and any errors raised during validation</li>
 <li>MUST NOT initiate a connection to any such host</li>
 </ul>
 </li>
-<li>If the DNS request returns no verified hosts in SRV records, no SRV records at all, or a DNS error happens, the
-driver:
+<li>
+<p>If the DNS request returns no verified hosts in SRV records, no SRV records at all, or a DNS error happens, the
+driver:</p>
 <ul>
 <li>MUST NOT change the topology</li>
 <li>MUST NOT raise an error</li>
@@ -239,7 +258,8 @@ driver:
 obtained.</li>
 </ul>
 </li>
-<li>For all verified host names, as returned through the DNS SRV query, the driver:
+<li>
+<p>For all verified host names, as returned through the DNS SRV query, the driver:</p>
 <ul>
 <li>MUST remove all hosts that are part of the topology, but are no longer in the returned set of valid hosts</li>
 <li>MUST NOT remove all hosts, and then re-add the ones that were returned. Hosts that have not changed, MUST be left
@@ -252,8 +272,10 @@ as Unknown until the topology has <code>srvMaxHosts</code> hosts. Drivers MUST u
 do for <a href="../initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.html#querying-dns">initial selection</a>.</li>
 </ul>
 </li>
-<li>Priorities and weights in SRV records MUST continue to be ignored, and MUST NOT dictate which mongos server is used
-for new connections.</li>
+<li>
+<p>Priorities and weights in SRV records MUST continue to be ignored, and MUST NOT dictate which mongos server is used
+for new connections.</p>
+</li>
 </ul>
 <p>The rescan needs to happen periodically. As SRV records contain a TTL value, this value can be used to indicate when a
 rescan needs to happen. Different SRV records can have different TTL values. The <em>rescanSRVIntervalMS</em> value MUST be set
@@ -314,6 +336,9 @@ were familiar with the old behaviour. We do not expect this to negatively impact
 <p>No future work is expected.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-09-16: Add <code>srvHostValidator</code> as a MongoClient option.</p>
+</li>
 <li>
 <p>2026-09-03: Account for the <code>srvAllowedHostsSuffix</code> MongoClient option when verifying returned host names.</p>
 </li>

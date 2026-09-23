@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-3ac6d19b.js";
+            window.path_to_searchindex_js = "../searchindex-ab4ffb9f.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -332,6 +332,7 @@ span is <code>findAndModify</code>. This ensures consistency between drivers whe
 <tr><td style="text-align: left"><code>db.operation.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the driver operation being executed</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.operation.summary</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Equivalent to span name</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.mongodb.cursor_id</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">If a cursor is created or used in the operation (see below)</td><td style="text-align: left">Conditional</td></tr>
+<tr><td style="text-align: left"><code>error.type</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">(see <a href="#errortype-operation-spans">error.type</a> below)</td><td style="text-align: left">Required if the operation fails</td></tr>
 </tbody>
 </table>
 </div>
@@ -381,6 +382,11 @@ if available:</p>
 <li><code>exception.type</code></li>
 <li><code>exception.stacktrace</code></li>
 </ul>
+<h6 id="errortype-operation-spans"><a class="header" href="#errortype-operation-spans">error.type (operation spans)</a></h6>
+<p>Operation spans MUST NOT have an <code>error.type</code> attribute when the operation succeeds, even if one of its commands failed:
+an operation can succeed through a retry, so a failed command’s <code>error.type</code> does not carry over. Drivers MUST add this
+attribute to the span when the operation itself fails. Its value SHOULD be the name of the exception class raised to the
+application, the same value as the operation span’s <code>exception.type</code> attribute above.</p>
 <h4 id="instrumenting-server-commands"><a class="header" href="#instrumenting-server-commands">Instrumenting Server Commands</a></h4>
 <p>Drivers MUST create a span for every server command sent to the server as a result of a public API call, except for
 sensitive commands as listed in the command logging and monitoring specification.</p>
@@ -404,6 +410,7 @@ span.</p>
 <tr><td style="text-align: left"><code>db.collection.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The collection being accessed within the database stated in <code>db.namespace</code></td><td style="text-align: left">Required if available</td></tr>
 <tr><td style="text-align: left"><code>db.command.name</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">The name of the server command being executed</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>db.response.status_code</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MongoDB error code represented as a string. This attribute should be added only if an error happens.</td><td style="text-align: left">Required if an error happens</td></tr>
+<tr><td style="text-align: left"><code>error.type</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">(see <a href="#errortype-command-spans">error.type</a> below)</td><td style="text-align: left">Required if the command fails</td></tr>
 <tr><td style="text-align: left"><code>server.port</code></td><td style="text-align: left"><code>int64</code></td><td style="text-align: left">Server port number</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>server.address</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">Name of the database host, or IP address if name is not known</td><td style="text-align: left">Required</td></tr>
 <tr><td style="text-align: left"><code>network.transport</code></td><td style="text-align: left"><code>string</code></td><td style="text-align: left">MUST be ‘tcp’ or ‘unix’ depending on the protocol</td><td style="text-align: left">Required</td></tr>
@@ -484,6 +491,45 @@ available:</p>
 <li><code>exception.type</code></li>
 <li><code>exception.stacktrace</code></li>
 </ul>
+<h6 id="errortype-command-spans"><a class="header" href="#errortype-command-spans">error.type (command spans)</a></h6>
+<p>Drivers MUST add this attribute to the command span when the command fails. This attribute SHOULD match
+<code>db.response.status_code</code> when the command failed with a server error, meaning the server returned an error code in its
+response. Otherwise, this attribute SHOULD be the name of the exception class associated with that command’s failure,
+whether or not the operation ultimately raises it to the application: a retry of the same operation may still succeed.</p>
+<p>Drivers MUST NOT set this attribute when the command succeeds. Per the
+<a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/error/#error-type">OpenTelemetry semantic conventions for <code>error.type</code></a>,
+this attribute SHOULD have a low cardinality, because tracing backends use it as a dimension for grouping and alerting
+on failures.</p>
+<p><code>error.type</code> is the OpenTelemetry semantic-convention attribute for this purpose, and the name tracing backends
+recognize for it. <code>exception.type</code> (see the exception attributes above) is not part of that convention, even though
+drivers also add it to the span. For a non-server error, <code>error.type</code> carries the same value as <code>exception.type</code>.</p>
+<h4 id="propagating-trace-context-to-the-server"><a class="header" href="#propagating-trace-context-to-the-server">Propagating Trace Context to the Server</a></h4>
+<p>Drivers MUST propagate the trace context of the <strong>command span</strong> to servers that support it, so that server-generated
+spans join the same distributed trace as the driver’s spans.</p>
+<p>The trace context is carried in an <code>OP_MSG</code> section with <a href="../message/OP_MSG.html"><code>Payload Type 3</code></a>, whose payload is a
+single BSON document with the following schema:</p>
+<pre><code class="language-json">{ "otel": { "traceparent": "&lt;string&gt;" } }
+</code></pre>
+<p><code>traceparent</code> is the <a href="https://www.w3.org/TR/trace-context/#traceparent-header">W3C traceparent</a> value of the <strong>command
+span</strong>: the propagated context MUST be that of the command span for the command being sent, so server spans join the
+trace as children of the exact command (and retry attempt) that produced them.</p>
+<p>Drivers MUST attach the section to a command if and only if all of the following hold:</p>
+<ol>
+<li>Tracing is enabled for the <code>MongoClient</code> (see
+<a href="#enabling-disabling-and-configuring-opentelemetry">Enabling, Disabling, and Configuring OpenTelemetry</a>).</li>
+<li>The connection’s <code>maxWireVersion</code> is greater than or equal to 29 (MongoDB 9.0).</li>
+<li>A valid <code>traceparent</code> value is available from the command span for the command being sent.</li>
+</ol>
+<p>A <code>traceparent</code> value is valid if and only if it is exactly 55 characters of the form
+<code>00-&lt;trace-id: 32 lowercase hex&gt;-&lt;parent-id: 16 lowercase hex&gt;-&lt;trace-flags: 2 lowercase hex&gt;</code> (the field names are
+those of the <a href="https://www.w3.org/TR/trace-context/#traceparent-header">W3C traceparent header</a>; <code>00</code> is the version, and
+<code>parent-id</code> carries the command span’s own span id — the parent of the spans the server creates) and neither the
+trace-id nor the parent-id is all zeroes. This mirrors the server-side validation. If no valid value is available,
+drivers MUST omit the section entirely rather than send an invalid or truncated value. Drivers MUST propagate unsampled
+trace contexts (trace-flags <code>00</code>); the sampling decision MUST NOT affect whether the section is attached.</p>
+<p>A message MUST NOT contain more than one telemetry section. Commands that carry no command span (for example server
+monitoring, authentication, and security-sensitive commands) naturally send no section.</p>
+<p>No tracing data is returned in server responses as part of this feature.</p>
 <h2 id="motivation-for-change"><a class="header" href="#motivation-for-change">Motivation for Change</a></h2>
 <p>A common complaint from our support team is that they don’t know how to easily get debugging information from drivers.
 Some drivers provide debug logging, but others do not. For drivers that do provide it, the log messages produced and the
@@ -564,18 +610,44 @@ replace those binary values with placeholders (assuming the encrypted blobs are 
 tracing may have unexpected negative outcome.</p>
 <p>Further, we already have two attributes that configure tracing, and we expect there might be more.</p>
 <p>A URI options can be added later if we realise our users need it, while the opposite is not easily accomplished.</p>
+<h3 id="wire-protocol-version-gate-instead-of-a-hello-capability"><a class="header" href="#wire-protocol-version-gate-instead-of-a-hello-capability">Wire protocol version gate instead of a hello capability</a></h3>
+<p>An alternative was for servers to advertise support via a <code>hello</code> response field. Gating on <code>maxWireVersion</code> was chosen
+instead: the wire protocol version acts as the schema contract for the telemetry payload, so drivers know exactly which
+fields a server accepts, and any future payload additions require a wire version bump rather than a second, parallel
+negotiation mechanism.</p>
+<h3 id="bson-document-instead-of-a-bare-traceparent-string"><a class="header" href="#bson-document-instead-of-a-bare-traceparent-string">BSON document instead of a bare traceparent string</a></h3>
+<p>Carrying the traceparent inside a BSON document allows future propagation fields to be added to the same section without
+redesigning the payload format.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
-<li>2026-08-11: Specified that each <code>getMore</code> command is nested under its own new operation span, sibling to the operation
+<li>
+<p>2026-08-19: Specified the <code>error.type</code> attribute on command spans, which drivers MUST add when a command fails and
+which matches <code>db.response.status_code</code> when the command failed with a server error and is otherwise the name of the
+exception class associated with that command’s failure. Specified that drivers MUST NOT set it when the command
+succeeds, that it SHOULD have a low cardinality, and that operation spans MUST NOT carry it unless the operation
+itself fails, in which case it matches the operation span’s <code>exception.type</code>.</p>
+</li>
+<li>
+<p>2026-08-11: Specified that each <code>getMore</code> command is nested under its own new operation span, sibling to the operation
 span of the command that created the cursor, when the caller drives cursor iteration. Specified that
 <code>db.mongodb.cursor_id</code> MUST be added to operation spans and to command spans that create a cursor with a non-zero id
 or that operate on a single existing cursor, and MUST be omitted rather than set to <code>0</code> when no server-side cursor
-remains.</li>
-<li>2026-07-31: Allowed the <code>update</code> test to accept <code>multi</code> and <code>upsert</code> at their default values, and added <code>initialData</code>
-to the operation tests that create or modify collections.</li>
-<li>2026-06-16: Clarified that the <code>db.query.text</code> attribute should be serialized to Relaxed Extended JSON.</li>
-<li>2026-02-09: Renamed <code>db.system</code> to <code>db.system.name</code> according to the corresponding update of OpenTelemetry semantic
-conventions.</li>
+remains.</p>
+</li>
+<li>
+<p>2026-07-31: Allowed the <code>update</code> test to accept <code>multi</code> and <code>upsert</code> at their default values, and added <code>initialData</code>
+to the operation tests that create or modify collections.</p>
+</li>
+<li>
+<p>2026-07-21: Add trace context propagation to the server via the <code>OP_MSG</code> telemetry section (DRIVERS-3454).</p>
+</li>
+<li>
+<p>2026-06-16: Clarified that the <code>db.query.text</code> attribute should be serialized to Relaxed Extended JSON.</p>
+</li>
+<li>
+<p>2026-02-09: Renamed <code>db.system</code> to <code>db.system.name</code> according to the corresponding update of OpenTelemetry semantic
+conventions.</p>
+</li>
 </ul>
 
                     </main>
