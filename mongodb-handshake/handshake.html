@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ab4ffb9f.js";
+            window.path_to_searchindex_js = "../searchindex-9aa677c2.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -486,7 +486,7 @@ equal with case sensitive string comparison.</p>
 <h3 id="metadata-updates-after-mongoclient-initialization"><a class="header" href="#metadata-updates-after-mongoclient-initialization">Metadata updates after MongoClient initialization</a></h3>
 <p>Drivers MUST provide an API that allows appending <code>DriverInfoOptions</code> to a <code>MongoClient</code> instance after initialization,
 adhering to the pattern described below while following idioms of the language of the driver:</p>
-<pre><code class="language-java">interface MongoClient { 
+<pre><code class="language-java">interface MongoClient {
   void appendMetadata(DriverInfoOptions driverInfoOptions);
   // other existing members of MongoClient
 }
@@ -509,13 +509,35 @@ be appended to their respective fields, and be delimited by a <code>|</code> cha
     }
 }
 </code></pre>
+<p>Entries in <code>driver.name</code> and <code>driver.version</code> MUST correspond one-to-one by index, so that splitting both fields on the
+delimiter and pairing them by position recovers which version belongs to which library. Every set of <code>DriverInfoOptions</code>
+MUST contribute exactly one entry to each field, and an unset field MUST contribute an empty entry rather than being
+skipped. Empty entries are significant and MUST NOT be stripped, including when they are trailing. For example, if
+<code>Framework2</code> reports no version:</p>
+<pre><code class="language-typescript">{
+    client: {
+        driver: {
+            name: "PyMongo|Framework1|Framework2|Framework3",
+            version: "3.6.0|1.5||3.5"
+        }
+    }
+}
+</code></pre>
+<p>Without the empty entry, <code>3.5</code> would appear to belong to <code>Framework2</code>.</p>
+<p>This requirement does not apply to <code>platform</code>, which is a single field with no counterpart to align against.</p>
 <p>Some client libraries provide APIs that accept a pre-initialized MongoClient as an argument. In these circumstances, it
 is possible for multiple library objects to be associated with the same MongoClient, which could result in the same
 metadata being appended multiple times. Drivers MUST ensure that any duplicate <code>DriverInfoOptions</code> objects provided to a
 MongoClient or appended to a MongoClient do not result in additional metadata being appended. See
 <a href="#supporting-wrapping-libraries">Supporting Wrapping Libraries</a>.</p>
-<p><strong>NOTE:</strong> All strings provided as part of the driver info MUST NOT contain the delimiter used for metadata concatention.
+<p>Two <code>DriverInfoOptions</code> are duplicates only when every field is equal. Drivers MUST NOT compare fields in isolation: two
+distinct libraries that happen to report the same version are not duplicates, and both MUST contribute an entry.
+Suppressing one of them would break the index correspondence between <code>driver.name</code> and <code>driver.version</code>.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>All strings provided as part of the driver info MUST NOT contain the delimiter used for metadata concatenation.
 Drivers MUST throw an error if any of these strings contains that character.</p>
+</blockquote>
 <h3 id="deviations"><a class="header" href="#deviations">Deviations</a></h3>
 <p>Some drivers have already implemented such functionality, and should not be required to make breaking changes to comply
 with the requirements set forth here. A non-exhaustive list of acceptable deviations are as follows:</p>
@@ -627,6 +649,8 @@ specification</li>
 </ul>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2026-09-11: Require <code>driver.name</code> and <code>driver.version</code> entries to correspond by index, and clarify that duplicate
+detection compares whole <code>DriverInfoOptions</code>.</li>
 <li>2026-06-25: Clarify the client backpressure component of the handshake.</li>
 <li>2026-06-17: Remove pre-4.2 version references.</li>
 <li>2026-06-11: Clarify that there is no new behavior as a result of only using OP_MSG for all handshakes.</li>
