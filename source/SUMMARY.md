@@ -1,0 +1,116 @@
+# Summary
+
+[Introduction](README.md)
+[Specification Owners](CODEOWNERS.md)
+[Mantras](driver-mantras.md)
+[Wire Version Feature List](wireversion-featurelist/wireversion-featurelist.md)
+
+# Specifications
+
+- [Serialization]()
+  - [BSON](BSON.md)
+  - [BSON Binary Subtype 9: Vector](bson-binary-vector/bson-binary-vector.md)
+  - [ObjectId](bson-objectid/objectid.md)
+  - [Decimal128](bson-decimal128/decimal128.md)
+  - [UUID](bson-binary-uuid/uuid.md)
+  - [DBRef](dbref/dbref.md)
+  - [Extended JSON](extended-json/extended-json.md)
+
+---
+
+- [Communication]()
+  - [`OP_MSG`](message/OP_MSG.md)
+  - [Command Execution](run-command/run-command.md)
+  - [Connection String](connection-string/connection-string-spec.md)
+  - [URI Options](uri-options/uri-options.md)
+  - [OCSP](ocsp-support/ocsp-support.md)
+  - [Initial Handshake](mongodb-handshake/handshake.md)
+  - [Wire Compression](compression/OP_COMPRESSED.md)
+  - [SOCKS5](socks5-support/socks5.md)
+  - [Initial DNS Seedlist Discovery](initial-dns-seedlist-discovery/initial-dns-seedlist-discovery.md)
+  - [Public Suffix List](public-suffix-list/public-suffix-list.md)
+
+---
+
+- [Connectivity]()
+  - [Server Discovery and Monitoring](server-discovery-and-monitoring/server-discovery-and-monitoring.md)
+  - [SDAM Summary](server-discovery-and-monitoring/server-discovery-and-monitoring-summary.md)
+  - [Connection Monitoring and Pooling](connection-monitoring-and-pooling/connection-monitoring-and-pooling.md)
+  - [Load Balancer Support](load-balancers/load-balancers.md)
+
+---
+
+- [Authentication](auth/auth.md)
+
+---
+
+- [Availability]()
+  - [Server Monitoring](server-discovery-and-monitoring/server-monitoring.md)
+  - [`SRV` Polling for mongos Discovery](polling-srv-records-for-mongos-discovery/polling-srv-records-for-mongos-discovery.md)
+  - [Server Selection](server-selection/server-selection.md)
+  - [Max Staleness](max-staleness/max-staleness.md)
+
+---
+
+- [Resilience]()
+  - [Retryability]()
+    - [Reads](retryable-reads/retryable-reads.md)
+    - [Writes](retryable-writes/retryable-writes.md)
+  - [Client Backpressure](client-backpressure/client-backpressure.md)
+  - [CSOT](client-side-operations-timeout/client-side-operations-timeout.md)
+  - [Consistency]()
+    - [Sessions](sessions/driver-sessions.md)
+    - [Causal Consistency](causal-consistency/causal-consistency.md)
+    - [Snapshot Reads](sessions/snapshot-sessions.md)
+    - [Transactions](transactions/transactions.md)
+    - [Convenient Transactions API](transactions-convenient-api/transactions-convenient-api.md)
+
+---
+
+- [Programmability]()
+  - [Stable API](versioned-api/versioned-api.md)
+  - [Resource Management]()
+    - [Databases](enumerate-databases/enumerate-databases.md)
+    - [Collections](enumerate-collections/enumerate-collections.md)
+    - [Indexes](index-management/index-management.md)
+  - [Data Management]()
+    - [CRUD](crud/crud.md)
+    - [Collation](collation/collation.md)
+    - [Write Commands](server_write_commands/server_write_commands.md)
+    - [Bulk API](driver-bulk-update.rst)
+    - [Bulk Write](crud/bulk-write.md)
+    - [R/W Concern](read-write-concern/read-write-concern.md)
+  - [Cursors]()
+    - [Change Streams](change-streams/change-streams.md)
+    - [`find`/`getMore`/`killCursors`](find_getmore_killcursors_commands/find_getmore_killcursors_commands.md)
+  - [GridFS](gridfs/gridfs-spec.md)
+
+---
+
+- [Security]()
+  - [Client Side Encryption](client-side-encryption/client-side-encryption.md)
+  - [BSON Binary Subtype 6: Encrypted](bson-binary-encrypted/binary-encrypted.md)
+
+---
+
+- [Observability]()
+  - [Open Telemetry](open-telemetry/open-telemetry.md)
+  - [Command Logging and Monitoring](command-logging-and-monitoring/command-logging-and-monitoring.md)
+  - [SDAM Logging and Monitoring](server-discovery-and-monitoring/server-discovery-and-monitoring-logging-and-monitoring.md)
+  - [Standardized Logging](logging/logging.md)
+  # - [Connection Pool Logging](connection-monitoring-and-pooling/connection-monitoring-and-pooling.md)
+
+---
+
+- [Testability]()
+  - [Unified Test Format](unified-test-format/unified-test-format.md)
+  - [Atlas SFP Testing](atlas-sfp-testing/atlas-sfp-testing.md)
+  - [Atlas Serverless Tests](serverless-testing/README.md)
+  - [Performance Benchmarking](benchmarking/benchmarking.md)
+  - [ODM Performance Benchmarking](benchmarking/odm-benchmarking.md)
+  - [BSON Corpus](bson-corpus/bson-corpus.md)
+  - [Replication Event Resilience](connections-survive-step-down/tests/README.md)
+  - [FAAS Automated Testing](faas-automated-testing/faas-automated-testing.md)
+  - [Max Staleness Tests](max-staleness/max-staleness-tests.md)
+  - [Server Selection Tests](server-selection/server-selection-tests.md)
+  - [SDAM Test Plan](server-discovery-and-monitoring/server-discovery-and-monitoring-tests.md)

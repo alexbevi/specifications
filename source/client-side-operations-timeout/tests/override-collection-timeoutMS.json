@@ -1303,6 +1303,21 @@
     },
     {
       "description": "timeoutMS can be configured on a MongoCollection - createChangeStream on collection",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4",
+          "topologies": [
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.4",
+          "maxServerVersion": "8.99",
+          "topologies": [
+            "sharded"
+          ]
+        }
+      ],
       "operations": [
         {
           "name": "createEntities",
@@ -3252,14 +3267,20 @@
           }
         },
         {
+          "name": "createIndex",
+          "object": "collection",
+          "arguments": {
+            "keys": {
+              "x": 1
+            },
+            "name": "x_1"
+          }
+        },
+        {
           "name": "dropIndex",
           "object": "collection",
           "arguments": {
             "name": "x_1"
-          },
-          "expectError": {
-            "isClientError": false,
-            "isTimeoutError": false
           }
         }
       ],
@@ -3267,6 +3288,12 @@
         {
           "client": "client",
           "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "createIndexes",
+                "databaseName": "test"
+              }
+            },
             {
               "commandStartedEvent": {
                 "commandName": "dropIndexes",
@@ -3328,14 +3355,20 @@
           }
         },
         {
+          "name": "createIndex",
+          "object": "collection",
+          "arguments": {
+            "keys": {
+              "x": 1
+            },
+            "name": "x_1"
+          }
+        },
+        {
           "name": "dropIndex",
           "object": "collection",
           "arguments": {
             "name": "x_1"
-          },
-          "expectError": {
-            "isClientError": false,
-            "isTimeoutError": false
           }
         }
       ],
@@ -3343,6 +3376,12 @@
         {
           "client": "client",
           "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "createIndexes",
+                "databaseName": "test"
+              }
+            },
             {
               "commandStartedEvent": {
                 "commandName": "dropIndexes",

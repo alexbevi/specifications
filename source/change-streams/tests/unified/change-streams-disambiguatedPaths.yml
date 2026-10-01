@@ -25,6 +25,15 @@ initialData:
 
 tests:
   - description: "disambiguatedPaths is not present when showExpandedEvents is false/unset"
+    # skip server version 8.2.0, which emits disambiguatedPaths unconditionally
+    runOnRequirements:
+      - minServerVersion: "6.1.0"
+        maxServerVersion: "8.1.99"
+        topologies: [ replicaset, load-balanced, sharded ]
+        serverless: forbid
+      - minServerVersion: "8.2.1"
+        topologies: [ replicaset, load-balanced, sharded ]
+        serverless: forbid
     operations:
       - name: insertOne
         object: *collection0

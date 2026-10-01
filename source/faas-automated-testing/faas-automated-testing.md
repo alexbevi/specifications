@@ -1,7 +1,6 @@
 # FaaS Automated Testing
 
 - Status:
-- Minimum Server Version: 3.6
 
 ______________________________________________________________________
 
@@ -85,7 +84,7 @@ Template: 1
 
 When prompted for language if the driver language is not Python, select "N".
 
-```
+```text
 Use the most popular runtime and package type? (Python and zip) [y/N]: n
 ```
 
@@ -201,8 +200,8 @@ sam local invoke --parameter-overrides "MongoDbUri=${MONGODB_URI}"
 ```
 
 *NOTE* "127.0.0.1" in the MONGODB_URI MUST be replaced with "host.docker.internal" to test a local MongoDB deployment.
-If "host.docker.internal" does not work (can occur on M1 machines), drivers MAY choose to use a \[bridged docker
-container\](<https://docs.docker.com/network/bridge/>) to test locally.
+If "host.docker.internal" does not work (can occur on M1 machines), drivers MAY choose to use a
+[bridged docker container](https://docs.docker.com/network/bridge/) to test locally.
 
 ###### Implementing the Function
 
@@ -211,13 +210,13 @@ driver MUST:
 
 - Create a MongoClient that points to MONGODB_URI.
 - Add listeners for the following monitoring events: ServerHeartbeatStarted, ServerHeartbeatFailed, CommandSucceeded,
-  CommandFailed, ConnectionCreated, ConnectionClosed.
+    CommandFailed, ConnectionCreated, ConnectionClosed.
 - Drivers MUST perform a single insert and then a single delete of the inserted document to force write operations on
-  the primary node.
+    the primary node.
 - Drivers MUST record the durations and counts of the heartbeats, the durations of the commands, as well as keep track
-  of the number of open connections, and report this information in the function response as JSON.
+    of the number of open connections, and report this information in the function response as JSON.
 - Drivers MUST assert no ServerHeartbeat events contain the `awaited=True` flag to confirm that the streaming protocol
-  is disabled ([DRIVERS-2578](https://jira.mongodb.org/browse/DRIVERS-2578)).
+    is disabled ([DRIVERS-2578](https://jira.mongodb.org/browse/DRIVERS-2578)).
 
 ###### Running in Continuous Integration
 
@@ -240,6 +239,17 @@ follows:
 | AWS_ACCESS_KEY_ID             | Assume role automatically sets this |
 | AWS_SECRET_ACCESS_KEY         | Assume role automatically sets this |
 | AWS_SESSION_TOKEN             | Assume role automatically sets this |
+
+The value for `LAMBDA_AWS_ROLE_ARN` MUST be stored in Evergreen project settings. The value can be found in the
+`drivers/atlas-qa` vault.
+
+The values for `DRIVERS_ATLAS_PUBLIC_API_KEY`, `DRIVERS_ATLAS_PRIVATE_API_KEY`, `DRIVERS_ATLAS_LAMBDA_USER`,
+`DRIVERS_ATLAS_LAMBDA_PASSWORD` and `DRIVERS_ATLAS_GROUP_ID` can be obtained programmatically from the
+`drivers/atlas-qa` vault.
+
+See
+[Secrets Handling README](https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/secrets_handling/README.md)
+for details on how to access the secrets.
 
 Supported Evergreen variants that have the AWS SAM CLI installed:
 
@@ -322,6 +332,7 @@ Description of the behaviour of run-deployed-lambda-aws-tests.sh:
 
 ## Changelog
 
+- 2025-08-07: Added instructions for accessing secrets from the vault.
 - 2024-02-27: Migrated from reStructuredText to Markdown.
 - 2023-08-21: Drivers MUST assert that the streaming protocol is disabled in the Lambda function.
 - 2023-08-17: Fixed URI typo, added host note, increase assume role duration.

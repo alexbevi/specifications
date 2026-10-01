@@ -320,6 +320,15 @@ tests:
     mechanism: MONGODB-AWS
     mechanism_properties:
       AWS_SESSION_TOKEN: token!@#$%^&*()_+
+- description: should throw an exception if username provided (MONGODB-AWS)
+  uri: mongodb://user@localhost.com/?authMechanism=MONGODB-AWS
+  valid: false
+- description: should throw an exception if username and password provided (MONGODB-AWS)
+  uri: mongodb://user:pass@localhost.com/?authMechanism=MONGODB-AWS
+  valid: false
+- description: should throw an exception if AWS_SESSION_TOKEN provided (MONGODB-AWS)
+  uri: mongodb://localhost/?authMechanism=MONGODB-AWS&authMechanismProperties=AWS_SESSION_TOKEN:token
+  valid: false
 - description: should recognise the mechanism with test environment (MONGODB-OIDC)
   uri: mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:test
   valid: true
@@ -452,5 +461,20 @@ tests:
   credential: null
 - description: should throw an error if not TOKEN_RESOURCE with gcp provider (MONGODB-OIDC)
   uri: mongodb://user:pass@localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:gcp
+  valid: false
+  credential: null
+- description: should recognise the mechanism with k8s provider (MONGODB-OIDC)
+  uri: mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:k8s
+  valid: true
+  credential:
+    username: null
+    password: null
+    source: $external
+    mechanism: MONGODB-OIDC
+    mechanism_properties:
+      ENVIRONMENT: k8s
+- description: should throw an error for a username and password with k8s provider
+    (MONGODB-OIDC)
+  uri: mongodb://user:pass@localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:k8s
   valid: false
   credential: null

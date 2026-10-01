@@ -19,15 +19,24 @@ client.admin.command('setParameter', 1, minSnapshotHistoryWindowInSeconds=600)
 
 ### Testing against servers that do not support sessions
 
-Since all regular 3.6+ servers support sessions, the prose tests which test for session non-support SHOULD use a
-mongocryptd server as the test server (available with server versions 4.2+); however, if future versions of mongocryptd
-support sessions or if mongocryptd is not a viable option for the driver implementing these tests, another server MAY be
-substituted as long as it does not return a non-null value for `logicalSessionTimeoutMinutes`; in the event that no such
-server is readily available, a mock server may be used as a last resort.
+Since all regular servers support sessions, the prose tests which test for session non-support SHOULD use a mongocryptd
+server as the test server; however, if future versions of mongocryptd support sessions or if mongocryptd is not a viable
+option for the driver implementing these tests, another server MAY be substituted as long as it does not return a
+non-null value for `logicalSessionTimeoutMinutes`; in the event that no such server is readily available, a mock server
+may be used as a last resort.
 
 As part of the test setup for these cases, create a `MongoClient` pointed at the test server with the options specified
 in the test case and verify that the test server does NOT define a value for `logicalSessionTimeoutMinutes` by sending a
 hello command and checking the response.
+
+## Specific operations and behaviour for unified tests
+
+An operation on sessions called `getSnapshotTime` must be supported for unified tests. This operation returns the value
+of `snapshotTime` on the session, so that it can be used in subsequent operations.
+
+When parsing `snapshotTime` from `sessionOptions` for unified tests, the parsed string is the name of the key for the
+actual value of `snapshotTime` to be found in the
+[entity map](https://github.com/mongodb/specifications/blob/master/source/unified-test-format/unified-test-format.md#entity-map).
 
 ## Prose tests
 
@@ -49,17 +58,14 @@ This test applies to drivers with session pools.
 
 ### 3. `$clusterTime` in commands
 
-- Turn `heartbeatFrequencyMS` up to a very large number.
 - Register a command-started and a command-succeeded APM listener. If the driver has no APM support, inspect
-  commands/replies in another idiomatic way, such as monkey-patching or a mock server.
+    commands/replies in another idiomatic way, such as monkey-patching or a mock server.
 - Send a `ping` command to the server with the generic `runCommand` method.
-- Assert that the command passed to the command-started listener includes `$clusterTime` if and only if `maxWireVersion`
-  \>= 6.
+- Assert that the command passed to the command-started listener includes `$clusterTime`.
 - Record the `$clusterTime`, if any, in the reply passed to the command-succeeded APM listener.
 - Send another `ping` command.
 - Assert that `$clusterTime` in the command passed to the command-started listener, if any, equals the `$clusterTime` in
-  the previous server reply. (Turning `heartbeatFrequencyMS` up prevents an intervening heartbeat from advancing the
-  `$clusterTime` between these final two steps.)
+    the previous server reply.
 
 Repeat the above for:
 
@@ -70,7 +76,7 @@ Repeat the above for:
 ### 4. Explicit and implicit session arguments
 
 - Register a command-started APM listener. If the driver has no APM support, inspect commands in another idiomatic way,
-  such as monkey-patching or a mock server.
+    such as monkey-patching or a mock server.
 - Create `client1`
 - Get `database` from `client1`
 - Get `collection` from `database`
@@ -120,9 +126,9 @@ Skip this test if your driver does not allow simultaneous authentication with mu
 - Insert two documents into a collection
 - Execute a find operation on the collection and iterate past the first document
 - Assert that the implicit session is returned to the pool. This can be done in several ways:
-  - Track in-use count in the server session pool and assert that the count has dropped to zero
-  - Track the lsid used for the find operation (e.g. with APM) and then do another operation and assert that the same
-    lsid is used as for the find operation.
+    - Track in-use count in the server session pool and assert that the count has dropped to zero
+    - Track the lsid used for the find operation (e.g. with APM) and then do another operation and assert that the same
+        lsid is used as for the find operation.
 
 ### 9. Client-side cursor that exhausts the results after a `getMore` immediately returns the implicit session to the pool
 
@@ -169,32 +175,27 @@ Skip this test if your driver does not allow forking.
 ### 14. Implicit sessions only allocate their server session after a successful connection checkout
 
 - Create a MongoClient with the following options: `maxPoolSize=1` and `retryWrites=true`. If testing against a sharded
-  deployment, the test runner MUST ensure that the MongoClient connects to only a single mongos host.
+    deployment, the test runner MUST ensure that the MongoClient connects to only a single mongos host.
 - Attach a command started listener that collects each command's lsid
 - Initiate the following concurrent operations
-  - `insertOne({ }),`
-  - `deleteOne({ }),`
-  - `updateOne({ }, { $set: { a: 1 } }),`
-  - `bulkWrite([{ updateOne: { filter: { }, update: { $set: { a: 1 } } } }]),`
-  - `findOneAndDelete({ }),`
-  - `findOneAndUpdate({ }, { $set: { a: 1 } }),`
-  - `findOneAndReplace({ }, { a: 1 }),`
-  - `find().toArray()`
+    - `insertOne({ }),`
+    - `deleteOne({ }),`
+    - `updateOne({ }, { $set: { a: 1 } }),`
+    - `bulkWrite([{ updateOne: { filter: { }, update: { $set: { a: 1 } } } }]),`
+    - `findOneAndDelete({ }),`
+    - `findOneAndUpdate({ }, { $set: { a: 1 } }),`
+    - `findOneAndReplace({ }, { a: 1 }),`
+    - `find().toArray()`
 - Wait for all operations to complete successfully
 - Assert the following across at least 5 retries of the above test:
-  - Drivers MUST assert that exactly one session is used for all operations at least once across the retries of this
-    test.
-  - Note that it's possible, although rare, for >1 server session to be used because the session is not released until
-    after the connection is checked in.
-  - Drivers MUST assert that the number of allocated sessions is strictly less than the number of concurrent operations
-    in every retry of this test. In this instance it would be less than (but NOT equal to) 8.
+    - Drivers MUST assert that exactly one session is used for all operations at least once across the retries of this
+        test.
+    - Note that it's possible, although rare, for >1 server session to be used because the session is not released until
+        after the connection is checked in.
+    - Drivers MUST assert that the number of allocated sessions is strictly less than the number of concurrent operations
+        in every retry of this test. In this instance it would be less than (but NOT equal to) 8.
 
-### 15. `lsid` is added inside `$query` when using OP_QUERY
-
-This test only applies to drivers that have not implemented OP_MSG and still use OP_QUERY.
-
-- For a command to a mongos that includes a readPreference, verify that the `lsid` on query commands is added inside the
-  `$query` field, and NOT as a top-level field.
+### 15. **Removed**
 
 ### 16. Authenticating as a second user after starting a session results in a server error
 
@@ -238,8 +239,55 @@ and configure a `MongoClient` with default options.
 - Attempt to send a write command to the server (e.g., `insertOne`) with the explicit session passed in
 - Assert that a client-side error is generated indicating that sessions are not supported
 
+### 20. Drivers do not gossip `$clusterTime` on SDAM commands.
+
+- Skip this test when connected to a deployment that does not support cluster times
+- Create a client, C1, directly connected to a writable server and a small heartbeatFrequencyMS
+    - `c1 = MongoClient(directConnection=True, heartbeatFrequencyMS=10)`
+- Run a ping command using C1 and record the `$clusterTime` in the response, as `clusterTime`.
+    - `clusterTime = c1.admin.command({"ping": 1})["$clusterTime"]`
+- Using a separate client, C2, run an insert to advance the cluster time
+    - `c2.test.test.insert_one({"advance": "$clusterTime"})`
+- Next, wait until the client C1 processes the next pair of SDAM heartbeat started + succeeded events.
+    - If possible, assert the SDAM heartbeats do not send `$clusterTime`
+- Run a ping command using C1 and assert that `$clusterTime` sent is the same as the `clusterTime` recorded earlier.
+    This assertion proves that C1's `$clusterTime` was not advanced by gossiping through SDAM.
+
+### 21. Having `snapshotTime` set and `snapshot` set to false is not allowed
+
+Snapshot sessions tests require server of version 5.0 or higher and replica set or a sharded cluster deployment.
+
+- Start a session by calling `startSession` with `snapshot = false` and `snapshotTime = new Timestamp(1)`.
+- Assert that a client side error was raised.
+
+### 22. Retrieving `snapshotTime` on a non-snapshot session raises an error
+
+Snapshot sessions tests require server of version 5.0 or higher and replica set or a sharded cluster deployment.
+
+- Start a session by calling `startSession` on with `snapshot = false`.
+- Try to access the session's snapshot time.
+- Assert that a client side error was raised.
+- Assert that the session's `snapshotTime` is unset.
+
+Drivers MAY skip this test if they choose not to implement a getter for `snapshotTime`.
+
+### 23. Ensure `snapshotTime` is Read-Only
+
+Snapshot sessions tests require server of version 5.0 or higher and replica set or a sharded cluster deployment.
+
+- Start a session by calling `startSession` on with `snapshot = false`.
+- Assert that the session's `snapshotTime` is unset.
+- Attempt to mutate the session's `snapshotTime` field through any publicly accessible API.
+- Assert that the original session's `snapshotTime` remains unchanged.
+
+Drivers MAY skip this test if they choose to expose a read-only `snapshotTime` property using an accessor method only.
+
 ## Changelog
 
+- 2026-06-17: Remove pre-4.2 version references.
+- 2025-12-18: Make snapshot getter prose test optional.
+- 2025-09-25: Added tests for snapshotTime.
+- 2025-02-24: Test drivers do not gossip $clusterTime on SDAM.
 - 2024-05-08: Migrated from reStructuredText to Markdown.
 - 2019-05-15: Initial version.
 - 2021-06-15: Added snapshot-session tests. Introduced legacy and unified folders.

@@ -1,7 +1,6 @@
 # Retryable Reads
 
 - Status: Accepted
-- Minimum Server Version: 3.6
 
 ______________________________________________________________________
 
@@ -14,6 +13,11 @@ This specification will
 
 - outline how an API for retryable read operations will be implemented in drivers
 - define an option to enable retryable reads for an application.
+
+The changes in this specification are related to but distinct from the retryability behaviors defined in the
+[Client Backpressure Specification](../client-backpressure/client-backpressure.md), which defines a retryability
+mechanism for all commands under certain server conditions. Unless otherwise noted, the changes in this specification
+refer only to the retryability behaviors summarized above.
 
 ## META
 
@@ -54,7 +58,7 @@ An error is considered retryable if it meets any of the following criteria:
 
 - a [PoolClearedError](../connection-monitoring-and-pooling/connection-monitoring-and-pooling.md#connection-pool-errors)
 - Any of the above retryable errors that occur during a connection handshake (including the authentication step). For
-  example, a network error or ShutdownInProgress error encountered when running the hello or saslContinue commands.
+    example, a network error or ShutdownInProgress error encountered when running the hello or saslContinue commands.
 
 ### MongoClient Configuration
 
@@ -80,71 +84,58 @@ the defined name but MAY deviate to comply with their existing conventions.
 
 ### Requirements for Retryable Reads
 
-#### Supported Server Versions
-
-Drivers MUST verify server eligibility by ensuring that `maxWireVersion` is at least 6 because retryable reads require a
-MongoDB 3.6 standalone, replica set or shard cluster, MongoDB 3.6 server wire version is 6 as defined in the
-[Server Wire version and Feature List specification](../wireversion-featurelist.md).
-
-The minimum server version is 3.6 because
-
-1. It gives us version parity with retryable writes.
-2. It forces the retry attempt(s) to use the same implicit session, which would make it it easier to track operations
-   and kill any errant longer running operation.
-3. It limits the scope of the implementation (`OP_QUERY` will not need to be supported).
-
 #### Supported Read Operations
 
 Drivers MUST support retryability for the following operations:
 
 - All read operations defined in the CRUD specification i.e.
 
-  - `Collection.find()`
+    - `Collection.find()`
 
-    - This includes the `find` operations backing the GridFS API.
+        - This includes the `find` operations backing the GridFS API.
 
-  - `Collection.aggregate()`
+    - `Collection.aggregate()`
 
-    - Only if the pipeline does not include a write stage (e.g. `$out`, `$merge`)
+        - Only if the pipeline does not include a write stage (e.g. `$out`, `$merge`)
 
-  - `Collection.distinct()`
+    - `Collection.distinct()`
 
-  - `Collection.count()`
+    - `Collection.count()`
 
-    - Only required if the driver already provides `count()`
+        - Only required if the driver already provides `count()`
 
-  - `Collection.estimatedDocumentCount()`
+    - `Collection.estimatedDocumentCount()`
 
-  - `Collection.countDocuments()`
+    - `Collection.countDocuments()`
 
 - All read operation helpers in the change streams specification i.e.
 
-  - `Collection.watch()`
-  - `Database.watch()`
-  - `MongoClient.watch()`
+    - `Collection.watch()`
+    - `Database.watch()`
+    - `MongoClient.watch()`
 
 - All enumeration commands e.g.
 
-  - `MongoClient.listDatabases()`
-  - `Database.listCollections()`
-  - `Collection.listIndexes()`
+    - `MongoClient.listDatabases()`
+    - `Database.listCollections()`
+    - `Collection.listIndexes()`
 
 - Any read operations not defined in the aforementioned specifications:
 
-  - Any read operation helpers e.g. `Collection.findOne()`
+    - Any read operation helpers e.g. `Collection.findOne()`
 
 Drivers SHOULD support retryability for the following operations:
 
 - Any driver that provides generic command runners for read commands (with logic to inherit a client-level read
-  concerns) SHOULD implement retryability for the read-only command runner.
+    concerns) SHOULD implement retryability for the read-only command runner.
 
 Most of the above methods are defined in the following specifications:
 
 - [Change Streams](../change-streams/change-streams.md)
 - [CRUD](../crud/crud.md)
-- [Enumerating Collections](../enumerate-collections.md)
+- [Enumerating Collections](../enumerate-collections/enumerate-collections.md)
 - [Enumerating Indexes](../index-management/index-management.md#enumerate-indexes)
-- [Enumerating Databases](../enumerate-databases.md)
+- [Enumerating Databases](../enumerate-databases/enumerate-databases.md)
 - [GridFS Spec](../gridfs/gridfs-spec.md)
 
 #### Unsupported Read Operations
@@ -152,13 +143,13 @@ Most of the above methods are defined in the following specifications:
 Drivers MUST NOT retry the following operations:
 
 - `Collection.mapReduce()`
-  - This is due to the "Early Failure on Socket Disconnect" feature not supporting `mapReduce`.
-  - N.B. If `mapReduce` is executed via a generic command runner for read commands, drivers SHOULD NOT inspect the
-    command to prevent `mapReduce` from retrying.
+    - This is due to the "Early Failure on Socket Disconnect" feature not supporting `mapReduce`.
+    - N.B. If `mapReduce` is executed via a generic command runner for read commands, drivers SHOULD NOT inspect the
+        command to prevent `mapReduce` from retrying.
 - Cursor.getMore()
-  - See [Why is retrying Cursor.getMore() not supported?](#why-is-retrying-cursorgetmore-not-supported)
+    - See [Why is retrying Cursor.getMore() not supported?](#why-is-retrying-cursorgetmore-not-supported)
 - The generic runCommand helper, even if it is passed a read command.
-  - N.B.: This applies only to a generic command runner, which is agnostic about the read/write nature of the command.
+    - N.B.: This applies only to a generic command runner, which is agnostic about the read/write nature of the command.
 
 ### Implementing Retryable Reads
 
@@ -185,7 +176,6 @@ Drivers MUST attempt to execute the read command exactly once and allow any erro
 following conditions:
 
 - if retryable reads is not enabled **or**
-- if the selected server does not support retryable reads **or**
 - if the session in a transaction
 
 By allowing the error to propagate, the caller is able to infer that one attempt was made.
@@ -195,7 +185,6 @@ By allowing the error to propagate, the caller is able to infer that one attempt
 Drivers MUST only attempt to retry a read command if
 
 - retryable reads are enabled **and**
-- the selected server supports retryable reads **and**
 - the previous attempt yields a retryable error
 
 ##### 3. Deciding to allow retry, encountering the initial retryable error, and selecting a server
@@ -207,12 +196,17 @@ capture this original retryable error. Drivers should then proceed with selectin
 
 ###### 3a. Selecting the server for retry
 
-In a sharded cluster, the server on which the operation failed MUST be provided to the server selection mechanism as a
-deprioritized server.
+For sharded clusters, the server address on which the operation failed MUST be provided to the server selection
+mechanism as a member of the deprioritized server address list.
 
-If the driver cannot select a server for a retry attempt or the newly selected server does not support retryable reads,
-retrying is not possible and drivers MUST raise the previous retryable error. In both cases, the caller is able to infer
-that an attempt was made.
+For all other topologies, the server address on which the operation failed MUST be provided to the server selection
+mechanism as a member of the deprioritized server address list only if the error is labelled with
+`SystemOverloadedError`. All other retryable errors MUST NOT cause the server address to be added to the deprioritized
+server address list. This requirement preserves the existing behavior of retryable reads for non-overload errors and
+avoids unintended consequences for operations utilizing primaryPreferred and secondaryPreferred read preferences.
+
+If the driver cannot select a server for a retry attempt, retrying is not possible and drivers MUST raise the previous
+retryable error. In this case, the caller is able to infer that an attempt was made.
 
 ###### 3b. Sending an equivalent command for a retry attempt
 
@@ -223,21 +217,21 @@ support a command equivalent to the initial command, drivers MUST NOT retry and 
 The above requirement can be fulfilled in one of two ways:
 
 1. During a retry attempt, the driver SHOULD recreate the command while adhering to that operation's specification's
-   server/wire version requirements. If an error occurs while recreating the command, then the driver MUST raise the
-   original retryable error.
+    server/wire version requirements. If an error occurs while recreating the command, then the driver MUST raise the
+    original retryable error.
 
-   For example, if the wire version dips from *W*<sub>0</sub> to *W*<sub>1</sub> after server selection, and the spec
-   for operation *O* notes that for wire version *W*<sub>1</sub>, that field *F* should be omitted, then field *F*
-   should be omitted. If the spec for operation *O* requires the driver to error out if field *F* is defined when
-   talking to a server with wire version *W*<sub>1</sub>, then the driver must error out and raise the original
-   retryable error.
+    For example, if the wire version dips from *W*<sub>0</sub> to *W*<sub>1</sub> after server selection, and the spec
+    for operation *O* notes that for wire version *W*<sub>1</sub>, that field *F* should be omitted, then field *F*
+    should be omitted. If the spec for operation *O* requires the driver to error out if field *F* is defined when
+    talking to a server with wire version *W*<sub>1</sub>, then the driver must error out and raise the original
+    retryable error.
 
 2. Alternatively, if a driver chooses not to recreate the command as described above, then a driver MUST NOT retry if
-   the server/wire version dips after server selection and MUST raise the original retryable error.
+    the server/wire version dips after server selection and MUST raise the original retryable error.
 
-   For example, if the wire version dips after server selection, the driver can choose to not retry and simply raise the
-   original retryable error because there is no guarantee that the lower versioned server can support the original
-   command.
+    For example, if the wire version dips after server selection, the driver can choose to not retry and simply raise the
+    original retryable error because there is no guarantee that the lower versioned server can support the original
+    command.
 
 ###### 3c. If a retry attempt fails
 
@@ -267,14 +261,14 @@ The following pseudocode for executing retryable read commands has been adapted 
 [the pseudocode for executing retryable write commands](../retryable-writes/retryable-writes.md#executing-retryable-write-commands)
 and reflects the flow described above.
 
-```typescript
-/**
- * Checks if a connection supports retryable reads.
- */
-function isRetryableReadsSupported(connection) {
-  return connection.MaxWireVersion >= RETRYABLE_READS_MIN_WIRE_VERSION);
-}
+> [!NOTE]
+> The rules above and the pseudocode below only demonstrate the rules for retryable reads as outlined in this
+> specification. For simplicity, and to make the retryable reads rules easier to follow, the pseudocode was
+> intentionally unmodified. For a pseudocode block that contains both retryable reads logic as defined in this
+> specification and backoff retryabilitity as defined in the client backpressure specification, see the pseudocode in
+> the [Backpressure Specification](../client-backpressure/client-backpressure.md).
 
+```typescript
 /**
  * Executes a read command in the context of a MongoClient where a retryable
  * read have been enabled. The session parameter may be an implicit or
@@ -284,6 +278,7 @@ function executeRetryableRead(command, session) {
   Exception previousError = null;
   retrying = false;
   Server previousServer = null;
+  deprioritizedServers = [];
   while true {
     if (previousError != null) {
       retrying = true;
@@ -292,9 +287,13 @@ function executeRetryableRead(command, session) {
       if (previousServer == null) {
         server = selectServer();
       } else {
-        // If a previous attempt was made, deprioritize the previous server
+        // If a previous attempt was made, deprioritize the previous server address
         // where the command failed.
-        deprioritizedServers = [ previousServer ];
+        // Sharded clusters deprioritize on all retryable errors.
+        // Other topologies only deprioritize on overload errors.
+        if previousServer.isSharded || previousError.hasLabel("SystemOverloadedError") {
+          deprioritizedServers.push(previousServer.address);
+        }
         server = selectServer(deprioritizedServers);
       }
     } catch (ServerSelectionException exception) {
@@ -320,23 +319,17 @@ function executeRetryableRead(command, session) {
       if (timeoutMS != null && isExpired(timeoutMS) {
         throw previousError;
       }
+      /* CSOT is not enabled, and we have already tried once */
+      if (timeoutMS == null && retrying) {
+        throw previousError;
+      }
       continue;
     }
 
-    if ( !isRetryableReadsSupported(connection) || session.inTransaction()) {
-      /* If this is the first loop iteration and we determine that retryable
-       * reads are not supported, execute the command once and allow any
-       * errors to propagate */
-
-      if (previousError == null) {
-        return executeCommand(connection, command);
-      }
-
-      /* If the server selected for retrying is too old, throw the previous error.
-       * The caller can then infer that an attempt was made and failed. This case
-       * is very rare, and likely means that the cluster is in the midst of a
-       * downgrade. */
-      throw previousError;
+    if (session.inTransaction()) {
+      /* Retryable reads are disabled within a transaction; execute the command
+       * once and allow any errors to propagate */
+      return executeCommand(connection, command);
     }
 
     /* NetworkException and NotWritablePrimaryException are both retryable errors. If
@@ -357,6 +350,12 @@ function executeRetryableRead(command, session) {
     } catch (NotWritablePrimaryException notPrimaryError) {
       updateTopologyDescriptionForNotWritablePrimaryError(server, notPrimaryError);
       previousError = notPrimaryError;
+      previousServer = server;
+    } catch (Exception error when error.code in RETRYABLE_ERROR_CODES) {
+      /* Catches remaining server errors with retryable error codes as defined
+       * in the Retryable Error section. */
+      updateTopologyDescriptionForError(server, error);
+      previousError = error;
       previousServer = server;
     } catch (DriverException error) {
       if ( previousError != null ) {
@@ -388,7 +387,7 @@ retry attempts for read operations. This specification does not define a format 
 ### Command Monitoring
 
 [As with retryable writes](../retryable-writes/retryable-writes.md#command-monitoring), in accordance with the
-[Command Logging and Monitoring](../command-logging-and-monitoring/command-logging-and-monitoring.rst) specification,
+[Command Logging and Monitoring](../command-logging-and-monitoring/command-logging-and-monitoring.md) specification,
 drivers MUST guarantee that each `CommandStartedEvent` has either a correlating `CommandSucceededEvent` or
 `CommandFailedEvent` and that every "command started" log message has either a correlating "command succeeded" log
 message or "command failed" log message. If the first attempt of a retryable read operation encounters a retryable
@@ -401,13 +400,13 @@ attempt. Note that the second `CommandStartedEvent` and "command started" log me
 
 1. Drivers MUST document all read operations that support retryable behavior.
 2. Drivers MUST document that the operations in [Unsupported Read Operations](#unsupported-read-operations) do not
-   support retryable behavior.
+    support retryable behavior.
 3. Driver release notes MUST make it clear to users that they may need to adjust custom retry logic to prevent an
-   application from inadvertently retrying for too long (see [Backwards Compatibility](#backwards-compatibility) for
-   details).
+    application from inadvertently retrying for too long (see [Backwards Compatibility](#backwards-compatibility) for
+    details).
 4. Drivers implementing retryability for their generic command runner for read commands MUST document that `mapReduce`
-   will be retried if it is passed as a command to the command runner. These drivers also MUST document the potential
-   for degraded performance given that "Early Failure on Socket Disconnect" feature does not support `mapReduce`.
+    will be retried if it is passed as a command to the command runner. These drivers also MUST document the potential
+    for degraded performance given that "Early Failure on Socket Disconnect" feature does not support `mapReduce`.
 
 ## Test Plan
 
@@ -448,12 +447,12 @@ retryable reads.
 ### Rejected Designs
 
 1. To improve performance on servers without "Early Failure on Socket Disconnect", we considered using `killSessions` to
-   automatically kill the previous attempt before running a retry. We decided against this because after killing the
-   session, parts of it still may be running if there are any errors. Additionally, killing sessions takes time because
-   a kill has to talk to every non-config `mongod` in the cluster (i.e. all the primaries and secondaries of each
-   shard). In addition, in order to protect the system against getting overloaded with these requests, every server
-   allows no more than one killsession operation at a time. Operations that attempt to `killsessions` while a
-   killsession is running are batched together and run simultaneously after the current one finishes.
+    automatically kill the previous attempt before running a retry. We decided against this because after killing the
+    session, parts of it still may be running if there are any errors. Additionally, killing sessions takes time
+    because a kill has to talk to every non-config `mongod` in the cluster (i.e. all the primaries and secondaries of
+    each shard). In addition, in order to protect the system against getting overloaded with these requests, every
+    server allows no more than one killsession operation at a time. Operations that attempt to `killsessions` while a
+    killsession is running are batched together and run simultaneously after the current one finishes.
 
 ## Reference Implementation
 
@@ -468,12 +467,11 @@ None.
 ## Future work
 
 1. A later specification may allow operations (including read) to be retried any number of times during a singular
-   timeout period.
-2. Any future changes to the the applicable parts of [retryable writes specification](../retryable-writes/) may also
-   need to be reflected in the retryable reads specification, and vice versa.
+    timeout period.
+2. Any future changes to the the applicable parts of
+    [retryable writes specification](../retryable-writes/retryable-writes.md) may also need to be reflected in the
+    retryable reads specification, and vice versa.
 3. We may revisit the decision not retry `Cursor.getMore()` (see [Q&A](#qa)).
-4. Once [DRIVERS-560](https://jira.mongodb.org/browse/DRIVERS-560) is resolved, tests will be added to allow testing
-   Retryable Reads on MongoDB 3.6. See the [test plan](./tests/README.md) for additional information.
 
 ## Q&A
 
@@ -509,7 +507,7 @@ attempts are fruitless and would waste time. See
 [How To Write Resilient MongoDB Applications](https://emptysqua.re/blog/how-to-write-resilient-mongodb-applications/)
 for additional discussion on this strategy.
 
-However when [Client Side Operations Timeout](../client-side-operations-timeout/client-side-operations-timeout.rst) is
+However when [Client Side Operations Timeout](../client-side-operations-timeout/client-side-operations-timeout.md) is
 enabled, the driver will retry multiple times until the operation succeeds, a non-retryable error is encountered, or the
 timeout expires. Retrying multiple times provides greater resilience to cascading failures such as rolling server
 restarts during planned maintenance events.
@@ -529,7 +527,7 @@ characteristics:
 
 1. The second attempt to send the read command could have a higher `$clusterTime`.
 2. If the initial attempt failed with a server error, then the session's `operationTime` would be advanced and the next
-   read would include a larger `readConcern.afterClusterTime`.
+    read would include a larger `readConcern.afterClusterTime`.
 
 A driver that resends the same wire protocol message would not exhibit the above characteristics. Thus, in order to
 avoid this behavioral difference and not violate the rules about gossiping `$clusterTime`, drivers MUST not resend the
@@ -546,21 +544,26 @@ any customers experiencing degraded performance can simply disable `retryableRea
 
 ## Changelog
 
+- 2026-06-17: Remove pre-4.2 version references.
+
+- 2026-02-19: Clarified that server deprioritization on replica sets only occurs for `SystemOverloadedError` errors.
+
+- 2026-02-11: Clarified that the retry logic and pseudocode does not include the modifications required by client
+    backpressure.
+
+- 2025-12-08: Clarified that server deprioritization during retries must use a list of server addresses.
+
 - 2024-04-30: Migrated from reStructuredText to Markdown.
 
-- 2023-12-05: Add that any server information associated with retryable\
-  exceptions MUST reflect the originating server,
-  even in the presence of retries.
+- 2023-12-05: Add that any server information associated with retryable exceptions MUST reflect the originating server,
+    even in the presence of retries.
 
-- 2023-11-30: Add ReadConcernMajorityNotAvailableYet to the list of error codes\
-  that should be retried.
+- 2023-11-30: Add ReadConcernMajorityNotAvailableYet to the list of error codes that should be retried.
 
-- 2023-11-28: Add ExceededTimeLimit to the list of error codes that should\
-  be retried.
+- 2023-11-28: Add ExceededTimeLimit to the list of error codes that should be retried.
 
-- 2023-08-26: Require that in a sharded cluster the server on which the\
-  operation failed MUST be provided to the server
-  selection mechanism as a deprioritized server.
+- 2023-08-26: Require that in a sharded cluster the server on which the operation failed MUST be provided to the server
+    selection mechanism as a deprioritized server.
 
 - 2023-08-21: Update Q&A that contradicts SDAM transient error logic
 
@@ -572,9 +575,8 @@ any customers experiencing degraded performance can simply disable `retryableRea
 
 - 2022-01-25: Note that drivers should retry handshake network failures.
 
-- 2021-04-26: Replaced deprecated terminology; removed requirement to parse error\
-  message text as MongoDB 3.6+ servers
-  will always return an error code
+- 2021-04-26: Replaced deprecated terminology; removed requirement to parse error message text as MongoDB 3.6+ servers
+    will always return an error code
 
 - 2021-03-23: Require that PoolClearedErrors are retried
 

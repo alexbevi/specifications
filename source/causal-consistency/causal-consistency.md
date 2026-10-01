@@ -1,7 +1,6 @@
 # Causal Consistency Specification
 
 - Status: Accepted
-- Minimum Server Version: 3.6
 
 ______________________________________________________________________
 
@@ -20,52 +19,63 @@ The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SH
 
 ### Terms
 
-**Causal consistency**\
-A property that guarantees that an application can read its own writes and that a later read
-will never observe a version of the data that is older than an earlier read.
+**Causal consistency**
 
-**ClientSession**\
+A property that guarantees that an application can read its own writes and that a later read will never observe a
+version of the data that is older than an earlier read.
+
+**ClientSession**
+
 The driver object representing a client session and the operations that can be performed on it.
 
-**Cluster time**\
-The current cluster time. The server reports its view of the current cluster time in the
-`$clusterTime` field in responses from the server and the driver participates in distributing the current cluster time
-to all nodes (called "gossipping the cluster time") by sending the highest `$clusterTime` it has seen so far in messages
-it sends to mongos servers. The current cluster time is a logical time, but is digitally signed to prevent malicious
-clients from propagating invalid cluster times. Cluster time is only used in replica sets and sharded clusters.
+**Cluster time**
 
-**Logical time**\
-A time-like quantity that can be used to determine the order in which events occurred. Logical time is
-represented as a BsonTimestamp.
+The current cluster time. The server reports its view of the current cluster time in the `$clusterTime` field in
+responses from the server and the driver participates in distributing the current cluster time to all nodes (called
+"gossipping the cluster time") by sending the highest `$clusterTime` it has seen so far in messages it sends to mongos
+servers. The current cluster time is a logical time, but is digitally signed to prevent malicious clients from
+propagating invalid cluster times. Cluster time is only used in replica sets and sharded clusters.
 
-**MongoClient**\
+**Logical time**
+
+A time-like quantity that can be used to determine the order in which events occurred. Logical time is represented as a
+BsonTimestamp.
+
+**MongoClient**
+
 The root object of a driver's API. MAY be named differently in some drivers.
 
-**MongoCollection**\
-The driver object representing a collection and the operations that can be performed on it. MAY be
-named differently in some drivers.
+**MongoCollection**
 
-**MongoDatabase**\
-The driver object representing a database and the operations that can be performed on it. MAY be
-named differently in some drivers.
+The driver object representing a collection and the operations that can be performed on it. MAY be named differently in
+some drivers.
 
-**Operation time**\
-The logical time at which an operation occurred. The server reports the operation time in the
-response to all commands, including error responses. The operation time by definition is always less than or equal to
-the cluster time. Operation times are tracked on a per `ClientSession` basis, so the `operationTime` of each
-`ClientSession` corresponds to the time of the last operation performed in that particular `ClientSession`.
+**MongoDatabase**
 
-**ServerSession**\
+The driver object representing a database and the operations that can be performed on it. MAY be named differently in
+some drivers.
+
+**Operation time**
+
+The logical time at which an operation occurred. The server reports the operation time in the response to all commands,
+including error responses. The operation time by definition is always less than or equal to the cluster time. Operation
+times are tracked on a per `ClientSession` basis, so the `operationTime` of each `ClientSession` corresponds to the time
+of the last operation performed in that particular `ClientSession`.
+
+**ServerSession**
+
 The driver object representing a server session.
 
-**Session**\
-A session is an abstract concept that represents a set of sequential operations executed by an application
-that are related in some way. This specification defines how sessions are used to implement causal consistency.
+**Session**
 
-**Unacknowledged writes**\
-Unacknowledged writes are write operations that are sent to the server without waiting for a
-reply acknowledging the write. See the "Unacknowledged Writes" section below for information on how unacknowledged
-writes interact with causal consistency.
+A session is an abstract concept that represents a set of sequential operations executed by an application that are
+related in some way. This specification defines how sessions are used to implement causal consistency.
+
+**Unacknowledged writes**
+
+Unacknowledged writes are write operations that are sent to the server without waiting for a reply acknowledging the
+write. See the "Unacknowledged Writes" section below for information on how unacknowledged writes interact with causal
+consistency.
 
 ## Specification
 
@@ -90,7 +100,7 @@ options = new SessionOptions(causalConsistency = true);
 session = client.startSession(options);
 ```
 
-All read operations performed using this session will now be causally consistent.
+All read and write operations performed using this session will now be causally consistent.
 
 If no value is provided for `causalConsistency` and snapshot reads are not requested a value of true is implied. See the
 `causalConsistency` section.
@@ -114,7 +124,7 @@ class SessionOptions {
 
 In order to support causal consistency a new property named `causalConsistency` is added to `SessionOptions`.
 Applications set `causalConsistency` when starting a client session to indicate whether they want causal consistency.
-All read operations performed using that client session are then causally consistent.
+All read and write operations performed using that client session are then causally consistent.
 
 Each new member is documented below.
 
@@ -185,11 +195,11 @@ started with `causalConsistency = true` then all operations using that session w
 
 There are no new server commands related to causal consistency. Instead, causal consistency is implemented by:
 
-1. Saving the `operationTime` returned by 3.6+ servers for all operations in a property of the `ClientSession` object.
-   The server reports the `operationTime` whether the operation succeeded or not and drivers MUST save the
-   `operationTime` in the `ClientSession` whether the operation succeeded or not.
+1. Saving the `operationTime` returned by servers for all operations in a property of the `ClientSession` object. The
+    server reports the `operationTime` whether the operation succeeded or not and drivers MUST save the `operationTime`
+    in the `ClientSession` whether the operation succeeded or not.
 2. Passing that `operationTime` in the `afterClusterTime` field of the `readConcern` field for subsequent causally
-   consistent read operations (for all commands that support a `readConcern`)
+    consistent read and write operations (for all commands that support a `readConcern`)
 3. Gossiping clusterTime (described in the Driver Session Specification)
 
 ## Server Command Responses
@@ -207,8 +217,8 @@ and write operations).
 ```
 
 The `operationTime` MUST be stored in the `ClientSession` to later be passed as the `afterClusterTime` field of the
-`readConcern` field in subsequent read operations. The `operationTime` is returned whether the command succeeded or not
-and MUST be stored in either case.
+`readConcern` field in subsequent causally consistent read and write operations. The `operationTime` is returned whether
+the command succeeded or not and MUST be stored in either case.
 
 Drivers MUST examine all responses from the server for the presence of an `operationTime` field and store the value in
 the `ClientSession`.
@@ -219,14 +229,14 @@ standalone node are causally consistent automatically because there is only one 
 When connected to a deployment that supports cluster times the command response also includes a field called
 `$clusterTime` that drivers MUST use to gossip the cluster time. See the Sessions Specification for details.
 
-## Causally consistent read commands
+## Causally consistent read and write commands
 
 For causal consistency the driver MUST send the `operationTime` saved in the `ClientSession` as the value of the
-`afterClusterTime` field of the `readConcern` field:
+`afterClusterTime` field of the `readConcern` field for read and write commands:
 
 ```typescript
 {
-    find : <string>, // or other read command
+    find : <string>, // or other read or write command
     ... // the rest of the command parameters
     readConcern :
     {
@@ -236,9 +246,8 @@ For causal consistency the driver MUST send the `operationTime` saved in the `Cl
 }
 ```
 
-For the lists of commands that support causally consistent reads, see
-[ReadConcern](https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#read-concern/)
-spec.
+For the list of commands that support causally consistent reads and writes, see the
+[Read Concern](../read-write-concern/read-write-concern.md#afterclustertime) spec.
 
 The driver MUST merge the `ReadConcern` specified for the operation with the `operationTime` from the `ClientSession`
 (which goes in the `afterClusterTime` field) to generate the combined `readConcern` to send to the server. If the level
@@ -249,15 +258,16 @@ level does not support causal consistency.
 
 The Read and Write Concern specification states that when a user has not specified a `ReadConcern` or has specified the
 server's default `ReadConcern`, drivers MUST omit the `ReadConcern` parameter when sending the command. For causally
-consistent reads this requirement is modified to state that when the `ReadConcern` parameter would normally be omitted
-drivers MUST send a `ReadConcern` after all because that is how the `afterClusterTime` value is sent to the server.
+consistent reads and writes this requirement is modified to state that when the `ReadConcern` parameter would normally
+be omitted drivers MUST send a `ReadConcern` after all because that is how the `afterClusterTime` value is sent to the
+server.
 
 The Read and Write Concern Specification states that drivers MUST NOT add a `readConcern` field to commands that are run
 using a generic `runCommand` method. The same is true for causal consistency, so commands that are run using
 `runCommand` MUST NOT have an `afterClusterTime` field added to them.
 
-When executing a causally consistent read, the `afterClusterTime` field MUST be sent when connected to a deployment that
-supports cluster times, and MUST NOT be sent when connected to a deployment that does not support cluster times.
+When executing a causally consistent operation, the `afterClusterTime` field MUST be sent when connected to a deployment
+that supports cluster times, and MUST NOT be sent when connected to a deployment that does not support cluster times.
 
 ## Unacknowledged writes
 
@@ -266,32 +276,32 @@ a write. Since unacknowledged writes don't receive a response from the server (o
 `ClientSession`'s `operationTime` is not updated after an unacknowledged write. That means that a causally consistent
 read after an unacknowledged write cannot be causally consistent with the unacknowledged write. Rather than prohibiting
 unacknowledged writes in a causally consistent session we have decided to accept this limitation. Drivers MUST document
-that causally consistent reads are not causally consistent with unacknowledged writes.
+that causally consistent operations are not causally consistent with unacknowledged writes.
 
 ## Test Plan
 
 Below is a list of test cases to write.
 
 Note: some tests are only relevant to certain deployments. For the purpose of deciding which tests to run assume that
-any deployment that is version 3.6 or higher and is either a replica set or a sharded cluster supports cluster times.
+any deployment that is either a replica set or a sharded cluster supports cluster times.
 
-01. When a `ClientSession` is first created the `operationTime` has no value.
+1. When a `ClientSession` is first created the `operationTime` has no value.
     - `session = client.startSession()`
     - assert `session.operationTime` has no value
-02. The first read in a causally consistent session must not send `afterClusterTime` to the server (because the
+2. The first read in a causally consistent session must not send `afterClusterTime` to the server (because the
     `operationTime` has not yet been determined)
     - `session = client.startSession(causalConsistency = true)`
     - `document = collection.anyReadOperation(session, ...)`
     - capture the command sent to the server (using APM or other mechanism)
     - assert that the command does not have an `afterClusterTime`
-03. The first read or write on a `ClientSession` should update the `operationTime` of the `ClientSession`, even if there
+3. The first read or write on a `ClientSession` should update the `operationTime` of the `ClientSession`, even if there
     is an error.
     - skip this test if connected to a deployment that does not support cluster times
     - `session = client.startSession() // with or without causal consistency`
     - `collection.anyReadOrWriteOperation(session, ...) // test with errors also if possible`
     - capture the response sent from the server (using APM or other mechanism)
     - assert `session.operationTime` has the same value that is in the response from the server
-04. A `findOne` followed by any other read operation (test them all) should include the `operationTime` returned by the
+4. A `findOne` followed by any other read operation (test them all) should include the `operationTime` returned by the
     server for the first operation in the `afterClusterTime` parameter of the second operation
     - skip this test if connected to a deployment that does not support cluster times
     - `session = client.startSession(causalConsistency = true)`
@@ -300,7 +310,7 @@ any deployment that is version 3.6 or higher and is either a replica set or a sh
     - `collection.anyReadOperation(session, ...)`
     - capture the command sent to the server (using APM or other mechanism)
     - assert that the command has an `afterClusterTime` field with a value of `operationTime`
-05. Any write operation (test them all) followed by a `findOne` operation should include the `operationTime` of the
+5. Any write operation (test them all) followed by a `findOne` operation should include the `operationTime` of the
     first operation in the `afterClusterTime` parameter of the second operation, including the case where the first
     operation returned an error.
     - skip this test if connected to a deployment that does not support cluster times
@@ -310,7 +320,7 @@ any deployment that is version 3.6 or higher and is either a replica set or a sh
     - `collection.findOne(session, {})`
     - capture the command sent to the server (using APM or other mechanism)
     - assert that the command has an `afterClusterTime` field with a value of `operationTime`
-06. A read operation in a `ClientSession` that is not causally consistent should not include the `afterClusterTime`
+6. A read operation in a `ClientSession` that is not causally consistent should not include the `afterClusterTime`
     parameter in the command sent to the server.
     - skip this test if connected to a deployment that does not support cluster times
     - `session = client.startSession(causalConsistency = false)`
@@ -318,14 +328,14 @@ any deployment that is version 3.6 or higher and is either a replica set or a sh
     - `operationTime = session.operationTime`
     - capture the command sent to the server (using APM or other mechanism)
     - assert that the command does not have an `afterClusterTime` field
-07. A read operation in a causally consistent session against a deployment that does not support cluster times does not
+7. A read operation in a causally consistent session against a deployment that does not support cluster times does not
     include the `afterClusterTime` parameter in the command sent to the server.
     - skip this test if connected to a deployment that does support cluster times
     - `session = client.startSession(causalConsistency = true)`
     - `collection.anyReadOperation(session, {})`
     - capture the command sent to the server (using APM or other mechanism)
     - assert that the command does not have an `afterClusterTime` field
-08. When using the default server `ReadConcern` the `readConcern` parameter in the command sent to the server should not
+8. When using the default server `ReadConcern` the `readConcern` parameter in the command sent to the server should not
     include a `level` field.
     - skip this test if connected to a deployment that does not support cluster times
     - `session = client.startSession(causalConsistency = true)`
@@ -336,7 +346,7 @@ any deployment that is version 3.6 or higher and is either a replica set or a sh
     - capture the command sent to the server (using APM or other mechanism)
     - assert that the command does not have a `` `level `` field
     - assert that the command has a `afterClusterTime` field with a value of `operationTime`
-09. When using a custom `ReadConcern` the `readConcern` field in the command sent to the server should be a merger of
+9. When using a custom `ReadConcern` the `readConcern` field in the command sent to the server should be a merger of
     the `ReadConcern` value and the `afterClusterTime` field.
     - skip this test if connected to a deployment that does not support cluster times
     - `session = client.startSession(causalConsistency = true)`
@@ -363,7 +373,7 @@ any deployment that is version 3.6 or higher and is either a replica set or a sh
 
 ## Motivation
 
-To support causal consistency. Only supported with server version 3.6 or newer.
+To support causal consistency.
 
 ## Design Rationale
 
@@ -393,6 +403,9 @@ resolving many discussions of spec details. A final reference implementation mus
 
 ## Changelog
 
+- 2026-05-04: Require `afterClusterTime` on all write commands in causally-consistent sessions, not only on read
+    commands.
+
 - 2024-02-08: Migrated from reStructuredText to Markdown.
 
 - 2022-11-11: Require `causalConsistency=false` for implicit sessions.
@@ -413,10 +426,8 @@ resolving many discussions of spec details. A final reference implementation mus
 
 - 2017-10-04: Added advanceOperationTime
 
-- 2017-09-28: Remove remaining references to collections being associated with\
-  sessions. Update spec to reflect that
-  replica sets use $clusterTime also now.
+- 2017-09-28: Remove remaining references to collections being associated with sessions. Update spec to reflect that
+    replica sets use $clusterTime also now.
 
-- 2017-09-13: Renamed "causally consistent reads" to "causal consistency". If no\
-  value is supplied for
-  `causallyConsistent` assume true.
+- 2017-09-13: Renamed "causally consistent reads" to "causal consistency". If no value is supplied for
+    `causallyConsistent` assume true.

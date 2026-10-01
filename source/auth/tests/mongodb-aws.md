@@ -2,32 +2,60 @@
 
 Drivers MUST test the following scenarios:
 
-1. `Regular Credentials`: Auth via an `ACCESS_KEY_ID` and `SECRET_ACCESS_KEY` pair
+1. `Regular Credentials`: Auth via an `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` pair
 2. `EC2 Credentials`: Auth from an EC2 instance via temporary credentials assigned to the machine
 3. `ECS Credentials`: Auth from an ECS instance via temporary credentials assigned to the task
 4. `Assume Role`: Auth via temporary credentials obtained from an STS AssumeRole request
 5. `Assume Role with Web Identity`: Auth via temporary credentials obtained from an STS AssumeRoleWithWebIdentity
-   request
+    request
 6. `AWS Lambda`: Auth via environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN`.
 7. Caching of AWS credentials fetched by the driver.
 
 For brevity, this section gives the values `<AccessKeyId>`, `<SecretAccessKey>` and `<Token>` in place of a valid access
-key ID, secret access key and session token (also known as a security token). Note that if these values are passed into
-the URI they MUST be URL encoded. Sample values are below.
+key ID, secret access key and session token (also known as a security token). Sample values are below.
 
-```
+```text
 AccessKeyId=AKIAI44QH8DHBEXAMPLE
 SecretAccessKey=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 Token=AQoDYXdzEJr...<remainder of security token>
 ```
 
+## Testing custom credential providers
+
+If the driver supports custom AWS credential providers, the driver MUST test the following:
+
+### 1. Custom Credential Provider Authenticates
+
+Scenarios 1-6 from the previous section with a user provided `AWS_CREDENTIAL_PROVIDER` auth mechanism property. This
+credentials MAY be obtained from the default credential provider from the AWS SDK. If the default provider does not
+cover all scenarios above, those not covered MAY be skipped. In these tests the driver MUST also assert that the user
+provided credential provider was called in each test. This may be via a custom function or object that wraps the calls
+to the custom provider and asserts that it was called at least once. For test scenarios where the drivers tools scripts
+put the credentials in the MONGODB_URI, drivers MAY extract the credentials from the URI and return the AWS credentials
+directly from the custom provider instead of using the AWS SDK default provider.
+
+### 2. Custom Credential Provider Authentication Precedence
+
+#### Case 1: Credentials in URI Take Precedence *Removed*
+
+#### Case 2: Custom Provider Takes Precedence Over Environment Variables
+
+Run this test in an environment with AWS credentials configured as environment variables (e.g. `AWS_ACCESS_KEY_ID`,
+`AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN`)
+
+Create a `MongoClient` configured to use AWS auth. Example: `mongodb://localhost:27017/?authMechanism=MONGODB-AWS`.
+
+Configure a custom credential provider to pass valid AWS credentials. The provider must track if it was called.
+
+Expect authentication to succeed and the custom credential provider was called.
+
 ## Regular credentials
 
-Drivers MUST be able to authenticate by providing a valid access key id and secret access key pair as the username and
-password, respectively, in the MongoDB URI. An example of a valid URI would be:
+Drivers MUST be able to authenticate when a valid access key id and secret access key pair are present in the
+environment. Drivers MUST provide the --nouri option to aws_tester.py in drivers-evergreen-tools for this test.
 
-```
-mongodb://<AccessKeyId>:<SecretAccessKey>@localhost/?authMechanism=MONGODB-AWS
+```text
+mongodb://localhost/?authMechanism=MONGODB-AWS
 ```
 
 ## EC2 Credentials
@@ -35,7 +63,7 @@ mongodb://<AccessKeyId>:<SecretAccessKey>@localhost/?authMechanism=MONGODB-AWS
 Drivers MUST be able to authenticate from an EC2 instance via temporary credentials assigned to the machine. A sample
 URI on an EC2 machine would be:
 
-```
+```text
 mongodb://localhost/?authMechanism=MONGODB-AWS
 ```
 
@@ -48,7 +76,7 @@ mongodb://localhost/?authMechanism=MONGODB-AWS
 Drivers MUST be able to authenticate from an ECS container via temporary credentials. A sample URI in an ECS container
 would be:
 
-```
+```text
 mongodb://localhost/?authMechanism=MONGODB-AWS
 ```
 
@@ -59,11 +87,11 @@ mongodb://localhost/?authMechanism=MONGODB-AWS
 ## AssumeRole
 
 Drivers MUST be able to authenticate using temporary credentials returned from an assume role request. These temporary
-credentials consist of an access key ID, a secret access key, and a security token passed into the URI. A sample URI
-would be:
+credentials consist of an access key ID, a secret access key, and a security token present in the environment. Drivers
+MUST provide the --nouri option to aws_tester.py in drivers-evergreen-tools for this test. A sample URI would be:
 
-```
-mongodb://<AccessKeyId>:<SecretAccessKey>@localhost/?authMechanism=MONGODB-AWS&authMechanismProperties=AWS_SESSION_TOKEN:<Token>
+```text
+mongodb://localhost/?authMechanism=MONGODB-AWS
 ```
 
 ## Assume Role with Web Identity
@@ -71,7 +99,7 @@ mongodb://<AccessKeyId>:<SecretAccessKey>@localhost/?authMechanism=MONGODB-AWS&a
 Drivers MUST be able to authentiate using a valid OIDC token and associated role ARN taken from environment variables,
 respectively:
 
-```
+```text
 AWS_WEB_IDENTITY_TOKEN_FILE
 AWS_ROLE_ARN
 AWS_ROLE_SESSION_NAME (optional)
@@ -79,7 +107,7 @@ AWS_ROLE_SESSION_NAME (optional)
 
 A sample URI in for a web identity test would be:
 
-```
+```text
 mongodb://localhost/?authMechanism=MONGODB-AWS
 ```
 
@@ -97,7 +125,7 @@ to obtain credentials.
 Drivers MUST be able to authenticate via an access key ID, secret access key and optional session token taken from the
 environment variables, respectively:
 
-```
+```text
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY 
 AWS_SESSION_TOKEN
@@ -132,15 +160,15 @@ Drivers MUST ensure that they are testing the ability to cache credentials. Driv
 override the cached credentials to verify usage. To determine whether to run the cache tests, the driver can check for
 the absence of the AWS_ACCESS_KEY_ID environment variable and of credentials in the URI.
 
-01. Clear the cache.
-02. Create a new client.
-03. Ensure that a `find` operation adds credentials to the cache.
-04. Override the cached credentials with an "Expiration" that is within one minute of the current UTC time.
-05. Create a new client.
-06. Ensure that a `find` operation updates the credentials in the cache.
-07. Poison the cache with an invalid access key id.
-08. Create a new client.
-09. Ensure that a `find` operation results in an error.
+1. Clear the cache.
+2. Create a new client.
+3. Ensure that a `find` operation adds credentials to the cache.
+4. Override the cached credentials with an "Expiration" that is within one minute of the current UTC time.
+5. Create a new client.
+6. Ensure that a `find` operation updates the credentials in the cache.
+7. Poison the cache with an invalid access key id.
+8. Create a new client.
+9. Ensure that a `find` operation results in an error.
 10. Ensure that the cache has been cleared.
 11. Ensure that a subsequent `find` operation succeeds.
 12. Ensure that the cache has been set.
@@ -149,15 +177,15 @@ If the drivers's language supports dynamically setting environment variables, ad
 integration tests are run in parallel for the driver, then these tests must be run as unit tests interacting with the
 auth provider directly instead of using a client.
 
-01. Clear the cache.
-02. Create a new client.
-03. Ensure that a `find` operation adds credentials to the cache.
-04. Set the AWS environment variables based on the cached credentials.
-05. Clear the cache.
-06. Create a new client.
-07. Ensure that a `find` operation succeeds and does not add credentials to the cache.
-08. Set the AWS environment variables to invalid values.
-09. Create a new client.
+1. Clear the cache.
+2. Create a new client.
+3. Ensure that a `find` operation adds credentials to the cache.
+4. Set the AWS environment variables based on the cached credentials.
+5. Clear the cache.
+6. Create a new client.
+7. Ensure that a `find` operation succeeds and does not add credentials to the cache.
+8. Set the AWS environment variables to invalid values.
+9. Create a new client.
 10. Ensure that a `find` operation results in an error.
 11. Clear the AWS environment variables.
 12. Clear the cache.

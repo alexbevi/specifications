@@ -1,0 +1,575 @@
+# OpenTelemetry
+
+- Title: OpenTelemetry
+- Status: Accepted
+- Minimum Server Version: N/A
+
+______________________________________________________________________
+
+## Abstract
+
+This specification defines requirements for drivers' OpenTelemetry integration and behavior. Drivers will trace database
+commands and driver operations with a pre-defined set of attributes when OpenTelemetry is enabled and configured in an
+application.
+
+## META
+
+The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
+
+## Specification
+
+### Terms
+
+**Host Application**
+
+An application that uses the MongoDB driver.
+
+**Span**
+
+A Span represents a single operation within a trace. Spans can be nested to form a trace tree. Each trace contains a
+root span, which typically describes the entire operation and, optionally, one or more sub-spans for its sub-operations.
+
+Spans encapsulate:
+
+- The span name
+- An immutable SpanContext that uniquely identifies the Span
+- A parent span in the form of a Span, SpanContext, or null
+- A SpanKind
+- A start timestamp
+- An end timestamp
+- Attributes
+- A list of links to other Spans
+- A list of timestamped Events
+- A Status
+
+### Implementation Requirements
+
+#### External Dependencies
+
+**OpenTelemetry API and SDK**
+
+OpenTelemetry offers two components for implementing instrumentation – API and SDK. The OpenTelemetry API provides all
+the necessary types and method signatures. If there is no OpenTelemetry SDK available at runtime, API methods are
+no-ops. OpenTelemetry SDK is an actual implementation of the API. If the SDK is available, API methods do work.
+
+Drivers MAY add a dependency to the corresponding OpenTelemetry API. This is the recommended way for implementing
+OpenTelemetry in libraries. Alternatively, drivers can implement OpenTelemetry support using any suitable tools within
+the driver ecosystem. Drivers MUST NOT add a dependency to OpenTelemetry SDK.
+
+#### Enabling, Disabling, and Configuring OpenTelemetry
+
+OpenTelemetry SHOULD be disabled by default.
+
+Drivers SHOULD support configuring OpenTelemetry on multiple levels.
+
+- **MongoClient Level**: Drivers SHOULD provide a configuration option for `MongoClient`'s Configuration/Settings that
+    enables or disables tracing for operations and commands executed with this client. This option MUST override
+    settings on higher levels. This configuration can be implemented with a `MongoClient` option. See
+    [Client Options](#client-options) section below.
+- **Driver Level**: Drivers SHOULD provide a global setting that enables or disables OpenTelemetry for all `MongoClient`
+    instances (excluding those that explicitly override the setting). This configuration SHOULD be implemented with an
+    environment variable `OTEL_#{LANG}_INSTRUMENTATION_MONGODB_ENABLED`. Drivers MAY provide other means to globally
+    disable OpenTelemetry that are more suitable for their language ecosystem. This option MUST override settings on the
+    higher level.
+- **Host Application Level**: If the host application enables OpenTelemetry for all available instrumentations (e.g.,
+    Ruby), and a driver can detect this, OpenTelemetry SHOULD be enabled in the driver.
+
+Drivers MUST NOT try to detect whether the OpenTelemetry SDK library is available, and enable tracing based on this.
+Drivers MUST NOT add means that configure OpenTelemetry SDK (e.g., setting a specific exporter). Drivers MUST NOT add
+means that configure OpenTelemetry on the host application level (e.g., setting a specific sampler).
+
+<span id="client-options"></span>
+
+##### `MongoClient` Options for configuring OpenTelemetry on the client level
+
+Drivers SHOULD add new options to `MongoClient` for configuring OpenTelemetry as described above. These options SHOULD
+be a dictionary that groups all OpenTelemetry-related options, the name of the dictionary SHOULD be `tracing`. The
+dictionary SHOULD contain at least the following options:
+
+- `enabled`: A boolean that enables or disables OpenTelemetry for this `MongoClient` instance. Default is `false` (i.e.,
+    use the driver-level setting).
+- `query_text_max_length`: An integer that sets the maximum length of the `db.query.text` attribute of command spans.
+    Default is `0` (i.e., do not add the attribute).
+
+#### Environment Variables for configuring OpenTelemetry
+
+Drivers SHOULD support configuration of OpenTelemetry on the driver level via at least the following environment
+variables:
+
+- `OTEL_#{LANG}_INSTRUMENTATION_MONGODB_ENABLED`: enables OpenTelemetry when set to `1`, `true`, `yes`.
+- `OTEL_#{LANG}_INSTRUMENTATION_MONGODB_QUERY_TEXT_MAX_LENGTH`: An integer that sets the maximum length of the
+    `db.query.text` attribute of command spans. Default is `0` (i.e., do not add the attribute).
+
+#### Tracer Attributes
+
+If a driver creates a Tracer using OpenTelemetry API, drivers MUST use the following attributes:
+
+- `name`: A string that identifies the driver. It can be the name of a driver's component (e.g., "mongo", "PyMongo") or
+    a package name (e.g., "com.mongo.Driver"). Drivers SHOULD select a name that is idiomatic for their language and
+    ecosystem. Drivers SHOULD follow the Instrumentation Scope guidance.
+- `version`: A string that represents internal driver version. The version formatting is not defined; drivers SHOULD
+    apply the same formatting as the use for `client.driver.version` attribute of the
+    [handshake](https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.md#clientdriverversion).
+
+#### Instrumenting Driver Operations
+
+When a user calls the driver's public API, the driver MUST create a span for every driver operation. Drivers MUST start
+the span as soon as possible so that the span’s duration reflects all activities made by the driver, such as server
+selection and serialization/deserialization.
+
+The span for the operation MUST be created within the current span of the host application, with the exceptions listed
+below.
+
+##### Transactions
+
+When a user starts a transaction with `startTransaction`, the driver SHOULD create a span for the pseudo operation
+`transaction`. This span MUST have only one attribute `db.system.name` with the value `mongodb`. All operations executed
+within the transaction SHOULD be nested to the `transaction` span.
+
+When a user commits or aborts a transaction with `commitTransaction` or `abortTransaction`, the driver SHOULD finish the
+`transaction` span.
+
+##### `withTransaction`
+
+In case of `withTransaction` operation spans for operations that are executed inside the callbacks SHOULD be nested into
+the `withTransaction` span.
+
+##### Cursor Iteration (`getMore`)
+
+If the driver does not expose the cursor to the caller, but iterates it internally to produce the return value of one
+public API call (e.g., a `find` helper returning an array of all matching documents), the driver MUST NOT create
+additional operation spans. Every `getMore` command span for that call MUST be nested under the call's single operation
+span.
+
+If the driver returns the cursor to the caller and the caller drives iteration, the driver MUST create a new operation
+span for each `getMore` it sends. The span MUST be created within the current span of the host application and MUST be
+named according to [Operation Span Name](#operation-span-name): `getMore db.collection_name` for a cursor over a
+collection, or `getMore db` when the cursor targets no specific collection (e.g., a cursor from `listCollections`), per
+[db.collection.name](#dbcollectionname). The `getMore` command span MUST be nested under it, per
+[Instrumenting Server Commands](#instrumenting-server-commands).
+
+This operation span MUST NOT be nested under the operation span of the command that created the cursor. A host
+application may do unrelated work between batches, and nesting each `getMore` under the cursor-creating operation would
+attribute that work to the original operation. Ordinary nesting still applies otherwise. A cursor iterated inside a
+`withTransaction` callback nests into the `withTransaction` span, and a cursor iterated inside a transaction started
+with the core transaction API nests into the pseudo operation `transaction` span.
+
+Each `getMore` operation span MUST be finished once its command completes. No span is scoped to a cursor's lifetime, so
+a cursor that is never exhausted (e.g., a tailable cursor) leaves nothing unfinished.
+
+A `getMore` is not retryable, but a change stream may resume after one fails. A resume MUST NOT extend the failed
+`getMore` operation span: drivers MUST finish that span with its error, and the `aggregate` and `getMore` commands that
+re-establish the cursor MUST each be nested under new operation spans. Drivers MUST NOT create an operation span for the
+`killCursors` a resume sends; it is internal cleanup rather than a public API call, so its command span is created
+within whatever span is current.
+
+##### Operation Span Name
+
+The span name SHOULD be:
+
+- `driver_operation_name db.collection_name` if the operation is executed on a collection (e.g.,
+    `collection.findOneAndDelete(filter)` will report `findAndModify warehouse_db.users_coll`).
+
+**Note**: since the `findOneAndDelete` operation is implemented as a `findAndModify` command, the operation name in the
+span is `findAndModify`. This ensures consistency between drivers when naming operations. See the
+[covered operations](#covered-operations) table below for mapping of public API methods to operation names.
+
+- `driver_operation_name db` if there is no specific collection for the operation (e.g., `runCommand warehouse`).
+
+##### Operation Span Kind
+
+Span kind MUST be "client".
+
+##### Operation Span Attributes
+
+Spans SHOULD have the following attributes:
+
+| Attribute              | Type     | Description                                                                | Requirement Level               |
+| :--------------------- | :------- | :------------------------------------------------------------------------- | :------------------------------ |
+| `db.system.name`       | `string` | MUST be 'mongodb'                                                          | Required                        |
+| `db.namespace`         | `string` | The database name                                                          | Required if available           |
+| `db.collection.name`   | `string` | The collection being accessed within the database stated in `db.namespace` | Required if available           |
+| `db.operation.name`    | `string` | The name of the driver operation being executed                            | Required                        |
+| `db.operation.summary` | `string` | Equivalent to span name                                                    | Required                        |
+| `db.mongodb.cursor_id` | `int64`  | If a cursor is created or used in the operation (see below)                | Conditional                     |
+| `error.type`           | `string` | (see [error.type](#errortype-operation-spans) below)                       | Required if the operation fails |
+
+Not all attributes are available at the moment of span creation. Drivers need to add attributes at later stages, which
+requires an operation span to be available throughout the complete operation lifecycle.
+
+###### db.namespace
+
+This attribute SHOULD be set to current database name except for operations executing against admin db ex: (transaction,
+client `bulkWrite`) operations.
+
+Examples:
+
+- `find` on `test.users` → `test`
+- `runCommand` on `admin` → `admin`
+- `commitTransaction` → `admin`
+- `abortTransaction` → `admin`
+- client `bulkWrite` → `admin`
+
+The name of this attribute is defined in the
+[OpenTelemetry Specifications](https://opentelemetry.io/docs/specs/semconv/registry/attributes/db/#db-namespace). In
+order to be compliant with these, we use this name even though the term `namespace` has a different
+[meaning](https://www.mongodb.com/docs/manual/reference/glossary/) for MongoDB.
+
+###### db.collection.name
+
+This attribute should be set to the user's collection if the operation is executing against a collection, this field is
+omitted for commands running against `admin` database or commands that do not target a specific collection.
+
+Examples:
+
+- `find` on `test.users` → `users`
+- `runCommand` on `admin` → *omitted*
+- `commitTransaction` → *omitted*
+- `abortTransaction` → *omitted*
+- client `bulkWrite` → *omitted*
+
+<span id="operation-cursor-id"></span>
+
+###### db.mongodb.cursor_id
+
+If the operation creates a cursor, or operates on a single existing cursor, the `cursor_id` attribute MUST be added to
+the operation span, following the same rules as the command span attribute of the same name, including its omissions:
+never a literal `0`, and never for a command that may operate on several cursors at once, such as `killCursors` (see
+[db.mongodb.cursor_id](#command-cursor-id)). When the driver iterates a cursor internally, the value is the id of the
+cursor the operation created; for a caller-driven `getMore`, it is the id the driver sent.
+
+##### Exceptions
+
+If the driver operation fails with an exception, drivers MUST record an exception to the current operation span. This
+does not relate to exceptions that happen on the server command level (see below). Those exceptions MUST be recorded to
+the corresponding command span.
+
+When recording an exception, drivers SHOULD add the following attributes to the span, when the content for the attribute
+if available:
+
+- `exception.message`
+- `exception.type`
+- `exception.stacktrace`
+
+###### error.type (operation spans)
+
+Operation spans MUST NOT have an `error.type` attribute when the operation succeeds, even if one of its commands failed:
+an operation can succeed through a retry, so a failed command's `error.type` does not carry over. Drivers MUST add this
+attribute to the span when the operation itself fails. Its value SHOULD be the name of the exception class raised to the
+application, the same value as the operation span's `exception.type` attribute above.
+
+#### Instrumenting Server Commands
+
+Drivers MUST create a span for every server command sent to the server as a result of a public API call, except for
+sensitive commands as listed in the command logging and monitoring specification.
+
+Spans for commands MUST be nested to the span for the corresponding driver operation span. If the command is being
+retried, the driver MUST create a separate span for each retry; all the retries MUST be nested to the same operation
+span.
+
+##### Command Span Name
+
+The span name SHOULD be the command name. For example, `find`, `insert`, `update`, etc.
+
+##### Command Span Kind
+
+Span kind MUST be "client".
+
+##### Command Span Attributes
+
+Spans SHOULD have the following attributes:
+
+| Attribute                         | Type     | Description                                                                                                                                              | Requirement Level             |
+| :-------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- |
+| `db.system.name`                  | `string` | MUST be 'mongodb'                                                                                                                                        | Required                      |
+| `db.namespace`                    | `string` | The database name                                                                                                                                        | Required if available         |
+| `db.collection.name`              | `string` | The collection being accessed within the database stated in `db.namespace`                                                                               | Required if available         |
+| `db.command.name`                 | `string` | The name of the server command being executed                                                                                                            | Required                      |
+| `db.response.status_code`         | `string` | MongoDB error code represented as a string. This attribute should be added only if an error happens.                                                     | Required if an error happens  |
+| `error.type`                      | `string` | (see [error.type](#errortype-command-spans) below)                                                                                                       | Required if the command fails |
+| `server.port`                     | `int64`  | Server port number                                                                                                                                       | Required                      |
+| `server.address`                  | `string` | Name of the database host, or IP address if name is not known                                                                                            | Required                      |
+| `network.transport`               | `string` | MUST be 'tcp' or 'unix' depending on the protocol                                                                                                        | Required                      |
+| `db.query.summary`                | `string` | (see explanation below)                                                                                                                                  | Required                      |
+| `db.mongodb.server_connection_id` | `int64`  | Server connection id                                                                                                                                     | Required if available         |
+| `db.mongodb.driver_connection_id` | `int64`  | Local connection id                                                                                                                                      | Required if available         |
+| `db.query.text`                   | `string` | Database command that was sent to the server. Content should be equivalent to the `document` field of the CommandStartedEvent of the command monitoring. | Conditional                   |
+| `db.mongodb.cursor_id`            | `int64`  | If a cursor is created or used in the command (see below)                                                                                                | Conditional                   |
+| `db.mongodb.lsid`                 | `string` | Logical session id                                                                                                                                       | Required if available         |
+| `db.mongodb.txn_number`           | `int64`  | Transaction number                                                                                                                                       | Required if available         |
+
+Besides the attributes listed in the table above, drivers MAY add other attributes from the
+[Semantic Conventions for Databases](https://opentelemetry.io/docs/specs/semconv/registry/attributes/db/) that are
+applicable to MongoDB.
+
+###### db.namespace
+
+This attribute SHOULD be set to current database name except for operations executing against admin db ex: (transaction,
+client `bulkWrite`) operations.
+
+Examples:
+
+- `find` on `test.users` → `test`
+- `runCommand` on `admin` → `admin`
+- `commitTransaction` → `admin`
+- `abortTransaction` → `admin`
+- client `bulkWrite` → `admin`
+
+The name of this attribute is defined in the
+[OpenTelemetry Specifications](https://opentelemetry.io/docs/specs/semconv/registry/attributes/db/#db-namespace). In
+order to be compliant with these, we use this name even though the term `namespace` has a different
+[meaning](https://www.mongodb.com/docs/manual/reference/glossary/) for MongoDB.
+
+###### db.collection.name
+
+This attribute should be set to the user's collection if the operation is executing against a collection, this field is
+omitted for commands running against `admin` database or commands that do not target a specific collection.
+
+Examples:
+
+- `find` on `test.users` → `users`
+- `runCommand` on `admin` → *omitted*
+- `commitTransaction` → *omitted*
+- `abortTransaction` → *omitted*
+- client `bulkWrite` → *omitted*
+
+###### db.query.summary
+
+This attribute SHOULD contain:
+
+- `command_name db.collection_name` if the command is executed on a collection.
+- `command_name db` if there is no specific collection for the command.
+- `command_name admin` in other cases (e.g., commands executed against `admin` database, transaction or client
+    `bulkWrite`).
+
+###### db.query.text
+
+This attribute contains the full database command executed serialized to Relaxed Extended JSON. If not truncated, the
+content of this attribute SHOULD be equivalent to the `document` field of the CommandStartedEvent of the command
+monitoring excluding the following fields: `lsid`, `$db`, `$clusterTime`, `signature`.
+
+Drivers MUST NOT add this attribute by default. Drivers MUST provide a toggle to enable this attribute. This
+configuration can be implemented with an environment variable
+`OTEL_#{LANG}_INSTRUMENTATION_MONGODB_QUERY_TEXT_MAX_LENGTH` set to a positive integer value. The attribute will be
+added and truncated to the provided value (similar to the Logging specification).
+
+On the `MongoClient` level this configuration can be implemented with a `MongoClient` option, for example,
+`tracing.query_text_max_length`.
+
+<span id="command-cursor-id"></span>
+
+###### db.mongodb.cursor_id
+
+If the command creates a cursor (e.g., `find`, `aggregate`, `listIndexes`) and the server returns a non-zero cursor id,
+the `cursor_id` attribute MUST be added.
+
+If the command operates on a single existing cursor (e.g., `getMore`), the attribute MUST be added, holding the cursor
+id the driver sent. It MUST still be added when the reply returns a cursor id of `0` to signal the cursor is now
+exhausted; the id the command operated on is the one worth recording.
+
+If a command may operate on several cursors at once (e.g., `killCursors`, whose `cursors` field is an array), the
+attribute MUST be omitted: it is a single `int64` and has no defined value for such a command.
+
+A cursor id of `0` means no server-side cursor remains. Drivers MUST NOT add the attribute with a value of `0`, and MUST
+omit it when a cursor-creating command's reply returns `0`.
+
+##### Exceptions
+
+If the server command fails with an exception, drivers MUST record an exception to the current command span. When
+recording an exception, drivers SHOULD add the following attributes to the span, when the content for the attribute if
+available:
+
+- `exception.message`
+- `exception.type`
+- `exception.stacktrace`
+
+###### error.type (command spans)
+
+Drivers MUST add this attribute to the command span when the command fails. This attribute SHOULD match
+`db.response.status_code` when the command failed with a server error, meaning the server returned an error code in its
+response. Otherwise, this attribute SHOULD be the name of the exception class associated with that command's failure,
+whether or not the operation ultimately raises it to the application: a retry of the same operation may still succeed.
+
+Drivers MUST NOT set this attribute when the command succeeds. Per the
+[OpenTelemetry semantic conventions for `error.type`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/error/#error-type),
+this attribute SHOULD have a low cardinality, because tracing backends use it as a dimension for grouping and alerting
+on failures.
+
+`error.type` is the OpenTelemetry semantic-convention attribute for this purpose, and the name tracing backends
+recognize for it. `exception.type` (see the exception attributes above) is not part of that convention, even though
+drivers also add it to the span. For a non-server error, `error.type` carries the same value as `exception.type`.
+
+#### Propagating Trace Context to the Server
+
+Drivers MUST propagate the trace context of the **command span** to servers that support it, so that server-generated
+spans join the same distributed trace as the driver's spans.
+
+The trace context is carried in an `OP_MSG` section with [`Payload Type 3`](../message/OP_MSG.md), whose payload is a
+single BSON document with the following schema:
+
+```json
+{ "otel": { "traceparent": "<string>" } }
+```
+
+`traceparent` is the [W3C traceparent](https://www.w3.org/TR/trace-context/#traceparent-header) value of the **command
+span**: the propagated context MUST be that of the command span for the command being sent, so server spans join the
+trace as children of the exact command (and retry attempt) that produced them.
+
+Drivers MUST attach the section to a command if and only if all of the following hold:
+
+1. Tracing is enabled for the `MongoClient` (see
+    [Enabling, Disabling, and Configuring OpenTelemetry](#enabling-disabling-and-configuring-opentelemetry)).
+2. The connection's `maxWireVersion` is greater than or equal to 29 (MongoDB 9.0).
+3. A valid `traceparent` value is available from the command span for the command being sent.
+
+A `traceparent` value is valid if and only if it is exactly 55 characters of the form
+`00-<trace-id: 32 lowercase hex>-<parent-id: 16 lowercase hex>-<trace-flags: 2 lowercase hex>` (the field names are
+those of the [W3C traceparent header](https://www.w3.org/TR/trace-context/#traceparent-header); `00` is the version, and
+`parent-id` carries the command span's own span id — the parent of the spans the server creates) and neither the
+trace-id nor the parent-id is all zeroes. This mirrors the server-side validation. If no valid value is available,
+drivers MUST omit the section entirely rather than send an invalid or truncated value. Drivers MUST propagate unsampled
+trace contexts (trace-flags `00`); the sampling decision MUST NOT affect whether the section is attached.
+
+A message MUST NOT contain more than one telemetry section. Commands that carry no command span (for example server
+monitoring, authentication, and security-sensitive commands) naturally send no section.
+
+No tracing data is returned in server responses as part of this feature.
+
+## Motivation for Change
+
+A common complaint from our support team is that they don't know how to easily get debugging information from drivers.
+Some drivers provide debug logging, but others do not. For drivers that do provide it, the log messages produced and the
+mechanisms for enabling debug logging are inconsistent.
+
+OpenTelemetry is currently the industry standard for instrumenting, generating, and collecting telemetry data (metrics,
+logs, and traces). By instrumenting our drivers natively, we allow our end users to collect traces in a
+batteries-included way, with the additional benefits that the tracing is developed and maintained in-house, and conforms
+to the open-source standard for tracing. This also ensures that traces generated on the client-side on driver operations
+can tie into other traces, thus giving our end users a broader picture of the network hops that a single request might
+take.
+
+## Test Plan
+
+See [OpenTelemetry Tests](tests/README.md) for the test plan.
+
+## Covered operations
+
+The OpenTelemetry specification covers all driver operations including but not limited to the following operations:
+
+| Operation                | Test                                                                           |
+| :----------------------- | :----------------------------------------------------------------------------- |
+| `aggregate`              | [tests/operation/aggregate.yml](tests/operation/aggregate.yml)                 |
+| `findAndModify`          | [tests/operation/find_and_modify.yml](tests/operation/find_and_modify.yml)     |
+| `bulkWrite`              | [tests/operation/bulk_write.yml](tests/operation/bulk_write.yml)               |
+| `commitTransaction`      | [tests/transaction/core_api.yml](tests/transaction/core_api.yml)               |
+| `abortTransaction`       | [tests/transaction/core_api.yml](tests/transaction/core_api.yml)               |
+| `withTransaction`        | [tests/transaction/convenient.yml](tests/transaction/convenient.yml)           |
+| `createCollection`       | [tests/operation/create_collection.yml](tests/operation/create_collection.yml) |
+| `createIndexes`          | [tests/operation/create_indexes.yml](tests/operation/create_indexes.yml)       |
+| `distinct`               | [tests/operation/distinct.yml](tests/operation/distinct.yml)                   |
+| `dropCollection`         | [tests/operation/drop_collection.yml](tests/operation/drop_collection.yml)     |
+| `dropIndexes`            | [tests/operation/drop_indexes.yml](tests/operation/drop_indexes.yml)           |
+| `find`                   | [tests/operation/find.yml](tests/operation/find.yml)                           |
+| `getMore`                | [tests/operation/get_more.yml](tests/operation/get_more.yml)                   |
+| `listCollections`        | [tests/operation/list_collections.yml](tests/operation/list_collections.yml)   |
+| `listDatabases`          | [tests/operation/list_databases.yml](tests/operation/list_databases.yml)       |
+| `listIndexes`            | [tests/operation/list_indexes.yml](tests/operation/list_indexes.yml)           |
+| `mapReduce`              | [tests/operation/map_reduce.yml](tests/operation/map_reduce.yml)               |
+| `estimatedDocumentCount` | [tests/operation/count.yml](tests/operation/count.yml)                         |
+| `insert`                 | [tests/operation/insert.yml](tests/operation/insert.yml)                       |
+| `delete`                 | [tests/operation/delete.yml](tests/operation/delete.yml)                       |
+| `update`                 | [tests/operation/update.yml](tests/operation/update.yml)                       |
+| `createSearchIndexes`    | [tests/operation/atlas_search.yml](tests/operation/atlas_search.yml)           |
+| `dropSearchIndex`        | [tests/operation/atlas_search.yml](tests/operation/atlas_search.yml)           |
+| `updateSearchIndex`      | [tests/operation/delete.yml](tests/operation/delete.yml)                       |
+| `delete`                 | [tests/operation/atlas_search.yml](tests/operation/atlas_search.yml)           |
+
+## Backwards Compatibility
+
+Introduction of OpenTelemetry in new driver versions should not significantly affect existing applications that do not
+enable OpenTelemetry. However, since the no-op tracing operation may introduce some performance degradation (though it
+should be negligible), customers should be informed of this feature and how to disable it completely.
+
+If a driver is used in an application that has OpenTelemetry enabled, customers will see traces from the driver in their
+OpenTelemetry backends. This may be unexpected and MAY cause negative effects in some cases (e.g., the OpenTelemetry
+backend MAY not have enough capacity to process new traces). Customers should be informed of this feature and how to
+disable it completely.
+
+## Security Implication
+
+Drivers MUST take care to avoid exposing sensitive information (e.g. authentication credentials) in traces. Drivers
+SHOULD follow the
+[Security](https://github.com/mongodb/specifications/blob/master/source/command-logging-and-monitoring/command-logging-and-monitoring.md#security)
+guidance of the Command Logging and Monitoring spec.
+
+## Future Work
+
+### Query Parametrization
+
+It might be beneficial to implement query parametrization for the `db.query.text` attribute.
+
+One might want to replace dynamic values in queries with placeholders. For example, the query
+
+```json
+{ find: "users", filter: { age: { $gt: 30 } } }
+```
+
+will be transformed to
+
+```json
+{ find: "users", filter: { age: { $gt: "?" } } }
+```
+
+for purposes of obfuscating queries in traces or query aggregation.
+
+In the case of CSFLE, the query might already have BSON binary values (with the encrypted subtype) by the time the query
+is sent along for tracing, which can also be considered a form of parameterization. In that case, a driver could easily
+replace those binary values with placeholders (assuming the encrypted blobs are irrelevant for logging).
+
+## Design Rationale
+
+### No URI options
+
+Enabling tracing may have performance and security implications. Copying and using a connection string that enables
+tracing may have unexpected negative outcome.
+
+Further, we already have two attributes that configure tracing, and we expect there might be more.
+
+A URI options can be added later if we realise our users need it, while the opposite is not easily accomplished.
+
+### Wire protocol version gate instead of a hello capability
+
+An alternative was for servers to advertise support via a `hello` response field. Gating on `maxWireVersion` was chosen
+instead: the wire protocol version acts as the schema contract for the telemetry payload, so drivers know exactly which
+fields a server accepts, and any future payload additions require a wire version bump rather than a second, parallel
+negotiation mechanism.
+
+### BSON document instead of a bare traceparent string
+
+Carrying the traceparent inside a BSON document allows future propagation fields to be added to the same section without
+redesigning the payload format.
+
+## Changelog
+
+- 2026-08-19: Specified the `error.type` attribute on command spans, which drivers MUST add when a command fails and
+    which matches `db.response.status_code` when the command failed with a server error and is otherwise the name of the
+    exception class associated with that command's failure. Specified that drivers MUST NOT set it when the command
+    succeeds, that it SHOULD have a low cardinality, and that operation spans MUST NOT carry it unless the operation
+    itself fails, in which case it matches the operation span's `exception.type`.
+
+- 2026-08-11: Specified that each `getMore` command is nested under its own new operation span, sibling to the operation
+    span of the command that created the cursor, when the caller drives cursor iteration. Specified that
+    `db.mongodb.cursor_id` MUST be added to operation spans and to command spans that create a cursor with a non-zero id
+    or that operate on a single existing cursor, and MUST be omitted rather than set to `0` when no server-side cursor
+    remains.
+
+- 2026-07-31: Allowed the `update` test to accept `multi` and `upsert` at their default values, and added `initialData`
+    to the operation tests that create or modify collections.
+
+- 2026-07-21: Add trace context propagation to the server via the `OP_MSG` telemetry section (DRIVERS-3454).
+
+- 2026-06-16: Clarified that the `db.query.text` attribute should be serialized to Relaxed Extended JSON.
+
+- 2026-02-09: Renamed `db.system` to `db.system.name` according to the corresponding update of OpenTelemetry semantic
+    conventions.

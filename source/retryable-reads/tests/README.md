@@ -5,7 +5,7 @@ ______________________________________________________________________
 ## Introduction
 
 The YAML and JSON files in this directory are platform-independent tests meant to exercise a driver's implementation of
-retryable reads. These tests utilize the \[Unified Test Format\](../../unified-test-format/unified-test-format.md).
+retryable reads. These tests utilize the [Unified Test Format](../../unified-test-format/unified-test-format.md).
 
 Several prose tests, which are not easily expressed in YAML, are also presented in this file. Those tests will need to
 be manually implemented by each driver.
@@ -19,22 +19,22 @@ any driver that implements the CMAP specification. This test requires MongoDB 4.
 the failpoint.
 
 1. Create a client with maxPoolSize=1 and retryReads=true. If testing against a sharded deployment, be sure to connect
-   to only a single mongos.
+    to only a single mongos.
 
 2. Enable the following failpoint:
 
-   ```
-   {
-       configureFailPoint: "failCommand",
-       mode: { times: 1 },
-       data: {
-           failCommands: ["find"],
-           errorCode: 91,
-           blockConnection: true,
-           blockTimeMS: 1000
-       }
-   }
-   ```
+    ```javascript
+    {
+        configureFailPoint: "failCommand",
+        mode: { times: 1 },
+        data: {
+            failCommands: ["find"],
+            errorCode: 91,
+            blockConnection: true,
+            blockTimeMS: 1000
+        }
+    }
+    ```
 
 3. Start two threads and attempt to perform a `findOne` simultaneously on both.
 
@@ -62,26 +62,26 @@ debugger, code coverage tool, etc.
 #### 2.1 Retryable Reads Are Retried on a Different mongos When One is Available
 
 This test MUST be executed against a sharded cluster that has at least two mongos instances, supports `retryReads=true`,
-and has enabled the `configureFailPoint` command (MongoDB 4.2+).
+and has enabled the `configureFailPoint` command.
 
 1. Create two clients `s0` and `s1` that each connect to a single mongos from the sharded cluster. They must not connect
-   to the same mongos.
+    to the same mongos.
 
 2. Configure the following fail point for both `s0` and `s1`:
 
-   ```
-   {
-       configureFailPoint: "failCommand",
-       mode: { times: 1 },
-       data: {
-           failCommands: ["find"],
-           errorCode: 6
-       }
-   }
-   ```
+    ```javascript
+    {
+        configureFailPoint: "failCommand",
+        mode: { times: 1 },
+        data: {
+            failCommands: ["find"],
+            errorCode: 6
+        }
+    }
+    ```
 
 3. Create a client `client` with `retryReads=true` that connects to the cluster using the same two mongoses as `s0` and
-   `s1`.
+    `s1`.
 
 4. Enable failed command event monitoring for `client`.
 
@@ -94,44 +94,248 @@ and has enabled the `configureFailPoint` command (MongoDB 4.2+).
 #### 2.2 Retryable Reads Are Retried on the Same mongos When No Others are Available
 
 This test MUST be executed against a sharded cluster that supports `retryReads=true` and has enabled the
-`configureFailPoint` command (MongoDB 4.2+).
+`configureFailPoint` command.
 
 1. Create a client `s0` that connects to a single mongos from the cluster.
 
 2. Configure the following fail point for `s0`:
 
-   ```
-   {
-       configureFailPoint: "failCommand",
-       mode: { times: 1 },
-       data: {
-           failCommands: ["find"],
-           errorCode: 6
-       }
-   }
-   ```
+    ```javascript
+    {
+        configureFailPoint: "failCommand",
+        mode: { times: 1 },
+        data: {
+            failCommands: ["find"],
+            errorCode: 6
+        }
+    }
+    ```
 
 3. Create a client `client` with `directConnection=false` (when not set by default) and `retryReads=true` that connects
-   to the cluster using the same single mongos as `s0`.
+    to the cluster using the same single mongos as `s0`.
 
 4. Enable succeeded and failed command event monitoring for `client`.
 
 5. Execute a `find` command with `client`. Assert that the command succeeded.
 
 6. Assert that exactly one failed command event and one succeeded command event occurred. Assert that both events
-   occurred on the same mongos.
+    occurred on the same mongos.
 
 7. Disable the fail point on `s0`.
 
+### 3. Retrying Reads in a Replica Set
+
+These tests will be used to ensure drivers properly retry reads against a replica set.
+
+#### 3.1 Retryable Reads Caused by Overload Errors Are Retried on a Different Replicaset Server When One is Available and enableOverloadRetargeting is enabled
+
+This test MUST be executed against a MongoDB 4.4+ replica set that has at least one secondary, supports
+`retryReads=true`, and has enabled the `configureFailPoint` command with the `errorLabels` option.
+
+1. Create a client `client` with `retryReads=true`, `readPreference=primaryPreferred`, `enableOverloadRetargeting=True`,
+    and command event monitoring enabled.
+
+2. Configure the following fail point for `client`:
+
+    ```javascript
+    {
+        configureFailPoint: "failCommand",
+        mode: { times: 1 },
+        data: {
+            failCommands: ["find"],
+            errorLabels: ["RetryableError", "SystemOverloadedError"]
+            errorCode: 6
+        }
+    }
+    ```
+
+3. Reset the command event monitor to clear the failpoint command from its stored events.
+
+4. Execute a `find` command with `client`.
+
+5. Assert that one failed command event and one successful command event occurred.
+
+6. Assert that both events occurred on different servers.
+
+#### 3.2 Retryable Reads Caused by Non-Overload Errors Are Retried on the Same Replicaset Server
+
+This test MUST be executed against a MongoDB 4.4+ replica set that has at least one secondary, supports
+`retryReads=true`, and has enabled the `configureFailPoint` command with the `errorLabels` option.
+
+1. Create a client `client` with `retryReads=true`, `readPreference=primaryPreferred`, and command event monitoring
+    enabled.
+
+2. Configure the following fail point for `client`:
+
+    ```javascript
+    {
+        configureFailPoint: "failCommand",
+        mode: { times: 1 },
+        data: {
+            failCommands: ["find"],
+            errorLabels: ["RetryableError"]
+            errorCode: 6
+        }
+    }
+    ```
+
+3. Reset the command event monitor to clear the failpoint command from its stored events.
+
+4. Execute a `find` command with `client`.
+
+5. Assert that one failed command event and one successful command event occurred.
+
+6. Assert that both events occurred on the same server.
+
+#### 3.3 Retryable Reads Caused by Overload Errors Are Retried on Same Replicaset Server When enableOverloadRetargeting is disabled
+
+This test MUST be executed against a MongoDB 4.4+ replica set that has at least one secondary, supports
+`retryReads=true`, and has enabled the `configureFailPoint` command with the `errorLabels` option.
+
+1. Create a client `client` with `retryReads=true`, `readPreference=primaryPreferred`, and command event monitoring
+    enabled.
+
+2. Configure the following fail point for `client`:
+
+    ```javascript
+    {
+        configureFailPoint: "failCommand",
+        mode: { times: 1 },
+        data: {
+            failCommands: ["find"],
+            errorLabels: ["RetryableError", "SystemOverloadedError"]
+            errorCode: 6
+        }
+    }
+    ```
+
+3. Reset the command event monitor to clear the failpoint command from its stored events.
+
+4. Execute a `find` command with `client`.
+
+5. Assert that one failed command event and one successful command event occurred.
+
+6. Assert that both events occurred on the same server.
+
+### 4: Test that drivers set the maximum number of retries for all retryable read errors when an overload error is encountered
+
+This test MUST be executed against a MongoDB 4.4+ server that supports `retryReads=true` and has enabled the
+`configureFailPoint` command with the `errorLabels` option.
+
+1. Create a client.
+
+2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
+    `SystemOverloadedError` error labels:
+
+    ```javascript
+    {
+        configureFailPoint: "failCommand",
+        mode: {times: 1},
+        data: {
+            failCommands: ["find"],
+            errorLabels: ["RetryableError", "SystemOverloadedError"],
+            errorCode: 91
+        }
+    }
+    ```
+
+3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `91` (ShutdownInProgress) and
+    the `RetryableError` label:
+
+    ```javascript
+    {
+        configureFailPoint: "failCommand",
+        mode: "alwaysOn",
+        data: {
+            failCommands: ["find"],
+            errorLabels: ["RetryableError"],
+            errorCode: 91
+        }
+    }
+    ```
+
+    Configure the second fail point command only if the failed event is for the first error configured in step 2.
+
+4. Attempt a `findOne` operation on any record for any database and collection. Expect the `findOne` to fail with a
+    server error. Assert that `MAX_RETRIES + 1` attempts were made.
+
+5. Disable the fail point:
+
+    ```javascript
+    {
+        configureFailPoint: "failCommand",
+        mode: "off"
+    }
+    ```
+
+### 5: Test that drivers do not apply backoff to non-overload errors
+
+This test MUST be executed against a MongoDB 4.4+ server that supports `retryReads=true` and has enabled the
+`configureFailPoint` command with the `errorLabels` option.
+
+1. Create a client.
+
+2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
+    `SystemOverloadedError` error labels:
+
+    ```javascript
+    {
+        configureFailPoint: "failCommand",
+        mode: {times: 1},
+        data: {
+            failCommands: ["find"],
+            errorLabels: ["RetryableError", "SystemOverloadedError"],
+            errorCode: 91
+        }
+    }
+    ```
+
+3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `91` (ShutdownInProgress) and
+    the `RetryableError` label:
+
+    ```javascript
+    {
+        configureFailPoint: "failCommand",
+        mode: "alwaysOn",
+        data: {
+            failCommands: ["find"],
+            errorLabels: ["RetryableError"],
+            errorCode: 91
+        }
+    }
+    ```
+
+    Configure the second fail point command only if the failed event is for the first error configured in step 2.
+
+4. Attempt a `findOne` operation on any record for any database and collection. Expect the `findOne` to fail with a
+    server error. Assert that backoff was applied only once for the initial overload error and not for the subsequent
+    non-overload retryable errors.
+
+5. Disable the fail point:
+
+    ```javascript
+    {
+        configureFailPoint: "failCommand",
+        mode: "off"
+    }
+    ```
+
 ## Changelog
+
+- 2026-06-17: Remove pre-4.2 version references.
+
+- 2026-04-14: Add prose tests for retry behavior when a mix of overload and non-overload errors are encountered.
+
+- 2026-03-31: Add additional prose test for overload retargeting.
+
+- 2026-02-19: Add prose tests for retrying against a replica set.
 
 - 2024-04-30: Migrated from reStructuredText to Markdown.
 
 - 2024-03-06: Convert legacy retryable reads tests to unified format.
 
-- 2024-02-21: Update mongos redirection prose tests to workaround SDAM behavior\
-  preventing execution of
-  deprioritization code paths.
+- 2024-02-21: Update mongos redirection prose tests to workaround SDAM behavior preventing execution of deprioritization
+    code paths.
 
 - 2023-08-26: Add prose tests for retrying in a sharded cluster.
 
@@ -141,12 +345,11 @@ This test MUST be executed against a sharded cluster that supports `retryReads=t
 
 - 2021-08-27: Clarify behavior of `useMultipleMongoses` for `LoadBalanced` topologies.
 
-- 2019-03-19: Add top-level `runOn` field to denote server version and/or\
-  topology requirements requirements for the
-  test file. Removes the `minServerVersion` and `topology` top-level fields, which are now expressed within `runOn`
-  elements.
+- 2019-03-19: Add top-level `runOn` field to denote server version and/or topology requirements requirements for the
+    test file. Removes the `minServerVersion` and `topology` top-level fields, which are now expressed within `runOn`
+    elements.
 
-  Add test-level `useMultipleMongoses` field.
+    Add test-level `useMultipleMongoses` field.
 
 - 2020-09-16: Suggest lowering heartbeatFrequencyMS in addition to minHeartbeatFrequencyMS.
 

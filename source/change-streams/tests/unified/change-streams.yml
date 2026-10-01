@@ -77,7 +77,7 @@ tests:
             "_id": 1,
             "a": 1,
             "array": ["foo", {"a": "bar"}, 1, 2, 3]
-          }
+            }
       - name: createChangeStream
         object: *collection0
         arguments: { pipeline: [] }
@@ -87,14 +87,14 @@ tests:
         arguments:
           filter: {
             "_id": 1
-          }
+            }
           update: [
             {
               "$set": {
                 "array": ["foo", {"a": "bar"}]
               }
             }
-          ]
+            ]
       - name: iterateUntilDocumentOrError
         object: *changeStream0
         expectResult: {
@@ -115,9 +115,10 @@ tests:
                 "field": "array",
                 "newSize": 2
               }
-            ]
+            ],
+            disambiguatedPaths: { $$unsetOrMatches: { $$exists: true } }
           }
-        }
+          }
 
   - description: "Test with document comment"
     runOnRequirements:
@@ -722,6 +723,7 @@ tests:
             updatedFields: { x: 2 }
             removedFields: []
             truncatedArrays: { $$unsetOrMatches: { $$exists: true } }
+            disambiguatedPaths: { $$unsetOrMatches: { $$exists: true } }
       - name: iterateUntilDocumentOrError
         object: *changeStream0
         expectResult:

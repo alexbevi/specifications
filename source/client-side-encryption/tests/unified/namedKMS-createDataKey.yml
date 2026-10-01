@@ -17,7 +17,8 @@ createEntities:
         keyVaultNamespace: keyvault.datakeys
         kmsProviders:
           "aws:name1": { accessKeyId: { $$placeholder: 1 }, secretAccessKey: { $$placeholder: 1 } }
-          "azure:name1": { tenantId: { $$placeholder: 1 }, clientId: { $$placeholder: 1 }, clientSecret: { $$placeholder: 1 } }
+          "azure:name1":
+            { tenantId: { $$placeholder: 1 }, clientId: { $$placeholder: 1 }, clientSecret: { $$placeholder: 1 } }
           "gcp:name1": { email: { $$placeholder: 1 }, privateKey: { $$placeholder: 1 } }
           "kmip:name1": { endpoint: { $$placeholder: 1 } }
           "local:name1": { key: { $$placeholder: 1 } }
@@ -73,8 +74,8 @@ tests:
           kmsProvider: "azure:name1"
           opts:
             masterKey: &new_azure_masterkey
-              keyVaultEndpoint: key-vault-csfle.vault.azure.net
-              keyName: key-name-csfle
+              keyVaultEndpoint: drivers-3392-key-vault.vault.azure.net
+              keyName: drivers-3392-keyname
         expectResult: { $$type: binData }
     expectEvents:
       - client: *client0

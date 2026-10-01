@@ -2,7 +2,7 @@
 
 - Status: Accepted
 
-\- Minimum Server Version: 2.4 See also the YAML test files and their accompanying README in the "tests" directory.
+- See also the YAML test files and their accompanying README in the "tests" directory.
 
 ______________________________________________________________________
 
@@ -52,18 +52,6 @@ For all these example responses, the client MUST mark the server "Unknown" and s
 ServerDescription's error field.
 
 Clients MUST NOT depend on any particular field order in these responses.
-
-### getLastError
-
-GLE response after OP_INSERT on an arbiter, secondary, recovering member, or ghost:
-
-> {ok: 1, err: "not writable primary"}
-
-[Possible GLE response in MongoDB 2.6](https://jira.mongodb.org/browse/SERVER-9617) during failover:
-
-> {ok: 1, err: "replicatedToNum called but not master anymore"}
-
-Note that this error message contains "not master" but does not start with it.
 
 ### Write command
 
@@ -132,20 +120,20 @@ This test requires MongoDB 4.9.0+.
 
 1. Enable the following failpoint:
 
-   ```
-   {
-       configureFailPoint: "failCommand",
-       mode: { times: 5 },
-       data: {
-           failCommands: ["hello"], // or legacy hello command
-           errorCode: 1234,
-           appName: "SDAMMinHeartbeatFrequencyTest"
-       }
-   }
-   ```
+    ```javascript
+    {
+        configureFailPoint: "failCommand",
+        mode: { times: 5 },
+        data: {
+            failCommands: ["hello"], // or legacy hello command
+            errorCode: 1234,
+            appName: "SDAMMinHeartbeatFrequencyTest"
+        }
+    }
+    ```
 
 2. Create a client with directConnection=true, appName="SDAMMinHeartbeatFrequencyTest", and
-   serverSelectionTimeoutMS=5000.
+    serverSelectionTimeoutMS=5000.
 
 3. Start a timer.
 
@@ -160,27 +148,74 @@ This test will be used to ensure monitors properly create and unpause connection
 This test requires failCommand appName support which is only available in MongoDB 4.2.9+.
 
 1. Create a client with directConnection=true, appName="SDAMPoolManagementTest", and heartbeatFrequencyMS=500 (or lower
-   if possible).
+    if possible).
 
 2. Verify via SDAM and CMAP event monitoring that a ConnectionPoolReadyEvent occurs after the first
-   ServerHeartbeatSucceededEvent event does.
+    ServerHeartbeatSucceededEvent event does.
 
 3. Enable the following failpoint:
 
-   ```
-   {
-       configureFailPoint: "failCommand",
-       mode: { times: 2 },
-       data: {
-           failCommands: ["hello"], // or legacy hello command
-           errorCode: 1234,
-           appName: "SDAMPoolManagementTest"
-       }
-   }
-   ```
+    ```javascript
+    {
+        configureFailPoint: "failCommand",
+        mode: { times: 2 },
+        data: {
+            failCommands: ["hello"], // or legacy hello command
+            errorCode: 1234,
+            appName: "SDAMPoolManagementTest"
+        }
+    }
+    ```
 
 4. Verify that a ServerHeartbeatFailedEvent and a ConnectionPoolClearedEvent (CMAP) are emitted.
 
 5. Then verify that a ServerHeartbeatSucceededEvent and a ConnectionPoolReadyEvent (CMAP) are emitted.
 
 6. Disable the failpoint.
+
+## Connection Pool Backpressure
+
+This test will be used to ensure that connection establishment failures during the TLS handshake do not result in a pool
+clear event. We create a setup client to enable the ingress connection establishment rate limiter, and then induce a
+connection storm. After the storm, we verify that some of the connections failed to checkout, but that the pool was not
+cleared.
+
+This test requires MongoDB 7.0+. See the
+[MongoDB Server Parameters](https://www.mongodb.com/docs/manual/reference/parameters/#mongodb-parameter-param.ingressConnectionEstablishmentRateLimiterEnabled)
+for more details.
+
+This test MUST be run both with and without TLS enabled. Without TLS enabled, the connection establishment will fail
+during the `hello` message, and with TLS enabled it will fail during the TLS handshake.
+
+If running against a sharded cluster, this test MUST be run against only a single host, similar to how
+`useMultipleMongoses:false` would be handled in a unified test.
+
+1. Create a test client that listens to CMAP events, with maxConnecting=100. The higher maxConnecting will help ensure
+    contention for creating connections.
+
+2. Run the following commands to set up the rate limiter.
+
+    ```python
+    client.admin.command("setParameter", 1, ingressConnectionEstablishmentRateLimiterEnabled=True)
+    client.admin.command("setParameter", 1, ingressConnectionEstablishmentRatePerSec=20)
+    client.admin.command("setParameter", 1, ingressConnectionEstablishmentBurstCapacitySecs=1)
+    client.admin.command("setParameter", 1, ingressConnectionEstablishmentMaxQueueDepth=1)
+    ```
+
+3. Add a document to the test collection so that the sleep operations will actually block:
+    `client.test.test.insert_one({})`.
+
+4. Run the following find command on the collection in 100 parallel threads/coroutines. Run these commands concurrently
+    but block on their completion, and ignore errors raised by the command.
+    `client.test.test.find_one({"$where": "function() { sleep(2000); return true; }})`
+
+5. Assert that at least 10 `ConnectionCheckOutFailedEvent` occurred.
+
+6. Assert that 0 `PoolClearedEvent` occurred.
+
+7. Ensure that the following steps run at test teardown even if the test fails:
+
+    7.1. Sleep for 1 second to clear the rate limiter.
+
+    7.2. Execute the following command:
+    `client.admin("setParameter", 1, ingressConnectionEstablishmentRateLimiterEnabled=False)`.

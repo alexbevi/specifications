@@ -1,0 +1,8 @@
+[book]
+authors = ["Alex Bevilacqua"]
+src = "source"
+title = "MongoDB Driver Specifications"
+
+[output.html]
+additional-css = ["theme/whichlang.css"]
+additional-js = ["theme/whichlang.js"]
