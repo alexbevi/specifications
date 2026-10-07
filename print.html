@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-2dea9ffd.js";
+            window.path_to_searchindex_js = "searchindex-91037e48.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-c2b477e5.js"></script>
@@ -3751,7 +3751,7 @@ to URI options apply here.</p>
 <tr><td>serverSelectionTimeoutMS</td><td>positive integer; a driver may also accept 0 to be used for a special case, provided that it documents the meaning</td><td>defined in <a href="#serverselectiontimeoutms">server selection spec</a></td><td>no</td><td>A timeout in milliseconds to block for server selection before raising an error</td></tr>
 <tr><td>serverSelectionTryOnce</td><td>“true” or “false”</td><td>defined in <a href="#serverselectiontryonce">server selection spec</a></td><td>required for single-threaded drivers</td><td>Scan the topology only once after a server selection failure instead of repeatedly until the server selection times out</td></tr>
 <tr><td>socketTimeoutMS</td><td>non-negative integer; 0 means no timeout</td><td>no timeout</td><td>no</td><td>NOTE: This option is deprecated in favor of <a href="#timeoutms">timeoutMS</a><br><br>Amount of time spent attempting to send or receive on a socket before timing out; note that this only applies to application operations, not SDAM.</td></tr>
-<tr><td>srvAllowedHostsSuffix</td><td>a valid DNS hostname suffix (e.g. “.mydomain.net”)</td><td>none; domain is inferred from the SRV hostname</td><td>no</td><td>A hostname suffix used to validate hosts returned via SRV lookup, replacing the domain inferred from the SRV hostname. Defined in the <a href="#srvallowedhostssuffix">Initial DNS Seedlist Discovery spec</a>.</td></tr>
+<tr><td>srvAllowedHostsSuffix</td><td>a string that passes the <code>srvAllowedHostsSuffix</code> normalization and validation (e.g. “.mydomain.net”)</td><td>none; domain is inferred from the SRV hostname</td><td>no</td><td>A hostname suffix used to validate hosts returned via SRV lookup, replacing the domain inferred from the SRV hostname. Defined in the <a href="#srvallowedhostssuffix">Initial DNS Seedlist Discovery spec</a>.</td></tr>
 <tr><td>srvMaxHosts</td><td>non-negative integer; 0 means no maximum</td><td>defined in the <a href="#srvmaxhosts">Initial DNS Seedlist Discovery spec</a></td><td>no</td><td>The maximum number of SRV results to randomly select when initially populating the seedlist or, during SRV polling, adding new hosts to the topology.</td></tr>
 <tr><td>srvServiceName</td><td>a valid SRV service name according to <a href="https://datatracker.ietf.org/doc/html/rfc6335#section-5.1">RFC 6335</a></td><td>“mongodb”</td><td>no</td><td>the service name to use for SRV lookup in <a href="#srvservicename">initial DNS seedlist discovery</a> and <a href="#polling-srv-records-for-mongos-discovery">SRV polling</a></td></tr>
 <tr><td>ssl</td><td>“true” or “false”</td><td>same as “tls”</td><td>no</td><td>alias of “tls”; required to ensure that Atlas connection strings continue to work</td></tr>
@@ -3815,6 +3815,10 @@ the name or the semantics of a URI option or adds a new URI option, this specifi
 changes.</p>
 <h2 id="changelog-9"><a class="header" href="#changelog-9">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-10-01: Clarify that <code>srvAllowedHostsSuffix</code> values are validated only by the steps in the Initial DNS Seedlist
+Discovery spec.</p>
+</li>
 <li>
 <p>2026-09-03: Add <code>srvAllowedHostsSuffix</code> option.</p>
 </li>
@@ -5368,8 +5372,8 @@ subdomain.</p>
 <p>This option is used to validate hosts. If present, its value MUST be treated as the <code>{domainname}</code> for
 <a href="#querying-dns">DNS validation</a> and
 <a href="#polling-srv-records-for-mongos-discovery">SRV polling</a>. For example,
-<code>srvAllowedHostsSuffix=.mydomain.net</code>. Drivers MUST apply the following normalization and validation to the value, in
-this order:</p>
+<code>srvAllowedHostsSuffix=.mydomain.net</code>. Drivers MUST apply only the following normalization and validation to the value,
+in this order:</p>
 <ol>
 <li>Any leading or trailing <code>.</code> MUST be stripped. For example, <code>srvAllowedHostsSuffix=.mydomain.net.</code> is treated as
 <code>mydomain.net</code>. If the resulting stripped value is empty, an error MUST be raised.</li>
@@ -5411,12 +5415,16 @@ for SRV host validation. If both <code>srvAllowedHostsSuffix</code> and <code>sr
 Drivers MAY raise this error at any point between MongoClient construction and DNS resolution. The signature of
 <code>srvHostValidator</code> MUST take in a string representing the SRV resolved hostname after applying the normalization
 described in <a href="#querying-dns">Querying DNS</a>, and return a bool representing whether the given SRV hostname is valid or
-not. If <code>srvHostValidator</code> raises an error during initial seedlist resolution, the driver MUST catch that error and wrap
-it prior to re-raising the error to the user. During
-<a href="#polling-srv-records-for-mongos-discovery">SRV polling</a>, a driver MUST
-NOT raise an error; an error raised by the validator is instead treated as though the validator had returned <code>false</code>.
-Since this is a synchronous callback, drivers should advise users to not write a validator that blocks. This option MUST
-only be configurable at the level of a <code>MongoClient</code>.</p>
+not. In languages that do not enforce types at compile time, drivers MUST raise an error if the provided
+<code>srvHostValidator</code> is not a callable of the expected type. Drivers MAY raise this error at any point between MongoClient
+construction and DNS resolution. During initial seedlist discovery, if <code>srvHostValidator</code> returns a value that is not a
+bool, drivers MUST treat it as though the validator raised an error. If <code>srvHostValidator</code> raises an error during
+initial seedlist resolution, the driver MUST catch that error and wrap it prior to re-raising the error to the user.
+During <a href="#polling-srv-records-for-mongos-discovery">SRV polling</a>, a driver
+MUST NOT raise an error; an error raised by the validator is instead treated as though the validator had returned
+<code>false</code> and any value that is not the boolean <code>true</code> MUST be treated as <code>false</code>. Since this is a synchronous callback,
+drivers should advise users to not write a validator that blocks. This option MUST only be configurable at the level of
+a <code>MongoClient</code>.</p>
 <p>Notably, <code>srvHostValidator</code> relaxes existing security measures and must be used with caution. Thus, drivers MUST
 document that this parameter is a dangerous option. For example, something like “WARNING: Modifying the default SRV
 domain name validation can create vulnerabilities.” should be clearly visible in the documentation.</p>
@@ -5629,6 +5637,11 @@ left the behaviour of supporting UTF-8 characters as unspecified.</p>
 <p>In the future we could consider using the priority and weight fields of the SRV records.</p>
 <h2 id="changelog-14"><a class="header" href="#changelog-14">ChangeLog</a></h2>
 <ul>
+<li>
+<p>2026-10-01: Specify that <code>srvAllowedHostsSuffix</code> has no hostname syntax validation beyond the listed steps, and that a
+<code>srvHostValidator</code> of the wrong type, or one returning a non-bool value, results in an error during initial seedlist
+discovery and is treated as <code>false</code> during SRV polling.</p>
+</li>
 <li>
 <p>2026-09-16: Add <code>srvHostValidator</code> as a MongoClient option, and allow <code>srvAllowedHostsSuffix</code> to be a single label
 when that label is one of a fixed list of names reserved for private or special use.</p>
@@ -38346,6 +38359,103 @@ creating raw BSON bytes or constructing BSON-specific type classes):</p>
 <p>Depending on how drivers implement BSON encoding, they MAY expect an error when constructing a type class (e.g. BSON
 Document or Regex class) or when encoding a language representation to BSON (e.g. converting a dictionary, which might
 allow null bytes in its keys, to raw BSON bytes).</p>
+<h3 id="2-test-duplicate-keys"><a class="header" href="#2-test-duplicate-keys">2. Test duplicate keys</a></h3>
+<p>The following tests exercise behavior for encoding and decoding BSON with duplicate keys. The expectations depend on the
+implementation. Duplicate keys are not prohibited by the <a href="https://bsonspec.org/spec.html">specification</a>, but are
+inconsistently handled by the MongoDB server (<a href="https://jira.mongodb.org/browse/SERVER-6439">SERVER-6439</a>). The expected
+behavior must be consistent with its corresponding API documentation.</p>
+<h4 id="21-test-encoding"><a class="header" href="#21-test-encoding">2.1 Test encoding</a></h4>
+<p>Test appending duplicate BSON keys using supported BSON builder API. In pseudo-code:</p>
+<pre><code class="language-python">builder = bson.builder()
+builder.append("foo", 1)
+builder.append("foo", 2)
+got = builder.encode()
+</code></pre>
+<p>Expect one of the following implementation-defined results:</p>
+<ul>
+<li>Duplicate key error raised.</li>
+<li>Last-one wins: <code>got</code> is <code>{ "foo": 2 }</code>.</li>
+<li>First-one wins: <code>got</code> is <code>{ "foo": 1 }</code>.</li>
+<li>Both values preserved in-order: <code>got</code> is <code>{ "foo": 1, "foo": 2 }</code>.</li>
+</ul>
+<h4 id="22-test-decoding"><a class="header" href="#22-test-decoding">2.2 Test decoding</a></h4>
+<p>Test decoding BSON data for a document containing duplicate keys:</p>
+<pre><code class="language-python"># Bytes represent BSON for { 'foo': 1, 'foo': 2 }
+data = bytes.fromhex("1700000010666f6f000100000010666f6f000200000000")
+</code></pre>
+<p>Behavior may differ between decoding APIs. Drivers MUST test each of the following that their BSON library provides:</p>
+<ul>
+<li>
+<p>Iterating elements without converting to a map (e.g. a BSON document iterator or reader). In pseudo-code:</p>
+<pre><code class="language-python">elements = list(bson.iter_elements(data))
+</code></pre>
+<p>Expect one of the following implementation-defined results:</p>
+<ul>
+<li>Duplicate key error raised.</li>
+<li>Both elements returned in-order: <code>elements</code> is <code>[("foo", 1), ("foo", 2)]</code>.</li>
+</ul>
+</li>
+<li>
+<p>Looking up a key in a document. In pseudo-code:</p>
+<pre><code class="language-python">got = bson.document(data)["foo"]
+</code></pre>
+<p>Expect one of the following implementation-defined results:</p>
+<ul>
+<li>Duplicate key error raised.</li>
+<li>Last-one wins: <code>got</code> is <code>2</code>.</li>
+<li>First-one wins: <code>got</code> is <code>1</code>.</li>
+</ul>
+</li>
+<li>
+<p>Converting to a native language map or dictionary. In pseudo-code:</p>
+<pre><code class="language-python">got = bson.decode(data)
+</code></pre>
+<p>Expect one of the following implementation-defined results:</p>
+<ul>
+<li>Duplicate key error raised.</li>
+<li>Last-one wins: <code>got</code> is <code>{ "foo": 2 }</code>.</li>
+<li>First-one wins: <code>got</code> is <code>{ "foo": 1 }</code>.</li>
+<li>Both values preserved in-order (only when the map type supports duplicate keys): <code>got</code> is <code>{ "foo": 1, "foo": 2 }</code>.</li>
+</ul>
+</li>
+<li>
+<p>Converting to Extended JSON. In pseudo-code:</p>
+<pre><code class="language-python">got = bson.to_extended_json(data)
+</code></pre>
+<p>Expect one of the following implementation-defined results:</p>
+<ul>
+<li>Duplicate key error raised.</li>
+<li>Last-one wins: <code>got</code> is <code>'{ "foo": 2 }'</code>.</li>
+<li>First-one wins: <code>got</code> is <code>'{ "foo": 1 }'</code>.</li>
+<li>Both values preserved in-order: <code>got</code> is <code>'{ "foo": 1, "foo": 2 }'</code>.</li>
+</ul>
+</li>
+</ul>
+<h4 id="23-test-round-trip"><a class="header" href="#23-test-round-trip">2.3 Test round-trip</a></h4>
+<p>Test decoding BSON data containing duplicate keys to a language representation and encoding it back to BSON. In
+pseudo-code:</p>
+<pre><code class="language-python"># Bytes represent BSON for { 'foo': 1, 'foo': 2 }
+data = bytes.fromhex("1700000010666f6f000100000010666f6f000200000000")
+got = bson.encode(bson.decode(data))
+</code></pre>
+<p>Expect one of the following implementation-defined results:</p>
+<ul>
+<li>Duplicate key error raised.</li>
+<li>Last-one wins: <code>got</code> is BSON for <code>{ "foo": 2 }</code>.</li>
+<li>First-one wins: <code>got</code> is BSON for <code>{ "foo": 1 }</code>.</li>
+<li>Both values preserved in-order: <code>got</code> is equal to <code>data</code>.</li>
+</ul>
+<h4 id="24-test-parsing-extended-json"><a class="header" href="#24-test-parsing-extended-json">2.4 Test parsing Extended JSON</a></h4>
+<p>Test parsing an Extended JSON document containing duplicate keys to BSON. In pseudo-code:</p>
+<pre><code class="language-python">got = bson.from_extended_json('{ "foo": 1, "foo": 2 }')
+</code></pre>
+<p>Expect one of the following implementation-defined results:</p>
+<ul>
+<li>Duplicate key error raised.</li>
+<li>Last-one wins: <code>got</code> is BSON for <code>{ "foo": 2 }</code>.</li>
+<li>First-one wins: <code>got</code> is BSON for <code>{ "foo": 1 }</code>.</li>
+<li>Both values preserved in-order: <code>got</code> is BSON for <code>{ "foo": 1, "foo": 2 }</code>.</li>
+</ul>
 <h2 id="implementation-notes-7"><a class="header" href="#implementation-notes-7">Implementation Notes</a></h2>
 <h3 id="a-tool-for-visualizing-bson"><a class="header" href="#a-tool-for-visualizing-bson">A tool for visualizing BSON</a></h3>
 <p>The test directory includes a Perl script <code>bsonview</code>, which will decompose and highlight elements of a BSON document. It
@@ -38399,6 +38509,9 @@ alone and can be confirmed to be internally consistent via the assertions. This 
 development.</p>
 <h2 id="changelog-58"><a class="header" href="#changelog-58">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-09-30: Add prose tests for duplicate keys.</p>
+</li>
 <li>
 <p>2024-01-22: Migrated from reStructuredText to Markdown.</p>
 </li>

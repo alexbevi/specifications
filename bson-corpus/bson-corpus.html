@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-2dea9ffd.js";
+            window.path_to_searchindex_js = "../searchindex-91037e48.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -415,6 +415,103 @@ creating raw BSON bytes or constructing BSON-specific type classes):</p>
 <p>Depending on how drivers implement BSON encoding, they MAY expect an error when constructing a type class (e.g. BSON
 Document or Regex class) or when encoding a language representation to BSON (e.g. converting a dictionary, which might
 allow null bytes in its keys, to raw BSON bytes).</p>
+<h3 id="2-test-duplicate-keys"><a class="header" href="#2-test-duplicate-keys">2. Test duplicate keys</a></h3>
+<p>The following tests exercise behavior for encoding and decoding BSON with duplicate keys. The expectations depend on the
+implementation. Duplicate keys are not prohibited by the <a href="https://bsonspec.org/spec.html">specification</a>, but are
+inconsistently handled by the MongoDB server (<a href="https://jira.mongodb.org/browse/SERVER-6439">SERVER-6439</a>). The expected
+behavior must be consistent with its corresponding API documentation.</p>
+<h4 id="21-test-encoding"><a class="header" href="#21-test-encoding">2.1 Test encoding</a></h4>
+<p>Test appending duplicate BSON keys using supported BSON builder API. In pseudo-code:</p>
+<pre><code class="language-python">builder = bson.builder()
+builder.append("foo", 1)
+builder.append("foo", 2)
+got = builder.encode()
+</code></pre>
+<p>Expect one of the following implementation-defined results:</p>
+<ul>
+<li>Duplicate key error raised.</li>
+<li>Last-one wins: <code>got</code> is <code>{ "foo": 2 }</code>.</li>
+<li>First-one wins: <code>got</code> is <code>{ "foo": 1 }</code>.</li>
+<li>Both values preserved in-order: <code>got</code> is <code>{ "foo": 1, "foo": 2 }</code>.</li>
+</ul>
+<h4 id="22-test-decoding"><a class="header" href="#22-test-decoding">2.2 Test decoding</a></h4>
+<p>Test decoding BSON data for a document containing duplicate keys:</p>
+<pre><code class="language-python"># Bytes represent BSON for { 'foo': 1, 'foo': 2 }
+data = bytes.fromhex("1700000010666f6f000100000010666f6f000200000000")
+</code></pre>
+<p>Behavior may differ between decoding APIs. Drivers MUST test each of the following that their BSON library provides:</p>
+<ul>
+<li>
+<p>Iterating elements without converting to a map (e.g. a BSON document iterator or reader). In pseudo-code:</p>
+<pre><code class="language-python">elements = list(bson.iter_elements(data))
+</code></pre>
+<p>Expect one of the following implementation-defined results:</p>
+<ul>
+<li>Duplicate key error raised.</li>
+<li>Both elements returned in-order: <code>elements</code> is <code>[("foo", 1), ("foo", 2)]</code>.</li>
+</ul>
+</li>
+<li>
+<p>Looking up a key in a document. In pseudo-code:</p>
+<pre><code class="language-python">got = bson.document(data)["foo"]
+</code></pre>
+<p>Expect one of the following implementation-defined results:</p>
+<ul>
+<li>Duplicate key error raised.</li>
+<li>Last-one wins: <code>got</code> is <code>2</code>.</li>
+<li>First-one wins: <code>got</code> is <code>1</code>.</li>
+</ul>
+</li>
+<li>
+<p>Converting to a native language map or dictionary. In pseudo-code:</p>
+<pre><code class="language-python">got = bson.decode(data)
+</code></pre>
+<p>Expect one of the following implementation-defined results:</p>
+<ul>
+<li>Duplicate key error raised.</li>
+<li>Last-one wins: <code>got</code> is <code>{ "foo": 2 }</code>.</li>
+<li>First-one wins: <code>got</code> is <code>{ "foo": 1 }</code>.</li>
+<li>Both values preserved in-order (only when the map type supports duplicate keys): <code>got</code> is <code>{ "foo": 1, "foo": 2 }</code>.</li>
+</ul>
+</li>
+<li>
+<p>Converting to Extended JSON. In pseudo-code:</p>
+<pre><code class="language-python">got = bson.to_extended_json(data)
+</code></pre>
+<p>Expect one of the following implementation-defined results:</p>
+<ul>
+<li>Duplicate key error raised.</li>
+<li>Last-one wins: <code>got</code> is <code>'{ "foo": 2 }'</code>.</li>
+<li>First-one wins: <code>got</code> is <code>'{ "foo": 1 }'</code>.</li>
+<li>Both values preserved in-order: <code>got</code> is <code>'{ "foo": 1, "foo": 2 }'</code>.</li>
+</ul>
+</li>
+</ul>
+<h4 id="23-test-round-trip"><a class="header" href="#23-test-round-trip">2.3 Test round-trip</a></h4>
+<p>Test decoding BSON data containing duplicate keys to a language representation and encoding it back to BSON. In
+pseudo-code:</p>
+<pre><code class="language-python"># Bytes represent BSON for { 'foo': 1, 'foo': 2 }
+data = bytes.fromhex("1700000010666f6f000100000010666f6f000200000000")
+got = bson.encode(bson.decode(data))
+</code></pre>
+<p>Expect one of the following implementation-defined results:</p>
+<ul>
+<li>Duplicate key error raised.</li>
+<li>Last-one wins: <code>got</code> is BSON for <code>{ "foo": 2 }</code>.</li>
+<li>First-one wins: <code>got</code> is BSON for <code>{ "foo": 1 }</code>.</li>
+<li>Both values preserved in-order: <code>got</code> is equal to <code>data</code>.</li>
+</ul>
+<h4 id="24-test-parsing-extended-json"><a class="header" href="#24-test-parsing-extended-json">2.4 Test parsing Extended JSON</a></h4>
+<p>Test parsing an Extended JSON document containing duplicate keys to BSON. In pseudo-code:</p>
+<pre><code class="language-python">got = bson.from_extended_json('{ "foo": 1, "foo": 2 }')
+</code></pre>
+<p>Expect one of the following implementation-defined results:</p>
+<ul>
+<li>Duplicate key error raised.</li>
+<li>Last-one wins: <code>got</code> is BSON for <code>{ "foo": 2 }</code>.</li>
+<li>First-one wins: <code>got</code> is BSON for <code>{ "foo": 1 }</code>.</li>
+<li>Both values preserved in-order: <code>got</code> is BSON for <code>{ "foo": 1, "foo": 2 }</code>.</li>
+</ul>
 <h2 id="implementation-notes"><a class="header" href="#implementation-notes">Implementation Notes</a></h2>
 <h3 id="a-tool-for-visualizing-bson"><a class="header" href="#a-tool-for-visualizing-bson">A tool for visualizing BSON</a></h3>
 <p>The test directory includes a Perl script <code>bsonview</code>, which will decompose and highlight elements of a BSON document. It
@@ -468,6 +565,9 @@ alone and can be confirmed to be internally consistent via the assertions. This 
 development.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-09-30: Add prose tests for duplicate keys.</p>
+</li>
 <li>
 <p>2024-01-22: Migrated from reStructuredText to Markdown.</p>
 </li>
