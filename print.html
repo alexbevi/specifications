@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-f1a90a6e.js";
+            window.path_to_searchindex_js = "searchindex-5d737a6e.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-c2b477e5.js"></script>
@@ -4451,6 +4451,7 @@ conn.authenticate(creds, negotiated_mechs, speculative_auth)
                 timeout_sec: 42,          /* OPTIONAL */
                 memory_mb: 1024,          /* OPTIONAL */
                 region: "&lt;string&gt;",       /* OPTIONAL */
+                agent: "&lt;string&gt;",        /* OPTIONAL */
                 /* OPTIONAL */
                 container: {
                     runtime: "&lt;string&gt;",  /* OPTIONAL */
@@ -4539,8 +4540,8 @@ typically <code>PRETTY_NAME</code> of <code>os-release(5)</code> (<code>/etc/os-
 <p><span id="client-env"></span></p>
 <h4 id="clientenv"><a class="header" href="#clientenv">client.env</a></h4>
 <p>This value is optional and is not application configurable.</p>
-<p>Information about the execution environment, including Function-as-a-Service (FaaS) identification and container
-runtime.</p>
+<p>Information about the execution environment, including Function-as-a-Service (FaaS) identification, container runtime,
+and agentic client (agent) identification.</p>
 <p>The contents of <code>client.env</code> MUST be adjusted to keep the handshake below the size limit; see
 <a href="#limitations">Limitations</a> for specifics.</p>
 <p>If no fields of <code>client.env</code> would be populated, <code>client.env</code> MUST be entirely omitted.</p>
@@ -4581,6 +4582,71 @@ other FaaS values to be entirely omitted.</p>
 </div>
 <p>Missing variables or variables with values not matching the expected type MUST cause the corresponding <code>client.env</code>
 field to be omitted and MUST NOT cause a user-visible error.</p>
+<h5 id="agent"><a class="header" href="#agent">Agent</a></h5>
+<p>Agents are AI coding assistants and agentic clients, such as Claude Code, Cursor, and Gemini CLI. Most agents set an
+environment variable when they run shell commands or code for a user. <code>client.env.agent</code> records which agent, if any,
+drives the client. This distinguishes agent-mediated use of MongoDB from direct human use.</p>
+<p><code>client.env.agent</code> is a single string. The environment variables below determine its value. Drivers MUST evaluate the
+list in order. The first populated variable determines the value. Drivers MUST NOT consider later entries.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Order</th><th>Environment Variable</th><th><code>client.env.agent</code> value</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td><code>CLAUDECODE</code></td><td><code>claude_code</code></td></tr>
+<tr><td>2</td><td><code>CLAUDE_CODE_ENTRYPOINT</code></td><td><code>claude_code</code></td></tr>
+<tr><td>3</td><td><code>CURSOR_AGENT</code></td><td><code>cursor</code></td></tr>
+<tr><td>4</td><td><code>CODEX_SANDBOX</code></td><td><code>codex_cli</code></td></tr>
+<tr><td>5</td><td><code>CLINE_ACTIVE</code></td><td><code>cline</code></td></tr>
+<tr><td>6</td><td><code>GEMINI_CLI</code></td><td><code>gemini_cli</code></td></tr>
+<tr><td>7</td><td><code>AUGMENT_AGENT</code></td><td><code>auggie_cli</code></td></tr>
+<tr><td>8</td><td><code>OPENCODE</code></td><td><code>opencode_client</code></td></tr>
+<tr><td>9</td><td><code>OPENCODE_CLIENT</code></td><td><code>opencode_client</code></td></tr>
+<tr><td>10</td><td><code>TRAE_AI_SHELL_ID</code></td><td><code>trae_ai</code></td></tr>
+<tr><td>11</td><td><code>GOOSE_TERMINAL</code></td><td><code>goose</code></td></tr>
+<tr><td>12</td><td><code>GOOSE_AGENT</code></td><td><code>goose</code></td></tr>
+<tr><td>13</td><td><code>AI_AGENT</code></td><td>See below.</td></tr>
+</tbody>
+</table>
+</div>
+<p>For entries 1 through 12, <code>client.env.agent</code> is the fixed string in the table, whatever the value of the populated
+variable. These variables identify a known agent, so the name does not depend on the value.</p>
+<p>Entry 13, <code>AI_AGENT</code>, is a generic variable that any agent may set. It is evaluated last, so a known agent is always
+reported under its fixed name. Normalize its value, then:</p>
+<ul>
+<li>If the normalized value is <code>1</code> or <code>true</code>, <code>client.env.agent</code> MUST be the fixed string <code>ai_agent</code>. These values
+identify an agent without naming it.</li>
+<li>Otherwise, <code>client.env.agent</code> MUST be the normalized value.</li>
+</ul>
+<p>Normalization removes leading and trailing whitespace and converts the value to lowercase. Drivers MUST then truncate
+the value to the largest valid UTF-8 prefix of 64 bytes or fewer. Drivers MUST drop a character that does not fit.
+Drivers MUST NOT split a character or replace one with U+FFFD.</p>
+<p><code>AI_AGENT</code> is the only entry whose value is reported, and therefore the only unbounded one. The 64-byte limit stops a
+long value from costing both <code>client.env.agent</code> and other fields under <a href="#limitations">Limitations</a>.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Truncation at a fixed byte count splits a character if the limit falls inside one, and some string APIs then
+substitute U+FFFD, which is lossy and longer than the bytes it replaces. Use an API that truncates on a character
+boundary, or walk back from byte 64 to the start of the character that contains it.</p>
+</blockquote>
+<p>Agents may include version information in this value, so it is not a fixed set of strings. Entries 1 through 12 report a
+name from the table, but an agent reports its own <code>AI_AGENT</code> value, which is therefore not generically queryable.</p>
+<p>A variable is populated if it is present and non-empty after normalization. A whitespace-only value is therefore not
+populated. If no variable above is populated, <code>client.env.agent</code> MUST be omitted.</p>
+<p>Determination of <code>client.env.agent</code> MUST NOT cause a user-visible error.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The variables above, and the names they map to, match the detection that
+<a href="https://github.com/mongodb-js/mongosh">mongosh</a> implements, so drivers and the shell report the same known agent
+under the same name. New agents will appear over time. Drivers MUST NOT add entries on their own; a change to this
+specification extends the list.</p>
+<p>mongosh checks <code>OPENCODE_CLIENT</code>, which opencode itself does not set; opencode sets <code>OPENCODE</code>. This specification
+checks both, so detection works either way.</p>
+<p>Normalization of <code>AI_AGENT</code> does not match mongosh, which keeps whitespace, reports a whitespace-only value, and does
+not truncate. <a href="https://jira.mongodb.org/browse/MONGOSH-3696">MONGOSH-3696</a> proposes that mongosh adopt the behavior
+above.</p>
+</blockquote>
 <h5 id="container"><a class="header" href="#container">Container</a></h5>
 <p>Container runtime information is captured in <code>client.env.container</code>.</p>
 <p><code>client.env.container.runtime</code> MUST be set to <code>"docker"</code> if the file <code>.dockerenv</code> exists in the root directory.</p>
@@ -4715,11 +4781,13 @@ which will result in handshake failure. Drivers MUST validate these values and t
 if necessary. Implementers SHOULD cumulatively update fields in the following order until the document is under the size
 limit:</p>
 <ol>
-<li>Omit fields from <code>env</code> except <code>env.name</code>.</li>
+<li>Omit fields from <code>env</code> except <code>env.name</code> and <code>env.agent</code>.</li>
+<li>Omit <code>env.agent</code>. If <code>env</code> then has no remaining fields, omit <code>env</code> entirely.</li>
 <li>Omit fields from <code>os</code> except <code>os.type</code>.</li>
 <li>Omit the <code>env</code> document entirely.</li>
 <li>Truncate <code>platform</code>.</li>
 </ol>
+<p><code>env.agent</code> is omitted before <code>env.name</code> because drivers have reported <code>env.name</code> since before <code>env.agent</code> existed.</p>
 <p>Additionally, implementers are encouraged to place high priority information about the platform earlier in the string,
 in order to avoid possible truncating of those details.</p>
 <h2 id="motivation-for-change-6"><a class="header" href="#motivation-for-change-6">Motivation For Change</a></h2>
@@ -4810,6 +4878,8 @@ specification</li>
 </ul>
 <h2 id="changelog-11"><a class="header" href="#changelog-11">Changelog</a></h2>
 <ul>
+<li>2026-10-14: Add <code>OPENCODE_CLIENT</code> to the <code>env.agent</code> detection table.</li>
+<li>2026-09-22: Add <code>env.agent</code> to <code>client</code> document for agentic client identification.</li>
 <li>2026-09-11: Require <code>driver.name</code> and <code>driver.version</code> entries to correspond by index, and clarify that duplicate
 detection compares whole <code>DriverInfoOptions</code>.</li>
 <li>2026-06-25: Clarify the client backpressure component of the handshake.</li>
