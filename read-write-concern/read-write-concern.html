@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-5d737a6e.js";
+            window.path_to_searchindex_js = "../searchindex-65a34617.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -495,13 +495,12 @@ concern in the command on the wire.</p>
   operationTime: Timestamp(1583026145, 1)
 }
 </code></pre>
-<p>Drivers SHOULD parse server replies for a “writeConcernError” field and report the error only in the command-specific
-helper methods for commands that write, from the list above. For example, helper methods for “findAndModify” or
-“aggregate” SHOULD parse the server reply for “writeConcernError”.</p>
+<p>Drivers MUST parse server replies for a “writeConcernError” field and report the error in all driver methods that send a
+server command that may include a <code>WriteConcern</code>, excluding <code>abortTransaction</code> and generic command methods. Drivers
+SHOULD NOT parse server replies for a “writeConcernError” in generic command methods.</p>
 <p>Drivers SHOULD report writeConcernErrors however they report other server errors: by raising an exception, returning
 “false”, or another idiom that is consistent with other server errors. Drivers SHOULD report writeConcernErrors with a
 <code>WriteConcernError</code> defined in the <a href="../crud/crud.html#error-handling">CRUD specification</a>.</p>
-<p>Drivers SHOULD NOT parse server replies for “writeConcernError” in generic command methods.</p>
 <p>(Reporting of writeConcernErrors is more complex for bulk operations, see the Bulk API Spec.)</p>
 <h6 id="writeconcernerror-examples"><a class="header" href="#writeconcernerror-examples">writeConcernError Examples</a></h6>
 <p>The set of possible writeConcernErrors is quite large because they can include errors caused by shutdown, stepdown,
@@ -580,6 +579,8 @@ concerns.</p>
 <ol>
 <li>Commands supporting a write concern MUST NOT send the default write concern to the server.</li>
 <li>Commands supporting a write concern MUST send any non-default write concern to the server in the command.</li>
+<li>Commands supporting a write concern MUST report a <code>writeConcernError</code> returned in the server reply from
+command-specific helper methods.</li>
 </ol>
 <h2 id="reference-implementation"><a class="header" href="#reference-implementation">Reference Implementation</a></h2>
 <p>These are currently under construction.</p>
@@ -593,6 +594,9 @@ don’t send one and if a user does specify a <code>ReadConcern</code>, we do se
 instance, we send it.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-10-27: Require drivers to report <code>writeConcernError</code>s.</p>
+</li>
 <li>
 <p>2026-06-17: Remove pre-4.2 version references.</p>
 </li>
