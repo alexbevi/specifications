@@ -172,19 +172,6 @@ tests:
         documents:
           - *dottedKeyInId
 
-  - description: "Inserting document with dotted key in _id on pre-3.6 server yields server-side error"
-    runOnRequirements:
-      - maxServerVersion: "3.4.99"
-    operations:
-      - name: insertOne
-        object: *collection0
-        arguments:
-          document: *dottedKeyInId
-        expectError:
-          isClientError: false
-    expectEvents: *expectEventsDottedKeyInId
-    outcome: *initialData
-
   - description: "Inserting document with DBRef-like keys"
     operations:
       - name: insertOne
@@ -198,7 +185,7 @@ tests:
           # Using "$db" here works for libmongoc so long as it's a string type;
           # however, neither $ref nor $id would be accepted on their own.
           #
-          # See https://github.com/mongodb/specifications/blob/master/source/extended-json.rst#parsers
+          # See https://github.com/mongodb/specifications/blob/master/source/extended-json.md#parsers
           document: &dbrefLikeKey { _id: 1, a: { $db: "foo" } }
         expectResult: *insertResult
     expectEvents:

@@ -1,7 +1,6 @@
 # Index Management
 
 - Status: Accepted
-- Minimum Server Version: 3.6
 
 ______________________________________________________________________
 
@@ -20,23 +19,27 @@ The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SH
 
 #### Terms
 
-**Collection**\
+**Collection**
+
 The term `Collection` references the object in the driver that represents a collection on the server.
 
-**Cursor**\
+**Cursor**
+
 The term `Cursor` references the driver's cursor object.
 
-**Iterable**\
+**Iterable**
+
 The term `Iterable` is to describe an object that is a sequence of elements that can be iterated over.
 
-**Document**\
+**Document**
+
 The term `Document` refers to the implementation in the driver's language of a BSON document.
 
-**Result**\
-The term `Result` references the object that is normally returned by the driver as the result of a command
-execution. In the case of situations where an actual command is not executed, rather an insert or a query, an object
-that adheres to the same interface must be returned with as much information as possible that could be obtained from the
-operation.
+**Result**
+
+The term `Result` references the object that is normally returned by the driver as the result of a command execution. In
+the case of situations where an actual command is not executed, rather an insert or a query, an object that adheres to
+the same interface must be returned with as much information as possible that could be obtained from the operation.
 
 ### Guidance
 
@@ -56,19 +59,18 @@ Within each API, all methods are REQUIRED unless noted otherwise in the comments
 All drivers MUST include the specified parameters in each operation. This does not preclude a driver from offering more.
 A driver SHOULD NOT require a user to specify the options parameter if they wish to use the server defaults.
 
-As of 3.4 (see <https://jira.mongodb.org/browse/SERVER-769>) the server validates options passed to the `createIndexes`
-command -- drivers should be aware when testing that passing arbitrary options when the driver does not validate them
-could fail on the server.
+The server validates options passed to the `createIndexes` command -- drivers should be aware when testing that passing
+arbitrary options when the driver does not validate them could fail on the server.
 
 #### Deviations
 
 A non-exhaustive list of acceptable deviations are as follows:
 
 - Using named parameters in place of an options hash or class. For instance,
-  `collection.create_index({x: 1}, commit_quorum="majority")`.
+    `collection.create_index({x: 1}, commit_quorum="majority")`.
 - When using an `Options` class, if multiple `Options` classes are structurally equatable, it is permissible to
-  consolidate them into one with a clear name. For instance, it would be permissible to use the name
-  `CreateIndexOptions` as the options for `createIndex` and `createIndexes`.
+    consolidate them into one with a clear name. For instance, it would be permissible to use the name
+    `CreateIndexOptions` as the options for `createIndex` and `createIndexes`.
 
 #### Naming
 
@@ -83,11 +85,11 @@ the user of another driver.
 A non-exhaustive list of acceptable naming deviations are as follows:
 
 - Using "maxTimeMS" as an example, .NET would use "MaxTime" where it's type is a TimeSpan structure that includes units.
-  However, calling it "MaximumTime" would not be acceptable.
+    However, calling it "MaximumTime" would not be acceptable.
 - Using "CreateIndexOptions" as an example, Javascript wouldn't need to name it while other drivers might prefer to call
-  it "CreateIndexArgs" or "CreateIndexParams".
+    it "CreateIndexArgs" or "CreateIndexParams".
 - Acceptable naming deviations should fall within the basic style of the language. For example, `createIndex` would be a
-  required name in Java, where camel-case method names are used, but in Ruby `create_index` would be acceptable.
+    required name in Java, where camel-case method names are used, but in Ruby `create_index` would be acceptable.
 
 #### Index Name Generation
 
@@ -134,7 +136,7 @@ interface Collection {
 
   /**
    * Creates multiple indexes in the collection.
-   * 
+   *
    * In all server versions, this MUST execute a createIndexes command.
    *
    * @return The names of all the indexes that were created.
@@ -179,7 +181,7 @@ interface Collection {
   dropIndexes(options: Optional<DropIndexesOptions>): Result;
 
   /**
-   * Gets index information for all indexes in the collection. The behavior for 
+   * Gets index information for all indexes in the collection. The behavior for
    * enumerating indexes is described in the :ref:`Enumerating Indexes` section.
    *
    */
@@ -211,6 +213,23 @@ interface CreateIndexOptions {
   maxTimeMS: Optional<Int64>;
 
   /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional<Boolean>;
+
+  /**
    * Enables users to specify an arbitrary comment to help trace the operation through
    * the database profiler, currentOp and logs. The default is to not send a value.
    *
@@ -234,6 +253,23 @@ interface DropIndexOptions {
   maxTimeMS: Optional<Int64>;
 
   /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional<Boolean>;
+
+/**
    * Enables users to specify an arbitrary comment to help trace the operation through
    * the database profiler, currentOp and logs. The default is to not send a value.
    *
@@ -265,7 +301,7 @@ Java:
 collection.createIndex(new Document("name", 1), new IndexOptions().unique(true));
 ```
 
-Produces the shell equivalent (>= 2.6.0) of:
+Produces the shell equivalent of:
 
 ```javascript
 db.runCommand({
@@ -296,7 +332,7 @@ collection.createIndexes(asList(
 ));
 ```
 
-Produces the shell equivalent (>= 2.6.0) of:
+Produces the shell equivalent of:
 
 ```javascript
 db.runCommand({
@@ -362,7 +398,7 @@ Java:
 collection.listIndexes();
 ```
 
-Produces the shell equivalent (>= 3.0.0) of:
+Produces the shell equivalent of:
 
 ```javascript
 db.runCommand({ listIndexes: "users" });
@@ -387,7 +423,7 @@ interface IndexView extends Iterable<Document> {
    * requirement is dropped in favor of the driver language standard for handling iteration
    * over a sequence of objects.
    *
-   * @see https://github.com/mongodb/specifications/blob/master/source/enumerate-indexes.rst
+   * @see https://github.com/mongodb/specifications/blob/master/source/enumerate-indexes.md
    *
    * @note For drivers that cannot make the IndexView iterable, they MUST implement a list
    *   method. See below.
@@ -398,8 +434,8 @@ interface IndexView extends Iterable<Document> {
    * For drivers that cannot make IndexView iterable, they MUST implement this method to
    * return a list of indexes. In the case of async drivers, this MAY return a Future<Cursor>
    *  or language/implementation equivalent.
-   * 
-   *  If drivers are unable to make the IndexView iterable, they MAY opt to provide the options for 
+   *
+   *  If drivers are unable to make the IndexView iterable, they MAY opt to provide the options for
    *  listing search indexes via the `list` method instead of the `Collection.indexes` method.
 
    */
@@ -436,7 +472,7 @@ interface IndexView extends Iterable<Document> {
    *
    * @note Each specification document becomes the "key" field in the document that
    *   is inserted or the command.
-   *   
+   *
    */
   createMany(models: Iterable<IndexModel>, options: Optional<CreateManyIndexesOptions>): Iterable<String>;
 
@@ -510,7 +546,7 @@ Java:
 collection.indexes().createOne(new Document("name", 1), new IndexOptions().unique(true));
 ```
 
-Produces the shell equivalent (>= 2.6.0) of:
+Produces the shell equivalent of:
 
 ```javascript
 db.runCommand({
@@ -541,7 +577,7 @@ collection.indexes().createMany(asList(
 ));
 ```
 
-Produces the shell equivalent (>= 2.6.0) of:
+Produces the shell equivalent of:
 
 ```javascript
 db.runCommand({
@@ -611,7 +647,7 @@ for (BsonDocument document: collection.indexes()) {
 }
 ```
 
-Produces the shell equivalent (>= 3.0.0) of:
+Produces the shell equivalent of:
 
 ```javascript
 var indexes = db.runCommand({ listIndexes: "users" });
@@ -642,7 +678,7 @@ interface IndexOptions {
    * Optionally tells the server to build the index in the background and not block
    * other tasks.
    *
-   * @note Starting in MongoDB 4.2, this option is ignored by the server.
+   * @note This option is ignored by the server.
    * @see https://www.mongodb.com/docs/manual/reference/command/createIndexes/
    * @deprecated 4.2
    */
@@ -664,7 +700,7 @@ interface IndexOptions {
    * @example For an index of name: 1, age: -1, the generated name would be "name_1_age_-1".
    */
   name: String;
-  
+
   /**
    * Optionally tells the index to only reference documents with the specified field in
    * the index.
@@ -672,8 +708,8 @@ interface IndexOptions {
   sparse: Boolean;
 
   /**
-   * Optionally used only in MongoDB 3.0.0 and higher. Allows users to configure the storage
-   * engine on a per-index basis when creating an index.
+   * Optionally allows users to configure the storage engine on a per-index basis when creating
+   * an index.
    */
   storageEngine: Document;
 
@@ -700,10 +736,6 @@ interface IndexOptions {
 
   /**
    * Optionally provides the text index version number.
-   *
-   * MongoDB 2.4 can only support version 1.
-   *
-   * MongoDB 2.6 and higher may support version 1 or 2.
    */
   textIndexVersion: Int32;
 
@@ -714,10 +746,6 @@ interface IndexOptions {
 
   /**
    * Optionally specifies the 2dsphere index version number.
-   *
-   * MongoDB 2.4 can only support version 1.
-   *
-   * MongoDB 2.6 and higher may support version 1 or 2.
    */
   2dsphereIndexVersion: Int32;
 
@@ -745,14 +773,13 @@ interface IndexOptions {
 
   /**
    * Optionally specifies a filter for use in a partial index. Only documents that match the
-   * filter expression are included in the index. New in MongoDB 3.2.
+   * filter expression are included in the index.
    */
   partialFilterExpression: Document;
 
   /**
-   * Optionally specifies a collation to use for the index in MongoDB 3.4 and higher.
-   * If not specified, no collation is sent and the default collation of the collection
-   * server-side is used.
+   * Optionally specifies a collation to use for the index. If not specified, no collation is
+   * sent and the default collation of the collection server-side is used.
    */
   collation: Document;
 
@@ -795,10 +822,27 @@ interface ListIndexesOptions {
 
   /**
    * Configures the batch size of the cursor returned from the ``listIndexes`` command.
-   * 
+   *
    * @note drivers MAY chose to support batchSize on the ListIndexesOptions.
    */
   batchSize: Optional<Int32>;
+
+  /**
+   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
+   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
+   *
+   * This option is intended for internal use by MongoDB teams and should be discouraged for
+   * general application use. It may be changed or removed in any release without notice.
+   *
+   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
+   *   - Marking it as deprecated, experimental, or internal in their language's idioms
+   *   - Excluding it from primary documentation
+   *
+   * @note This option MUST NOT be sent when connected to pre-8.2 servers.
+   *
+   * @since MongoDB 8.2
+   */
+  rawData: Optional<Boolean>;
 }
 ```
 
@@ -813,12 +857,14 @@ implementing the index view API.
 In MongoDB 4.4, the `ns` field was removed from the index specifications returned from the `listIndexes` command.
 
 - For drivers that report those index specifications in the form of documents or dictionaries, no special handling is
-  necessary, but any documentation of the contents of the documents/dictionaries MUST indicate that the `ns` field will
-  no longer be present in MongoDB 4.4+. If the contents of the documents/dictionaries are undocumented, then no special
-  mention of the `ns` field is necessary.
+    necessary, but any documentation of the contents of the documents/dictionaries MUST indicate that the `ns` field
+    will no longer be present in MongoDB 4.4+. If the contents of the documents/dictionaries are undocumented, then no
+    special mention of the `ns` field is necessary.
 - For drivers that report those index specifications in the form of statically defined models, the driver MUST manually
-  populate the `ns` field of the models with the appropriate namespace if the server does not report it in the
-  `listIndexes` command response. The `ns` field is not required to be a part of the models, however.
+    populate the `ns` field of the models with the appropriate namespace if the server does not report it in the
+    `listIndexes` command response. The `ns` field is not required to be a part of the models, however.
+
+<span id="enumerate-indexes"></span>
 
 #### Getting Index Names
 
@@ -827,7 +873,7 @@ as the following example:
 
 Example:
 
-```
+```javascript
 > a = [];
 [ ]
 > db.runCommand( { listIndexes: 'poiConcat' } ).indexes.forEach(function(i) { a.push(i.name); } );
@@ -898,26 +944,46 @@ await collection.dropSearchIndex('my-test-index');
 
 ```typescript
 interface SearchIndexModel {
-  // The definition for this index.
+  /**
+   * Document describing the index to create.
+   *
+   * The definition syntax depends on whether you create a standard search index
+   * or a vector search index.
+   *
+   * @see https://www.mongodb.com/docs/manual/reference/command/createSearchIndexes/
+   */
   definition: Document;
 
-  // The name for this index, if present.
-  name: Optional<string>;
-     
-  // The type for this index, if present. Can be either "search" or "vectorSearch".  
-  type: Optional<string>;
+  /**
+   * Contains the options for the index.
+   */
+  options: SearchIndexOptions;
 }
 
 interface SearchIndexOptions {
-  // The name for this index, if present.
+  /**
+   * Name of the search index to create.
+   *
+   * The server will use "default" if this option is not specified.
+   */
   name: Optional<string>;
+
+  /**
+   * Type of search index to create. Defaults to "search" if not provided.
+   *
+   * Specify "search" for a standard search index or "vectorSearch" for a vector
+   * search index.
+   *
+   * The server will use "search" if this option is not specified.
+   */
+  type: Optional<string>;
 }
 
 /**
- * The following interfaces are empty but are provided as placeholders for drivers that cannot 
+ * The following interfaces are empty but are provided as placeholders for drivers that cannot
  * add options in a non-breaking manner, if options are added in the future.
  */
-interface CreateSearchIndexOptions {} 
+interface CreateSearchIndexOptions {}
 interface UpdateSearchIndexOptions {}
 interface ListSearchIndexOptions {}
 interface DropSearchIndexOptions {}
@@ -929,22 +995,22 @@ interface DropSearchIndexOptions {}
 interface Collection {
   /**
    * Convenience method for creating a single search index.
-   * 
+   *
    * @return The name of the created search index
-   * 
+   *
    * @note Drivers MAY opt to implement this method signature, the signature that
    *   takes an SearchIndexModel as a parameter, or for those languages with method
    *   overloading MAY decide to implement both.
-   *   
+   *
    * @note Drivers MAY combine the `indexOptions` with the `createSearchIndexOptions`, if that is idiomatic for their language.
    */
   createSearchIndex(definition: Document, indexOptions: Optional<SearchIndexOptions>, createSearchIndexOptions: Optional<CreateSearchIndexOptions>): String;
 
   /**
    * Convenience method for creating a single index.
-   * 
+   *
    * @return The name of the created search index
-   * 
+   *
    * @note Drivers MAY opt to implement this method signature, the signature that
    *   takes an name and a definition as parameters, or for those languages with method
    *   overloading MAY decide to implement both.
@@ -953,13 +1019,13 @@ interface Collection {
 
   /**
    * Creates multiple search indexes on the collection.
-   * 
+   *
    * @return An iterable of the newly created index names.
    */
   createSearchIndexes(models: Iterable<SearchIndexModel>, options: CreateSearchIndexOptions): Iterable<String>;
 
   /**
-   * Updates the search index with the given name to use the provided 
+   * Updates the search index with the given name to use the provided
    * definition.
    */
   updateSearchIndex(name: String, definition: Document, options: Optional<UpdateSearchIndexOptions>): void;
@@ -990,7 +1056,7 @@ interface Collection {
 
 interface SearchIndexView extends Iterable<Document> {
   /**
-   * Enumerates the index information for all search indexes in the collection. 
+   * Enumerates the index information for all search indexes in the collection.
    *
    * @note For drivers that cannot make the IndexView iterable, they MUST implement a list
    *   method. See below.
@@ -1001,8 +1067,8 @@ interface SearchIndexView extends Iterable<Document> {
    * For drivers that cannot make SearchIndexView iterable, they MUST implement this method to
    * return a list of indexes. In the case of async drivers, this MAY return a Future<Cursor>
    *  or language/implementation equivalent.
-   *  
-   *  If drivers are unable to make the SearchIndexView iterable, they MAY opt to provide the options for 
+   *
+   *  If drivers are unable to make the SearchIndexView iterable, they MAY opt to provide the options for
    *  listing search indexes via the `list` method instead of the `Collection.searchIndexes` method.
    */
   list(): Cursor<Document>;
@@ -1016,7 +1082,7 @@ interface SearchIndexView extends Iterable<Document> {
    * @note Drivers MAY opt to implement this method signature, the signature that
    *   takes an SearchIndexModel as a parameter, or for those languages with method
    *   overloading MAY decide to implement both.
-   *   
+   *
    * @note Drivers MAY combine the `indexOptions` with the `createSearchIndexOptions`, if that is idiomatic for their language.
    */
   createOne(definition: Document, indexOptions: Optional<SearchIndexOptions>, createSearchIndexOptions: Optional<CreateSearchIndexOptions>): String;
@@ -1053,12 +1119,12 @@ interface SearchIndexView extends Iterable<Document> {
 
 ### Q & A
 
-Q: Where is write concern?\
-The `createIndexes` and `dropIndexes` commands take a write concern that indicates how the
-write is acknowledged. Since all operations defined in this specification are performed on a collection, it's uncommon
-that two different index operations on the same collection would use a different write concern. As such, the most
-natural place to indicate write concern is on the client, the database, or the collection itself and not the operations
-within it.
+Q: Where is write concern?
+
+The `createIndexes` and `dropIndexes` commands take a write concern that indicates how the write is acknowledged. Since
+all operations defined in this specification are performed on a collection, it's uncommon that two different index
+operations on the same collection would use a different write concern. As such, the most natural place to indicate write
+concern is on the client, the database, or the collection itself and not the operations within it.
 
 However, it might be that a driver needs to expose write concern to a user per operation for various reasons. It is
 permitted to allow a write concern option, but since writeConcern is a top-level command option, it MUST NOT be
@@ -1066,11 +1132,12 @@ specified as part of an `IndexModel` passed into the helper. It SHOULD be specif
 helper. For example, it would be ambiguous to specify write concern for one or more models passed to `createIndexes()`,
 but it would not be to specify it via the `CreateIndexesOptions`.
 
-Q: What does the commitQuorum option do?\
-Prior to MongoDB 4.4, secondaries would simply replicate index builds once
-they were completed on the primary. Building indexes requires an exclusive lock on the collection being indexed, so the
-secondaries would be blocked from replicating all other operations while the index build took place. This would
-introduce replication lag correlated to however long the index build took.
+Q: What does the commitQuorum option do?
+
+Prior to MongoDB 4.4, secondaries would simply replicate index builds once they were completed on the primary. Building
+indexes requires an exclusive lock on the collection being indexed, so the secondaries would be blocked from replicating
+all other operations while the index build took place. This would introduce replication lag correlated to however long
+the index build took.
 
 Starting in MongoDB 4.4, secondaries build indexes simultaneously with the primary, and after starting an index build,
 the primary will wait for a certain number of data-bearing nodes, including itself, to have completed the build before
@@ -1083,11 +1150,12 @@ committing the index.
 The server-default value for `commitQuorum` is "votingMembers", which means the primary will wait for all voting
 data-bearing nodes to complete building the index before it commits it.
 
-Q: Why would a user want to specify a non-default `commitQuorum`?\
-Like `w: "majority"`, `commitQuorum: "votingMembers"`
-doesn't consider non-voting data-bearing nodes such as analytics nodes. If a user wanted to ensure these nodes didn't
-lag behind, then they would specify `commitQuorum: <total number of data-bearing nodes, including non-voting nodes>`.
-Alternatively, if they wanted to ensure only specific non-voting nodes didn't lag behind, they could specify a
+Q: Why would a user want to specify a non-default `commitQuorum`
+
+Like `w: "majority"`, `commitQuorum: "votingMembers"` doesn't consider non-voting data-bearing nodes such as analytics
+nodes. If a user wanted to ensure these nodes didn't lag behind, then they would specify
+`commitQuorum: <total number of data-bearing nodes, including non-voting nodes>`. Alternatively, if they wanted to
+ensure only specific non-voting nodes didn't lag behind, they could specify a
 [custom getLastErrorMode based on the nodes' tag sets](https://www.mongodb.com/docs/manual/reference/replica-configuration/#rsconf.settings.getLastErrorModes)
 (e.g. `commitQuorum: <custom getLastErrorMode name>`).
 
@@ -1095,11 +1163,12 @@ Additionally, if a user has a high tolerance for replication lag, they can set a
 useful for situations where certain secondaries take longer to build indexes than the primaries, and the user doesn't
 care if they lag behind.
 
-Q: What is the difference between write concern and `commitQuorum`?\
-While these two options share a lot in terms of how
-they are specified, they configure entirely different things. `commitQuorum` determines how much new replication lag an
-index build can tolerably introduce, but it says nothing of durability. Write concern specifies the durability
-requirements of an index build, but it makes no guarantees about introducing replication lag.
+Q: What is the difference between write concern and `commitQuorum`?
+
+While these two options share a lot in terms of how they are specified, they configure entirely different things.
+`commitQuorum` determines how much new replication lag an index build can tolerably introduce, but it says nothing of
+durability. Write concern specifies the durability requirements of an index build, but it makes no guarantees about
+introducing replication lag.
 
 For instance, an index built with `writeConcern: { w: 1 }, commitQuorum: "votingMembers"` could possibly be rolled back,
 but it will not introduce any new replication lag. Likewise, an index built with
@@ -1110,61 +1179,62 @@ lag. To ensure the index is both durable and will not introduce replication lag 
 Also note that, since indexes are built simultaneously, higher values of `commitQuorum` are not as expensive as higher
 values of `writeConcern`.
 
-Q: Why does the driver manually throw errors if the `commitQuorum` option is specified against a pre 4.4
-server?\
-Starting in 3.4, the server validates all options passed to the `createIndexes` command, but due to a bug in
-versions 4.2.0-4.2.5 of the server (SERVER-47193), specifying `commitQuorum` does not result in an error. The option is
-used internally by the server on those versions, and its value could have adverse effects on index builds. To prevent
-users from mistakenly specifying this option, drivers manually verify it is only sent to 4.4+ servers.
+Q: Why does the driver manually throw errors if the `commitQuorum` option is specified against a pre 4.4 server?<br>
+Starting in 3.4, the server validates all options passed to the `createIndexes` command, but due to a bug in versions
+4.2.0-4.2.5 of the server (SERVER-47193), specifying `commitQuorum` does not result in an error. The option is used
+internally by the server on those versions, and its value could have adverse effects on index builds. To prevent users
+from mistakenly specifying this option, drivers manually verify it is only sent to 4.4+ servers.
 
 #### Changelog
 
+- 2026-06-17: Remove pre-4.2 version references.
+
+- 2025-12-18: Search index tests only assert `latestDefinition.mappings.dynamic` values.
+
+- 2025-09-09: Clarify that `rawData` is for internal use only.
+
+- 2025-06-27: Added `rawData` option to CreateIndexOptions, DropIndexOptions and ListIndexesOptions.
+
+- 2024-09-05: Moved options in SearchIndexModel to SearchIndexOptions for consistency with IndexModel and IndexOptions.
+
+- 2024-03-06: Added `type` option to SearchIndexOptions.
+
 - 2024-03-05: Migrated from reStructuredText to Markdown.
 
-- 2023-11-08: Clarify that `readConcern` and `writeConcern` must not be\
-  applied to search index management commands.
+- 2023-11-08: Clarify that `readConcern` and `writeConcern` must not be applied to search index management commands.
 
 - 2023-07-27: Add search index management clarifications.
 
 - 2023-05-18: Add the search index management API.
 
-- 2023-05-10: Merge index enumeration and index management specs and get rid of references\
-  to legacy server versions.
+- 2023-05-10: Merge index enumeration and index management specs and get rid of references to legacy server versions.
 
 - 2022-10-05: Remove spec front matter and reformat changelog.
 
-- 2022-04-18: Added the `clustered` attribute to `IndexOptions` in order to\
-  support clustered collections.
+- 2022-04-18: Added the `clustered` attribute to `IndexOptions` in order to support clustered collections.
 
-- 2022-02-10: Specified that `getMore` command must explicitly send inherited\
-  comment.
+- 2022-02-10: Specified that `getMore` command must explicitly send inherited comment.
 
 - 2022-02-01: Added comment field to helper methods.
 
-- 2022-01-19: Require that timeouts be applied per the client-side operations\
-  timeout spec.
+- 2022-01-19: Require that timeouts be applied per the client-side operations timeout spec.
 
-- 2020-03-30: Added options types to various helpers. Introduced `commitQuorum`\
-  option. Added deprecation message for
-  `background` option.
+- 2020-03-30: Added options types to various helpers. Introduced `commitQuorum` option. Added deprecation message for
+    `background` option.
 
-- 2019-04-24: Added `wildcardProjection` attribute to `IndexOptions` in order\
-  to support setting a wildcard projection
-  on a wildcard index.
+- 2019-04-24: Added `wildcardProjection` attribute to `IndexOptions` in order to support setting a wildcard projection
+    on a wildcard index.
 
 - 2017-06-07: Include listIndexes() in Q&A about maxTimeMS.
 
 - 2017-05-31: Add Q & A addressing write concern and maxTimeMS option.
 
-- 2016-10-11: Added note on 3.4 servers validation options passed to\
-  `createIndexes`. Add note on server generated name
-  for the `_id` index.
+- 2016-10-11: Added note on 3.4 servers validation options passed to `createIndexes`. Add note on server generated name
+    for the `_id` index.
 
 - 2016-08-08: Fixed `collation` language to not mention a collection default.
 
-- 2016-05-19: Added `collation` attribute to `IndexOptions` in order to\
-  support setting a collation on an index.
+- 2016-05-19: Added `collation` attribute to `IndexOptions` in order to support setting a collation on an index.
 
-- 2015-09-17: Added `partialFilterExpression` attribute to `IndexOptions` in\
-  order to support partial indexes. Fixed
-  "provides" typo.
+- 2015-09-17: Added `partialFilterExpression` attribute to `IndexOptions` in order to support partial indexes. Fixed
+    "provides" typo.

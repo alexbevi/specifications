@@ -1,7 +1,6 @@
 # SDAM Logging and Monitoring Specification
 
 - Status: Accepted
-- Minimum Server Version: 2.4
 
 ______________________________________________________________________
 
@@ -368,14 +367,14 @@ The following table describes the rules for determining if a topology type has r
 preference is passed to `hasReadableServer`, the driver MUST default the value to the default read preference,
 `primary`, or treat the call as if `primary` was provided.
 
-| Topology Type         | `hasReadableServer`                                                                                                                                                                               | `hasWritableServer`                |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| Unknown               | `false`                                                                                                                                                                                           | `false`                            |
-| Single                | `true` if the server is available                                                                                                                                                                 | `true` if the server is available  |
-| ReplicaSetNoPrimary   | Called with `primary`: `false`  <br>Called with any other option: uses the read preference to determine if any server in the cluster is suitable for reading.  <br>Called with no option: `false` | `false`                            |
-| ReplicaSetWithPrimary | Called with any valid option: uses the read preference to determine if any server in the cluster is suitable for reading.  <br>Called with no option: `true`                                      | `true`                             |
-| Sharded               | `true` if 1+ servers are available                                                                                                                                                                | `true` if 1+ servers are available |
-| LoadBalanced          | `true`                                                                                                                                                                                            | `true`                             |
+| Topology Type         | `hasReadableServer`                                                                                                                                                                             | `hasWritableServer`                |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| Unknown               | `false`                                                                                                                                                                                         | `false`                            |
+| Single                | `true` if the server is available                                                                                                                                                               | `true` if the server is available  |
+| ReplicaSetNoPrimary   | Called with `primary`: `false` <br>Called with any other option: uses the read preference to determine if any server in the cluster is suitable for reading. <br>Called with no option: `false` | `false`                            |
+| ReplicaSetWithPrimary | Called with any valid option: uses the read preference to determine if any server in the cluster is suitable for reading. <br>Called with no option: `true`                                     | `true`                             |
+| Sharded               | `true` if 1+ servers are available                                                                                                                                                              | `true` if 1+ servers are available |
+| LoadBalanced          | `true`                                                                                                                                                                                          | `true`                             |
 
 ### Log Messages
 
@@ -407,7 +406,7 @@ messages":
 | serverHost         | Log messages specific to a particular server, including heartbeat-related messages | String         | The hostname, IP address, or Unix domain socket path for the endpoint the pool is for.                                                                                                                                                                                                                                                                                                                                                                                                           |
 | serverPort         | Log messages specific to a particular server, including heartbeat-related messages | Int            | (Only present for server-specific log messages) The port for the endpoint the pool is for. Optional; not present for Unix domain sockets. When the user does not specify a port and the default (27017) is used, the driver SHOULD include it here.                                                                                                                                                                                                                                              |
 | driverConnectionId | Heartbeat-related log messages                                                     | Int            | The driver-generated ID for the monitoring connection as defined in the [connection monitoring and pooling specification](../connection-monitoring-and-pooling/connection-monitoring-and-pooling.md). Unlike `connectionId` in the above events, this field MUST NOT contain the host/port; that information MUST be in the above fields, `serverHost` and `serverPort`. This field is optional for drivers that do not implement CMAP if they do have an equivalent concept of a connection ID. |
-| serverConnectionId | Heartbeat-related log messages                                                     | Int            | The server's ID for the monitoring connection, if known. This value will be unknown and can be omitted in certain cases, e.g. the first "heartbeat started" message for a monitoring connection. Only present on server versions 4.2+.                                                                                                                                                                                                                                                           |
+| serverConnectionId | Heartbeat-related log messages                                                     | Int            | The server's ID for the monitoring connection, if known. This value will be unknown and can be omitted in certain cases, e.g. the first "heartbeat started" message for a monitoring connection.                                                                                                                                                                                                                                                                                                 |
 
 #### "Starting Topology Monitoring" Log Message
 
@@ -517,12 +516,12 @@ This message MUST be published under the same circumstances as a `ServerHeartbea
 
 In addition to the relevant common fields, these messages MUST contain the following key-value pairs:
 
-| Key        | Suggested Type | Value                                                                                                                                                         |
-| ---------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| message    | String         | "Server heartbeat succeeded"                                                                                                                                  |
-| awaited    | Boolean        | Whether this log message is for an awaitable hello or legacy "hello".                                                                                         |
-| durationMS | Int            | The execution time for the heartbeat in milliseconds. See `ServerHeartbeatSucceededEvent` in [Events API](#events-api) for details on calculating this value. |
-| reply      | String         | Relaxed extended JSON representation of the reply to the heartbeat command.                                                                                   |
+| Key        | Suggested Type     | Value                                                                                                                                                         |
+| ---------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| message    | String             | "Server heartbeat succeeded"                                                                                                                                  |
+| awaited    | Boolean            | Whether this log message is for an awaitable hello or legacy "hello".                                                                                         |
+| durationMS | Int32/Int64/Double | The execution time for the heartbeat in milliseconds. See `ServerHeartbeatSucceededEvent` in [Events API](#events-api) for details on calculating this value. |
+| reply      | String             | Relaxed extended JSON representation of the reply to the heartbeat command.                                                                                   |
 
 The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
 placeholders as appropriate:
@@ -538,12 +537,12 @@ This message MUST be published under the same circumstances as a `ServerHeartbea
 
 In addition to the relevant common fields, these messages MUST contain the following key-value pairs:
 
-| Key        | Suggested Type | Value                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ---------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| message    | String         | "Server heartbeat failed"                                                                                                                                                                                                                                                                                                                                                                             |
-| awaited    | Boolean        | Whether this log message is for an awaitable hello or legacy "hello".                                                                                                                                                                                                                                                                                                                                 |
-| durationMS | Int            | The execution time for the heartbeat in milliseconds. See `ServerHeartbeatFailedEvent` in [Events API](#events-api) for details on calculating this value.                                                                                                                                                                                                                                            |
-| failure    | Flexible       | The error. The type and format of this value is flexible; see the [logging specification](../logging/logging.md#representing-errors-in-log-messages) for details on representing errors in log messages. If the command is considered sensitive, the error MUST be redacted and replaced with a language-appropriate alternative for a redacted error, e.g. an empty string, empty document, or null. |
+| Key        | Suggested Type     | Value                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| message    | String             | "Server heartbeat failed"                                                                                                                                                                                                                                                                                                                                                                             |
+| awaited    | Boolean            | Whether this log message is for an awaitable hello or legacy "hello".                                                                                                                                                                                                                                                                                                                                 |
+| durationMS | Int32/Int64/Double | The execution time for the heartbeat in milliseconds. See `ServerHeartbeatFailedEvent` in [Events API](#events-api) for details on calculating this value.                                                                                                                                                                                                                                            |
+| failure    | Flexible           | The error. The type and format of this value is flexible; see the [logging specification](../logging/logging.md#representing-errors-in-log-messages) for details on representing errors in log messages. If the command is considered sensitive, the error MUST be redacted and replaced with a language-appropriate alternative for a redacted error, e.g. an empty string, empty document, or null. |
 
 The unstructured form SHOULD be as follows, using the values defined in the structured format above to fill in
 placeholders as appropriate:
@@ -558,6 +557,10 @@ See the [README](tests/monitoring/README.md).
 
 ## Changelog
 
+- 2026-06-17: Remove pre-4.2 version references.
+
+- 2025-01-22: Clarify durationMS in logs may be Int32/Int64/Double.
+
 - 2024-05-02: Migrated from reStructuredText to Markdown.
 
 - 2024-03-29: Updated to clarify expected initial value of TopologyDescriptionChangedEvent's previousDescription field
@@ -565,7 +568,7 @@ See the [README](tests/monitoring/README.md).
 - 2024-01-04: Updated to clarify when ServerHeartbeatStartedEvent should be emitted
 
 - 2023-03-31: Renamed to include "logging" in the title. Reorganized contents and made consistent with CLAM spec, and
-  added requirements for SDAM log messages.
+    added requirements for SDAM log messages.
 
 - 2022-10-05: Remove spec front matter and reformat changelog.
 

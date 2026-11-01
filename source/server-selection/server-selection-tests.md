@@ -2,8 +2,6 @@
 
 - Status: Accepted
 
-- Minimum Server Version: 2.4
-
 See also the YAML test files and their accompanying README in the "tests" directory.
 
 ______________________________________________________________________
@@ -22,7 +20,7 @@ calculations can be found in the "tests" directory and they test for correctness
 
 - first RTT: new average RTT equals measurement
 - subsequent measurements: new average RTT is calculated using the new measurement and the previous average as described
-  in the spec.
+    in the spec.
 
 Additionally, drivers SHOULD ensure that their implementations reject negative RTT values.
 
@@ -40,14 +38,18 @@ The following test cases can be found in YAML form in the "tests" directory. Eac
 representing a set of servers, a ReadPreference document, and sets of servers returned at various stages of the server
 selection process. These sets are described below. Note that it is not required to test for correctness at every step.
 
-| Test Case           | Description                                                                                                                                        |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `suitable_servers`  | the set of servers matching all server selection logic.                                                                                            |
-| `in_latency_window` | the subset of `suitable_servers` that falls within the allowable latency window (required). NOTE: tests use the default localThresholdMS of 15 ms. |
+| Test Case               | Description                                                                                                                                        |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `suitable_servers`      | the set of servers matching all server selection logic.                                                                                            |
+| `in_latency_window`     | the subset of `suitable_servers` that falls within the allowable latency window (required). NOTE: tests use the default localThresholdMS of 15 ms. |
+| `deprioritized_servers` | the set of servers that are deprioritized and must only be selected if no other suitable server exists.                                            |
 
 Drivers implementing server selection MUST test that their implementations correctly return **one** of the servers in
 `in_latency_window`. Drivers SHOULD test against the full set of servers in `in_latency_window` and against
 `suitable_servers` if possible.
+
+For tests containing `deprioritized_servers`, drivers MUST pass the given list of deprioritized servers to each server
+selection call.
 
 ### Topology Type Single
 
@@ -58,19 +60,19 @@ Drivers implementing server selection MUST test that their implementations corre
 **Reads**
 
 - PRIMARY
-  - no server selected
+    - no server selected
 - PRIMARY_PREFERRED
-  - Matching tags: select any eligible secondary
-  - Non-matching tags: no server selected
+    - Matching tags: select any eligible secondary
+    - Non-matching tags: no server selected
 - SECONDARY
-  - Matching tags: select any eligible secondary
-  - Non-matching tags: no server selected
+    - Matching tags: select any eligible secondary
+    - Non-matching tags: no server selected
 - SECONDARY_PREFERRED
-  - Matching tags: select any eligible secondary
-  - Non-matching tags: no server selected
+    - Matching tags: select any eligible secondary
+    - Non-matching tags: no server selected
 - NEAREST
-  - Matching tags: select any eligible secondary
-  - Non-matching tags: no server selected
+    - Matching tags: select any eligible secondary
+    - Non-matching tags: no server selected
 
 **Writes**
 
@@ -81,20 +83,20 @@ Drivers implementing server selection MUST test that their implementations corre
 **Reads**
 
 - PRIMARY
-  - primary is selected **NOTE:** it is an error to provide tags with mode PRIMARY. See "ReadPreference Document
-    Validation."
+    - primary is selected **NOTE:** it is an error to provide tags with mode PRIMARY. See "ReadPreference Document
+        Validation."
 - PRIMARY_PREFERRED
-  - Matching tags: primary is selected
-  - Non-matching tags: primary is selected
+    - Matching tags: primary is selected
+    - Non-matching tags: primary is selected
 - SECONDARY
-  - Matching tags: select any eligible secondary
-  - Non-matching tags: no server selected
+    - Matching tags: select any eligible secondary
+    - Non-matching tags: no server selected
 - SECONDARY_PREFERRED
-  - Matching tags: select any eligible secondary
-  - Non-matching tags: primary is selected
+    - Matching tags: select any eligible secondary
+    - Non-matching tags: primary is selected
 - NEAREST
-  - Matching tags: select any eligible server
-  - Non-matching tags: no server selected
+    - Matching tags: select any eligible server
+    - Non-matching tags: no server selected
 
 **Writes**
 
@@ -126,20 +128,20 @@ While there are no YAML tests for this, drivers are strongly encouraged to test 
 implementation that ReadPreference is correctly passed to Mongos in the following scenarios:
 
 - PRIMARY
-  - the SecondaryOk wire protocol flag is NOT set
-  - $readPreference is NOT used
+    - the SecondaryOk wire protocol flag is NOT set
+    - $readPreference is NOT used
 - PRIMARY_PREFERRED
-  - the SecondaryOk wire protocol flag is set
-  - $readPreference is used
+    - the SecondaryOk wire protocol flag is set
+    - $readPreference is used
 - SECONDARY
-  - the SecondaryOk wire protocol flag is set
-  - $readPreference is used
+    - the SecondaryOk wire protocol flag is set
+    - $readPreference is used
 - SECONDARY_PREFERRED
-  - the SecondaryOk wire protocol flag is set
-  - if `tag_sets` or `hedge` are specified $readPreference is used, otherwise $readPreference is NOT used
+    - the SecondaryOk wire protocol flag is set
+    - if `tag_sets` or `hedge` are specified $readPreference is used, otherwise $readPreference is NOT used
 - NEAREST
-  - the SecondaryOk wire protocol flag is set
-  - $readPreference is used
+    - the SecondaryOk wire protocol flag is set
+    - $readPreference is used
 
 ## Random Selection Within Latency Window (single-threaded drivers)
 
@@ -150,7 +152,7 @@ language-specific way to confirm randomness.
 For example, the following topology description, operation, and read preference will return a set of three suitable
 servers within the latency window:
 
-```
+```yaml
     topology_description:
       type: ReplicaSetWithPrimary
       servers:
@@ -202,42 +204,41 @@ Multi-threaded and async drivers MUST also implement the following prose test:
 
 2. Enable the following failpoint against exactly one of the mongoses:
 
-   ```
-   {
-      configureFailPoint: "failCommand",
-      mode: { times: 10000 },
-      data: {
-          failCommands: ["find"],
-          blockConnection: true,
-          blockTimeMS: 500,
-          appName: "loadBalancingTest",
-      },
-   }
-   ```
+    ```javascript
+    {
+       configureFailPoint: "failCommand",
+       mode: { times: 10000 },
+       data: {
+           failCommands: ["find"],
+           blockConnection: true,
+           blockTimeMS: 500,
+           appName: "loadBalancingTest",
+       },
+    }
+    ```
 
 3. Create a client with both mongoses' addresses in its seed list, appName="loadBalancingTest", and
-   localThresholdMS=30000.
+    localThresholdMS=30000.
 
-   - localThresholdMS is set to a high value to help avoid a single mongos being selected too many times due to a random
-     spike in latency in the other mongos.
+    - localThresholdMS is set to a high value to help avoid a single mongos being selected too many times due to a random
+        spike in latency in the other mongos.
 
 4. Using CMAP events, ensure the client's connection pools for both mongoses have been saturated, either via setting
-   minPoolSize=maxPoolSize or executing operations.
+    minPoolSize=maxPoolSize or executing operations.
 
-   - This helps reduce any noise introduced by connection establishment latency during the actual server selection
-     tests.
+    - This helps reduce any noise introduced by connection establishment latency during the actual server selection
+        tests.
 
 5. Start 10 concurrent threads / tasks that each run 10 `findOne` operations with empty filters using that client.
 
 6. Using command monitoring events, assert that fewer than 25% of the CommandStartedEvents occurred on the mongos that
-   the failpoint was enabled on.
+    the failpoint was enabled on.
 
 7. Disable the failpoint.
 
 8. Start 10 concurrent threads / tasks that each run 100 `findOne` operations with empty filters using that client.
 
-9. Using command monitoring events, assert that each mongos was selected\
-   roughly 50% of the time (within +/- 10%).
+9. Using command monitoring events, assert that each mongos was selected roughly 50% of the time (within +/- 10%).
 
 ## Application-Provided Server Selector
 
@@ -245,6 +246,7 @@ The Server Selection spec allows drivers to configure registration of a server s
 of suitable servers. Drivers implementing this part of the spec MUST test that:
 
 - The application-provided server selector is executed as part of the server selection process when there is a nonzero
-  number of candidate or eligible servers. For example, execute a test against a replica set: Register a server selector
-  that selects the suitable server with the highest port number. Execute 10 queries with nearest read preference and,
-  using command monitoring, assert that all the operations execute on the member with the highest port number.
+    number of candidate or eligible servers. For example, execute a test against a replica set: Register a server
+    selector that selects the suitable server with the highest port number. Execute 10 queries with nearest read
+    preference and, using command monitoring, assert that all the operations execute on the member with the highest port
+    number.

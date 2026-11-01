@@ -10,7 +10,7 @@ Tests of drivers' connection string parsing and validation.
 
 maxStalenessSeconds is set to 120 from this connection string:
 
-```
+```text
 mongodb://host/?readPreference=secondary&maxStalenessSeconds=120
 ```
 
@@ -18,7 +18,7 @@ mongodb://host/?readPreference=secondary&maxStalenessSeconds=120
 
 These connection strings are invalid because the mode is "primary", either by default or explicitly:
 
-```
+```text
 mongodb://host/?maxStalenessSeconds=120
 mongodb://host/?readPreference=primary&maxStalenessSeconds=120
 ```
@@ -28,13 +28,13 @@ mongodb://host/?readPreference=primary&maxStalenessSeconds=120
 A MongoClient with this connection string has no max staleness, the same as if "maxStalenessSeconds" were omitted from
 the connection string:
 
-```
+```text
 mongodb://host/?readPreference=secondary&maxStalenessSeconds=-1
 ```
 
 This connection string is valid and does not raise an error:
 
-```
+```text
 mongodb://host/?readPreference=primary&maxStalenessSeconds=-1>
 ```
 
@@ -43,7 +43,7 @@ mongodb://host/?readPreference=primary&maxStalenessSeconds=-1>
 A MongoClient can be initialized with this connection string; the small maxStalenessSeconds value causes no error
 initially:
 
-```
+```text
 mongodb://host/?readPreference=secondary&maxStalenessSeconds=1
 ```
 
@@ -54,7 +54,7 @@ configurable in all drivers, not just single-threaded drivers.
 
 Test that a user can set heartbeatFrequencyMS in the connection string:
 
-```
+```text
 mongodb://host/?heartbeatFrequencyMS=500
 ```
 
@@ -66,8 +66,7 @@ Test that a client initialized with this string checks a standalone server rough
 
 Configure a client with heartbeatFrequencyMS of 500 milliseconds.
 
-Connect to a MongoDB replica set member with maxWireVersion at least 5. (Only replica set members with maxWireVersion 5
-have a lastWriteDate in the legacy hello reply.)
+Connect to a MongoDB replica set member.
 
 Insert a document and wait one second.
 
@@ -81,23 +80,18 @@ but less than 10 seconds greater.
 (This test is as lenient as possible, while still testing that the driver parses lastWriteDate and converts it to an
 appropriate unit.)
 
-### Absent lastWriteDate
-
-Connect to a MongoDB server with maxWireVersion less than 5. Check that the driver's ServerDescription for this server
-has no lastWriteDate, represented with null, zero, or however the driver represents a non-value.
-
 ### Direct connection to mongos
 
 Initialize a MongoClient with this connection string:
 
-```
+```text
 mongodb://mongos/?readPreference=secondary&maxStalenessSeconds=120
 ```
 
-Where "mongos" is the hostname and port of a mongos server running wire protocol version 5+. Execute a "findOne"
-operation. The MongoClient must include following read preference element with its "find" command:
+Where "mongos" is the hostname and port of a mongos server. Execute a "findOne" operation. The MongoClient must include
+following read preference element with its "find" command:
 
-```
+```javascript
 $readPreference: {
     mode: "secondary",
     maxStalenessSeconds: 120
@@ -108,7 +102,7 @@ The "maxStalenessSeconds" element must be a BSON int32 or int64 type.
 
 Do the same test with this connection string:
 
-```
+```text
 mongodb://mongos/?readPreference=secondary
 ```
 
@@ -122,7 +116,7 @@ These tests MUST be added to the server code repository, validating mongos's max
 
 mongos MUST reject a read with:
 
-```
+```javascript
 $readPreference: {mode: "primary", maxStalenessSeconds: 120}
 ```
 
@@ -134,7 +128,7 @@ mongos MUST reject a read with `maxStalenessSeconds` that is not an int32 or int
 
 The minimum value of maxStalenessSeconds is 90. mongos MUST reject a read with:
 
-```
+```javascript
 $readPreference: {mode: "secondary", maxStalenessSeconds: 89}
 ```
 

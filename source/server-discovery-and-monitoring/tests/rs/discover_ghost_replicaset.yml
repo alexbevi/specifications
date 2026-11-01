@@ -14,7 +14,7 @@ phases: [
                     isWritablePrimary: false,
                     isreplicaset: true,
                     minWireVersion: 0,
-                    maxWireVersion: 6
+                    maxWireVersion: 21
                 }]
         ],
 
@@ -39,4 +39,4 @@ phases: [
             setName: "rs"
         }
     }
-]
+    ]

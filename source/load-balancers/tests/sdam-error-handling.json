@@ -263,7 +263,7 @@
       "description": "errors during the initial connection hello are ignored",
       "runOnRequirements": [
         {
-          "minServerVersion": "4.9"
+          "minServerVersion": "4.4.7"
         }
       ],
       "operations": [
@@ -282,7 +282,7 @@
                   "isMaster",
                   "hello"
                 ],
-                "closeConnection": true,
+                "errorCode": 11600,
                 "appName": "lbSDAMErrorTestClient"
               }
             }
@@ -297,7 +297,7 @@
             }
           },
           "expectError": {
-            "isClientError": true
+            "isError": true
           }
         }
       ],

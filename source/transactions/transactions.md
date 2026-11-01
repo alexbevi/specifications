@@ -1,7 +1,6 @@
 # Transactions Specification
 
 - Status: Accepted
-- Minimum Server Version: 4.0
 
 ______________________________________________________________________
 
@@ -59,15 +58,13 @@ Any error or timeout that occurs while selecting a server or reading from or wri
 
 #### Error Label
 
-Starting in MongoDB 4.0, any command error may include a top level "errorLabels" field. The field contains an array of
-string error labels. Drivers may also add error labels to errors that they return.
+Any command error may include a top level "errorLabels" field. The field contains an array of string error labels.
+Drivers may also add error labels to errors that they return.
 
 #### Transient Transaction Error
 
-Any command error that includes the "TransientTransactionError" error label in the "errorLabels" field. Any network
-error encountered running any command other than commitTransaction in a transaction. If a network error occurs while
-running the commitTransaction command then it is not known whether the transaction committed or not, and thus the
-"TransientTransactionError" label MUST NOT be added.
+Any command, network, or driver error that includes the "TransientTransactionError" error label in the "errorLabels"
+field.
 
 ### **Naming variations**
 
@@ -78,7 +75,7 @@ instead. For example, you might use StartTransaction or start_transaction instea
 A non-exhaustive list of acceptable naming deviations are as follows:
 
 - Using "maxCommitTimeMS" as an example, .NET would use "MaxCommitTime" where it's type is a TimeSpan structure that
-  includes units. However, calling it "MaximumCommitTime" would not be acceptable.
+    includes units. However, calling it "MaximumCommitTime" would not be acceptable.
 
 ### **Transaction API**
 
@@ -205,6 +202,19 @@ Drivers MUST raise an error if the user provides or if defaults would result in 
 Driver Sessions spec disallows using unacknowledged writes in a session. The error message MUST contain "transactions do
 not support unacknowledged write concerns".
 
+If a higher level object, such as a Collection, is created inside a transaction, their write concern option MUST be
+ignored if provided and the transaction level write concern used instead. An example of expected behaviour is:
+
+```python
+client = MongoClient("mongodb://host/?readPreference=nearest")
+coll = client.db.test
+with client.start_session() as s:
+    with s.start_transaction():
+        w_0_coll = db.get_collection("w_0_coll", writeConcern=WriteConcern(w=0))
+        # This is allowed, the write concern of the transaction is used instead of w=0 from the collection.
+        w_0_coll.insert_one({}, session=s)
+```
+
 #### readPreference
 
 The read preference to use for all read operations in this transaction.
@@ -218,9 +228,9 @@ The transaction’s read preference MUST override all other user configurable re
 drivers that allow an operation level read preference. In this case, the driver MUST respect the read preference
 specified by the user, allowing the server to report an error.
 
-In MongoDB 4.0, transactions may only read from the primary. If a read is attempted and the transaction’s read
-preference is not Primary drivers MUST raise an error containing the string "read preference in a transaction must be
-primary". Drivers MUST NOT validate the read preference during write operations or in startTransaction. See
+Transactions may only read from the primary. If a read is attempted and the transaction’s read preference is not Primary
+drivers MUST raise an error containing the string "read preference in a transaction must be primary". Drivers MUST NOT
+validate the read preference during write operations or in startTransaction. See
 [Why is readPreference part of TransactionOptions?](#why-is-readpreference-part-of-transactionoptions).
 
 ```python
@@ -231,8 +241,6 @@ with client.start_session() as s:
         coll.insert_one({}, session=s)
         coll.find_one(session=s)  # Error: "read preference in a transaction must be primary"
 ```
-
-In the future, we might relax this restriction and allow any read preference on a transaction.
 
 #### maxCommitTimeMS
 
@@ -258,8 +266,7 @@ ClientSession is in one of five states: "no transaction", "starting transaction"
 "transaction committed", and "transaction aborted". It transitions among these states according to the following
 diagram:
 
-<img src="client-session-transaction-states.png"
-style="width:6.5in;height:3.68056in" alt="states" />\
+![ClientSession transaction states](client-session-transaction-states.png)
 ([GraphViz source](client-session-transaction-states.dot))
 
 When a ClientSession is created it starts in the "no transaction" state. Starting, committing, and aborting a
@@ -287,12 +294,8 @@ If this session is in the "starting transaction " or "transaction in progress" s
 containing the message "Transaction already in progress" without modifying any session state.
 
 startTransaction SHOULD report an error if the driver can detect that transactions are not supported by the deployment.
-A deployment does not support transactions when the deployment does not support sessions, or maxWireVersion \< 7, or the
-maxWireVersion \< 8 and the topology type is Sharded, see
-[How to Check Whether a Deployment Supports Sessions](../sessions/driver-sessions.md#how-to-check-whether-a-deployment-supports-sessions).
-Note that checking the maxWireVersion does not guarantee that the deployment supports transactions, for example a
-MongoDB 4.0 replica set using MMAPv1 will report maxWireVersion 7 but does not support transactions. In this case,
-Drivers rely on the deployment to report an error when a transaction is started.
+A deployment does not support transactions when the deployment does not support sessions, see
+[How to Tell Whether a Connection Supports Sessions](../sessions/driver-sessions.md#how-to-tell-whether-a-connection-supports-sessions).
 
 Drivers MUST increment the `txnNumber` for the corresponding server session.
 
@@ -338,7 +341,22 @@ transaction, drivers MUST NOT run the commitTransaction command.
 
 commitTransaction is a retryable write command. Drivers MUST retry once after commitTransaction fails with a retryable
 error, including a handshake network error, according to the Retryable Writes Specification, regardless of whether
-retryWrites is set on the MongoClient or not.
+retryWrites is set on the MongoClient or not. If a commitTransaction fails with a
+[retryable overload error](../client-backpressure/client-backpressure.md#retryable-overload-error), the command MUST be
+retried as specified in [Interaction with Client Backpressure](#interaction-with-client-backpressure).
+
+When retrying a commitTransaction attempt, if the previous commitTransaction attempt failed with a
+[retryable overload error](../client-backpressure/client-backpressure.md#retryable-overload-error), drivers MUST apply
+the write concern modification rules as outlined in the
+[Interaction With Client Backpressure](#interaction-with-client-backpressure) to determine whether or not to modify the
+command's writeConcern. If the command failed with any other error, drivers MUST follow the rules for write concern
+modification as outlined in [writeConcern for commitTransaction attempts](#writeconcern-for-committransaction-attempts).
+
+Drivers MUST add error labels to certain errors when commitTransaction fails. See the
+[Error reporting changes](#error-reporting-changes) and [Error Labels](#error-labels) sections for a precise
+description.
+
+##### writeConcern for commitTransaction attempts
 
 When commitTransaction is retried, either by the driver's internal retry logic or explicitly by the user calling
 commitTransaction again, drivers MUST apply `w: majority` to the write concern of the commitTransaction command. If the
@@ -348,10 +366,6 @@ TransactionOptions during the `startTransaction` call or otherwise inherited), a
 `wtimeout` value, drivers MUST also apply `wtimeout: 10000` to the write concern in order to avoid waiting forever (or
 until a socket timeout) if the majority write concern cannot be satisfied. See
 [Majority write concern is used when retrying commitTransaction](#majority-write-concern-is-used-when-retrying-committransaction).
-
-Drivers MUST add error labels to certain errors when commitTransaction fails. See the
-[Error reporting changes](#error-reporting-changes) and [Error Labels](#error-labels) sections for a precise
-description.
 
 #### abortTransaction
 
@@ -376,12 +390,14 @@ transaction, drivers MUST NOT run the abortTransaction command.
 
 abortTransaction is a retryable write command. Drivers MUST retry after abortTransaction fails with a retryable error
 according to the [Retryable Writes Specification](../retryable-writes/retryable-writes.md), including a handshake
-network error, regardless of whether retryWrites is set on the MongoClient or not.
+network error, regardless of whether retryWrites is set on the MongoClient or not. If a abortTransaction fails with a
+[retryable overload error](../client-backpressure/client-backpressure.md#retryable-overload-error), the command MUST be
+retried as specified in [Interaction with Client Backpressure](#interaction-with-client-backpressure).
 
-If the operation times out or fails with a non-retryable error, drivers MUST ignore all errors from the abortTransaction
-command. Errors from abortTransaction are meaningless to the application because they cannot do anything to recover from
-the error. The transaction will ultimately be aborted by the server anyway either upon reaching an age limit or when the
-application starts a new transaction on this session, see
+If the operation times out or fails with a non-retryable error, drivers MUST NOT propagate errors from the
+abortTransaction command. Errors from abortTransaction are meaningless to the application because they cannot do
+anything to recover from the error. The transaction will ultimately be aborted by the server anyway either upon reaching
+an age limit or when the application starts a new transaction on this session, see
 [Drivers ignore all abortTransaction errors](#drivers-ignore-all-aborttransaction-errors).
 
 #### endSession changes
@@ -397,8 +413,8 @@ server to the client, or determined client-side. Any error reported by the drive
 selection error, or network error MUST have an API for determining whether it has a given label. In programming
 languages that use class inheritance hierarchies for exceptions, the presence of an error label MUST NOT affect an
 exception's class. Error labels MUST be expressed as a collection of text strings, and it MUST be possible for
-applications to check if an error has a label that is not yet specified in MongoDB 4.0. Drivers MAY define constants for
-error label strings that are known at this time.
+applications to check if an error has a label that is not yet specified in the current driver version. Drivers MAY
+define constants for error label strings that are known at this time.
 
 Drivers MAY implement an error label API similar to the following:
 
@@ -444,18 +460,17 @@ All operations within a multi-statement transaction (including commitTransaction
 #### Behavior of the readConcern field
 
 Any command that marks the beginning of a transaction MAY include a `readConcern` argument with an optional `level` and
-`afterClusterTime` fields. Read concern level 'local', 'majority', and 'snapshot' are all supported, although they will
-all have the same behavior as "snapshot" in MongoDB 4.0. To support causal consistency, if `readConcern`
-`afterClusterTime` is specified, then the server will ensure that the transaction’s read timestamp is after the
-`afterClusterTime`.
+`afterClusterTime` fields. Read concern level `local`, `majority`, and `snapshot` are all supported. To support causal
+consistency, if `readConcern` `afterClusterTime` is specified, then the server will ensure that the transaction’s read
+timestamp is after the `afterClusterTime`.
 
 All commands of a multi-statement transaction subsequent to the initial command MUST NOT specify a `readConcern`, since
 the `readConcern` argument is only needed to establish the transaction’s read timestamp. If a `readConcern` argument is
 specified on a subsequent (non-initial) command, the server will return an error.
 
-Read concern level "snapshot" is new in MongoDB 4.0 and can only be used when starting a transaction. The server will
-return an error if read concern level "snapshot" is specified on a command that is not the start of a transaction.
-Drivers MUST rely on the server to report an error if read concern level snapshot is used incorrectly.
+Read concern level `snapshot` can only be used when starting a transaction. The server will return an error if read
+concern level `snapshot` is specified on a command that is not the start of a transaction. Drivers MUST rely on the
+server to report an error if read concern level `snapshot` is used incorrectly.
 
 #### Behavior of the writeConcern field
 
@@ -545,11 +560,14 @@ a transaction.
 
 ### **Interaction with Retryable Writes**
 
-In MongoDB 4.0 the only supported retryable write commands within a transaction are commitTransaction and
-abortTransaction. Therefore drivers MUST NOT retry write commands within transactions even when retryWrites has been
-enabled on the MongoClient. In addition, drivers MUST NOT add the RetryableWriteError label to any error that occurs
-during a write command within a transaction (excepting commitTransation and abortTransaction), even when retryWrites has
-been enabled on the MongoClient.
+The only supported retryable write commands within a transaction are commitTransaction and abortTransaction. Therefore
+drivers MUST NOT retry write commands within transactions even when retryWrites has been enabled on the MongoClient,
+unless the server response is a
+[retryable overload error](../client-backpressure/client-backpressure.md#retryable-overload-error).
+
+In addition, drivers MUST NOT add the RetryableWriteError label to any error that occurs during a write command within a
+transaction (excepting commitTransation and abortTransaction), even when retryWrites has been enabled on the
+MongoClient.
 
 Drivers MUST retry the commitTransaction and abortTransaction commands even when retryWrites has been disabled on the
 MongoClient. commitTransaction and abortTransaction are retryable write commands and MUST be retried according to the
@@ -560,6 +578,31 @@ Retryable writes and transactions both use the `txnNumber` associated with a Ser
 incremented at the start and then stays constant, even for retryable operations within the transaction. When executing
 the commitTransaction and abortTransaction commands within a transaction drivers MUST use the same `txnNumber` used for
 all preceding commands in the transaction.
+
+### **Interaction with Client Backpressure**
+
+All commands in a transaction are subject to the
+[Client Backpressure Specification](../client-backpressure/client-backpressure.md), and MUST be retried accordingly.
+This includes the initial command with `startTransaction:true`, the abortTransaction and commitTransaction commands, as
+well as any read or write commands attempted during the transaction.
+
+When a commitTransaction attempt fails with a retryable overload error:
+
+- If a commitTransaction attempt has already failed with an error that is not a
+    [retryable overload error](../client-backpressure/client-backpressure.md#retryable-overload-error), drivers MUST
+    follow the instructions for modifying writeConcern as outlined in the
+    [writeConcern for commitTransaction attempts](#writeconcern-for-committransaction-attempts) section for the next
+    retry attempt.
+- Otherwise, drivers MUST retry using the same write concern as was used for the most recently failed commitTransaction
+    attempt.
+
+See
+[Majority write concern is used when retrying commitTransaction](#majority-write-concern-is-used-when-retrying-committransaction)
+for discussion on why majority write concern is sometimes needed on commitTransaction retries.
+
+If executing the first command within a transaction fails with a
+[retryable overload error](../client-backpressure/client-backpressure.md#retryable-overload-error), and another attempt
+is executed, the command executed in the retry attempt must be treated as the first command within a transaction.
 
 ### **Server Commands**
 
@@ -616,9 +659,8 @@ In case of a write concern error, the server response has the following format:
 
 ## Sharded Transactions
 
-MongoDB 4.2 (maxWireVersion 8) introduces support for sharded transactions. Sharded transactions support all of the same
-features as single replica set transaction but introduce two new driver concepts: mongos pinning and the `recoveryToken`
-field.
+MongoDB 4.2 introduces support for sharded transactions. Sharded transactions support all of the same features as single
+replica set transaction but introduce two new driver concepts: mongos pinning and the `recoveryToken` field.
 
 ### Mongos Pinning
 
@@ -634,18 +676,19 @@ retries of commitTransaction and abortTransaction) to the same mongos.
 Drivers MUST unpin a ClientSession in the following situations:
 
 1. The transaction is aborted. The session MUST be unpinned regardless of whether or the `abortTransaction` command
-   succeeds or fails, or was executed at all. If the operation fails with a retryable error, the session MUST be
-   unpinned before performing server selection for the retry.
+    succeeds or fails, or was executed at all. If the operation fails with a retryable error, the session MUST be
+    unpinned before performing server selection for the retry.
 2. Any operation in the transaction, including `commitTransaction` fails with a TransientTransactionError. Transient
-   errors indicate that the transaction in question has already been aborted or that the pinnned mongos is
-   down/unavailable. Unpinning the session ensures that a subsequent `abortTransaction` (or `commitTransaction`) does
-   not block waiting on a server that is unreachable.
+    errors indicate that the transaction in question has already been aborted or that the pinnned mongos is
+    down/unavailable. Unpinning the session ensures that a subsequent `abortTransaction` (or `commitTransaction`) does
+    not block waiting on a server that is unreachable.
 3. Any `commitTransaction` attempt fails with an `UnknownTransactionCommitResult` error label. If the error is also
-   considered retryable, the session MUST be unpinned before performing server selection for the retry.
+    considered retryable, the session MUST be unpinned before performing server selection for the retry.
 4. A new transaction is started on the ClientSession after the previous transaction has been committed. The session MUST
-   be unpinned before performing server selection for the first operation of the new transaction.
+    be unpinned before performing server selection for the first operation of the new transaction.
 5. A non-transactional operation is performed using the ClientSession. The session MUST be unpinned before performing
-   server selection for the operation.
+    server selection for the operation.
+6. The ClientSession is ended either explicitly via `endSession` method, or implicitly when supported by the driver.
 
 Note that committing a transaction on a pinned ClientSession MUST NOT unpin the session as `commitTransaction` may be
 called multiple times.
@@ -674,15 +717,17 @@ contents of the document.
 
 ### Error Labels
 
-Starting in MongoDB 4.0, any command error may include a top level "errorLabels" field. The field contains an array of
-string error labels.
+Any command error may include a top level "errorLabels" field. The field contains an array of string error labels.
 
-### TransientTransactionError
+### Transient Transaction Error
 
-Any command error that includes the "TransientTransactionError" error label in the "errorLabels" field. Any network
-error or server selection error encountered running any command besides commitTransaction in a transaction. In the case
-of command errors, the server adds the label; in the case of network errors or server selection errors where the client
-receives no server reply, the client adds the label.
+- Any command error that includes the "TransientTransactionError" error label in the "errorLabels" field. In the case of
+    command errors, the server adds the label.
+- Any network error or server selection error encountered running any command besides commitTransaction in a
+    transaction. In the case of network errors or server selection errors where the client receives no server reply, the
+    client MUST add the label. If a network error occurs while running the commitTransaction command then it is not
+    known whether the transaction committed or not, and thus the "TransientTransactionError" label MUST NOT be added.
+- `PoolClearedError`. Driver MUST add the label to this error.
 
 #### Retrying transactions that fail with TransientTransactionError
 
@@ -875,18 +920,15 @@ The [Python driver](https://github.com/mongodb/mongo-python-driver/) serves as a
 
 - Support retryable writes within a transaction.
 
-- Support transactions on secondaries. In this case, drivers would be\
-  required to pin a transaction to the server
-  selected for the initial operation. All subsequent operations in the transaction would go to the pinned server.
+- Support transactions on secondaries. In this case, drivers would be required to pin a transaction to the server
+    selected for the initial operation. All subsequent operations in the transaction would go to the pinned server.
 
-- Support for transactions that read from multiple nodes in a replica\
-  set. One interesting use case would be to run a
-  single transaction that performs low-latency reads with readPreference "nearest" followed by some writes.
+- Support for transactions that read from multiple nodes in a replica set. One interesting use case would be to run a
+    single transaction that performs low-latency reads with readPreference "nearest" followed by some writes.
 
-- Support for unacknowledged transaction commits. This might be useful\
-  when data consistency is paramount but
-  durability is optional. Imagine a system that increments two counters in two different collections. The system may
-  want to use transactions to guarantee that both counters are always incremented together or not at all.
+- Support for unacknowledged transaction commits. This might be useful when data consistency is paramount but durability
+    is optional. Imagine a system that increments two counters in two different collections. The system may want to use
+    transactions to guarantee that both counters are always incremented together or not at all.
 
 ## **Justifications**
 
@@ -928,6 +970,11 @@ transactions. There will then be new error scenarios, such as a transaction with
 won't be possible in the future for startTransaction to check that the read preference is correct for all operations the
 application will perform in the transaction. Therefore, we specify now that the readPreference must be checked
 per-operation. (However, we have not completely planned how read preference validation will behave in MongoDB 4.2.)
+
+*Update 28.Oct.20214*
+
+Note this section is retained in the spec for historical reasons and that the read preference in transactions must
+always be primary.
 
 ### Users cannot pass readConcern or writeConcern to operations in transactions
 
@@ -994,18 +1041,18 @@ that calling commitTransaction again may succeed.
 
 The following commands are allowed inside transactions:
 
-01. find
-02. getMore
+1. find
+2. getMore
     - Note that it is not possible to start a transaction with a getMore command, the cursor must have been created
-      within the transaction in order for the getMore to succeed.
-03. killCursors
-04. insert, including into a non-existing collection that implicitly creates it
-05. update
-06. delete
-07. findAndModify
-08. aggregate (including `$lookup`)
+        within the transaction in order for the getMore to succeed.
+3. killCursors
+4. insert, including into a non-existing collection that implicitly creates it
+5. update
+6. delete
+7. findAndModify
+8. aggregate (including `$lookup`)
     - The `$out` and `$merge` stages are prohibited.
-09. distinct
+9. distinct
 10. geoSearch
 11. create
 12. createIndexes on an empty collection created in the same transaction or on a non-existing collection
@@ -1027,17 +1074,16 @@ transaction.
 
 ### Majority write concern is used when retrying commitTransaction
 
-Drivers should apply a majority write concern when retrying commitTransaction to guard against a transaction being
-applied twice.
+When retrying commitTransaction, drivers use a majority write concern to ensure the transaction is not applied twice.
 
 Consider the following scenario:
 
 1. The driver is connected to a replica set where node A is primary.
 2. The driver sends commitTransaction to A with `w:1`. A commits the transaction but dies before it can reply. This
-   constitutes a retryable error, which means the driver can retry the commitTransaction command.
+    constitutes a retryable error, which means the driver can retry the commitTransaction command.
 3. Node B is briefly elected.
 4. The driver retries commitTransaction on B with `w:1`, and B replies with a NoSuchTransaction error code and
-   TransientTransactionError error label. This implies that the driver may retry the entire transaction.
+    TransientTransactionError error label. This implies that the driver may retry the entire transaction.
 5. Node A revives before B has done any `w:majority` writes and is reëlected as primary.
 6. The driver then retries the entire transaction on A where it commits successfully.
 
@@ -1048,13 +1094,13 @@ Drivers can avoid this scenario if they always use a majority write concern when
 majority write concern to step four in the above scenario would lead to one of the following possible outcomes:
 
 - Node B replies with failed response, which does not include a TransientTransactionError error label. This does not
-  constitute a retryable error. Control is returned to the user.
+    constitute a retryable error. Control is returned to the user.
 - Node B replies with a successful response (e.g. `ok:1`) indicating that the retried commitTransaction has succeeded
-  durably and the driver can continue. Control is returned to the user.
+    durably and the driver can continue. Control is returned to the user.
 - Node B replies with a wtimeout error. This does not constitute a retryable error. Control is returned to the user.
 - Node B replies with a failure response that includes the TransientTransactionError label, which indicates it is safe
-  to retry the entire transaction. Drivers can trust that a server response will not include both a write concern error
-  and TransientTransactionError label (see: [SERVER-37179](https://jira.mongodb.org/browse/SERVER-37179)).
+    to retry the entire transaction. Drivers can trust that a server response will not include both a write concern
+    error and TransientTransactionError label (see: [SERVER-37179](https://jira.mongodb.org/browse/SERVER-37179)).
 
 Adding a majority write concern only when retrying commitTransaction provides a good compromise of performance and
 durability. Applications can use `w:1` for the initial transaction attempt for a performance advantage in the happy
@@ -1071,14 +1117,31 @@ custom write concerns. Excluding the edge case where
 has been disabled, drivers can readily trust that a majority write concern is durable, which achieves the primary
 objective of avoiding duplicate commits.
 
+A [retryable overload error](../client-backpressure/client-backpressure.md#retryable-overload-error) indicates that the
+server performed no work when executing the command. As such, the scenario above is irrelevant for commitTransaction
+attempts which have only failed with retryable overload errors. However, after a commitTransaction fails with an error
+that is not a retryable overload error, we no longer have the guarantee that the server has performed no work, and we
+must apply a majority write concern to prevent the transaction from being applied twice.
+
 ## **Changelog**
+
+- 2026-06-17: Remove pre-4.2 version references.
+
+- 2026-01-09: Specify the handling of client backpressure.
+
+- 2024-11-01: Clarify collection options inside txn.
+
+- 2024-11-01: Specify that ClientSession must be unpinned when ended.
+
+- 2024-10-31: Clarify when drivers must add TransientTransactionError label.
+
+- 2024-10-28: Note read preference must always be primary in a transaction.
 
 - 2024-05-08: Add bulkWrite to the list of commands allowed in transactions.
 
 - 2024-02-15: Migrated from reStructuredText to Markdown.
 
-- 2023-11-22: Specify that non-transient transaction errors abort the transaction\
-  on the server.
+- 2023-11-22: Specify that non-transient transaction errors abort the transaction on the server.
 
 - 2022-10-05: Remove spec front matter and reformat changelog
 
@@ -1088,8 +1151,7 @@ objective of avoiding duplicate commits.
 
 - 2021-04-12: Adding in behaviour for load balancer mode.
 
-- 2020-04-07: Clarify that all abortTransaction attempts should unpin the session,\
-  even if the command is not executed.
+- 2020-04-07: Clarify that all abortTransaction attempts should unpin the session, even if the command is not executed.
 
 - 2020-04-07: Specify that sessions should be unpinned once a transaction is aborted.
 
@@ -1101,9 +1163,8 @@ objective of avoiding duplicate commits.
 
 - 2019-06-07: Mention `$merge` stage for aggregate alongside `$out`
 
-- 2019-05-13: Add support for maxTimeMS on transaction commit, MaxTimeMSExpired\
-  errors on commit are labelled
-  UnknownTransactionCommitResult.
+- 2019-05-13: Add support for maxTimeMS on transaction commit, MaxTimeMSExpired errors on commit are labelled
+    UnknownTransactionCommitResult.
 
 - 2019-02-19: Add support for sharded transaction recoveryToken.
 
@@ -1113,13 +1174,11 @@ objective of avoiding duplicate commits.
 
 - 2018-11-13: Add mongos pinning to support sharded transaction.
 
-- 2018-06-18: Explicit readConcern and/or writeConcern are prohibited within\
-  transactions, with a client-side error.
+- 2018-06-18: Explicit readConcern and/or writeConcern are prohibited within transactions, with a client-side error.
 
 - 2018-06-07: The count command is not supported within transactions.
 
-- 2018-06-14: Any retryable writes error raised by commitTransaction must be\
-  labelled "UnknownTransactionCommitResult".
+- 2018-06-14: Any retryable writes error raised by commitTransaction must be labelled "UnknownTransactionCommitResult".
 
 [^1]: In 4.2, a new mongos waits for the *outcome* of the transaction but will never itself cause the transaction to be
     committed. If the initial commit on the original mongos itself failed to initiate the transaction's commit sequence,

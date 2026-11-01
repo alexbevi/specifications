@@ -1,20 +1,17 @@
-# MongoDB Specifications
+# MongoDB Specifications 
 
 [![Documentation Status](https://readthedocs.org/projects/specifications/badge/?version=latest)](http://specifications.readthedocs.io/en/latest/?badge=latest)
 
 This repository holds in progress and completed specification for features of MongoDB, Drivers, and associated products.
 Also contained is a rudimentary system for producing these documents.
 
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
+
 ## Driver Mantras
 
 See [Documentation](./source/driver-mantras.md).
-
-## Writing Documents
-
-Write documents using [GitHub Flavored Markdown](https://github.github.com/gfm/), following the
-[MongoDB Documentation Style Guidelines](https://www.mongodb.com/docs/meta/style-guide/).
-
-Store all source documents in the `source/` directory.
 
 ## Linting
 
@@ -36,22 +33,19 @@ To run a manual hook like `shellcheck` manually, run:
 pre-commit run --all-files --hook-stage manual shellcheck
 ```
 
-## Prose test numbering
-
-When numbering prose tests, always use relative numbered bullets (`1.`). New tests must be appended at the end of the
-test list, since drivers may refer to existing tests by number.
-
-Outdated tests must not be removed completely, but may be marked as such (e.g. by striking through or replacing the
-entire test with a note (e.g. *Removed*).
-
 ## Building Documents
 
-We use [mkdocs](https://www.mkdocs.org/) to render the documentation. To see a live view of the documentation, run:
+We use [mkdocs](https://www.mkdocs.org/) to render the documentation. To see a live view of the documentation, in a
+Python [venv](https://docs.python.org/3/library/venv.html) run:
 
 ```bash
-pip install mkdocs
+pip install -r source/requirements.txt
 mkdocs serve
 ```
+
+To build the docs, use `mkdocs build`.
+
+In CI we verify that there are no warnings. To replicate locally, run `mkdocs build --strict`.
 
 ## Converting to JSON
 
@@ -60,7 +54,17 @@ using `yaml2json` anymore, but instead the [js-yaml](https://www.npmjs.com/packa
 converter, so that JSON is formatted consistently.
 
 Run `npm install -g js-yaml`, then run `make` in the `source` directory at the top level of this repository to convert
-all YAML test files to JSON.
+all YAML test files in `source` to JSON.
+
+Some specs include Python scripts that generate test files. These often live alongside their respective specs:
+
+```bash
+python source/server-discovery-and-monitoring/tests/errors/generate-error-tests.py   # SDAM error tests
+python source/client-side-encryption/etc/generate-corpus.py                          # Client-side encryption corpus tests
+python source/etc/generate-handshakeError-tests.py                                   # Handshake error tests
+```
+
+In general, these follow the `generate-*.py` naming convention in a spec's `etc/` or `tests/` subdirectory.
 
 ## Licensing
 
