@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-65a34617.js";
+            window.path_to_searchindex_js = "searchindex-31fca414.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-c2b477e5.js"></script>
@@ -16931,6 +16931,9 @@ availability. For example, if the driver attempts to connect to a member of a di
 up with an invalid cluster time. Worse, this invalid cluster time may remain the highest for an indefinite time since
 clocks between different clusters are not synced. This results in all operations failing until the application is
 restarted. To fix this issue we decided it was more robust to stop gossiping on SDAM commands altogether.</p>
+<h2 id="idiomatic-apis"><a class="header" href="#idiomatic-apis">Idiomatic APIs</a></h2>
+<p>Drivers MAY implement session management APIs idiomatic to their language. These APIs SHOULD take advantage of language
+runtime capabilities to encourage correct usage of sessions.</p>
 <h2 id="test-plan-21"><a class="header" href="#test-plan-21">Test Plan</a></h2>
 <p>See the <a href="sessions/tests/README.html">README</a> for tests.</p>
 <h2 id="motivation-2"><a class="header" href="#motivation-2">Motivation</a></h2>
@@ -16982,6 +16985,8 @@ collection = database.getCollection(...)
 collection.insertOne(session, {})
 session.endSession()
 </code></pre>
+<p>If possible, drivers are encouraged to implement APIs idiomatic to their language that remove the need to explicitly
+pass sessions to each operation.</p>
 <h3 id="why-does-a-network-error-cause-the-serversession-to-be-discarded-from-the-pool"><a class="header" href="#why-does-a-network-error-cause-the-serversession-to-be-discarded-from-the-pool">Why does a network error cause the <code>ServerSession</code> to be discarded from the pool?</a></h3>
 <p>When a network error is encountered when executing an operation with a <code>ClientSession</code>, the operation may be left
 running on the server. Re-using this <code>ServerSession</code> can lead to parallel operations which violates the rule that a
@@ -17019,6 +17024,7 @@ remain acquired by the <code>ClientSession</code> after an operation is attempte
 has risks that do not justify the potential guaranteed <code>ServerSession</code> allocation limiting.</p>
 <h2 id="changelog-29"><a class="header" href="#changelog-29">Changelog</a></h2>
 <ul>
+<li>2026-11-03: Drivers MAY implement idiomatic session management APIs.</li>
 <li>2026-06-17: Remove pre-4.2 version references.</li>
 <li>2025-02-24: Drivers MUST NOT gossip $clusterTime on SDAM commands.</li>
 <li>2024-05-08: Migrated from reStructuredText to Markdown.</li>
@@ -31706,8 +31712,8 @@ instances (excluding those that explicitly override the setting). This configura
 environment variable <code>OTEL_#{LANG}_INSTRUMENTATION_MONGODB_ENABLED</code>. Drivers MAY provide other means to globally
 disable OpenTelemetry that are more suitable for their language ecosystem. This option MUST override settings on the
 higher level.</li>
-<li><strong>Host Application Level</strong>: If the host application enables OpenTelemetry for all available instrumentations (e.g.,
-Ruby), and a driver can detect this, OpenTelemetry SHOULD be enabled in the driver.</li>
+<li><strong>Host Application Level</strong>: If the host application enables OpenTelemetry for all available instrumentations, and a
+driver can detect this, OpenTelemetry SHOULD be enabled in the driver.</li>
 </ul>
 <p>Drivers MUST NOT try to detect whether the OpenTelemetry SDK library is available, and enable tracing based on this.
 Drivers MUST NOT add means that configure OpenTelemetry SDK (e.g., setting a specific exporter). Drivers MUST NOT add
@@ -32065,17 +32071,96 @@ take.</p>
 </div>
 <h2 id="backwards-compatibility-28"><a class="header" href="#backwards-compatibility-28">Backwards Compatibility</a></h2>
 <p>Introduction of OpenTelemetry in new driver versions should not significantly affect existing applications that do not
-enable OpenTelemetry. However, since the no-op tracing operation may introduce some performance degradation (though it
-should be negligible), customers should be informed of this feature and how to disable it completely.</p>
+enable OpenTelemetry. However, since the disabled instrumentation may introduce some performance degradation (see
+<a href="#performance-implications">Performance Implications section</a>), customers should be informed of this feature and how to
+minimize performance impact.</p>
 <p>If a driver is used in an application that has OpenTelemetry enabled, customers will see traces from the driver in their
 OpenTelemetry backends. This may be unexpected and MAY cause negative effects in some cases (e.g., the OpenTelemetry
 backend MAY not have enough capacity to process new traces). Customers should be informed of this feature and how to
-disable it completely.</p>
+disable tracing.</p>
 <h2 id="security-implication-4"><a class="header" href="#security-implication-4">Security Implication</a></h2>
 <p>Drivers MUST take care to avoid exposing sensitive information (e.g. authentication credentials) in traces. Drivers
 SHOULD follow the
 <a href="https://github.com/mongodb/specifications/blob/master/source/command-logging-and-monitoring/command-logging-and-monitoring.md#security">Security</a>
 guidance of the Command Logging and Monitoring spec.</p>
+<h2 id="performance-implications"><a class="header" href="#performance-implications">Performance Implications</a></h2>
+<p>Drivers MUST measure the performance impact of their OpenTelemetry implementations as described in
+<a href="#benchmarking">Benchmarking</a>, and SHOULD follow the <a href="#implementation-guidelines">Implementation Guidelines</a>. This
+specification sets no numeric limit: the cost depends on the language runtime, the host and the workload. In this
+section, “SDK” means the tracer implementation a host application installs; where tracing is built into the runtime, it
+means the component that subscribes to and records the runtime’s spans.</p>
+<h3 id="implementation-guidelines"><a class="header" href="#implementation-guidelines">Implementation Guidelines</a></h3>
+<p>Not every span is recorded, for two reasons. First, when no SDK is installed and the current context holds no valid
+span, the tracing API returns a span whose context is not valid: its trace id and span id are all zeroes. Such a span is
+never recorded, and it cannot be a parent or be propagated. Drivers check this with
+<a href="https://opentelemetry.io/docs/specs/otel/trace/api/#isvalid">IsValid</a> in the OpenTelemetry API, or the tracing API’s
+equivalent.</p>
+<p>Second, a span with a valid context may still not be recorded: the sampler decided to drop it, or no SDK is installed
+and the context came from an upstream service. Drivers check this with
+<a href="https://opentelemetry.io/docs/specs/otel/trace/api/#isrecording">IsRecording</a> in the OpenTelemetry API, or the tracing
+API’s equivalent.</p>
+<p>Both checks need a span that has already been created, so a driver chooses the attributes to provide at creation before
+it knows whether the span will be recorded. Those attributes are built even for spans that are dropped, but only they
+are visible to the sampler. Keeping the creation set small and deferring the rest is an acceptable trade-off: only
+custom samplers keying on deferred attributes are affected.</p>
+<p>Drivers SHOULD:</p>
+<ol>
+<li>Create a span with a minimum set of attributes that are cheap to create. The recommended set for command spans is
+<code>db.system.name</code>, <code>db.namespace</code>, <code>db.collection.name</code>, <code>db.command.name</code>, <code>server.address</code>, <code>server.port</code>,
+<code>network.transport</code>, <code>db.mongodb.server_connection_id</code>, and <code>db.mongodb.driver_connection_id</code>. The recommended set
+for operation spans is <code>db.system.name</code>, <code>db.namespace</code>, <code>db.collection.name</code>, and <code>db.operation.name</code>.</li>
+<li>After creating the span, check whether its context is valid. If not, skip all span work: making the span current,
+adding attributes, recording the outcome, and ending the span.</li>
+<li>Otherwise, check whether the span is being recorded:
+<ul>
+<li>If it is, add the rest of the attributes and record the outcome (status, error attributes, and exceptions).</li>
+<li>If it is not, add no more attributes and do not record the outcome. The span is still made current, so that the
+spans created within it are nested under it and its context is
+<a href="#propagating-trace-context-to-the-server">propagated</a>.</li>
+</ul>
+</li>
+</ol>
+<p>Note that when a host application samples at the collector rather than in process (tail-based sampling), it configures
+the in-process sampler to record every span; the guidance above then yields no saving, and the driver-side cost is that
+of the <code>sdk-always</code> configuration plus the cost of exporting every span.</p>
+<p>Drivers SHOULD compute values that do not change during the life of an object once, and reuse them: connection
+attributes for the life of a connection, operation names per operation type, the formatted session id per server
+session. Such caches MUST be safe for concurrent use.</p>
+<h3 id="benchmarking"><a class="header" href="#benchmarking">Benchmarking</a></h3>
+<p>Drivers MUST benchmark the following configurations, and record the overhead of each relative to the baseline as a
+metric of its own. The benchmark harness, not the driver, installs and configures the SDK and its sampler for the SDK
+configurations. No configuration has an active parent span, so that <code>api-only</code> produces no valid span in any driver.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">Configuration</th><th style="text-align: left">Tracing setup</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><code>off</code></td><td style="text-align: left">tracing disabled; the baseline</td></tr>
+<tr><td style="text-align: left"><code>api-only</code></td><td style="text-align: left">tracing enabled; no SDK, so every tracing call is a no-op</td></tr>
+<tr><td style="text-align: left"><code>sdk-ratio</code></td><td style="text-align: left">tracing enabled; SDK installed; <code>TraceIdRatioBased</code> sampler with a representative ratio (e.g. 1%)</td></tr>
+<tr><td style="text-align: left"><code>sdk-always</code></td><td style="text-align: left">tracing enabled; SDK installed; every span sampled</td></tr>
+</tbody>
+</table>
+</div>
+<p>The differences between consecutive configurations are meaningful: <code>off</code> → <code>api-only</code> is the cost of the driver’s own
+code, which drivers control, and <code>api-only</code> → <code>sdk-ratio</code> → <code>sdk-always</code> adds the cost of the SDK and of recording. If
+<code>sdk-ratio</code> costs nearly as much as <code>sdk-always</code>, attribute building is not gated on the sampling decision.</p>
+<p>Additionally, when a driver first releases OpenTelemetry support, it SHOULD compare its default configuration (normally
+<code>off</code>) once against the commit before OpenTelemetry support was added, and record the overhead it measures.</p>
+<p>Drivers MUST use their standardized performance testing infrastructure (see
+<a href="#performance-benchmarking">Performance Benchmarking</a>) rather than a purpose-built OpenTelemetry benchmark.</p>
+<p>Drivers MUST measure the <code>Small doc insertOne</code> and <code>Find one by ID</code> tasks, through both the synchronous and the
+asynchronous API where a driver has both.</p>
+<p>The overheads measured are small differences between two noisy numbers. Drivers SHOULD run the whole set of
+configurations interleaved and rotate their order between repetitions, run compared configurations on the same host, and
+judge the trend over several runs rather than a single run against a threshold.</p>
+<p>Drivers SHOULD run the benchmarks in the runtime’s default production configuration, with warm-up and iterations as in
+<a href="#performance-benchmarking">Performance Benchmarking</a>.</p>
+<p>Drivers MAY also record the CPU time per operation alongside the throughput score: it excludes waiting on the server, so
+it is usually less noisy than throughput.</p>
+<p>SDK configurations SHOULD NOT install an exporter or a span processor. Spans are still sampled and recorded without
+them; processing cost depends on the host application’s choice of processor.</p>
 <h2 id="future-work-18"><a class="header" href="#future-work-18">Future Work</a></h2>
 <h3 id="query-parametrization"><a class="header" href="#query-parametrization">Query Parametrization</a></h3>
 <p>It might be beneficial to implement query parametrization for the <code>db.query.text</code> attribute.</p>
@@ -32105,6 +32190,9 @@ negotiation mechanism.</p>
 redesigning the payload format.</p>
 <h2 id="changelog-49"><a class="header" href="#changelog-49">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-11-04: Added the Performance Implications section (DRIVERS-3620).</p>
+</li>
 <li>
 <p>2026-10-26: Added a non-normative description of expected server behavior for propagated trace context: the server may
 ignore it, may continue only sampled traces and may drop them under its own rate limiting, and does not expose it in
