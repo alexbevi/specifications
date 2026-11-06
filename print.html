@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-0f4a75a6.js";
+            window.path_to_searchindex_js = "searchindex-9645a0ef.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-c2b477e5.js"></script>
@@ -7917,24 +7917,6 @@ driver meets ALL of the following conditions:</p>
 language. All connection pools created by a MongoClient MUST use the same ConnectionPoolOptions.</p>
 <p>When parsing a mongodb connection string, a user MUST be able to specify these options using the default names specified
 above.</p>
-<h4 id="deprecated-options"><a class="header" href="#deprecated-options">Deprecated Options</a></h4>
-<p>The following ConnectionPoolOptions are considered deprecated. They MUST NOT be implemented if they do not already exist
-in a driver, and they SHOULD be deprecated and removed from drivers that implement them as early as possible:</p>
-<pre><code class="language-typescript">interface ConnectionPoolOptions {
-  /**
-   *  The maximum number of threads that can simultaneously wait
-   *  for a Connection to become available.
-   */
-  waitQueueSize?: number;
-
-  /**
-   *  An alternative way of setting waitQueueSize, it specifies
-   *  the maximum number of threads that can wait per connection.
-   *  waitQueueSize === waitQueueMultiple * maxPoolSize
-   */
-  waitQueueMultiple?: number
-}
-</code></pre>
 <h3 id="connection-pool-members"><a class="header" href="#connection-pool-members">Connection Pool Members</a></h3>
 <h4 id="connection-1"><a class="header" href="#connection-1">Connection</a></h4>
 <p>A driver-defined wrapper around a single TCP connection to an Endpoint. A <a href="#connection">Connection</a> has the following
@@ -8742,8 +8724,6 @@ structured logging framework does not support numeric types).</p>
 <tr><td>maxPoolSize</td><td>Int</td><td>The maxPoolSize value for this pool. Optional; only required to include if the user specified a value.</td></tr>
 <tr><td>maxConnecting</td><td>Int</td><td>The maxConnecting value for this pool. Optional; only required to include if the driver supports this option and the user specified a value.</td></tr>
 <tr><td>waitQueueTimeoutMS</td><td>Int</td><td>The waitQueueTimeoutMS value for this pool. Optional; only required to include if the driver supports this option and the user specified a value.</td></tr>
-<tr><td>waitQueueSize</td><td>Int</td><td>The waitQueueSize value for this pool. Optional; only required to include if the driver supports this option and the user specified a value.</td></tr>
-<tr><td>waitQueueMultiple</td><td>Int</td><td>The waitQueueMultiple value for this pool. Optional; only required to include if the driver supports this option and the user specified a value.</td></tr>
 </tbody>
 </table>
 </div>
@@ -8752,7 +8732,7 @@ placeholders as appropriate:</p>
 <blockquote>
 <p>Connection pool created for {{serverHost}}:{{serverPort}} using options maxIdleTimeMS={{maxIdleTimeMS}},
 minPoolSize={{minPoolSize}}, maxPoolSize={{maxPoolSize}}, maxConnecting={{maxConnecting}},
-waitQueueTimeoutMS={{waitQueueTimeoutMS}}, waitQueueSize={{waitQueueSize}}, waitQueueMultiple={{waitQueueMultiple}}</p>
+waitQueueTimeoutMS={{waitQueueTimeoutMS}}</p>
 </blockquote>
 <h4 id="pool-ready-message"><a class="header" href="#pool-ready-message">Pool Ready Message</a></h4>
 <p>In addition to the common fields defined above, this message MUST contain the following key-value pairs:</p>
@@ -8990,21 +8970,6 @@ increases by one</li>
 totalConnectionCount and potentially availableConnectionCount. After this point, the <a href="#connection">Connection</a> is no
 longer a part of the pool. Further hypothetical events would not indicate a change to the state of the pool, so they are
 not specified here.</p>
-<h3 id="why-are-waitqueuesize-and-waitqueuemultiple-deprecated"><a class="header" href="#why-are-waitqueuesize-and-waitqueuemultiple-deprecated">Why are waitQueueSize and waitQueueMultiple deprecated?</a></h3>
-<p>These options were originally only implemented in three drivers (Java, C#, and Python), and provided little value. While
-these fields would allow for faster diagnosis of issues in the connection pool, they would not actually prevent an error
-from occurring.</p>
-<p>Additionally, these options have the effect of prioritizing newer requests over older requests, which is not necessarily
-the behavior that users want. For example, consider a situation when a WaitQueue is full, and a request for
-<a href="#connection">Connection</a> gets rejected. Then a spot opens in the WaitQueue, and a newer request gets accepted. One may
-say that the newer request was prioritized over the older one, which violates the fairness recommendation that the
-WaitQueue normally adheres to.</p>
-<p>Because of these issues, it does not make sense to
-<a href="#">go against driver mantras and provide an additional knob</a>. We may eventually pursue an
-alternative configuration to address wait queue size in <a href="#advanced-pooling-behaviors">Advanced Pooling Behaviors</a>.</p>
-<p>Users that wish to have this functionality can achieve similar results by utilizing other methods to limit concurrency.
-Examples include implementing either a thread pool or an operation queue with a capped size in the user application.
-Drivers that need to deprecate <code>waitQueueSize</code> and/or <code>waitQueueMultiple</code> SHOULD refer users to these examples.</p>
 <h3 id="why-is-waitqueuetimeoutms-optional-for-some-drivers"><a class="header" href="#why-is-waitqueuetimeoutms-optional-for-some-drivers">Why is waitQueueTimeoutMS optional for some drivers?</a></h3>
 <p>We are anticipating eventually introducing a single client-side timeout mechanism, making us hesitant to introduce
 another granular timeout control. Therefore, if a driver/language already has an idiomatic way to implement their
@@ -9057,10 +9022,6 @@ higher or equal to .net 5.0. On macOS, there is no straight equivalent for this 
 some equivalent configuration, but this configuration will also require target frameworks higher than or equal to .net
 5.0. The advantage of using Background Thread to manage perished connections is that it will work regardless of
 environment setup.</p>
-<h2 id="backwards-compatibility-9"><a class="header" href="#backwards-compatibility-9">Backwards Compatibility</a></h2>
-<p>As mentioned in <a href="#deprecated-options">Deprecated Options</a>, some drivers currently implement the options <code>waitQueueSize</code>
-and/or <code>waitQueueMultiple</code>. These options will need to be deprecated and phased out of the drivers that have implemented
-them.</p>
 <h2 id="reference-implementations-3"><a class="header" href="#reference-implementations-3">Reference Implementations</a></h2>
 <ul>
 <li>JAVA (JAVA-3079)</li>
@@ -9085,6 +9046,9 @@ Connection.</li>
 to close and remove from its pool a <a href="#connection">Connection</a> which has unread exhaust messages.</p>
 <h2 id="changelog-18"><a class="header" href="#changelog-18">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-10-08: Removed deprecated waitQueueSize and waitQueueMultiple connection pool options.</p>
+</li>
 <li>
 <p>2026-01-12: Clarify handling TLS I/O errors for backpressure error labels.</p>
 </li>
@@ -11037,7 +11001,7 @@ forms:</p>
 <h3 id="minimum-iteration-count"><a class="header" href="#minimum-iteration-count">Minimum iteration count</a></h3>
 <p>For SCRAM-SHA-1 and SCRAM-SHA-256, test that the minimum iteration count is respected. This may be done via unit testing
 of an underlying SCRAM library.</p>
-<h2 id="backwards-compatibility-10"><a class="header" href="#backwards-compatibility-10">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-9"><a class="header" href="#backwards-compatibility-9">Backwards Compatibility</a></h2>
 <p>Drivers may need to remove support for association of more than one credential with a MongoClient, including</p>
 <ul>
 <li>Deprecation and removal of MongoClient constructors that take as an argument more than a single credential</li>
@@ -12276,7 +12240,7 @@ anyway, but when we have no TTL records to reference we still need a fallback fr
 <h4 id="no-option-to-turn-off-periodic-rescanning"><a class="header" href="#no-option-to-turn-off-periodic-rescanning">No option to turn off periodic rescanning</a></h4>
 <p>The design does not allow for an option to turn off the periodic rescanning of SRV records on the basis that we try to
 have as few options as possible: the “no knobs” philosophy.</p>
-<h2 id="backwards-compatibility-11"><a class="header" href="#backwards-compatibility-11">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-10"><a class="header" href="#backwards-compatibility-10">Backwards Compatibility</a></h2>
 <p>This specification changes the behaviour of server monitoring by introducing a repeating DNS lookup of the SRV records.
 Although this is an improvement in the <code>mongodb+srv://</code> scheme it can nonetheless break expectations with users that
 were familiar with the old behaviour. We do not expect this to negatively impact users.</p>
@@ -13485,7 +13449,7 @@ server’s full state as in the Server Discovery and Monitoring Spec, it is only
 open. We might also consider a <code>select</code> or <code>poll</code> call to check if the socket layer considers the socket closed, without
 requiring a round-trip to the server. However, this technique usually will not detect an uncleanly shutdown server or a
 network outage.</p>
-<h2 id="backwards-compatibility-12"><a class="header" href="#backwards-compatibility-12">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-11"><a class="header" href="#backwards-compatibility-11">Backwards Compatibility</a></h2>
 <p>In general, backwards breaking changes have been made in the name of consistency with mongos and avoiding misleading
 users about monotonicity.</p>
 <ul>
@@ -14511,7 +14475,7 @@ attempt. Note that the second <code>CommandStartedEvent</code> and “command st
 <li>Drivers MUST document that the operations in <a href="#unsupported-read-operations">Unsupported Read Operations</a> do not
 support retryable behavior.</li>
 <li>Driver release notes MUST make it clear to users that they may need to adjust custom retry logic to prevent an
-application from inadvertently retrying for too long (see <a href="#backwards-compatibility-13">Backwards Compatibility</a> for
+application from inadvertently retrying for too long (see <a href="#backwards-compatibility-12">Backwards Compatibility</a> for
 details).</li>
 <li>Drivers implementing retryability for their generic command runner for read commands MUST document that <code>mapReduce</code>
 will be retried if it is passed as a command to the command runner. These drivers also MUST document the potential
@@ -14532,7 +14496,7 @@ as little as possible to introduce the concept retryable behavior for read opera
 randomization) were considered, but the behavior of a single, immediate retry attempt was chosen in the interests of
 simplicity as well as consistency with the design for retryable writes.</p>
 <p>See the <a href="#future-work-9">future work</a> section for potential upcoming changes to retry mechanics.</p>
-<h2 id="backwards-compatibility-13"><a class="header" href="#backwards-compatibility-13">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-12"><a class="header" href="#backwards-compatibility-12">Backwards Compatibility</a></h2>
 <p>The API changes to support retryable reads extend the existing API but do not introduce any backward breaking changes.
 Existing programs that do not make use of retryable reads will continue to compile and run correctly.</p>
 <p>N.B.: Applications with custom retry logic that choose to enable retryable reads may need to redo their custom retry
@@ -15157,7 +15121,7 @@ server version (see:
 <p>While this approach will allow applications to take advantage of retryable write behavior with minimal code changes, it
 also presents a documentation challenge. Users must understand exactly what can and will be retried (see:
 <a href="#how-will-users-know-which-operations-are-supported">How will users know which operations are supported?</a>).</p>
-<h2 id="backwards-compatibility-14"><a class="header" href="#backwards-compatibility-14">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-13"><a class="header" href="#backwards-compatibility-13">Backwards Compatibility</a></h2>
 <p>The API changes to support retryable writes extend the existing API but do not introduce any backward breaking changes.
 Existing programs that do not make use of retryable writes will continue to compile and run correctly.</p>
 <h2 id="reference-implementation-13"><a class="header" href="#reference-implementation-13">Reference Implementation</a></h2>
@@ -15645,10 +15609,10 @@ since a server is reselected for a retry attempt.</p>
 <ol>
 <li>Drivers MUST document that all commands support retries on server overload.</li>
 <li>Driver release notes MUST make it clear to users that they may need to adjust custom retry logic to prevent an
-application from inadvertently retrying for too long (see <a href="#backwards-compatibility-15">Backwards Compatibility</a> for
+application from inadvertently retrying for too long (see <a href="#backwards-compatibility-14">Backwards Compatibility</a> for
 details).</li>
 </ol>
-<h3 id="backwards-compatibility-15"><a class="header" href="#backwards-compatibility-15">Backwards Compatibility</a></h3>
+<h3 id="backwards-compatibility-14"><a class="header" href="#backwards-compatibility-14">Backwards Compatibility</a></h3>
 <p>The server’s rate limiting can introduce higher error rates than previously would have been exposed to users under
 periods of extreme server overload. The increased error rate is a tradeoff: given the choice between an overloaded
 server (potential crash), or at minimum dramatically slower query execution time and a stable but lowered throughput
@@ -16942,7 +16906,7 @@ runtime capabilities to encourage correct usage of sessions.</p>
 <p>The goal is to modify the driver API in such a way that existing programs that don’t use sessions continue to compile
 and run correctly. This goal is met by defining new methods (or overloads) that take a session parameter. An application
 does not need to be modified unless it wants to take advantage of the new features supported by sessions.</p>
-<h2 id="backwards-compatibility-16"><a class="header" href="#backwards-compatibility-16">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-15"><a class="header" href="#backwards-compatibility-15">Backwards Compatibility</a></h2>
 <p>The API changes to support sessions extend the existing API but do not introduce any backward breaking changes. Existing
 programs that don’t use sessions continue to compile and run correctly.</p>
 <h2 id="reference-implementation-always-required"><a class="header" href="#reference-implementation-always-required">Reference Implementation (always required)</a></h2>
@@ -17390,7 +17354,7 @@ consistent.</p>
 <code>operationTime</code> that is sufficiently new to guarantee causal consistency for that session, but no newer. Using an
 <code>operationTime</code> that is newer than necessary can cause reads to block longer than necessary when sent to a lagging
 secondary. The goal is to block for just long enough to guarantee causal consistency and no longer.</p>
-<h2 id="backwards-compatibility-17"><a class="header" href="#backwards-compatibility-17">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-16"><a class="header" href="#backwards-compatibility-16">Backwards Compatibility</a></h2>
 <p>The API changes to support sessions extend the existing API but do not introduce any backward breaking changes. Existing
 programs that don’t use causal consistency continue to compile and run correctly.</p>
 <h2 id="reference-implementation-15"><a class="header" href="#reference-implementation-15">Reference Implementation</a></h2>
@@ -17629,7 +17593,7 @@ be best served by a session-based approach, as no API changes will be required.<
 <p>Allowing callers to mutate <code>snapshotTime</code> enables misuse patterns where applications overwrite <code>snapshotTime</code> on an
 existing session and then use that session in transactions, combining an inconsistent timestamp with an existing server
 session and triggering hard-to-diagnose write conflicts.</p>
-<h2 id="backwards-compatibility-18"><a class="header" href="#backwards-compatibility-18">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-17"><a class="header" href="#backwards-compatibility-17">Backwards Compatibility</a></h2>
 <p>The API changes to support snapshot reads extend the existing API but do not introduce any backward breaking changes.
 Existing programs that don’t use snapshot reads continue to compile and run correctly.</p>
 <h2 id="reference-implementation-16"><a class="header" href="#reference-implementation-16">Reference Implementation</a></h2>
@@ -18328,7 +18292,7 @@ execute a command directly with minimum additional client-side logic.</p>
 <li><a href="#sessions-specification">Driver Sessions Specification</a></li>
 <li><a href="#retryable-writes">Retryable Writes Specification</a></li>
 </ol>
-<h2 id="backwards-compatibility-19"><a class="header" href="#backwards-compatibility-19"><strong>Backwards Compatibility</strong></a></h2>
+<h2 id="backwards-compatibility-18"><a class="header" href="#backwards-compatibility-18"><strong>Backwards Compatibility</strong></a></h2>
 <p>The API changes to support transactions extend the existing API but do not introduce any backward breaking changes.
 Existing programs that do not make use of transactions will continue to compile and run correctly.</p>
 <h2 id="reference-implementation-17"><a class="header" href="#reference-implementation-17"><strong>Reference Implementation</strong></a></h2>
@@ -19000,7 +18964,7 @@ server load increases, immediate retries can result in retry storms, unnecessari
 (5-milliseconds) and growth value (1.5x) were chosen specifically to mitigate latency in low levels of contention.
 Empirical evidence suggests that 500-millisecond max backoff ensured that a transaction did not wait so long as to
 exceed the 120-second timeout and reduced load spikes.</p>
-<h2 id="backwards-compatibility-20"><a class="header" href="#backwards-compatibility-20">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-19"><a class="header" href="#backwards-compatibility-19">Backwards Compatibility</a></h2>
 <p>The specification introduces a new method on the ClientSession class and does not introduce any backward breaking
 changes. Existing programs that do not make use of this new method will continue to compile and run correctly.</p>
 <h2 id="reference-implementation-18"><a class="header" href="#reference-implementation-18">Reference Implementation</a></h2>
@@ -19397,7 +19361,7 @@ option.</p>
 <a href="#enumerating-collections">Collection Enumeration</a> and
 <a href="#index-management">Index Management</a> specifications. Since most drivers already implement a
 <code>listDatabases</code> command helper in some fashion, this spec is flexible when it comes to existing APIs.</p>
-<h2 id="backwards-compatibility-21"><a class="header" href="#backwards-compatibility-21">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-20"><a class="header" href="#backwards-compatibility-20">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns. This specification merely deals with how to enumerate databases in
 future versions of MongoDB and allows flexibility for existing driver APIs.</p>
 <h2 id="reference-implementation-19"><a class="header" href="#reference-implementation-19">Reference Implementation</a></h2>
@@ -19642,7 +19606,7 @@ primary node when in a replica set topology, unless directly connected to a seco
 </ul>
 </li>
 </ul>
-<h2 id="backwards-compatibility-22"><a class="header" href="#backwards-compatibility-22">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-21"><a class="header" href="#backwards-compatibility-21">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns. This SPEC merely deals with how to enumerate collections in future
 versions of MongoDB.</p>
 <h2 id="reference-implementation-20"><a class="header" href="#reference-implementation-20">Reference Implementation</a></h2>
@@ -23129,7 +23093,7 @@ collection.find({ name: 'john doe' }).explain({ timeoutMS: 1000 });
 <p>Current drivers have chosen slightly different names and semantics for the same operations and options. In addition, not
 all drivers offer all the same operations and methods. As such, it is difficult to transition from driver to driver
 making the jobs of polyglot developers, documentation authors, and support engineers more difficult.</p>
-<h2 id="backwards-compatibility-23"><a class="header" href="#backwards-compatibility-23">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-22"><a class="header" href="#backwards-compatibility-22">Backwards Compatibility</a></h2>
 <p>This spec should be mostly backwards compatible as it is very lenient. Drivers finding a backwards compatibility problem
 should attempt to work around it using an acceptable deviation. In rare cases, a driver may need to break backwards
 compatibility. This should be done in accordance with a versioning scheme indicating that a backwards compatible break
@@ -23594,7 +23558,7 @@ Management API, and collection creation/modification component to ensure that Co
 <p>In addition, drivers should test that two indexes can be created with identical key patterns and different collations. A
 custom name must be provided for one of them. Then, the test should ensure that the correct index is dropped when
 delete_one is called with an index name.</p>
-<h2 id="backwards-compatibility-24"><a class="header" href="#backwards-compatibility-24">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-23"><a class="header" href="#backwards-compatibility-23">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns.</p>
 <h2 id="reference-implementation-22"><a class="header" href="#reference-implementation-22">Reference Implementation</a></h2>
 <p>Reference Implementation:</p>
@@ -26706,7 +26670,7 @@ mongodb://server:27017/db?wtimeoutMS=1000
 
 mongodb://server:27017/db?w=majority&amp;wtimeoutMS=1000
 </code></pre>
-<h2 id="backwards-compatibility-25"><a class="header" href="#backwards-compatibility-25">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-24"><a class="header" href="#backwards-compatibility-24">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns. This specification merely deals with how to specify read and write
 concerns.</p>
 <h2 id="test-plan-30"><a class="header" href="#test-plan-30">Test Plan</a></h2>
@@ -27746,7 +27710,7 @@ for the long sequence of getMores with empty responses. But resuming with the la
 unnecessary scanning of unmatched oplog entries.</p>
 <h2 id="test-plan-31"><a class="header" href="#test-plan-31">Test Plan</a></h2>
 <p>See <a href="change-streams/tests/README.html">tests/README.md</a></p>
-<h2 id="backwards-compatibility-26"><a class="header" href="#backwards-compatibility-26">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-25"><a class="header" href="#backwards-compatibility-25">Backwards Compatibility</a></h2>
 <p>There should be no backwards compatibility concerns.</p>
 <h2 id="reference-implementations-4"><a class="header" href="#reference-implementations-4">Reference Implementations</a></h2>
 <ul>
@@ -29127,7 +29091,7 @@ method returned an ObjectId, and support for custom file ids is implemented by a
 file id as an additional parameter. Drivers should continue to support the original method if possible to maintain
 backward compatibility. This spec does not attempt to completely mandate how each driver should maintain backward
 compatibility, as different languages have different approaches and capabilities for maintaining backward compatibility.</p>
-<h2 id="backwards-compatibility-27"><a class="header" href="#backwards-compatibility-27">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-26"><a class="header" href="#backwards-compatibility-26">Backwards Compatibility</a></h2>
 <p>This spec presents a new API for GridFS systems, which may break existing functionality for some drivers. The following
 are suggestions for ways to mitigate these incompatibilities.</p>
 <p>File revisions</p>
@@ -32069,7 +32033,7 @@ take.</p>
 </tbody>
 </table>
 </div>
-<h2 id="backwards-compatibility-28"><a class="header" href="#backwards-compatibility-28">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-27"><a class="header" href="#backwards-compatibility-27">Backwards Compatibility</a></h2>
 <p>Introduction of OpenTelemetry in new driver versions should not significantly affect existing applications that do not
 enable OpenTelemetry. However, since the disabled instrumentation may introduce some performance degradation (see
 <a href="#performance-implications">Performance Implications section</a>), customers should be informed of this feature and how to
@@ -33609,7 +33573,7 @@ override programmatic defaults), but if we went with the opposite default, it wo
 to override: not all languages will necessarily have an easy way to override/unset an environment variable from
 within application code.</li>
 </ol>
-<h2 id="backwards-compatibility-29"><a class="header" href="#backwards-compatibility-29">Backwards Compatibility</a></h2>
+<h2 id="backwards-compatibility-28"><a class="header" href="#backwards-compatibility-28">Backwards Compatibility</a></h2>
 <p>This specification takes the stance that the contents of log messages (both structured and unstructured) are <em>not</em>
 covered by semantic versioning, but that logging components <em>are</em>, since changing the name of a component or removing a
 component altogether has the potential to break user logging configuration and cause users to silently miss log

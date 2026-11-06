@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-0f4a75a6.js";
+            window.path_to_searchindex_js = "../searchindex-9645a0ef.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -287,24 +287,6 @@ driver meets ALL of the following conditions:</p>
 language. All connection pools created by a MongoClient MUST use the same ConnectionPoolOptions.</p>
 <p>When parsing a mongodb connection string, a user MUST be able to specify these options using the default names specified
 above.</p>
-<h4 id="deprecated-options"><a class="header" href="#deprecated-options">Deprecated Options</a></h4>
-<p>The following ConnectionPoolOptions are considered deprecated. They MUST NOT be implemented if they do not already exist
-in a driver, and they SHOULD be deprecated and removed from drivers that implement them as early as possible:</p>
-<pre><code class="language-typescript">interface ConnectionPoolOptions {
-  /**
-   *  The maximum number of threads that can simultaneously wait
-   *  for a Connection to become available.
-   */
-  waitQueueSize?: number;
-
-  /**
-   *  An alternative way of setting waitQueueSize, it specifies
-   *  the maximum number of threads that can wait per connection.
-   *  waitQueueSize === waitQueueMultiple * maxPoolSize
-   */
-  waitQueueMultiple?: number
-}
-</code></pre>
 <h3 id="connection-pool-members"><a class="header" href="#connection-pool-members">Connection Pool Members</a></h3>
 <h4 id="connection-1"><a class="header" href="#connection-1">Connection</a></h4>
 <p>A driver-defined wrapper around a single TCP connection to an Endpoint. A <a href="#connection">Connection</a> has the following
@@ -1112,8 +1094,6 @@ structured logging framework does not support numeric types).</p>
 <tr><td>maxPoolSize</td><td>Int</td><td>The maxPoolSize value for this pool. Optional; only required to include if the user specified a value.</td></tr>
 <tr><td>maxConnecting</td><td>Int</td><td>The maxConnecting value for this pool. Optional; only required to include if the driver supports this option and the user specified a value.</td></tr>
 <tr><td>waitQueueTimeoutMS</td><td>Int</td><td>The waitQueueTimeoutMS value for this pool. Optional; only required to include if the driver supports this option and the user specified a value.</td></tr>
-<tr><td>waitQueueSize</td><td>Int</td><td>The waitQueueSize value for this pool. Optional; only required to include if the driver supports this option and the user specified a value.</td></tr>
-<tr><td>waitQueueMultiple</td><td>Int</td><td>The waitQueueMultiple value for this pool. Optional; only required to include if the driver supports this option and the user specified a value.</td></tr>
 </tbody>
 </table>
 </div>
@@ -1122,7 +1102,7 @@ placeholders as appropriate:</p>
 <blockquote>
 <p>Connection pool created for {{serverHost}}:{{serverPort}} using options maxIdleTimeMS={{maxIdleTimeMS}},
 minPoolSize={{minPoolSize}}, maxPoolSize={{maxPoolSize}}, maxConnecting={{maxConnecting}},
-waitQueueTimeoutMS={{waitQueueTimeoutMS}}, waitQueueSize={{waitQueueSize}}, waitQueueMultiple={{waitQueueMultiple}}</p>
+waitQueueTimeoutMS={{waitQueueTimeoutMS}}</p>
 </blockquote>
 <h4 id="pool-ready-message"><a class="header" href="#pool-ready-message">Pool Ready Message</a></h4>
 <p>In addition to the common fields defined above, this message MUST contain the following key-value pairs:</p>
@@ -1360,21 +1340,6 @@ increases by one</li>
 totalConnectionCount and potentially availableConnectionCount. After this point, the <a href="#connection">Connection</a> is no
 longer a part of the pool. Further hypothetical events would not indicate a change to the state of the pool, so they are
 not specified here.</p>
-<h3 id="why-are-waitqueuesize-and-waitqueuemultiple-deprecated"><a class="header" href="#why-are-waitqueuesize-and-waitqueuemultiple-deprecated">Why are waitQueueSize and waitQueueMultiple deprecated?</a></h3>
-<p>These options were originally only implemented in three drivers (Java, C#, and Python), and provided little value. While
-these fields would allow for faster diagnosis of issues in the connection pool, they would not actually prevent an error
-from occurring.</p>
-<p>Additionally, these options have the effect of prioritizing newer requests over older requests, which is not necessarily
-the behavior that users want. For example, consider a situation when a WaitQueue is full, and a request for
-<a href="#connection">Connection</a> gets rejected. Then a spot opens in the WaitQueue, and a newer request gets accepted. One may
-say that the newer request was prioritized over the older one, which violates the fairness recommendation that the
-WaitQueue normally adheres to.</p>
-<p>Because of these issues, it does not make sense to
-<a href="../driver-mantras.html#">go against driver mantras and provide an additional knob</a>. We may eventually pursue an
-alternative configuration to address wait queue size in <a href="#advanced-pooling-behaviors">Advanced Pooling Behaviors</a>.</p>
-<p>Users that wish to have this functionality can achieve similar results by utilizing other methods to limit concurrency.
-Examples include implementing either a thread pool or an operation queue with a capped size in the user application.
-Drivers that need to deprecate <code>waitQueueSize</code> and/or <code>waitQueueMultiple</code> SHOULD refer users to these examples.</p>
 <h3 id="why-is-waitqueuetimeoutms-optional-for-some-drivers"><a class="header" href="#why-is-waitqueuetimeoutms-optional-for-some-drivers">Why is waitQueueTimeoutMS optional for some drivers?</a></h3>
 <p>We are anticipating eventually introducing a single client-side timeout mechanism, making us hesitant to introduce
 another granular timeout control. Therefore, if a driver/language already has an idiomatic way to implement their
@@ -1427,10 +1392,6 @@ higher or equal to .net 5.0. On macOS, there is no straight equivalent for this 
 some equivalent configuration, but this configuration will also require target frameworks higher than or equal to .net
 5.0. The advantage of using Background Thread to manage perished connections is that it will work regardless of
 environment setup.</p>
-<h2 id="backwards-compatibility"><a class="header" href="#backwards-compatibility">Backwards Compatibility</a></h2>
-<p>As mentioned in <a href="#deprecated-options">Deprecated Options</a>, some drivers currently implement the options <code>waitQueueSize</code>
-and/or <code>waitQueueMultiple</code>. These options will need to be deprecated and phased out of the drivers that have implemented
-them.</p>
 <h2 id="reference-implementations"><a class="header" href="#reference-implementations">Reference Implementations</a></h2>
 <ul>
 <li>JAVA (JAVA-3079)</li>
@@ -1455,6 +1416,9 @@ Connection.</li>
 to close and remove from its pool a <a href="#connection">Connection</a> which has unread exhaust messages.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-10-08: Removed deprecated waitQueueSize and waitQueueMultiple connection pool options.</p>
+</li>
 <li>
 <p>2026-01-12: Clarify handling TLS I/O errors for backpressure error labels.</p>
 </li>
