@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-9645a0ef.js";
+            window.path_to_searchindex_js = "searchindex-afd88095.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-c2b477e5.js"></script>
@@ -35477,6 +35477,10 @@ could be executed on a sharded topology (according to <a href="#runOnRequirement
 <a href="#test_runOnRequirements">test.runOnRequirements</a>). This is advised because server selection rules for mongos could
 lead to unpredictable behavior if different servers were selected for configuring the fail point and executing
 subsequent operations.</p>
+<p>When configuring a fail point, a test MUST NOT use a client entity that specifies timeout options such as
+<code>socketTimeoutMS</code> in <code>uriOptions</code>. Since the test runner disables the fail point using the same client after the
+test, short timeouts can cause the cleanup to fail intermittently. Tests that need a client with timeout options
+MUST configure the fail point using a separate client entity without them.</p>
 </li>
 </ul>
 <p>When executing this operation, the test runner MUST keep a record of the fail point so that it can be disabled after the
@@ -36600,6 +36604,9 @@ operations and arguments. This is a concession until such time that better proce
 other specs <em>and</em> collating spec changes developed in parallel or during the same release cycle.</p>
 <h2 id="changelog-53"><a class="header" href="#changelog-53">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-10-29: Require that fail points not be configured through clients with timeout options.</p>
+</li>
 <li>
 <p>2026-08-26: <strong>Schema version 1.29.</strong></p>
 <p>Introduced the <code>$$gte</code> operator, the lower-bound counterpart to <code>$$lte</code>. Also clarified that <code>ignoreExtraSpans</code>
