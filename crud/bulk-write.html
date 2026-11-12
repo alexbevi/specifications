@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-afd88095.js";
+            window.path_to_searchindex_js = "../searchindex-ec98a658.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -657,7 +657,7 @@ the ones defined here exactly.</p>
     /**
      * A top-level error that occurred when attempting to communicate with the server or execute
      * the bulk write. This value may not be populated if the exception was thrown due to errors
-     * occurring on individual writes.
+     * occurring on individual writes or write concern errors.
      */
     error: Optional&lt;Error&gt;;
 
@@ -928,6 +928,8 @@ top-level error occurs, drivers MUST send the <code>killCursors</code> command t
 <p>Write concern errors are recorded in the <code>writeConcernErrors</code> field on <code>BulkWriteException</code>. When a write concern error
 is encountered, it should not terminate execution of the bulk write for either ordered or unordered bulk writes.
 However, drivers MUST throw an exception at the end of execution if any write concern errors were observed.</p>
+<p>A write concern error is not a top-level error. Drivers MUST NOT populate the <code>error</code> field of the <code>BulkWriteException</code>
+when no top-level error was encountered.</p>
 <h3 id="individual-write-errors"><a class="header" href="#individual-write-errors">Individual Write Errors</a></h3>
 <p>Individual write errors retrieved from the cursor are recorded in the <code>writeErrors</code> field on <code>BulkWriteException</code>. If an
 individual write error is encountered during an ordered bulk write, drivers MUST record the error in <code>writeErrors</code> and
@@ -1004,6 +1006,9 @@ The requirement has since been removed. Checking size limits complicates some dr
 error in this specific situation does not seem helpful enough to require size checks.</p>
 <h2 id="changelog"><a class="header" href="#changelog"><strong>Changelog</strong></a></h2>
 <ul>
+<li>
+<p>2026-10-08: Add prose tests for top-level errors mid bulk write and specify a write concern error is not top-level.</p>
+</li>
 <li>
 <p>2026-01-05: Specify that <code>killCursors</code>’s response cannot be ignored.</p>
 </li>
