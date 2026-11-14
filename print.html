@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-ec98a658.js";
+            window.path_to_searchindex_js = "searchindex-539b2471.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-c2b477e5.js"></script>
@@ -5468,9 +5468,10 @@ mail
 </code></pre>
 For example, <code>srvAllowedHostsSuffix=net</code> MUST raise an error, but <code>srvAllowedHostsSuffix=test</code> MUST NOT raise an
 error.</li>
-<li>Drivers SHOULD raise an error if the resulting value is a public suffix, per the algorithm in
-<a href="#public-suffix-list">Public Suffix List</a>, unless the value is in the aforementioned list
-of valid names.</li>
+<li>Drivers MAY check whether the resulting value is a public suffix, per the algorithm in
+<a href="#public-suffix-list">Public Suffix List</a>. Drivers that perform this check MUST raise an
+error if the value is a public suffix, unless the value is in the aforementioned list of valid names. See
+<a href="#rationale-for-optional-public-suffix-list-check">rationale</a>.</li>
 <li>A <code>.</code> MUST be prepended. For example, <code>srvAllowedHostsSuffix=mydomain.net</code> is treated as <code>.mydomain.net</code>.</li>
 </ol>
 <p>If this option is not present, the <code>{domainname}</code> MUST be inferred from the <code>{hostname}</code> (as described in
@@ -5675,6 +5676,15 @@ these:</p>
 <pre><code class="language-text">mongodb+srv://cluster.test.internal.example.com/?srvAllowedHostsSuffix=.example.com
 mongodb+srv://cluster.test.internal.example.com/?srvAllowedHostsSuffix=.internal.example.com
 </code></pre>
+<h3 id="rationale-for-optional-public-suffix-list-check"><a class="header" href="#rationale-for-optional-public-suffix-list-check">Rationale for optional Public Suffix List check</a></h3>
+<p>The Public Suffix List (PSL) check is optional. Implementing the check requires bundling a copy of the PSL and tracking
+its frequent updates.</p>
+<p>The check has limited value. The <code>srvHostValidator</code> option added in
+<a href="https://jira.mongodb.org/browse/DRIVERS-3632">DRIVERS-3632</a> bypasses the check entirely.</p>
+<p>The rules are inconsistent for this use case. For example, <code>*.compute.amazonaws.com</code> is a public suffix but its parent
+<code>compute.amazonaws.com</code> is not, so the check rejects <code>.co.uk</code> yet accepts <code>.compute.amazonaws.com</code>.</p>
+<p>Java and C# implemented the PSL check and later removed it (<a href="https://jira.mongodb.org/browse/JAVA-6235">JAVA-6235</a>,
+<a href="https://jira.mongodb.org/browse/CSHARP-6214">CSHARP-6214</a>).</p>
 <h3 id="rationale-for-srvhostvalidator"><a class="header" href="#rationale-for-srvhostvalidator">Rationale for <code>srvHostValidator</code></a></h3>
 <p><code>srvAllowedHostsSuffix</code> only validates SRV host against a single suffix. This can be limiting as users may want to allow
 multiple unrelated suffixes or apply custom logic beyond simple suffix matching. Users may have more specific validation
@@ -5707,6 +5717,9 @@ left the behaviour of supporting UTF-8 characters as unspecified.</p>
 <p>In the future we could consider using the priority and weight fields of the SRV records.</p>
 <h2 id="changelog-14"><a class="header" href="#changelog-14">ChangeLog</a></h2>
 <ul>
+<li>
+<p>2026-11-13: Document rationale for PSL validation and change SHOULD to MAY.</p>
+</li>
 <li>
 <p>2026-10-01: Specify that <code>srvAllowedHostsSuffix</code> has no hostname syntax validation beyond the listed steps, and that a
 <code>srvHostValidator</code> of the wrong type, or one returning a non-bool value, results in an error during initial seedlist
