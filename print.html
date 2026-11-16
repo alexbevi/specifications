@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-539b2471.js";
+            window.path_to_searchindex_js = "searchindex-4fd4f3be.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-c2b477e5.js"></script>
@@ -15598,10 +15598,9 @@ def execute_command_retryable(command, ...):
                 time.sleep(backoff)
 </code></pre>
 <h4 id="handshake-changes"><a class="header" href="#handshake-changes">Handshake changes</a></h4>
-<p>Drivers conforming to this spec MUST add <code>"backpressure": True</code> to the
-<a href="mongodb-handshake/handshake.rst">connection handshake</a>. This flag allows the server to identify clients which do and
-do not support backpressure. Currently, this flag is unused but in the future the server may offer different rate
-limiting behavior for clients that do not support backpressure.</p>
+<p>Drivers conforming to this spec MUST add <code>backpressure: "2"</code> to the
+<a href="#connection-handshake">connection handshake</a>. This flag allows the server to identify
+clients which do and do not support backpressure, as well as which version of backpressure they support.</p>
 <h4 id="implementation-notes-5"><a class="header" href="#implementation-notes-5">Implementation notes</a></h4>
 <p>On some platforms sleep() can have a very low precision, meaning an attempt to sleep for 50ms may actually sleep for a
 much larger time frame. Drivers are not required to work around this limitation.</p>
@@ -15767,6 +15766,10 @@ another dimension to read preference selection that users need to reason about. 
 to understand and configure.</p>
 <h2 id="changelog-27"><a class="header" href="#changelog-27">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-11-12: Make the backpressure support flag in connection handshakes consistent with the actual requirement
+specified in the connection handshake specification.</p>
+</li>
 <li>
 <p>2026-07-08: Update exponential backoff formula to use the attempt number as the exponent instead of one less than the
 attempt number.</p>
