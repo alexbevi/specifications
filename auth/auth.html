@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-049e2d2e.js";
+            window.path_to_searchindex_js = "../searchindex-889294ad.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -589,7 +589,7 @@ RESP = {conversationId: 1, payload: BinData(0,""), done: true, ok: 1}
 <ul>
 <li>
 <p>username</p>
-<p>MUST be specified and non-zero length.</p>
+<p>MUST be specified and non-zero length. MUST NOT contain any NUL characters (<code>U+0000</code>).</p>
 </li>
 <li>
 <p>source</p>
@@ -597,7 +597,7 @@ RESP = {conversationId: 1, payload: BinData(0,""), done: true, ok: 1}
 </li>
 <li>
 <p>password</p>
-<p>MUST be specified.</p>
+<p>MUST be specified. MUST NOT contain any NUL characters (<code>U+0000</code>).</p>
 </li>
 <li>
 <p>mechanism</p>
@@ -608,6 +608,8 @@ RESP = {conversationId: 1, payload: BinData(0,""), done: true, ok: 1}
 <p>MUST NOT be specified.</p>
 </li>
 </ul>
+<p>If the username or password contains a NUL character, drivers MUST raise an error with a message containing the string
+“cannot contain NUL characters”. Drivers MUST raise this error before sending any authentication command to the server.</p>
 <h3 id="scram-sha-1"><a class="header" href="#scram-sha-1">SCRAM-SHA-1</a></h3>
 <p>SCRAM-SHA-1 is defined in <a href="http://tools.ietf.org/html/rfc5802">RFC 5802</a>.</p>
 <p><a href="http://tools.ietf.org/html/rfc5802#page-11">Page 11 of the RFC</a> specifies that user names be prepared with SASLprep,
@@ -1894,6 +1896,9 @@ practice to avoid this. (See
 <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html">IAM Roles for Tasks</a>)</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-10-30: Forbid NUL characters in PLAIN authentication username/password.</p>
+</li>
 <li>
 <p>2026-06-17: Remove additional pre-4.2 version references.</p>
 </li>
