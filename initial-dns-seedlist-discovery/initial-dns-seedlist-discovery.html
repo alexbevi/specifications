@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-889294ad.js";
+            window.path_to_searchindex_js = "../searchindex-0c1c7a00.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -340,6 +340,9 @@ during operation execution.</p>
 parse error and MUST NOT do DNS resolution or contact hosts.</p>
 <p>It is an error to specify more than one host name in a connection string with the <code>mongodb+srv</code> protocol, and the driver
 MUST raise a parse error and MUST NOT do DNS resolution or contact hosts.</p>
+<p>Parse errors raised for a <code>mongodb+srv</code> connection string are subject to
+<a href="../connection-string/connection-string-spec.html#reporting-a-parse-failure">Reporting a parse failure</a> and MUST NOT
+disclose any part of the connection string.</p>
 <p>If <code>mongodb+srv</code> is used, a driver MUST implicitly also enable TLS. Clients can turn this off by passing <code>tls=false</code> in
 either the Connection String, or options passed in as parameters in code to the MongoClient constructor (or equivalent
 API for each driver), but not through a TXT record (discussed in a later section).</p>
@@ -539,6 +542,9 @@ when that label is one of a fixed list of names reserved for private or special 
 <li>
 <p>2026-09-03: Specify that host names returned through SRV records, and the <code>{domainname}</code> they are validated against,
 are both normalized – trailing dot stripped, converted to A-label form, ASCII lowercased – before validation.</p>
+</li>
+<li>
+<p>2026-09-02: Note that SRV parse errors must not disclose the connection string.</p>
 </li>
 <li>
 <p>2026-08-24: Add <code>srvAllowedHostsSuffix</code> MongoClient option.</p>

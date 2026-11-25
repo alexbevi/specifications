@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-889294ad.js";
+            window.path_to_searchindex_js = "../searchindex-0c1c7a00.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -290,6 +290,22 @@ to URI options apply here.</p>
 </tbody>
 </table>
 </div>
+<h3 id="sensitive-options"><a class="header" href="#sensitive-options">Sensitive options</a></h3>
+<p>The value of a sensitive option MUST NOT appear in any diagnostic, log message, or string representation of a connection
+string. See
+<a href="../connection-string/connection-string-spec.html#disclosure-of-sensitive-values">Disclosure of Sensitive Values</a>.</p>
+<p>The following options are sensitive:</p>
+<ul>
+<li><code>proxyUsername</code></li>
+<li><code>proxyPassword</code></li>
+<li><code>tlsCertificateKeyFilePassword</code></li>
+</ul>
+<p>Where a driver implements a sensitive option under an additional or deprecated name, as permitted by
+<a href="#list-of-specified-options">List of specified options</a>, the argument of that name is sensitive as well.</p>
+<p><code>authMechanismProperties</code> does not currently define sensitive sub-options. If a driver implements sensitive sub-options
+(e.g. the now-removed <code>AWS_SESSION_TOKEN</code>) those must be considered sensitive.</p>
+<p>A specification that defines a new connection parameter MUST state whether the argument is potentially sensitive, and
+this specification MUST be updated to list it here if it is.</p>
 <h2 id="test-plan"><a class="header" href="#test-plan">Test Plan</a></h2>
 <p>Tests are implemented and described in the <a href="tests/README.html">tests</a> directory.</p>
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design Rationale</a></h2>
@@ -339,6 +355,10 @@ Discovery spec.</p>
 </li>
 <li>
 <p>2026-09-03: Add <code>srvAllowedHostsSuffix</code> option.</p>
+</li>
+<li>
+<p>2026-09-02: Add the list of sensitive parameters and require new parameters in other specification documents to
+declare whether their arguments are sensitive.</p>
 </li>
 <li>
 <p>2026-06-17: Remove pre-4.2 version references.</p>

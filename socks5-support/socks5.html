@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-889294ad.js";
+            window.path_to_searchindex_js = "../searchindex-0c1c7a00.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -218,6 +218,8 @@ option of - Code:<code>proxyPassword=password</code> MUST be added to the connec
 <code>MongoClient</code> option. This option specifies a string of non-zero length. Drivers MUST ignore this option if it specifies
 a zero-length string. Drivers MUST error if this option was specified and <code>proxyHost</code> was not specified or
 <code>proxyUsername</code> was not specified.</p>
+<p>The values of <code>proxyUsername</code> and <code>proxyPassword</code> are sensitive: see
+<a href="../uri-options/uri-options.html#sensitive-options">Sensitive options</a>.</p>
 <h3 id="connection-pooling"><a class="header" href="#connection-pooling">Connection Pooling</a></h3>
 <h4 id="connection-establishment"><a class="header" href="#connection-establishment">Connection Establishment</a></h4>
 <p>When establishing a new outgoing TCP connection, drivers MUST perform the following steps if <code>proxyHost</code> was specified:</p>
@@ -273,6 +275,7 @@ with enabling other authentication methods.</p>
 <h3 id="alternative-designs"><a class="header" href="#alternative-designs">Alternative Designs</a></h3>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>2026-09-02: Note that the SOCKS5 credential options are sensitive.</li>
 <li>2024-09-04: Migrated from reStructuredText to Markdown.</li>
 <li>2022-10-05: Remove spec front matter</li>
 </ul>
