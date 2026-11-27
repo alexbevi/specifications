@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-0c1c7a00.js";
+            window.path_to_searchindex_js = "../searchindex-e1940e9c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -209,6 +209,24 @@ root span, which typically describes the entire operation and, optionally, one o
 <li>A list of timestamped Events</li>
 <li>A Status</li>
 </ul>
+<p><span id="logging-through-a-framework"></span></p>
+<p><strong>Logging through a framework</strong></p>
+<p>A driver logs through a framework when every log destination it supports is a logging interface or framework configured
+by the host application (see
+<a href="../logging/logging.html#minimizing-required-code-changes">Minimizing Required Code Changes</a>), and the code receiving each
+message can read the current trace context. A log-correlation integration installed by the application can then attach
+the current span without help from the driver. Examples: <code>SLF4J</code>, <code>Microsoft.Extensions.Logging</code>, Python <code>logging</code>, Rust
+<code>tracing</code>, a Ruby <code>logger</code>.</p>
+<p><span id="driver-managed-log-output"></span></p>
+<p><strong>Driver-managed log output</strong></p>
+<p>A driver has driver-managed log output when, for at least one destination, it writes the final log output itself
+(stdout, stderr, a file) or hands messages to a receiver that cannot read the current trace context, such as a callback
+with no context parameter in a language where the trace context is passed explicitly rather than stored per thread or
+task. Examples: libmongoc’s structured log handler, the Go driver’s <code>LogSink</code>, the Node.js driver’s <code>MONGODB_LOG_PATH</code>
+output.</p>
+<p>The two classifications are exclusive and apply to the whole driver. A driver with any driver-managed destination has
+driver-managed log output. A receiver that cannot read the trace context never counts as a framework, even if the
+application supplies it.</p>
 <h3 id="implementation-requirements"><a class="header" href="#implementation-requirements">Implementation Requirements</a></h3>
 <h4 id="external-dependencies"><a class="header" href="#external-dependencies">External Dependencies</a></h4>
 <p><strong>OpenTelemetry API and SDK</strong></p>
@@ -540,6 +558,77 @@ propagated trace context in its diagnostics: the trace id does not appear in ser
 slow-query logs, because the trace context arrives outside the command body.</p>
 <p>These behaviors do not affect the requirements above: drivers MUST still propagate the trace context on every eligible
 command regardless of the sampling decision or of whether the server acts on it.</p>
+<h4 id="correlating-log-messages-with-traces"><a class="header" href="#correlating-log-messages-with-traces">Correlating Log Messages with Traces</a></h4>
+<p>OpenTelemetry log integrations correlate a log record with a trace by reading the current span when the record is
+created. This section therefore specifies which span is current when a driver emits a log message, not the message’s
+contents.</p>
+<h5 id="covered-log-messages"><a class="header" href="#covered-log-messages">Covered Log Messages</a></h5>
+<p>The “covering span” of a message is the span the message belongs to.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Specification</th><th>Log messages</th><th>Covering span</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="../command-logging-and-monitoring/command-logging-and-monitoring.html">Command Logging and Monitoring</a></td><td>“Command started”, “Command succeeded”, “Command failed”</td><td>The command span of that attempt</td></tr>
+<tr><td><a href="../server-selection/server-selection.html">Server Selection</a></td><td>“Server selection started”, “Server selection succeeded”, “Server selection failed”, “Waiting for suitable server to become available”</td><td>The operation span</td></tr>
+<tr><td><a href="../connection-monitoring-and-pooling/connection-monitoring-and-pooling.html">Connection Monitoring and Pooling</a></td><td>“Connection checkout started”, “Connection checkout failed”, “Connection checked out”, “Connection checked in”</td><td>The operation span</td></tr>
+</tbody>
+</table>
+</div>
+<p>The <code>transaction</code> span is never a covering span. Inside a transaction, command messages still belong to the command
+span. Server selection and connection checkout messages are emitted before any command span exists, so they belong to
+the operation span, in or out of a transaction.</p>
+<p>Other messages are not covered. Pool lifecycle, connection lifecycle (“Connection created”, “Connection ready”,
+“Connection closed”), topology, and heartbeat messages may come from background work with no covering span. Drivers MAY
+emit them inside a scope that happens to be open, but MUST NOT make a span current in order to emit them. Commands with
+no command span (see <a href="#instrumenting-server-commands">Instrumenting Server Commands</a>) have no covered messages.</p>
+<h5 id="emitting-covered-messages-within-the-span-scope"><a class="header" href="#emitting-covered-messages-within-the-span-scope">Emitting Covered Messages Within the Span Scope</a></h5>
+<p>When tracing is enabled, drivers MUST emit each covered message while its covering span is the current span. In
+asynchronous code the driver MUST make the covering span current on whichever thread or callback emits the message, for
+example by re-entering the command span’s scope before emitting “Command succeeded” in a completion callback.</p>
+<p>The covering span may already have ended, for example when “Connection checked in” is emitted after the operation
+completed. The requirement still applies: the OpenTelemetry Tracing API guarantees that “any mechanisms for putting the
+Span into a Context MUST still work after the Span was ended” and that its span context “may be used even after the Span
+is finished” (see <a href="https://opentelemetry.io/docs/specs/otel/trace/api/#end">End</a> and
+<a href="https://opentelemetry.io/docs/specs/otel/trace/api/#get-context">Get Context</a> in the Tracing API specification).</p>
+<p>This section does not change span timing. Drivers MUST NOT start a span earlier or end it later than
+<a href="#instrumenting-driver-operations">Instrumenting Driver Operations</a> and
+<a href="#instrumenting-server-commands">Instrumenting Server Commands</a> require.</p>
+<p>When tracing is disabled, this section does not apply.</p>
+<h5 id="trace-context-fields-in-log-messages"><a class="header" href="#trace-context-fields-in-log-messages">Trace Context Fields in Log Messages</a></h5>
+<p>The Logging specification defines <code>trace_id</code>, <code>span_id</code>, and <code>trace_flags</code> in
+<a href="../logging/logging.html#trace-context-in-log-messages">Trace Context in Log Messages</a>.</p>
+<ul>
+<li>A driver that <a href="#logging-through-a-framework">logs through a framework</a> MUST NOT add these fields. The application’s
+integration supplies them.</li>
+<li>A driver with <a href="#driver-managed-log-output">driver-managed log output</a> SHOULD add them to every covered message, from
+the covering span, once per message and for all destinations. They MUST be added only when tracing is enabled and
+the covering span’s context is valid (see <a href="#implementation-guidelines">Implementation Guidelines</a>); otherwise all
+three MUST be omitted.</li>
+</ul>
+<p>The only exception to this SHOULD is a tracing API that cannot expose the current span’s trace id and span id without
+the OpenTelemetry SDK, which drivers MUST NOT depend on.</p>
+<p>The following non-normative table records the expected classification at the time of writing. Each driver classifies
+itself using <a href="#terms">Terms</a>.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Driver</th><th>Log emission mechanism</th><th>Classification</th></tr>
+</thead>
+<tbody>
+<tr><td>Java, Kotlin, Scala</td><td>SLF4J</td><td>Logging through a framework</td></tr>
+<tr><td>C#</td><td>Microsoft.Extensions.Logging via <code>LoggingSettings</code></td><td>Logging through a framework</td></tr>
+<tr><td>Python</td><td><code>logging</code> module</td><td>Logging through a framework</td></tr>
+<tr><td>Rust</td><td><code>tracing</code> events</td><td>Logging through a framework</td></tr>
+<tr><td>Ruby</td><td><code>logger</code> module</td><td>Logging through a framework</td></tr>
+<tr><td>Node.js</td><td><code>MongoLogger</code> writing to stderr, stdout, or a <code>write(log)</code> object</td><td>Driver-managed log output</td></tr>
+<tr><td>Go</td><td><code>LogSink</code> interface without a context parameter; default sink writes to stderr or a file</td><td>Driver-managed log output</td></tr>
+<tr><td>C, C++</td><td><code>mongoc_structured_log</code> handler; default handler writes to stderr</td><td>Driver-managed log output</td></tr>
+<tr><td>PHP</td><td>Spec-defined messages are produced by the bundled libmongoc default handler</td><td>Driver-managed log output</td></tr>
+</tbody>
+</table>
+</div>
 <h2 id="motivation-for-change"><a class="header" href="#motivation-for-change">Motivation for Change</a></h2>
 <p>A common complaint from our support team is that they don’t know how to easily get debugging information from drivers.
 Some drivers provide debug logging, but others do not. For drivers that do provide it, the log messages produced and the
@@ -707,8 +796,36 @@ negotiation mechanism.</p>
 <h3 id="bson-document-instead-of-a-bare-traceparent-string"><a class="header" href="#bson-document-instead-of-a-bare-traceparent-string">BSON document instead of a bare traceparent string</a></h3>
 <p>Carrying the traceparent inside a BSON document allows future propagation fields to be added to the same section without
 redesigning the payload format.</p>
+<h3 id="log-correlation-relies-on-the-current-span-rather-than-on-log-message-fields"><a class="header" href="#log-correlation-relies-on-the-current-span-rather-than-on-log-message-fields">Log correlation relies on the current span rather than on log message fields</a></h3>
+<p>Every OpenTelemetry log integration (Java MDC bridges, Python <code>LoggingInstrumentor</code>, .NET <code>ActivityTrackingOptions</code>,
+Rust <code>tracing-opentelemetry</code>, Node.js logger instrumentations, Ruby <code>opentelemetry-instrumentation-logger</code>) reads the
+current span when a record is created. A driver that <a href="#logging-through-a-framework">logs through such a framework</a> gets
+correlation for free if it emits each message while the right span is current. Writing the trace id and span id into
+messages instead would duplicate what the integration adds. It would also not help on its own: if a message is emitted
+while a different span is current, the integration and the driver stamp two different span ids on the same line. When
+this section was written, two implementations with native tracing emitted “Command started” under the operation span and
+“Command succeeded” under the command span, so the scope requirement addresses an observed problem, not a hypothetical
+one.</p>
+<h3 id="trace-context-fields-only-for-driver-managed-log-output"><a class="header" href="#trace-context-fields-only-for-driver-managed-log-output">Trace context fields only for driver-managed log output</a></h3>
+<p>When no integration can read the trace context, the driver is the only component that can add the trace id and span id,
+so the fields are limited to drivers with driver-managed log output. The criterion is whether the receiver can read the
+trace context, not who owns the output. Go’s <code>LogSink</code> is application code, yet it receives no <code>context.Context</code>, so it
+falls on the driver-managed side.</p>
+<p>The field names follow OpenTelemetry’s convention for trace context in non-OTLP log formats, so backends recognise them.
+They are added once per message rather than per destination, because the driver cannot know where a user callback
+forwards a record. If a record is forwarded into an instrumented framework, the driver and the integration write the
+same names, and the same values, since the scope requirement applies to these drivers too.</p>
+<h3 id="prose-tests-for-log-correlation"><a class="header" href="#prose-tests-for-log-correlation">Prose tests for log correlation</a></h3>
+<p>The unified test runner cannot observe which span was current when a message was emitted, and <code>runOnRequirements</code> cannot
+express “drivers with <a href="#driver-managed-log-output">driver-managed log output</a>”. A unified test skipped by half the
+drivers would read as non-compliance. Prose tests describe both checks once and let each driver run what applies.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-11-12: Added the Correlating Log Messages with Traces section: covered log messages MUST be emitted while their
+covering span is current, and drivers with driver-managed log output SHOULD add the trace context fields defined in
+the Logging specification (DRIVERS-3739).</p>
+</li>
 <li>
 <p>2026-11-04: Added the Performance Implications section (DRIVERS-3620).</p>
 </li>

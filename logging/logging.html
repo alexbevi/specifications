@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-0c1c7a00.js";
+            window.path_to_searchindex_js = "../searchindex-e1940e9c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c2b477e5.js"></script>
@@ -391,6 +391,33 @@ logs.</p>
 <h4 id="including-timestamps-in-log-messages"><a class="header" href="#including-timestamps-in-log-messages">Including Timestamps in Log Messages</a></h4>
 <p>Drivers MAY add timestamps to their log messages if one will not be added automatically by the logging framework(s) they
 use.</p>
+<h4 id="trace-context-in-log-messages"><a class="header" href="#trace-context-in-log-messages">Trace Context in Log Messages</a></h4>
+<p>The <a href="../open-telemetry/open-telemetry.html">OpenTelemetry</a> specification defines when a driver includes the trace context
+of a message’s covering span in the message, and which span that is (see
+<a href="../open-telemetry/open-telemetry.html#correlating-log-messages-with-traces">Correlating Log Messages with Traces</a>). This
+specification defines only the fields.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Key</th><th>Suggested Type</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td><code>trace_id</code></td><td>String</td><td>The trace id, as 32 lowercase hexadecimal characters.</td></tr>
+<tr><td><code>span_id</code></td><td>String</td><td>The covering span’s id, as 16 lowercase hexadecimal characters.</td></tr>
+<tr><td><code>trace_flags</code></td><td>String</td><td>The W3C trace flags, as 2 lowercase hexadecimal characters (<code>01</code> when sampled, <code>00</code> otherwise).</td></tr>
+</tbody>
+</table>
+</div>
+<p>Names and encodings follow OpenTelemetry’s
+<a href="https://opentelemetry.io/docs/specs/otel/compatibility/logging_trace_context/">trace context in non-OTLP log formats</a>
+so log backends recognise them. They are snake_case for that reason, unlike other spec fields, and structured logging
+MUST use them exactly (see <a href="#standard-naming-in-structured-log-messages">Standard Naming in Structured Log Messages</a>).
+When they do not apply they MUST be omitted, per
+<a href="#omitting-null-values-from-log-messages">Omitting Null Values from Log Messages</a>.</p>
+<p>Unstructured messages SHOULD append the following segment, omitted when the fields do not apply:</p>
+<blockquote>
+<p>Trace ID: {{trace_id}}, span ID: {{span_id}}, trace flags: {{trace_flags}}</p>
+</blockquote>
 <h4 id="supporting-both-programmatic-and-environment-variable-configuration"><a class="header" href="#supporting-both-programmatic-and-environment-variable-configuration">Supporting Both Programmatic and Environment Variable Configuration</a></h4>
 <p>If a driver supports configuration via both environment variables and programmatically via API, programmatic
 configuration MUST take precedence over environment variables. Drivers supporting both forms of configuration MUST
@@ -520,6 +547,10 @@ this issue, we could try to address it at the specification level by e.g. requir
 on individual clients or for particular namespaces.</p>
 <h2 id="changelog"><a class="header" href="#changelog">Changelog</a></h2>
 <ul>
+<li>
+<p>2026-11-12: Defined the <code>trace_id</code>, <code>span_id</code>, and <code>trace_flags</code> fields for log messages. When they apply is defined
+in the OpenTelemetry specification (DRIVERS-3739).</p>
+</li>
 <li>
 <p>2024-03-06: Migrated from reStructuredText to Markdown.</p>
 </li>
